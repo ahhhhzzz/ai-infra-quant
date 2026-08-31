@@ -20,6 +20,11 @@ python -m venv .venv
 Open `http://127.0.0.1:8000`. All external providers remain unavailable and the paper broker
 is only a non-operational descriptor in Phase 1.
 
+Alembic selects its database URL in this order: an explicit
+`-x database_url=...` override, `DATABASE_URL` from application settings or `.env`, then the
+application's default SQLite URL. PostgreSQL overrides are for migration verification only;
+Phase 1 application runtime remains SQLite-only.
+
 ## Validation
 
 ```powershell

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from argparse import Namespace
 from pathlib import Path
 
 from alembic import command
@@ -33,6 +34,12 @@ PHASE_ONE_TABLES = {
 }
 
 
+def _alembic_config(database_url: str) -> Config:
+    config = Config("alembic.ini")
+    config.cmd_opts = Namespace(x=[f"database_url={database_url}"])
+    return config
+
+
 def test_fresh_migration_is_at_head_and_has_phase_one_tables(migrated_engine: Engine) -> None:
     with migrated_engine.connect() as connection:
         assert MigrationContext.configure(connection).get_current_revision() == (
@@ -52,8 +59,7 @@ def test_migration_decimal_columns_are_declared_text(migrated_engine: Engine) ->
 
 
 def test_downgrade_upgrade_cycle(database_url: str) -> None:
-    config = Config("alembic.ini")
-    config.set_main_option("sqlalchemy.url", database_url)
+    config = _alembic_config(database_url)
     command.upgrade(config, "head")
     command.downgrade(config, "base")
     command.upgrade(config, "head")
@@ -75,8 +81,7 @@ def test_revision_0001_ignores_later_orm_tables(tmp_path: Path) -> None:
         Column("id", String(36), primary_key=True),
     )
     database_url = f"sqlite:///{(tmp_path / 'isolated.db').resolve().as_posix()}"
-    config = Config("alembic.ini")
-    config.set_main_option("sqlalchemy.url", database_url)
+    config = _alembic_config(database_url)
     try:
         command.upgrade(config, "head")
         engine = create_database_engine(database_url)

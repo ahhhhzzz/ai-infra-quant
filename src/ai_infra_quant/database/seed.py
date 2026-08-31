@@ -170,6 +170,7 @@ def _ensure_seed_configuration(
 def bootstrap_phase_one(session_factory: sessionmaker[Session], settings: Settings) -> SeedResult:
     with SQLAlchemyUnitOfWork(session_factory) as uow:
         session = uow.session
+        currency = settings.initial_base_currency
         opening_instant = opening_at(settings)
         _ensure_seed_configuration(session, settings, opening_instant)
         security_ids = tuple(
@@ -295,8 +296,8 @@ def bootstrap_phase_one(session_factory: sessionmaker[Session], settings: Settin
 
         transaction_id = stable_id("ledger-transaction:initial-contribution")
         if session.get(LedgerTransactionModel, transaction_id) is None:
-            cash_account_id = stable_id("ledger-account:cash-hkd")
-            capital_account_id = stable_id("ledger-account:contributed-capital-hkd")
+            cash_account_id = stable_id(f"ledger-account:cash-{currency.lower()}")
+            capital_account_id = stable_id(f"ledger-account:contributed-capital-{currency.lower()}")
             session.add_all(
                 [
                     LedgerAccountModel(
@@ -304,7 +305,7 @@ def bootstrap_phase_one(session_factory: sessionmaker[Session], settings: Settin
                         portfolio_id=portfolio_id,
                         broker_account_id=broker_account_id,
                         security_id=None,
-                        account_code="CASH_HKD",
+                        account_code=f"CASH_{currency}",
                         account_type="CASH_ASSET",
                         currency=settings.initial_base_currency,
                         normal_balance="DEBIT",
@@ -317,7 +318,7 @@ def bootstrap_phase_one(session_factory: sessionmaker[Session], settings: Settin
                         portfolio_id=portfolio_id,
                         broker_account_id=None,
                         security_id=None,
-                        account_code="CONTRIBUTED_CAPITAL_HKD",
+                        account_code=f"CONTRIBUTED_CAPITAL_{currency}",
                         account_type="CONTRIBUTED_CAPITAL",
                         currency=settings.initial_base_currency,
                         normal_balance="CREDIT",
@@ -420,7 +421,7 @@ def bootstrap_phase_one(session_factory: sessionmaker[Session], settings: Settin
             )
             session.add(
                 CashBalanceModel(
-                    id=stable_id("cash-balance:paper:HKD"),
+                    id=stable_id(f"cash-balance:paper:{currency}"),
                     broker_account_id=broker_account_id,
                     currency=settings.initial_base_currency,
                     settled_amount=settings.initial_capital,

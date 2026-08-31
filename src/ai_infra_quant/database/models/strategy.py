@@ -11,7 +11,9 @@ from ai_infra_quant.database.types import UTCDateTime
 
 class StrategyDefinitionModel(Base):
     __tablename__ = "strategy_definitions"
-    __table_args__ = (UniqueConstraint("name", "version", name="identity"),)
+    __table_args__ = (
+        UniqueConstraint("name", "version", name="uq_strategy_definitions_name_version"),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)

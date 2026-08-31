@@ -23,7 +23,7 @@ from ai_infra_quant.database.types import ExactDecimal, UTCDateTime
 class SecurityModel(Base):
     __tablename__ = "securities"
     __table_args__ = (
-        UniqueConstraint("market", "symbol", name="identity"),
+        UniqueConstraint("market", "symbol", name="uq_securities_market_symbol"),
         CheckConstraint("length(currency) = 3", name="currency_length"),
         CheckConstraint("instrument_type IN ('EQUITY','ETF','UNKNOWN')", name="instrument_type"),
         CheckConstraint("record_source IN ('SYSTEM_SEED','USER_SUPPLIED')", name="record_source"),
@@ -124,13 +124,13 @@ class ProviderSymbolMappingModel(Base):
 class WatchlistModel(Base):
     __tablename__ = "watchlists"
     __table_args__ = (
-        UniqueConstraint("portfolio_id", "name", name="portfolio_name"),
+        UniqueConstraint("portfolio_id", "name", name="uq_watchlists_portfolio_name"),
         Index(
             "uq_watchlists_default_portfolio",
             "portfolio_id",
             unique=True,
             sqlite_where=text("is_default = 1"),
-            postgresql_where=text("is_default"),
+            postgresql_where=text("is_default IS TRUE"),
         ),
     )
 

@@ -24,7 +24,7 @@ from ai_infra_quant.database.types import ExactDecimal, UTCDateTime
 class BrokerProfileModel(Base):
     __tablename__ = "broker_profiles"
     __table_args__ = (
-        UniqueConstraint("name", name="name"),
+        UniqueConstraint("name", name="uq_broker_profiles_name"),
         CheckConstraint(
             "environment IN ('PAPER','SIMULATED','LIVE','READ_ONLY')", name="environment"
         ),
@@ -45,7 +45,11 @@ class BrokerProfileModel(Base):
 class BrokerAccountModel(Base):
     __tablename__ = "broker_accounts"
     __table_args__ = (
-        UniqueConstraint("broker_profile_id", "external_account_id_hash", name="external_identity"),
+        UniqueConstraint(
+            "broker_profile_id",
+            "external_account_id_hash",
+            name="uq_broker_accounts_profile_external_id_hash",
+        ),
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
@@ -67,7 +71,7 @@ class BrokerAccountModel(Base):
 
 class PortfolioModel(Base):
     __tablename__ = "portfolios"
-    __table_args__ = (UniqueConstraint("name", name="name"),)
+    __table_args__ = (UniqueConstraint("name", name="uq_portfolios_name"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)

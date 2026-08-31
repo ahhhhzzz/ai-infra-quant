@@ -9,12 +9,27 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session, sessionmaker
 
 
+def ensure_sqlite_database_parent(database_url: str) -> None:
+    """Create the parent for a file-backed SQLite database URL."""
+    url = make_url(database_url)
+    if url.get_backend_name() != "sqlite":
+        return
+    database = url.database
+    if (
+        not database
+        or database == ":memory:"
+        or database.startswith("file::memory:")
+        or url.query.get("mode") == "memory"
+    ):
+        return
+    Path(database).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
+
+
 def create_database_engine(database_url: str) -> Engine:
     url = make_url(database_url)
     if url.drivername != "sqlite":
         raise ValueError("Phase 1 runtime supports SQLite only")
-    if url.database and url.database != ":memory:":
-        Path(url.database).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
+    ensure_sqlite_database_parent(database_url)
     engine = create_engine(database_url, future=True, connect_args={"check_same_thread": False})
 
     @event.listens_for(engine, "connect")

@@ -156,8 +156,12 @@ class LedgerAccountModel(Base):
 class LedgerTransactionModel(Base):
     __tablename__ = "ledger_transactions"
     __table_args__ = (
-        UniqueConstraint("sequence_no", name="sequence"),
-        UniqueConstraint("portfolio_id", "idempotency_key", name="idempotency"),
+        UniqueConstraint("sequence_no", name="uq_ledger_transactions_sequence_no"),
+        UniqueConstraint(
+            "portfolio_id",
+            "idempotency_key",
+            name="uq_ledger_transactions_portfolio_idempotency_key",
+        ),
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
@@ -181,7 +185,9 @@ class LedgerTransactionModel(Base):
 class LedgerEntryModel(Base):
     __tablename__ = "ledger_entries"
     __table_args__ = (
-        UniqueConstraint("ledger_transaction_id", "entry_no", name="transaction_entry"),
+        UniqueConstraint(
+            "ledger_transaction_id", "entry_no", name="uq_ledger_entries_transaction_entry_no"
+        ),
         CheckConstraint("direction IN ('DEBIT','CREDIT')", name="direction"),
         CheckConstraint("entry_no > 0", name="entry_no_positive"),
         CheckConstraint("length(currency) = 3", name="currency_length"),
@@ -213,7 +219,13 @@ class LedgerEntryModel(Base):
 
 class CashFlowModel(Base):
     __tablename__ = "cash_flows"
-    __table_args__ = (UniqueConstraint("portfolio_id", "idempotency_key", name="idempotency"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "portfolio_id",
+            "idempotency_key",
+            name="uq_cash_flows_portfolio_idempotency_key",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     portfolio_id: Mapped[str] = mapped_column(
@@ -268,7 +280,11 @@ class UnitTransactionModel(Base):
 
 class CashBalanceModel(Base):
     __tablename__ = "cash_balances"
-    __table_args__ = (UniqueConstraint("broker_account_id", "currency", name="account_currency"),)
+    __table_args__ = (
+        UniqueConstraint(
+            "broker_account_id", "currency", name="uq_cash_balances_broker_account_currency"
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     broker_account_id: Mapped[str] = mapped_column(
@@ -290,7 +306,11 @@ class PortfolioSnapshotModel(Base):
     __tablename__ = "portfolio_snapshots"
     __table_args__ = (
         UniqueConstraint(
-            "portfolio_id", "valuation_at", "valuation_kind", "is_official", name="official_point"
+            "portfolio_id",
+            "valuation_at",
+            "valuation_kind",
+            "is_official",
+            name="uq_portfolio_snapshots_official_point",
         ),
         CheckConstraint(
             "quality_status IN ('COMPLETE','PARTIAL','INVALID')", name="quality_status"

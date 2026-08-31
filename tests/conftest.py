@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from argparse import Namespace
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -21,7 +22,7 @@ def sqlite_url(path: Path) -> str:
 
 def upgrade_database(database_url: str) -> None:
     config = Config("alembic.ini")
-    config.set_main_option("sqlalchemy.url", database_url)
+    config.cmd_opts = Namespace(x=[f"database_url={database_url}"])
     command.upgrade(config, "head")
 
 

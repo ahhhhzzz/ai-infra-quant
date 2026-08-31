@@ -36,12 +36,18 @@ def _fk(name: str, target: str, *, nullable: bool = False) -> sa.Column[str]:
     )
 
 
-def _create_indexes(indexes: Iterable[tuple[str, str, list[str], bool, str | None]]) -> None:
+def _create_indexes(
+    indexes: Iterable[tuple[str, str, list[str], bool, str | tuple[str | None, str | None] | None]],
+) -> None:
     for name, table, columns, unique, predicate in indexes:
         kwargs: dict[str, object] = {}
-        if predicate is not None:
-            kwargs["sqlite_where"] = sa.text(predicate)
-            kwargs["postgresql_where"] = sa.text(predicate)
+        sqlite_predicate, postgresql_predicate = (
+            predicate if isinstance(predicate, tuple) else (predicate, predicate)
+        )
+        if sqlite_predicate is not None:
+            kwargs["sqlite_where"] = sa.text(sqlite_predicate)
+        if postgresql_predicate is not None:
+            kwargs["postgresql_where"] = sa.text(postgresql_predicate)
         op.create_index(name, table, columns, unique=unique, **kwargs)
 
 
@@ -68,7 +74,13 @@ INDEXES = (
         "valid_to IS NULL",
     ),
     ("ix_watchlists_portfolio_id", "watchlists", ["portfolio_id"], False, None),
-    ("uq_watchlists_default_portfolio", "watchlists", ["portfolio_id"], True, "is_default = 1"),
+    (
+        "uq_watchlists_default_portfolio",
+        "watchlists",
+        ["portfolio_id"],
+        True,
+        ("is_default = 1", "is_default IS TRUE"),
+    ),
     ("ix_watchlist_items_watchlist_id", "watchlist_items", ["watchlist_id"], False, None),
     ("ix_watchlist_items_security_id", "watchlist_items", ["security_id"], False, None),
     (
@@ -239,26 +251,24 @@ def upgrade() -> None:
         sa.Column("updated_at", _utc_datetime(), nullable=False),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_securities"),
-        sa.UniqueConstraint("market", "symbol", name="identity"),
-        sa.CheckConstraint("length(currency) = 3", name="ck_securities_currency_length"),
+        sa.UniqueConstraint("market", "symbol", name="uq_securities_market_symbol"),
+        sa.CheckConstraint("length(currency) = 3", name="currency_length"),
+        sa.CheckConstraint("instrument_type IN ('EQUITY','ETF','UNKNOWN')", name="instrument_type"),
         sa.CheckConstraint(
-            "instrument_type IN ('EQUITY','ETF','UNKNOWN')", name="ck_securities_instrument_type"
-        ),
-        sa.CheckConstraint(
-            "record_source IN ('SYSTEM_SEED','USER_SUPPLIED')", name="ck_securities_record_source"
+            "record_source IN ('SYSTEM_SEED','USER_SUPPLIED')", name="record_source"
         ),
         sa.CheckConstraint(
             "verification_status IN ('VERIFIED','SYSTEM_SEED_UNVERIFIED',"
             "'USER_SUPPLIED_UNVERIFIED')",
-            name="ck_securities_verification_status",
+            name="verification_status",
         ),
         sa.CheckConstraint(
             "tradability_status IN ('VERIFIED','UNVERIFIED','NOT_SUPPORTED','DISABLED')",
-            name="ck_securities_tradability_status",
+            name="tradability_status",
         ),
         sa.CheckConstraint(
             "metadata_status IN ('AVAILABLE','MISSING','UNAVAILABLE','NOT_SUPPORTED','INVALID')",
-            name="ck_securities_metadata_status",
+            name="metadata_status",
         ),
         sa.CheckConstraint(
             "record_source != 'USER_SUPPLIED' OR "
@@ -271,7 +281,7 @@ def upgrade() -> None:
             "AND fractional_supported = false AND tick_size IS NULL "
             "AND min_notional IS NULL AND market_timezone IS NULL "
             "AND trading_calendar IS NULL)",
-            name="ck_securities_user_supplied_fail_closed",
+            name="user_supplied_fail_closed",
         ),
     )
     op.create_table(
@@ -287,7 +297,7 @@ def upgrade() -> None:
         sa.Column("enabled", sa.Boolean(), nullable=False),
         sa.Column("created_at", _utc_datetime(), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_strategy_definitions"),
-        sa.UniqueConstraint("name", "version", name="identity"),
+        sa.UniqueConstraint("name", "version", name="uq_strategy_definitions_name_version"),
     )
     op.create_table(
         "broker_profiles",
@@ -302,10 +312,10 @@ def upgrade() -> None:
         sa.Column("updated_at", _utc_datetime(), nullable=False),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_broker_profiles"),
-        sa.UniqueConstraint("name", name="name"),
+        sa.UniqueConstraint("name", name="uq_broker_profiles_name"),
         sa.CheckConstraint(
             "environment IN ('PAPER','SIMULATED','LIVE','READ_ONLY')",
-            name="ck_broker_profiles_environment",
+            name="environment",
         ),
     )
     op.create_table(
@@ -322,7 +332,7 @@ def upgrade() -> None:
         sa.Column("updated_at", _utc_datetime(), nullable=False),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_portfolios"),
-        sa.UniqueConstraint("name", name="name"),
+        sa.UniqueConstraint("name", name="uq_portfolios_name"),
     )
     op.create_table(
         "settings",
@@ -337,7 +347,7 @@ def upgrade() -> None:
         sa.Column("updated_at", _utc_datetime(), nullable=False),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_settings"),
-        sa.CheckConstraint("is_secret = false", name="ck_settings_never_secret"),
+        sa.CheckConstraint("is_secret = false", name="never_secret"),
     )
     op.create_table(
         "broker_accounts",
@@ -358,7 +368,7 @@ def upgrade() -> None:
         sa.UniqueConstraint(
             "broker_profile_id",
             "external_account_id_hash",
-            name="external_identity",
+            name="uq_broker_accounts_profile_external_id_hash",
         ),
     )
     op.create_table(
@@ -380,7 +390,7 @@ def upgrade() -> None:
         sa.Column("created_at", _utc_datetime(), nullable=False),
         sa.Column("updated_at", _utc_datetime(), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_watchlists"),
-        sa.UniqueConstraint("portfolio_id", "name", name="portfolio_name"),
+        sa.UniqueConstraint("portfolio_id", "name", name="uq_watchlists_portfolio_name"),
     )
     op.create_table(
         "watchlist_items",
@@ -408,7 +418,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name="pk_provider_symbol_mappings"),
         sa.CheckConstraint(
             "provider_type IN ('BROKER','MARKET_DATA','FUNDAMENTAL','EVENT')",
-            name="ck_provider_symbol_mappings_provider_type",
+            name="provider_type",
         ),
     )
     op.create_table(
@@ -438,9 +448,7 @@ def upgrade() -> None:
         sa.Column("created_at", _utc_datetime(), nullable=False),
         sa.Column("updated_at", _utc_datetime(), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_ledger_accounts"),
-        sa.CheckConstraint(
-            "normal_balance IN ('DEBIT','CREDIT')", name="ck_ledger_accounts_normal_balance"
-        ),
+        sa.CheckConstraint("normal_balance IN ('DEBIT','CREDIT')", name="normal_balance"),
     )
     op.create_table(
         "ledger_transactions",
@@ -457,8 +465,12 @@ def upgrade() -> None:
         sa.Column("description", sa.Text(), nullable=False),
         sa.Column("created_by", sa.String(64), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_ledger_transactions"),
-        sa.UniqueConstraint("sequence_no", name="sequence"),
-        sa.UniqueConstraint("portfolio_id", "idempotency_key", name="idempotency"),
+        sa.UniqueConstraint("sequence_no", name="uq_ledger_transactions_sequence_no"),
+        sa.UniqueConstraint(
+            "portfolio_id",
+            "idempotency_key",
+            name="uq_ledger_transactions_portfolio_idempotency_key",
+        ),
     )
     op.create_table(
         "ledger_entries",
@@ -478,13 +490,13 @@ def upgrade() -> None:
         sa.Column("effective_at", _utc_datetime(), nullable=False),
         sa.Column("created_at", _utc_datetime(), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_ledger_entries"),
-        sa.UniqueConstraint("ledger_transaction_id", "entry_no", name="transaction_entry"),
-        sa.CheckConstraint("direction IN ('DEBIT','CREDIT')", name="ck_ledger_entries_direction"),
-        sa.CheckConstraint("entry_no > 0", name="ck_ledger_entries_entry_no_positive"),
-        sa.CheckConstraint("length(currency) = 3", name="ck_ledger_entries_currency_length"),
-        sa.CheckConstraint(
-            "length(base_currency) = 3", name="ck_ledger_entries_base_currency_length"
+        sa.UniqueConstraint(
+            "ledger_transaction_id", "entry_no", name="uq_ledger_entries_transaction_entry_no"
         ),
+        sa.CheckConstraint("direction IN ('DEBIT','CREDIT')", name="direction"),
+        sa.CheckConstraint("entry_no > 0", name="entry_no_positive"),
+        sa.CheckConstraint("length(currency) = 3", name="currency_length"),
+        sa.CheckConstraint("length(base_currency) = 3", name="base_currency_length"),
     )
     op.create_table(
         "portfolio_snapshots",
@@ -521,11 +533,11 @@ def upgrade() -> None:
             "valuation_at",
             "valuation_kind",
             "is_official",
-            name="official_point",
+            name="uq_portfolio_snapshots_official_point",
         ),
         sa.CheckConstraint(
             "quality_status IN ('COMPLETE','PARTIAL','INVALID')",
-            name="ck_portfolio_snapshots_quality_status",
+            name="quality_status",
         ),
     )
     op.create_table(
@@ -550,7 +562,11 @@ def upgrade() -> None:
         _fk("ledger_transaction_id", "ledger_transactions.id"),
         _fk("reverses_cash_flow_id", "cash_flows.id", nullable=True),
         sa.PrimaryKeyConstraint("id", name="pk_cash_flows"),
-        sa.UniqueConstraint("portfolio_id", "idempotency_key", name="idempotency"),
+        sa.UniqueConstraint(
+            "portfolio_id",
+            "idempotency_key",
+            name="uq_cash_flows_portfolio_idempotency_key",
+        ),
         sa.UniqueConstraint("ledger_transaction_id", name="uq_cash_flows_ledger_transaction_id"),
     )
     op.create_table(
@@ -582,7 +598,9 @@ def upgrade() -> None:
         sa.Column("updated_at", _utc_datetime(), nullable=False),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_cash_balances"),
-        sa.UniqueConstraint("broker_account_id", "currency", name="account_currency"),
+        sa.UniqueConstraint(
+            "broker_account_id", "currency", name="uq_cash_balances_broker_account_currency"
+        ),
     )
 
     _create_indexes(INDEXES)
