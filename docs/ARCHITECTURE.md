@@ -96,12 +96,22 @@ Physical creation is phased. Empty future adapter packages are not required in P
 ## 5. Canonical model boundary
 
 - Domain identifiers are UUIDs represented at the API as lowercase canonical strings. Vendor account/order/symbol identifiers are separate fields and are never used as primary keys.
-- All instants are timezone-aware UTC. Market-local dates also carry an IANA timezone/calendar identifier.
+- All instants are timezone-aware UTC. SQLite stores a canonical UTC `...Z` text instant and
+  restores an aware UTC `datetime`; PostgreSQL uses a timezone-aware timestamp. Naive values are
+  rejected at persistence. Market-local dates also carry an IANA timezone/calendar identifier.
 - Currency is an uppercase ISO-4217 code. Unsupported or non-fiat units require a later schema decision.
 - Money, prices, quantities, fees, tax, rates, ratios, and returns are `Decimal`; API representations are decimal strings.
 - Persistence is dialect-aware: SQLite uses validated fixed-scale canonical decimal `TEXT` with no numeric affinity; PostgreSQL uses `NUMERIC(p,s)`. SQLite decimal arithmetic/balancing occurs in Python `Decimal` inside the Unit of Work, never by claiming `TEXT` `SUM`/`CAST` is exact.
 - Domain and port models are independent of Pydantic, SQLAlchemy, Futu, or any other provider model.
-- Capability outcomes use explicit states: `SUPPORTED`, `NOT_SUPPORTED`, `NOT_IMPLEMENTED`, `UNAVAILABLE`, and `UNKNOWN`. Missing data uses `MISSING`, `UNAVAILABLE`, or `NOT_SUPPORTED` and is never replaced by fabricated values.
+- Capability outcomes use `CapabilityStatus`: `SUPPORTED`, `NOT_SUPPORTED`, `NOT_IMPLEMENTED`,
+  `UNAVAILABLE`, and `UNKNOWN`. Observation availability uses `DataAvailabilityStatus`:
+  `AVAILABLE`, `MISSING`, `UNAVAILABLE`, `NOT_SUPPORTED`, and `INVALID`. Snapshot quality and
+  score coverage use their separate `COMPLETE`, `PARTIAL`, and `INVALID` taxonomies; those states
+  are not interchangeable and missing data is never replaced by fabricated values.
+
+Phase 1 security identity is fail-closed and market-specific. US symbols are trimmed, uppercased,
+and limited to ASCII letters, digits, period, and hyphen. HK symbols are one to five ASCII digits
+and are left-padded to five. A market without a registered canonicalizer is rejected.
 
 ## 6. Authoritative state and write flows
 
@@ -142,6 +152,9 @@ The internal ledger remains authoritative for internal performance. Broker snaps
 - SQLite runs as one application process. Financial mutation use cases serialize writes and use optimistic `version` fields on projections where stale updates matter.
 - Every order, cash flow, FX conversion, and future live mutation requires a unique idempotency key. Reusing a key with the identical canonical request returns the original result; reusing it with a different request returns `IDEMPOTENCY_CONFLICT`.
 - Provider calls never occur while a database write transaction is held open. The command records intent, performs external I/O, then records the observed result through an explicit state transition.
+- Bootstrap has one stable opening-portfolio identity independent of its display name. A canonical
+  configuration fingerprint covers name, currency, opening capital/units/NAV, inception date, and
+  valuation timezone. Drift fails atomically with `SEED_CONFIGURATION_MISMATCH`.
 - There is no background distributed worker. Later scheduled activity, if approved, runs in process and is restart-safe through persisted jobs/events.
 
 ## 8. Runtime and safety topology

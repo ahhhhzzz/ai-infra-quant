@@ -1,0 +1,90 @@
+from enum import StrEnum
+
+
+class DataAvailabilityStatus(StrEnum):
+    AVAILABLE = "AVAILABLE"
+    MISSING = "MISSING"
+    UNAVAILABLE = "UNAVAILABLE"
+    NOT_SUPPORTED = "NOT_SUPPORTED"
+    INVALID = "INVALID"
+
+
+class SnapshotQualityStatus(StrEnum):
+    COMPLETE = "COMPLETE"
+    PARTIAL = "PARTIAL"
+    INVALID = "INVALID"
+
+
+class ScoreCoverageStatus(StrEnum):
+    COMPLETE = "COMPLETE"
+    PARTIAL = "PARTIAL"
+    INVALID = "INVALID"
+
+
+class CapabilityStatus(StrEnum):
+    SUPPORTED = "SUPPORTED"
+    NOT_SUPPORTED = "NOT_SUPPORTED"
+    NOT_IMPLEMENTED = "NOT_IMPLEMENTED"
+    UNAVAILABLE = "UNAVAILABLE"
+    UNKNOWN = "UNKNOWN"
+
+
+class InstrumentType(StrEnum):
+    EQUITY = "EQUITY"
+    ETF = "ETF"
+    UNKNOWN = "UNKNOWN"
+
+
+class RecordSource(StrEnum):
+    SYSTEM_SEED = "SYSTEM_SEED"
+    USER_SUPPLIED = "USER_SUPPLIED"
+
+
+class VerificationStatus(StrEnum):
+    VERIFIED = "VERIFIED"
+    SYSTEM_SEED_UNVERIFIED = "SYSTEM_SEED_UNVERIFIED"
+    USER_SUPPLIED_UNVERIFIED = "USER_SUPPLIED_UNVERIFIED"
+
+
+class TradabilityStatus(StrEnum):
+    VERIFIED = "VERIFIED"
+    UNVERIFIED = "UNVERIFIED"
+    NOT_SUPPORTED = "NOT_SUPPORTED"
+    DISABLED = "DISABLED"
+
+
+class BrokerEnvironment(StrEnum):
+    PAPER = "PAPER"
+    SIMULATED = "SIMULATED"
+    LIVE = "LIVE"
+    READ_ONLY = "READ_ONLY"
+
+
+class OrderSide(StrEnum):
+    BUY = "BUY"
+    SELL = "SELL"
+
+
+class OrderType(StrEnum):
+    MARKET = "MARKET"
+    LIMIT = "LIMIT"
+
+
+class TimeInForce(StrEnum):
+    DAY = "DAY"
+    GOOD_TIL_CANCELLED = "GOOD_TIL_CANCELLED"
+
+
+class OrderState(StrEnum):
+    CREATED = "CREATED"
+    RISK_REJECTED = "RISK_REJECTED"
+    PENDING_APPROVAL = "PENDING_APPROVAL"
+    SUBMITTING = "SUBMITTING"
+    SUBMITTED = "SUBMITTED"
+    PARTIALLY_FILLED = "PARTIALLY_FILLED"
+    FILLED = "FILLED"
+    CANCEL_PENDING = "CANCEL_PENDING"
+    CANCELLED = "CANCELLED"
+    REJECTED = "REJECTED"
+    EXPIRED = "EXPIRED"
+    ERROR = "ERROR"

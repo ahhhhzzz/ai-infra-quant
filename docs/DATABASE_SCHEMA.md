@@ -39,6 +39,9 @@ SQLite canonical storage format is an optional leading `-`, exactly 20 integer d
 
 `ExactDecimal` accepts only `Decimal` or canonical decimal input strings. It rejects floats, booleans, NaN/infinity, exponent notation at the persistence boundary, more than 18 fractional digits, and values outside `-99999999999999999999.999999999999999999` through `99999999999999999999.999999999999999999`. It does not silently quantize an over-scale value. Values with fewer fractional digits are padded exactly on storage.
 
+Every zero is normalized to a positive zero before comparison, serialization, persistence, or
+canonical hashing. SQLite therefore never stores a negative-zero representation.
+
 SQLite lexical ordering is not treated as signed numeric ordering. Repositories first restrict by indexed non-decimal keys/time and then compare/order exact values as Python `Decimal` inside the Unit of Work. SQL `SUM`, `AVG`, arithmetic, numeric `CAST`, and decimal `ORDER BY`/range predicates over these TEXT columns are prohibited unless a later separately specified exact sortable representation is added. PostgreSQL may use native exact numeric operations.
 
 The required SQLite round-trip vectors are:
@@ -59,13 +62,16 @@ Tests must prove identical `Decimal.as_tuple()` values after round trip, correct
 
 Stable domain enums are string values protected with portable `CHECK` constraints where practical. Unknown vendor values are retained in adapter raw/provenance data and mapped to `UNKNOWN`; they do not cause a guessed platform state.
 
-Data-status values are `AVAILABLE`, `MISSING`, `UNAVAILABLE`, `NOT_SUPPORTED`, and `INVALID`. Capability status is `SUPPORTED`, `NOT_SUPPORTED`, `NOT_IMPLEMENTED`, `UNAVAILABLE`, or `UNKNOWN`.
+`DataAvailabilityStatus` values are `AVAILABLE`, `MISSING`, `UNAVAILABLE`, `NOT_SUPPORTED`, and
+`INVALID`. `SnapshotQualityStatus` and `ScoreCoverageStatus` each use `COMPLETE`, `PARTIAL`, and
+`INVALID`. `CapabilityStatus` is `SUPPORTED`, `NOT_SUPPORTED`, `NOT_IMPLEMENTED`, `UNAVAILABLE`,
+or `UNKNOWN`. A field uses exactly one taxonomy.
 
 ### 1.6 Immutability
 
 These tables are append-only after insert: `ledger_transactions`, `ledger_entries`, `unit_transactions`, `cash_flows` after posting, `fx_transactions` after posting, `order_events`, `fills`, posted `settlements`, `market_prices`, `fx_rates`, `fundamental_records`, `valuation_snapshots`, `corporate_events`, `strategy_runs`, `signals`, `recommendations`, `portfolio_snapshots`, and published `performance_series` points.
 
-Correction means an explicit reversal/superseding row linked to the original. Database repository methods expose no update/delete operation for immutable rows. SQLite triggers added with the relevant migration reject `UPDATE` and `DELETE` on posted ledger entries/transactions, fills, posted cash flows/FX, and unit transactions. PostgreSQL migrations preserve the same rule.
+Correction means an explicit reversal/superseding row linked to the original. Database repository methods expose no update/delete operation for immutable rows. Phase 1 SQLite triggers reject `UPDATE` and `DELETE` on the migrated immutable opening-fact tables. PostgreSQL trigger parity is not implemented or claimed in Phase 1; a later PostgreSQL runtime phase must add equivalent enforcement before support is declared.
 
 SQLite append-only triggers protect immutability only. They do not use TEXT arithmetic to assert a balanced ledger. The Unit of Work constructs all ledger entries, sums debit/credit base amounts with Python `Decimal`, validates exact equality and domain constraints, and commits the transaction atomically only if balanced. Direct database writes outside repositories are unsupported.
 
@@ -121,7 +127,17 @@ A portfolio may contain many broker accounts. In v1 an active broker account bel
 
 Initial rows are configurable seed data for `(US, AVGO)`, `(US, VRT)`, and `(HK, 09698)`. Lot/tick/minimum metadata remains null/`UNAVAILABLE` until verified; it is never guessed from the example symbol.
 
-User-created rows normalize `market` and `symbol` to uppercase trimmed canonical values before the unique `(market, symbol)` check. `currency` is exactly three uppercase ASCII letters and `instrument_type` is restricted to the public creation enum. A new user row is always `record_source=USER_SUPPLIED`, `verification_status=USER_SUPPLIED_UNVERIFIED`, and `tradability_status=UNVERIFIED`; the request cannot override those values. Provider mappings, exchange/calendar/timezone, lot/tick/minimum/fractional rules remain null/unavailable. Watchlist membership is allowed, but strategy runs and orders fail closed until required verification/provenance gates pass.
+User-created identities use a market-specific canonicalizer before the unique `(market, symbol)`
+check. US accepts trimmed ASCII letters/digits plus period and hyphen and uppercases the result. HK
+accepts one to five trimmed ASCII digits and left-pads to five (`9698` becomes `09698`). Other
+markets fail with `INVALID_MARKET`; invalid symbols fail with `INVALID_SYMBOL`. `currency` is
+exactly three uppercase ASCII letters and `instrument_type` is restricted to the public creation
+enum. A new user row is always `record_source=USER_SUPPLIED`,
+`verification_status=USER_SUPPLIED_UNVERIFIED`, `tradability_status=UNVERIFIED`, and
+`metadata_status=UNAVAILABLE`; the request cannot override those values. Provider mappings,
+exchange/calendar/timezone, lot/tick/minimum/fractional rules remain absent. SQLite guards reject
+both insertion and update of a mapping onto a user-supplied security. Watchlist membership is
+allowed, but strategy runs and orders fail closed until required verification/provenance gates pass.
 
 ### 3.2 `provider_symbol_mappings`
 
@@ -149,7 +165,12 @@ User-created rows normalize `market` and `symbol` to uppercase trimmed canonical
 - `implementation_key` (registry key, not import path supplied by a user)
 - `parameter_schema_json`, `default_parameters_json`
 - `definition_hash`
+- `research_status` (persisted audited lifecycle state)
 - `enabled`, `created_at`
+
+`implementation_status` is not stored here. It is resolved from `implementation_key` through the
+build-time `StrategyRegistry`; required-data availability is derived at read time from provider
+descriptors. This prevents persisted implementation state from drifting from shipped code.
 
 Published definitions are immutable; a behavior change creates a new version.
 
@@ -160,7 +181,8 @@ Published definitions are immutable; a behavior change creates a new version.
 - `parameters_json`, `parameters_hash`
 - `effective_from`, nullable `effective_to`
 - `created_at`
-- no overlapping active assignment for the same `(portfolio_id, security_id)`
+- no overlapping active assignment for the same scope/security: separate partial indexes enforce
+  portfolio-scoped and global (`portfolio_id IS NULL`) keys
 
 Parameters are validated against the strategy's schema before insert. Decimal parameters are canonical strings in JSON and are converted to `Decimal` at the boundary.
 
@@ -293,7 +315,7 @@ For every posted transaction, total debit `base_amount` equals total credit `bas
 - `idempotency_key`, `status`
 - `base_fx_rate`, `base_amount`
 - `pre_flow_nav`, `units_issued`, `units_redeemed`
-- nullable `pre_flow_snapshot_id` FK `portfolio_snapshots`
+- nullable `pre_flow_snapshot_id` FK `portfolio_snapshots` with `ON DELETE RESTRICT`
 - `ledger_transaction_id`, nullable `reverses_cash_flow_id`
 - unique `(portfolio_id, idempotency_key)`
 
@@ -503,7 +525,7 @@ Manual flags record actor and provenance. Resolution appends/supersedes rather t
 - `cost_basis`, `realized_pnl`, `unrealized_pnl`, `fees`, `taxes`, `equity_pnl`, `fx_pnl`
 - `cash_ratio`, `invested_ratio`
 - `price_manifest_hash`, `fx_manifest_hash`, `ledger_sequence`
-- `is_official`, `quality_status`, `missing_data_json`
+- `is_official`, `quality_status` (`COMPLETE`, `PARTIAL`, `INVALID`), `missing_data_json`
 - unique official snapshot per `(portfolio_id, valuation_at, valuation_kind)`
 
 Invariant: `nav_per_unit = total_equity / units_outstanding` when units are positive. A snapshot with stale/missing marks is labelled and cannot be silently promoted to official.
@@ -570,7 +592,13 @@ High-use indexes cover:
 
 ## 12. Initial data and migrations
 
-Alembic is the only schema-change path. Application startup checks the migration revision and refuses ad hoc `create_all` in normal operation. Migration rendering is dialect-aware: SQLite DDL emits canonical fixed-scale `TEXT` for `ExactDecimal`; PostgreSQL DDL emits `NUMERIC(38,18)`. A migration test inspects the actual SQLite declared type and `typeof()` results so an accidental return to NUMERIC affinity fails.
+Alembic is the only schema-change path. Application startup checks the migration revision and
+refuses ad hoc schema creation in normal operation. Revision 0001 consists of explicit Alembic
+tables, indexes, constraints, and SQLite trigger DDL; it does not read current ORM metadata.
+Migration rendering is dialect-aware: SQLite DDL emits canonical fixed-scale `TEXT` for
+`ExactDecimal`; PostgreSQL DDL emits `NUMERIC(38,18)`. Isolation tests prove later ORM tables do
+not alter revision 0001. A local database made by the earlier metadata-driven development draft
+must be recreated manually; no automatic database deletion occurs.
 
 The Phase 1 bootstrap is idempotent and identified by stable seed keys. It creates:
 
@@ -581,7 +609,12 @@ The Phase 1 bootstrap is idempotent and identified by stable seed keys. It creat
 5. 200 portfolio units issued at NAV 100.00;
 6. an inception snapshot at local midnight (`2026-08-30T16:00:00Z`) with HKD 20,000 cash, zero invested value, and NAV 100.00.
 
-This is a bootstrap fact set, not a deposit/order API. Re-running seed logic must create no duplicates. Phase 2 accounting code must rebuild identical projections from these facts before it can add later transactions.
+This is a bootstrap fact set, not a deposit/order API. The opening portfolio uses a stable singleton
+ID independent of its mutable display name. Local midnight in the configured IANA valuation
+timezone is converted to UTC. A stored canonical fingerprint covers portfolio name, base currency,
+capital, units, NAV, inception date, and valuation timezone. Re-running identical settings is
+idempotent; any drift fails before writes with `SEED_CONFIGURATION_MISMATCH`. Phase 2 accounting
+code must rebuild identical projections from these facts before it can add later transactions.
 
 Future migrations are phased: execution/accounting behavior in Phase 2, external data/strategy records in Phase 3, backtest metadata in Phase 4, reconciliation/Futu records in Phase 5, and live audit/security data in Phase 7. Schema elements may be created earlier when necessary for referential integrity, but no earlier phase exposes future behavior.
 

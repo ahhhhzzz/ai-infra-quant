@@ -1,6 +1,6 @@
 # Requirements Traceability Matrix
 
-Status: Phase 0 design freeze candidate
+Status: Phase 1 remediation implemented locally on 2026-08-31; awaiting independent re-review
 
 Source baseline: `docs/MASTER_SPEC.md` v1.0 and the Phase 0 user instruction
 
@@ -20,7 +20,7 @@ Evidence in this Phase 0 matrix is either a design section or a named future acc
 
 | ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
 |---|---|---:|---|---|---|
-| ARC-001 | Single-user, local-first, single-process modular monolith | 1 | `ARCHITECTURE.md` §§1,8 | DOCUMENTED | Phase 1 startup/process inspection; no distributed dependencies in lock metadata |
+| ARC-001 | Single-user, local-first, single-process modular monolith | 1 | `ARCHITECTURE.md` §§1,8 | IMPLEMENTED | Loopback Uvicorn startup and dependency scan passed on 2026-08-31 |
 | ARC-002 | No microservices, Kafka, Redis, Celery, Kubernetes, distributed event sourcing, or autonomous trading | all | `ARCHITECTURE.md` §§1,8 | DOCUMENTED | Dependency/config scan each phase |
 | ARC-003 | Strategy separated from broker, API, ORM, portfolio mutation, and execution | 1/3 | `ARCHITECTURE.md` §§2-4 | DOCUMENTED | `test_core_import_boundaries`; strategy unit tests use canonical context only |
 | ARC-004 | Portfolio separated from Accounting and broker SDKs | 1/2 | `ARCHITECTURE.md` §3 | DOCUMENTED | import-boundary and use-case tests |
@@ -29,12 +29,12 @@ Evidence in this Phase 0 matrix is either a design section or a named future acc
 | ARC-007 | Risk is broker-agnostic and cannot submit orders | 2 | `ARCHITECTURE.md` §3 | DOCUMENTED | risk decision unit tests and import-boundary test |
 | ARC-008 | Performance is read-only/reproducible from accounting facts | 2 | `ARCHITECTURE.md` §§3,6 | DOCUMENTED | deterministic snapshot/TWR rebuild |
 | ARC-009 | Backtest reuses Strategy and canonical signals but has isolated clock/simulator | 4 | `ARCHITECTURE.md` §3; `STRATEGY_SPEC.md` §17 | DOCUMENTED | shared-strategy identity and future-data injection tests |
-| ARC-010 | BrokerAdapter separated from all data-provider ports | 1 | `ARCHITECTURE.md` §§3-4 | DOCUMENTED | interface signatures and registry independence tests |
-| ARC-011 | Market, fundamental, and event providers are three separate ports/capability models | 1 | `ARCHITECTURE.md` §3 | DOCUMENTED | structural protocol/capability tests |
+| ARC-010 | BrokerAdapter separated from all data-provider ports | 1 | `ARCHITECTURE.md` §§3-4 | IMPLEMENTED | `test_registries` and `test_import_boundaries` passed |
+| ARC-011 | Market, fundamental, and event providers are three separate ports/capability models | 1 | `ARCHITECTURE.md` §3 | IMPLEMENTED | `test_capabilities` and `test_registries` passed |
 | ARC-012 | Broker and market-data provider independently selectable | 1/5 | `ARCHITECTURE.md` §§1-4 | DOCUMENTED | composition test with independent registry keys; real adapter evidence in Phase 5 |
-| ARC-013 | One portfolio may aggregate multiple broker accounts, without conflating entities | 1 | `ARCHITECTURE.md` §5; `DATABASE_SCHEMA.md` §5 | DOCUMENTED | model/repository relationship test |
-| ARC-014 | Registries/factories avoid scattered provider-specific conditionals | 1 | `ARCHITECTURE.md` §§1-4 | DOCUMENTED | registry registration/unknown/duplicate tests |
-| ARC-015 | Domain/provider responses use platform-owned canonical models | 1 | `ARCHITECTURE.md` §5; `API_CONTRACTS.md` §1 | DOCUMENTED | adapter protocol type and API/ORM isolation tests |
+| ARC-013 | One portfolio may aggregate multiple broker accounts, without conflating entities | 1 | `ARCHITECTURE.md` §5; `DATABASE_SCHEMA.md` §5 | IMPLEMENTED | Separate portfolio/account/link models exist in migration 0001 |
+| ARC-014 | Registries/factories avoid scattered provider-specific conditionals | 1 | `ARCHITECTURE.md` §§1-4 | IMPLEMENTED | registration/unknown/duplicate and namespace-independence tests passed |
+| ARC-015 | Domain/provider responses use platform-owned canonical models | 1 | `ARCHITECTURE.md` §5; `API_CONTRACTS.md` §1 | IMPLEMENTED | Core/application import-boundary tests and API mapping tests passed |
 | ARC-016 | In-process transaction/unit-of-work and idempotency rules | 1/2 | `ARCHITECTURE.md` §7 | DOCUMENTED | UoW rollback and idempotency tests |
 | ARC-017 | Preserve phase gates; Phase 1 and strategy approval are separate exact instructions | every phase | `ARCHITECTURE.md` §§9-11; Phase plans | DOCUMENTED | `APPROVE PHASE 1` authorizes foundation only; `APPROVE STRATEGY SPEC V1` required before strategy implementation |
 | ARC-018 | Preserve unrelated user changes; no unauthorized push/remote/global Git changes | every phase | `AGENTS.md`; `PHASE_1_PLAN.md` | DOCUMENTED | before/after `git status`, remote/config not mutated |
@@ -43,30 +43,30 @@ Evidence in this Phase 0 matrix is either a design section or a named future acc
 
 | ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
 |---|---|---:|---|---|---|
-| DOM-001 | Vendor-neutral security IDs and full security metadata | 1 | `DATABASE_SCHEMA.md` §3.1; `API_CONTRACTS.md` §4.8 | DOCUMENTED | uniqueness, validation, API contract tests |
-| DOM-002 | Provider symbol mappings separate from security | 1 | `DATABASE_SCHEMA.md` §3.2 | DOCUMENTED | independent mapping/registry tests |
-| DOM-003 | Initial AVGO, VRT, HK.09698 defaults configurable, not core constants | 1 | `DATABASE_SCHEMA.md` §12; `PHASE_1_PLAN.md` | DOCUMENTED | seed override/idempotency test |
-| DOM-004 | HKD 20,000, inception 2026-08-31, NAV 100 defaults configurable | 1 | `DATABASE_SCHEMA.md` §12; `API_CONTRACTS.md` §4.2 | DOCUMENTED | bootstrap invariant integration test |
-| DOM-005 | Missing facts explicitly MISSING/UNAVAILABLE/NOT_SUPPORTED; never fabricated | 1 | `ARCHITECTURE.md` §5; `API_CONTRACTS.md` §§1-2 | DOCUMENTED | missing-data API/domain tests |
-| DOM-006 | Typed capability models for broker/market/fundamental/event | 1 | `ARCHITECTURE.md` §3; `API_CONTRACTS.md` §2.2 | DOCUMENTED | enum and provider descriptor tests |
-| DOM-007 | Settings contain no secrets; credentials remain environment/external storage | 1 | `DATABASE_SCHEMA.md` §10.1 | DOCUMENTED | settings allowlist/redaction tests, secret scan |
-| DOM-008 | Environment configuration; live disabled and auto execution false | 1 | `ARCHITECTURE.md` §8; `PHASE_1_PLAN.md` | DOCUMENTED | configuration default/validation tests |
+| DOM-001 | Vendor-neutral security IDs and full security metadata | 1 | `DATABASE_SCHEMA.md` §3.1; `API_CONTRACTS.md` §4.8 | IMPLEMENTED | uniqueness, normalization, validation, and API contract tests passed |
+| DOM-002 | Provider symbol mappings separate from security | 1 | `DATABASE_SCHEMA.md` §3.2 | IMPLEMENTED | separate table/port registry tests and user-unverified mapping trigger passed |
+| DOM-003 | Initial AVGO, VRT, HK.09698 defaults configurable, not core constants | 1 | `DATABASE_SCHEMA.md` §12; `PHASE_1_PLAN.md` | IMPLEMENTED | seed and idempotency tests passed |
+| DOM-004 | HKD 20,000, inception 2026-08-31, NAV 100 defaults configurable | 1 | `DATABASE_SCHEMA.md` §12; `API_CONTRACTS.md` §4.2 | IMPLEMENTED | exact bootstrap/API invariant tests passed |
+| DOM-005 | Missing facts explicitly MISSING/UNAVAILABLE/NOT_SUPPORTED; never fabricated | 1 | `ARCHITECTURE.md` §5; `API_CONTRACTS.md` §§1-2 | IMPLEMENTED | missing-data, status, performance, and offline tests passed |
+| DOM-006 | Typed capability models for broker/market/fundamental/event | 1 | `ARCHITECTURE.md` §3; `API_CONTRACTS.md` §2.2 | IMPLEMENTED | capability and descriptor tests passed |
+| DOM-007 | Settings contain no secrets; credentials remain environment/external storage | 1 | `DATABASE_SCHEMA.md` §10.1 | IMPLEMENTED | settings constraint, redaction test, and secret scan passed |
+| DOM-008 | Environment configuration; live disabled and auto execution false | 1 | `ARCHITECTURE.md` §8; `PHASE_1_PLAN.md` | IMPLEMENTED | configuration safety tests and `/health` evidence passed |
 | DOM-009 | Decimal domain/API; exact SQLite fixed-scale TEXT and PostgreSQL NUMERIC physical persistence | 1/2 | `DATABASE_SCHEMA.md` §1.3; `API_CONTRACTS.md` §1 | DOCUMENTED | required vector tuple round trips, `typeof=text`, float/scale/range/order tests |
 | DOM-010 | All timestamps/calendar/timezones point-in-time explicit | 1/3 | `DATABASE_SCHEMA.md` §1.2; `STRATEGY_SPEC.md` §2 | DOCUMENTED | timezone/calendar validation and PIT tests |
-| DOM-011 | User may create canonical unverified security; watchlist allowed but strategy/orders fail closed | 1 | `DATABASE_SCHEMA.md` §3.1; `API_CONTRACTS.md` §4.9 | DOCUMENTED | normalization/uniqueness/forced-status/unavailable-rules/blocking tests |
+| DOM-011 | User may create canonical unverified security; watchlist allowed but strategy/orders fail closed | 1 | `DATABASE_SCHEMA.md` §3.1; `API_CONTRACTS.md` §4.9 | IMPLEMENTED | US/HK canonicalization, normalized conflicts, invalid-market/symbol, DB forced-status, insert/update mapping guards, and watchlist tests passed |
 
 ## 4. Database, accounting, cash, NAV, and performance
 
 | ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
 |---|---|---:|---|---|---|
 | DB-001 | Normalized minimum schema and relationships | 1-3 | `DATABASE_SCHEMA.md` §§2-10 | DOCUMENTED | Alembic schema/FK/index inspection by assigned phase |
-| DB-002 | Alembic migrations; no ad hoc normal-startup `create_all` | 1 | `DATABASE_SCHEMA.md` §12 | DOCUMENTED | empty DB upgrade/current/downgrade-upgrade test |
+| DB-002 | Alembic migrations; no ad hoc normal-startup schema creation | 1 | `DATABASE_SCHEMA.md` §12 | IMPLEMENTED | explicit revision 0001, static metadata-independence test, later-ORM isolation, fresh upgrade/current, and downgrade/upgrade passed |
 | ACC-001 | Append-only balanced ledger and explicit reversals; SQLite balances in Python Decimal UoW | 1/2 | `DATABASE_SCHEMA.md` §§1.3,1.6,6.1-6.3 | DOCUMENTED | exact UoW balance/rollback, no TEXT SUM/CAST, immutability trigger, reversal tests |
 | ACC-002 | Orders/fills/cash flows not silently overwritten/deleted | 2 | `DATABASE_SCHEMA.md` §§1.6,6-7 | DOCUMENTED | update/delete rejection and event-history tests |
 | ACC-003 | Multi-currency cash per account/currency; settled/unsettled/reserved/buying power | 2 | `DATABASE_SCHEMA.md` §§6.7-6.9 | DOCUMENTED | cash projection/settlement/reservation tests |
 | ACC-004 | Explicit and recorded AUTO_FX/EXPLICIT_FX with rate/spread/fee | 2 | `DATABASE_SCHEMA.md` §6.6; `API_CONTRACTS.md` §6.2 | DOCUMENTED | FX direction, balance, disclosure tests |
 | ACC-005 | Deposits/withdrawals separated from return and require complete FLOW_PRE valuation with positions | 2 | `DATABASE_SCHEMA.md` §§6.4-6.5,9; `API_CONTRACTS.md` §6.1 | DOCUMENTED | NAV/TWR continuity and atomic `PORTFOLIO_VALUATION_UNAVAILABLE` tests |
-| ACC-006 | Initial equity 20,000, 200 units, NAV 100 | 1 | `DATABASE_SCHEMA.md` §§6.5,12 | DOCUMENTED | exact Decimal bootstrap/rebuild test |
+| ACC-006 | Initial equity 20,000, 200 units, NAV 100 | 1 | `DATABASE_SCHEMA.md` §§6.5,12 | IMPLEMENTED | exact Decimal opening ledger/unit/cash/snapshot tests passed |
 | ACC-007 | Unitized NAV and TWR; daily/weekly/monthly/since inception | 2 | `DATABASE_SCHEMA.md` §9 | DOCUMENTED | unit issue/redeem/geometric-link tests |
 | ACC-008 | Weighted-average cost consistently used | 2 | `DATABASE_SCHEMA.md` §7.4; `ARCHITECTURE.md` DR-015 | DOCUMENTED | multi-fill buy/sell/fee realized P&L tests |
 | ACC-009 | Cost basis, realized/unrealized, fee/tax, equity/FX P&L reporting | 2 | `DATABASE_SCHEMA.md` §§7.4,9 | DOCUMENTED | accounting equation and attribution fixtures |
@@ -75,13 +75,13 @@ Evidence in this Phase 0 matrix is either a design section or a named future acc
 | ACC-012 | Portfolio valuation cutoff across markets | 2 | `ARCHITECTURE.md` OD-002 | DECISION_REQUIRED | user-approved cutoff and close-series acceptance tests |
 | ACC-013 | Versioned settlement and fee/tax policy | 2 | `ARCHITECTURE.md` OD-003; `DATABASE_SCHEMA.md` §6.9 | DECISION_REQUIRED | verified/simplified policy fixtures and provenance |
 | ACC-014 | Maximum drawdown, benchmark, cash/invested ratios | 2/3 | `DATABASE_SCHEMA.md` §9; `API_CONTRACTS.md` §4.4 | DOCUMENTED | return/drawdown tests; benchmark unavailable until legitimate source |
-| ACC-015 | Zero positions imply exact zero unrealized P&L independent of unavailable market-data capability | 1 | `API_CONTRACTS.md` §4.2 | DOCUMENTED | opening portfolio response/capability-separation test |
+| ACC-015 | Zero positions imply exact zero unrealized P&L independent of unavailable market-data capability | 1 | `API_CONTRACTS.md` §4.2 | IMPLEMENTED | opening portfolio response/capability-separation test passed |
 
 ## 5. Orders, PaperBroker, execution, and risk
 
 | ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
 |---|---|---:|---|---|---|
-| EXE-001 | StandardOrder contains all required canonical identifiers/terms | 1 | `DATABASE_SCHEMA.md` §7.1; `API_CONTRACTS.md` §6.3 | DOCUMENTED | model validation/serialization tests |
+| EXE-001 | StandardOrder contains all required canonical identifiers/terms | 1 | `DATABASE_SCHEMA.md` §7.1; `API_CONTRACTS.md` §6.3 | IMPLEMENTED | canonical boundary model/validation test passed; no execution behavior exists |
 | EXE-002 | Required order states and valid state machine | 2 | `DATABASE_SCHEMA.md` §§7.1-7.2 | DOCUMENTED | exhaustive transition-table tests |
 | EXE-003 | Submitted is not filled; multiple/partial fills supported | 2 | `ARCHITECTURE.md` §6.1; `DATABASE_SCHEMA.md` §7.3 | DOCUMENTED | acknowledgement/no-position and partial-fill tests |
 | EXE-004 | Same idempotency key never creates two broker orders | 2/7 | `ARCHITECTURE.md` §7; `API_CONTRACTS.md` §§1,8 | DOCUMENTED | identical replay/conflicting replay/concurrency tests |
@@ -123,9 +123,9 @@ Evidence in this Phase 0 matrix is either a design section or a named future acc
 
 | ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
 |---|---|---:|---|---|---|
-| DAT-001 | MarketDataProvider quote/snapshot/history/subscription/order-book contract | 1 | `ARCHITECTURE.md` §3; Phase 1 port plan | DOCUMENTED | protocol signatures/canonical return tests |
-| DAT-002 | FundamentalDataProvider financial/estimate/valuation/history/balance contract | 1 | `ARCHITECTURE.md` §3; `DATABASE_SCHEMA.md` §8 | DOCUMENTED | protocol and PIT model tests |
-| DAT-003 | EventDataProvider earnings/corporate/regulatory/manual flag contract | 1 | `ARCHITECTURE.md` §3; `DATABASE_SCHEMA.md` §§8.5-8.6 | DOCUMENTED | protocol and event provenance tests |
+| DAT-001 | MarketDataProvider quote/snapshot/history/subscription/order-book contract | 1 | `ARCHITECTURE.md` §3; Phase 1 port plan | IMPLEMENTED | abstract canonical port and architecture tests passed |
+| DAT-002 | FundamentalDataProvider financial/estimate/valuation/history/balance contract | 1 | `ARCHITECTURE.md` §3; `DATABASE_SCHEMA.md` §8 | IMPLEMENTED | abstract canonical port and architecture tests passed |
+| DAT-003 | EventDataProvider earnings/corporate/regulatory/manual flag contract | 1 | `ARCHITECTURE.md` §3; `DATABASE_SCHEMA.md` §§8.5-8.6 | IMPLEMENTED | abstract canonical port and architecture tests passed |
 | DAT-004 | Preserve source IDs, period/publish/available/effective/retrieval, currency, restatement | 3 | `DATABASE_SCHEMA.md` §§8.3-8.4 | DOCUMENTED | G-17 and restatement PIT queries |
 | DAT-005 | Distinguish raw, split-adjusted, total-return prices/corporate actions | 3/4 | `DATABASE_SCHEMA.md` §8.1; `STRATEGY_SPEC.md` §2 | DOCUMENTED | adjustment-factor and strategy-source tests |
 | DAT-006 | Correct US/HK calendars/timezones; no missing-session forward fill | 3/4 | `STRATEGY_SPEC.md` §§2-3 | DOCUMENTED | calendar gap/DST/session tests |
@@ -149,7 +149,7 @@ Evidence in this Phase 0 matrix is either a design section or a named future acc
 
 | ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
 |---|---|---:|---|---|---|
-| INT-001 | No Futu SDK in Phase 0/1; no OpenD connection | 0/1 | `ARCHITECTURE.md` §8; `PHASE_1_PLAN.md` | DOCUMENTED | dependency/import scan; offline startup |
+| INT-001 | No Futu SDK in Phase 0/1; no OpenD connection | 0/1 | `ARCHITECTURE.md` §8; `PHASE_1_PLAN.md` | IMPLEMENTED | dependency/import scan and offline startup passed; descriptor is inert |
 | INT-002 | Shared FutuConnectionManager, SDK imports confined to Futu integration | 5 | `ARCHITECTURE.md` dependency rule | DOCUMENTED | import scan, lifecycle/connect/close tests |
 | INT-003 | Futu read-only market/account/cash/position/order/fill and offline-safe startup | 5 | `ARCHITECTURE.md` §9 | DOCUMENTED | mocked protocol plus verified offline status; no availability claimed now |
 | INT-004 | Disabled Futu canonical order conversion before live routes | 6 | `ARCHITECTURE.md` §§8-9; `API_CONTRACTS.md` §7 | DOCUMENTED | route absence and mapping simulation tests |
@@ -167,16 +167,16 @@ Evidence in this Phase 0 matrix is either a design section or a named future acc
 
 | ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
 |---|---|---:|---|---|---|
-| API-001 | Versioned request/response models and stable error semantics | 1 | `API_CONTRACTS.md` §§1-2,8 | DOCUMENTED | OpenAPI/problem-schema tests |
-| API-002 | Decimal strings, UTC, UUID, explicit missing-data values | 1 | `API_CONTRACTS.md` §§1-2 | DOCUMENTED | schema/serialization tests |
-| API-003 | Phase 1 security creation/read, portfolio/positions/performance, and watchlist CRUD | 1 | `API_CONTRACTS.md` §4 | DOCUMENTED | security normalization/status plus endpoint integration tests |
+| API-001 | Versioned request/response models and stable error semantics | 1 | `API_CONTRACTS.md` §§1-2,8 | IMPLEMENTED | OpenAPI, problem media type/shape, and request-ID tests passed |
+| API-002 | Decimal strings, UTC, UUID, explicit missing-data values | 1 | `API_CONTRACTS.md` §§1-2 | IMPLEMENTED | schema/serialization and exact portfolio/performance tests passed |
+| API-003 | Phase 1 security creation/read, portfolio/positions/performance, and watchlist CRUD | 1 | `API_CONTRACTS.md` §4 | IMPLEMENTED | all Phase 1 endpoint integration tests passed |
 | API-004 | Strategy/indicator/signal endpoints only with Phase 3 behavior | 3 | `API_CONTRACTS.md` §5 | DOCUMENTED | route absence before Phase 3; contract tests in Phase 3 |
 | API-005 | Paper financial endpoints only in Phase 2 | 2 | `API_CONTRACTS.md` §6 | DOCUMENTED | Phase 1 route denylist; Phase 2 idempotency tests |
-| API-006 | Broker/provider status truthful and no connection side effect | 1 | `API_CONTRACTS.md` §§4.11-4.13 | DOCUMENTED | descriptor/no-instantiation tests |
+| API-006 | Broker/provider status truthful and no connection side effect | 1 | `API_CONTRACTS.md` §§4.11-4.13 | IMPLEMENTED | repeated inert descriptor/no-connection tests passed |
 | API-007 | Local-only CORS/no-store/request IDs/no secret/raw provider exposure | 1/7 | `API_CONTRACTS.md` §9 | DOCUMENTED | header/schema/redaction tests |
-| API-008 | Inception-only daily return unavailable; since-inception/drawdown exact zero | 1 | `API_CONTRACTS.md` §4.4 | DOCUMENTED | one-point performance contract test |
-| UI-001 | Minimal professional dark read-only dashboard in Phase 1 | 1 | `PHASE_1_PLAN.md`; master §18 | DOCUMENTED | browser smoke and static text/state checks |
-| UI-002 | Summary NAV/equity/cash/invested and truthful unavailable status | 1 | `API_CONTRACTS.md` §§4.2-4.4 | DOCUMENTED | browser/API bootstrap test |
+| API-008 | Inception-only daily return unavailable; since-inception/drawdown exact zero | 1 | `API_CONTRACTS.md` §4.4 | IMPLEMENTED | one-point performance contract test passed |
+| UI-001 | Minimal professional dark read-only dashboard in Phase 1 | 1 | `PHASE_1_PLAN.md`; master §18 | IMPLEMENTED | actual dashboard 200 and offline/static safety smoke passed |
+| UI-002 | Summary NAV/equity/cash/invested and truthful unavailable status | 1 | `API_CONTRACTS.md` §§4.2-4.4 | IMPLEMENTED | dashboard/API bootstrap and provider-state tests passed |
 | UI-003 | Security cards, indicators, components, explanations, recommendation panel | 3 | `API_CONTRACTS.md` §5; `STRATEGY_SPEC.md` §15 | DOCUMENTED | Phase 3 UI contract/e2e tests |
 | UI-004 | Paper and live actions visually/functionally separate; live unmistakable | 2/7 | `API_CONTRACTS.md` §§6-7 | DOCUMENTED | DOM/route/action separation tests |
 
@@ -206,4 +206,23 @@ Evidence in this Phase 0 matrix is either a design section or a named future acc
 
 ## 13. Current implementation statement
 
-At the end of Phase 0, only design documents exist. No application, strategy, accounting engine, PaperBroker, provider, Futu/OpenD integration, external-data connection, backtest, paper order, or live order is implemented or claimed. Rows marked `DOCUMENTED` describe frozen proposals/contracts, not runtime completion.
+Phase 1 remediation is implemented locally and awaiting independent re-review. Rows marked `IMPLEMENTED` have
+runtime evidence for their complete Phase 1 scope. Multi-phase rows remain `DOCUMENTED` or
+`DECISION_REQUIRED` when later behavior is still intentionally absent.
+
+Actual Phase 1 evidence on CPython 3.12.13:
+
+- fresh Alembic upgrade/current: `0001_phase1_foundation (head)`;
+- complete pytest suite: `111 passed`;
+- Ruff check and format check: passed;
+- mypy: `Success: no issues found in 94 source files`;
+- Uvicorn loopback startup and `/health`, `/openapi.json`, `/`: 200;
+- exact Decimal vectors: identical tuples, canonical fixed-scale SQLite storage,
+  `typeof(value)='text'`, PostgreSQL `NUMERIC(38,18)` compilation;
+- architecture, migration isolation, partial uniqueness/FK/check/trigger, Python-Decimal ledger,
+  seed idempotency/drift, UTC/signed-zero, security fail-closed/race, frontend injection-safety,
+  no-connection descriptor, and OpenAPI allowlist/denylist tests: passed.
+
+No PaperBroker, order/fill, deposit/withdrawal/FX route, strategy calculation, sizing decision,
+external provider call, broker SDK, OpenD connection, backtest, live route, or live authentication
+is implemented or claimed. Phase 2 has not begun.

@@ -1,0 +1,49 @@
+from fastapi.testclient import TestClient
+
+EXPECTED_PATHS = {
+    "/health",
+    "/api/v1/portfolio",
+    "/api/v1/positions",
+    "/api/v1/performance",
+    "/api/v1/watchlist",
+    "/api/v1/watchlist/{security_id}",
+    "/api/v1/securities",
+    "/api/v1/securities/{security_id}",
+    "/api/v1/strategies",
+    "/api/v1/brokers",
+    "/api/v1/brokers/{broker}/status",
+    "/api/v1/market-data/providers",
+    "/api/v1/fundamental-data/providers",
+    "/api/v1/event-data/providers",
+}
+
+
+def test_openapi_has_exact_phase_one_allowlist(client: TestClient) -> None:
+    document = client.get("/openapi.json").json()
+    assert set(document["paths"]) == EXPECTED_PATHS
+    serialized = str(document).lower()
+    for forbidden in (
+        "/live",
+        "/paper",
+        "deposit",
+        "withdraw",
+        "manual-fill",
+        "orders",
+        "fills",
+        "backtest",
+        "kill-switch",
+        "strategies/run",
+        "indicators",
+        "signals",
+        "score",
+        "accounts",
+    ):
+        assert forbidden not in serialized
+
+
+def test_response_headers_and_problem_shape(client: TestClient) -> None:
+    response = client.get("/api/v1/securities/not-a-uuid")
+    assert response.status_code == 422
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["x-request-id"] == response.json()["request_id"]
+    assert response.headers["content-type"].startswith("application/problem+json")

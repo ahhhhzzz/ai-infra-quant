@@ -1,6 +1,6 @@
 # Phase 1 Plan — Foundation and Contracts
 
-Status: proposed; **do not execute until the exact user instruction `APPROVE PHASE 1`**
+Status: Phase 1 remediation implemented locally on 2026-08-31; awaiting independent re-review
 
 Phase boundary: foundation, contracts, migrations, initial read-only state, unverified canonical-security creation, and watchlist CRUD only
 
@@ -36,7 +36,11 @@ pyproject.toml
 alembic.ini
 ```
 
-`pyproject.toml` targets CPython 3.12 and declares only foundation runtime dependencies: FastAPI, Uvicorn, SQLAlchemy 2.x, Alembic, Pydantic/Pydantic Settings, and Jinja2. Development extras: pytest, pytest-cov, HTTPX, Ruff, and mypy plus necessary type stubs. Exact compatible versions must be resolved/recorded during Phase 1; no broker/provider SDK belongs in dependencies.
+`pyproject.toml` targets CPython 3.12 and declares only foundation runtime dependencies: FastAPI,
+Uvicorn, SQLAlchemy 2.x, Alembic, Pydantic/Pydantic Settings, Jinja2, and the IANA `tzdata`
+database required by `zoneinfo` on Windows. Development extras: pytest, pytest-cov, HTTPX, Ruff,
+and mypy plus necessary type stubs. Exact compatible versions must be resolved/recorded during
+Phase 1; no broker/provider SDK belongs in dependencies.
 
 `.env.example` contains safe placeholders/defaults only:
 
@@ -109,7 +113,13 @@ src/ai_infra_quant/application/watchlist_service.py
 src/ai_infra_quant/application/status_queries.py
 ```
 
-Only read queries, idempotent initial bootstrap, validated unverified-security creation, and default-watchlist add/remove are allowed. Security creation normalizes identity and forces `USER_SUPPLIED_UNVERIFIED`/`UNVERIFIED`; it performs no provider call or tradability inference. No generic command bus, background worker, strategy run, order, fill, deposit, withdrawal, or FX use case is created.
+Only read queries, idempotent initial bootstrap, validated unverified-security creation, and
+default-watchlist add/remove are allowed. Security creation uses fail-closed US/HK canonicalizers
+and forces `USER_SUPPLIED_UNVERIFIED`/`UNVERIFIED` with unavailable metadata; it performs no
+provider call or tradability inference. Bootstrap uses a stable singleton identity, local-midnight
+UTC conversion, and a canonical configuration fingerprint that rejects drift atomically. No
+generic command bus, background worker, strategy run, order, fill, deposit, withdrawal, or FX use
+case is created.
 
 ### 3.5 Integration descriptors/registries
 
@@ -154,7 +164,13 @@ Migration 0001 creates only Phase 1 tables needed for canonical identity, config
 - ledger accounts/transactions/entries, cash flows, unit transactions, cash-balance projection, portfolio snapshots;
 - settings.
 
-Orders/fills/settlements/positions and external-data/strategy-run/performance-series tables are introduced in their behavior phases unless an FK required now is proven necessary. The migration and seed use the names/types/invariants in `DATABASE_SCHEMA.md`. Normal startup checks Alembic revision and does not call `create_all`.
+Orders/fills/settlements/positions and external-data/strategy-run/performance-series tables are
+introduced in their behavior phases unless an FK required now is proven necessary. Revision 0001
+uses explicit Alembic operations and is isolated from later ORM metadata. It includes the nullable
+restricting cash-flow snapshot FK, corrected logical partial indexes, status checks, and SQLite
+append-only/fail-closed guards. Normal startup checks the Alembic revision and never creates schema
+from ORM metadata. Databases made by the earlier metadata-driven local draft must be recreated
+manually; no arbitrary database is deleted.
 
 Every Phase 1 financial column is declared through dialect-aware `ExactDecimal(38,18)`: SQLite migration DDL must emit fixed-scale canonical `TEXT` with no numeric affinity; PostgreSQL compilation must emit `NUMERIC(38,18)`. The SQLite TypeDecorator validates precision/scale/range, rejects floats, binds canonical padded text, and parses directly to `Decimal`. Ledger balance is checked with Python `Decimal` inside the Unit of Work before atomic commit. No SQLite `SUM`, numeric `CAST`, or decimal TEXT ordering/range query is used or described as exact. Append-only triggers remain database-enforced.
 
@@ -266,6 +282,11 @@ Phase 1 is complete only when all are true:
 13. pytest, Ruff check/format check, and mypy all pass with the exact results recorded.
 14. `.env`, databases, logs, caches, secrets, account IDs/exports and credentials are ignored/not tracked; a tracked-file scan finds no obvious secret or broker SDK.
 15. Git diff contains only Phase 1 planned files and approved documentation updates; unrelated changes are intact.
+16. Snapshot quality, score coverage, data availability, and capability statuses use separate
+    taxonomies; the inception snapshot/API point is `COMPLETE`.
+17. UTC-aware offset round trips preserve the instant, naive persistence is rejected, and all
+    signed-zero forms become positive zero.
+18. Frontend rendering uses DOM nodes and `textContent`, never user-controlled HTML sinks.
 
 ## 6. Test plan
 
@@ -293,6 +314,11 @@ Phase 1 is complete only when all are true:
 - negative/zero/positive/large Decimal ordering in Python, plus scale/range/float rejection; tests must demonstrate lexical TEXT order is not used as numeric order;
 - balanced opening ledger via Python Decimal UoW, atomic rejection of imbalance, no TEXT `SUM`/numeric `CAST`, and update/delete rejection for posted facts;
 - seed twice creates no duplicates and never resets user-created watchlist membership.
+- later ORM tables cannot change revision 0001; every nullable logical uniqueness rule and the
+  cash-flow snapshot FK are tested adversarially;
+- seed name/capital/currency/date/timezone drift fails atomically, and offset-aware timestamps
+  round-trip as UTC;
+- invalid ledger directions/IDs/numbers/amounts/FX/currency/account scope fail before any write.
 
 ### 6.4 API/application integration
 
@@ -303,6 +329,9 @@ Phase 1 is complete only when all are true:
 - known economic zero remains zero (zero-position unrealized P&L), while capability availability is a separate field;
 - problem/error content type, code, field errors and request ID;
 - OpenAPI allowlist/denylist, including no `/live` and no financial mutation routes;
+- normalized security/watchlist integrity races return stable 409/idempotent responses;
+- frontend source scanning rejects user-controlled `innerHTML`, `outerHTML`, and adjacent-HTML
+  sinks.
 - status endpoints return unavailable descriptors without connection calls;
 - UoW rollback leaves no partial writes.
 
@@ -369,3 +398,25 @@ Report:
 - confirmation that no broker SDK, OpenD connection, paper/live order, live route, push/remote/global-config change occurred.
 
 Then stop. Do not begin Phase 2. Wait for the exact instruction `APPROVE PHASE 2`.
+
+## 10. Implementation evidence
+
+The exact `APPROVE PHASE 1` instruction was received. The implementation stayed within this
+plan and produced the planned package, migration, API/dashboard, and test files. Local evidence:
+
+- remediation began from the reported uncommitted Phase 1 working tree; unrelated prior changes
+  were preserved;
+- CPython 3.12.13 virtual environment with only the pinned foundation/development dependencies;
+- fresh SQLite upgrade/current: `0001_phase1_foundation (head)`;
+- actual loopback Uvicorn startup; `/health`, `/openapi.json`, and `/` returned 200;
+- full remediation pytest result: `111 passed`;
+- Ruff check/format and mypy: passed;
+- exact SQLite Decimal tuple round trips with physical `text` storage and PostgreSQL
+  `NUMERIC(38,18)` compilation;
+- migration isolation, partial uniqueness/FK/check/append-only triggers, Python-Decimal UoW,
+  idempotent and drift-safe seed, UTC/signed-zero, security/race fail-closed behavior, frontend
+  injection safety, API allowlist/denylist, offline startup, no-connection descriptor, and
+  architecture-boundary tests: passed.
+
+No strategy formula, position sizing, PaperBroker execution, order/fill, external provider call,
+Futu/OpenD integration, live route, commit, push, remote change, or global Git change occurred.

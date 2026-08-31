@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Infra Quant</title>
+    <link rel="stylesheet" href="/static/app.css">
+  </head>
+  <body>
+    <header>
+      <div>
+        <p class="eyebrow">LOCAL · PHASE 1</p>
+        <h1>AI INFRA QUANT</h1>
+      </div>
+      <div class="safety">PAPER BROKER: NOT IMPLEMENTED · LIVE ROUTES: ABSENT</div>
+    </header>
+
+    <main>
+      <section class="grid summary" aria-label="Opening portfolio facts">
+        <article><span>Portfolio equity</span><strong id="equity">—</strong></article>
+        <article><span>Cash</span><strong id="cash">—</strong></article>
+        <article><span>NAV</span><strong id="nav">—</strong></article>
+        <article><span>Units</span><strong id="units">—</strong></article>
+        <article><span>Invested</span><strong id="invested">—</strong></article>
+        <article><span>Since inception</span><strong id="return">—</strong></article>
+      </section>
+
+      <section class="two-column">
+        <article class="panel">
+          <div class="panel-title">
+            <div><p class="eyebrow">IDENTITY</p><h2>Watchlist</h2></div>
+            <span id="watchlist-status">Loading</span>
+          </div>
+          <div id="watchlist" class="watchlist"></div>
+        </article>
+
+        <article class="panel">
+          <p class="eyebrow">TRUTHFUL AVAILABILITY</p>
+          <h2>System boundaries</h2>
+          <div id="providers" class="status-list"></div>
+          <p class="note">No external price, FX, fundamental, valuation, event, broker, or
+            account data is requested by this page.</p>
+        </article>
+      </section>
+
+      <section class="panel admin">
+        <p class="eyebrow">LOCAL IDENTITY ADMINISTRATION</p>
+        <h2>Create an unverified security</h2>
+        <form id="security-form">
+          <label>Market<input name="market" required maxlength="32" placeholder="US"></label>
+          <label>Symbol<input name="symbol" required maxlength="32" placeholder="EXAMPLE"></label>
+          <label>Currency<input name="currency" required maxlength="3" placeholder="USD"></label>
+          <label>Type<select name="instrument_type"><option>EQUITY</option><option>ETF</option><option>UNKNOWN</option></select></label>
+          <label>Name<input name="display_name" maxlength="120" placeholder="Optional local label"></label>
+          <button type="submit">Create unverified identity</button>
+        </form>
+        <p id="form-result" class="note" role="status"></p>
+      </section>
+    </main>
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>

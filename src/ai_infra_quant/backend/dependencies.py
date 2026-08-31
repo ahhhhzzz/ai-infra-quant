@@ -1,0 +1,88 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Annotated, cast
+
+from fastapi import Depends, Request
+from sqlalchemy import Engine
+from sqlalchemy.orm import Session, sessionmaker
+
+from ai_infra_quant.application.portfolio_queries import PortfolioQueries
+from ai_infra_quant.application.security_service import SecurityService
+from ai_infra_quant.application.status_queries import StatusQueries
+from ai_infra_quant.application.watchlist_service import WatchlistService
+from ai_infra_quant.config import Settings
+from ai_infra_quant.core.domain.enums import CapabilityStatus, DataAvailabilityStatus
+from ai_infra_quant.core.domain.strategy import StrategyDefinition
+from ai_infra_quant.core.strategy.registry import StrategyRegistry
+from ai_infra_quant.database.repositories.unit_of_work import SQLAlchemyUnitOfWork
+from ai_infra_quant.integrations.registry import Registries
+
+
+@dataclass(slots=True)
+class AppContainer:
+    settings: Settings
+    engine: Engine
+    session_factory: sessionmaker[Session]
+    registries: Registries
+    strategy_registry: StrategyRegistry
+    portfolio_queries: PortfolioQueries
+    security_service: SecurityService
+    watchlist_service: WatchlistService
+    status_queries: StatusQueries
+
+
+def build_container(
+    settings: Settings,
+    engine: Engine,
+    session_factory: sessionmaker[Session],
+    registries: Registries,
+    strategy_registry: StrategyRegistry,
+) -> AppContainer:
+    def uow_factory() -> SQLAlchemyUnitOfWork:
+        return SQLAlchemyUnitOfWork(session_factory)
+
+    def required_data_status(definition: StrategyDefinition) -> DataAvailabilityStatus:
+        del definition
+        descriptors = (
+            registries.market_data.get(settings.market_data_provider),
+            registries.fundamental_data.get(settings.fundamental_data_provider),
+            registries.event_data.get(settings.event_data_provider),
+        )
+        if any(descriptor is None for descriptor in descriptors):
+            return DataAvailabilityStatus.INVALID
+        statuses = {
+            status
+            for descriptor in descriptors
+            if descriptor is not None
+            for status in (descriptor.implementation_status, descriptor.connection_status)
+        }
+        if statuses == {CapabilityStatus.SUPPORTED}:
+            return DataAvailabilityStatus.AVAILABLE
+        if CapabilityStatus.NOT_SUPPORTED in statuses:
+            return DataAvailabilityStatus.NOT_SUPPORTED
+        return DataAvailabilityStatus.UNAVAILABLE
+
+    return AppContainer(
+        settings=settings,
+        engine=engine,
+        session_factory=session_factory,
+        registries=registries,
+        strategy_registry=strategy_registry,
+        portfolio_queries=PortfolioQueries(uow_factory, strategy_registry, required_data_status),
+        security_service=SecurityService(uow_factory),
+        watchlist_service=WatchlistService(uow_factory),
+        status_queries=StatusQueries(
+            registries.brokers,
+            registries.market_data,
+            registries.fundamental_data,
+            registries.event_data,
+        ),
+    )
+
+
+def get_container(request: Request) -> AppContainer:
+    return cast(AppContainer, request.app.state.container)
+
+
+ContainerDep = Annotated[AppContainer, Depends(get_container)]

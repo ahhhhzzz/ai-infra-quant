@@ -12,6 +12,8 @@ Base path: `/api/v1`
 - Request and response models are versioned Python schemas independent of ORM and vendor SDK models.
 - UUIDs are lowercase canonical strings. Timestamps are ISO-8601 UTC strings ending in `Z`; dates are `YYYY-MM-DD`.
 - Decimal values are JSON strings matching `^-?(0|[1-9][0-9]*)(\.[0-9]+)?$`. Financial endpoints reject JSON numeric/float values with `INVALID_DECIMAL`. Ratios are fractional (`"0.250000000000"` means 25%); strategy scores are 0-100 strings.
+- Signed zero is normalized before comparison, serialization, persistence, and canonical hashing;
+  no API decimal string begins with `-` when its numeric value is zero.
 - Currency uses uppercase ISO-4217 codes. Enum values are uppercase strings.
 - Missing numeric data is `null` plus an explicit status/reason. `0` never means missing.
 - Responses never expose credentials, trade passwords, tokens, raw broker payloads, or external account IDs.
@@ -33,6 +35,10 @@ Base path: `/api/v1`
 ```
 
 `status` is one of `AVAILABLE`, `MISSING`, `UNAVAILABLE`, `NOT_SUPPORTED`, or `INVALID`. `value` is non-null only for `AVAILABLE`; `as_of` and `source` may be null when no observation exists.
+
+This is `DataAvailabilityStatus`. Snapshot `quality_status` instead uses
+`SnapshotQualityStatus` (`COMPLETE`, `PARTIAL`, `INVALID`), and score coverage uses the separate
+`ScoreCoverageStatus` with those same values. Capability fields use only `CapabilityStatus`.
 
 ### 2.2 `CapabilityItem`
 
@@ -143,7 +149,7 @@ Returns the configured default portfolio. An optional future `portfolio_id` quer
   "nav": "100.000000000000000000",
   "cash_ratio": "1.000000000000",
   "invested_ratio": "0.000000000000",
-  "quality_status": "AVAILABLE",
+  "quality_status": "COMPLETE",
   "missing_data": [],
   "capabilities": {
     "market_data": "UNAVAILABLE",
@@ -198,7 +204,7 @@ Query: `range` one of `1D`, `1W`, `1M`, `3M`, `YTD`, `SINCE_INCEPTION`; optional
     "benchmark_return": {"value": null, "status": "UNAVAILABLE", "as_of": null, "source": null, "reason": "No benchmark data source is configured"}
   },
   "points": [
-    {"at": "2026-08-30T16:00:00Z", "nav": "100.000000000000000000", "twr_index": "1.000000000000", "quality_status": "AVAILABLE"}
+    {"at": "2026-08-30T16:00:00Z", "nav": "100.000000000000000000", "twr_index": "1.000000000000", "quality_status": "COMPLETE"}
   ]
 }
 ```
@@ -309,7 +315,13 @@ Request `SecurityCreateV1`:
 }
 ```
 
-The server trims and uppercases `market`, `symbol`, and `currency`; `instrument_type` is one of `EQUITY`, `ETF`, or `UNKNOWN`. `display_name` is optional, length-limited plain text. Clients cannot submit exchange, calendar, provider mappings, lot/tick/minimum/fractional rules, verification, or tradability status.
+The server uses a fail-closed market-specific identity canonicalizer. US symbols are trimmed,
+uppercased, limited to 32 characters, and accept only ASCII letters, digits, period, and hyphen.
+HK symbols must contain one to five trimmed ASCII digits and are left-padded to five (`9698`
+becomes `09698`). Markets without a configured canonicalizer return `INVALID_MARKET`. Currency is
+trimmed and uppercased; `instrument_type` is one of `EQUITY`, `ETF`, or `UNKNOWN`. `display_name`
+is optional, length-limited plain text. Clients cannot submit exchange, calendar, provider
+mappings, lot/tick/minimum/fractional rules, verification, metadata, or tradability status.
 
 Response 201 `SecurityReadV1` always includes:
 
@@ -326,6 +338,7 @@ Response 201 `SecurityReadV1` always includes:
   "record_source": "USER_SUPPLIED",
   "verification_status": "USER_SUPPLIED_UNVERIFIED",
   "tradability_status": "UNVERIFIED",
+  "metadata_status": "UNAVAILABLE",
   "market_timezone": null,
   "trading_calendar": null,
   "trading_rules": {"status": "UNAVAILABLE"},
@@ -360,6 +373,9 @@ Response `Page[StrategyDefinitionRead]`:
 ```
 
 Phase 1 has no run endpoint and cannot produce a score/recommendation.
+`implementation_status` is resolved from the build-time strategy registry, `research_status` and
+`enabled` are persisted audited configuration, and `required_data_status` is derived at request
+time from configured provider capabilities. The implementation status is not persisted.
 
 ### 4.11 `GET /api/v1/brokers`
 
