@@ -104,7 +104,7 @@ Prefer the simplest design that satisfies the concrete extension requirements in
 9. Trading broker and market-data provider must be independently selectable.
 10. External capital flows must be separated from investment return.
 11. All accounting calculations must be reproducible.
-12. Financial amounts, prices, quantities, fees, and FX rates use `Decimal`, not binary floating point.
+12. Financial amounts, prices, quantities, fees, and FX rates use `Decimal`, not binary floating point. PostgreSQL persists them as `NUMERIC(p,s)`; SQLite persists them through a dialect-aware, no-numeric-affinity canonical fixed-scale `TEXT` representation so SQLite cannot coerce them to binary `REAL`.
 13. No fabricated market, valuation, fundamental, or broker data.
 14. Missing data must be marked as `MISSING`, `UNAVAILABLE`, or `NOT_SUPPORTED`.
 15. Live trading is disabled by default and must be blocked server-side, not merely hidden in the UI.
@@ -405,6 +405,8 @@ Store provider mappings separately:
 
 For example, Futu may map `HK/09698` to `HK.09698`.
 
+Phase 1 must also provide a user-controlled canonical-security creation path. A user may supply market, symbol, currency, instrument type, and optional display name. Such a record is `USER_SUPPLIED_UNVERIFIED`; tradability, provider mappings, calendar, lot/tick/minimum rules, and price/fundamental provenance remain unavailable until separately verified. It may be placed on a watchlist, but strategy execution and all orders are blocked until required metadata and data are valid.
+
 ### 7.2 Portfolio versus broker account
 
 A portfolio is an internal investment grouping. A broker account is an execution/custody account. They must not be the same entity.
@@ -464,7 +466,17 @@ The same idempotency key must never create two broker orders.
 
 ### 8.1 Decimal and append-only ledger
 
-Use `Decimal` in Python and `NUMERIC/DECIMAL` database columns for money, price, quantity, FX, and fees.
+Use `Decimal` in Python for money, price, quantity, FX, fees, ratios, and scores. API values are canonical decimal strings.
+
+Physical persistence is dialect-aware:
+
+- SQLite uses a custom SQLAlchemy `TypeDecorator` or equivalently exact design backed by fixed-scale canonical `TEXT` in a column with no numeric affinity.
+- PostgreSQL uses `NUMERIC(p,s)`.
+- Floats are forbidden at every boundary.
+- SQLite ledger arithmetic and balance validation occur with Python `Decimal` inside one Unit of Work; do not claim that `SUM`, `CAST`, or other SQLite arithmetic over decimal text is exact.
+- Ordering/range operations on stored SQLite decimals use validated application `Decimal` values or a separately designed exact sortable representation; ordinary lexical ordering is not assumed to be numeric.
+
+The exact values `100.000000000000000001`, `12345678901234567890.123456789012345678`, and `0.123456789012345678` must round-trip without change.
 
 The accounting ledger is append-only. Orders/fills/cash flows must not be silently overwritten or deleted.
 
@@ -504,6 +516,8 @@ NAV = 100.00
 ```
 
 A deposit issues new units at the NAV immediately before the external cash flow. A withdrawal redeems units at the NAV immediately before the cash flow. External cash flows must not create a NAV jump.
+
+After positions exist, deposit or withdrawal requires a complete official `FLOW_PRE` valuation snapshot. Every position must have a valid point-in-time mark and every required currency conversion must have a valid point-in-time FX rate. If valuation is incomplete, reject the flow with `PORTFOLIO_VALUATION_UNAVAILABLE`; do not issue/redeem units from an incomplete NAV.
 
 At minimum, report:
 
@@ -637,6 +651,12 @@ Before implementing `AIInfraStrategy`, Phase 0 must create `docs/STRATEGY_SPEC.m
 - Golden deterministic test cases.
 
 Do not invent an arbitrary normalization and immediately encode it. The strategy specification must be reviewed and approved first.
+
+`APPROVE PHASE 1` authorizes foundation implementation only and does not approve strategy formulas. Before any Phase 3 strategy implementation, the user must separately send the exact instruction:
+
+`APPROVE STRATEGY SPEC V1`
+
+Until then, `STRATEGY_SPEC.md` remains `PROPOSED / RESEARCH_UNVALIDATED`.
 
 Absolute scores should primarily use each security's own historical distribution. With only three tracked securities, cross-sectional ranking must be used only as a relative-priority overlay, not as the primary score.
 
@@ -790,7 +810,12 @@ For safety, strategy output is a recommendation. It does not autonomously execut
 
 ### 10.12 Position sizing and legal order quantity
 
-Use ATR14 and/or historical volatility so higher volatility produces a smaller risk budget.
+The primary sizing formula is `DECISION_REQUIRED`. At minimum, the approved decision must compare:
+
+1. **Option A — hard-stop risk-budget sizing.** Quantity is derived from risk budget divided by an approved stop distance. This option requires a corresponding stop policy that is actually enforced; otherwise its output must not be described as a guaranteed maximum loss.
+2. **Option B — target-allocation sizing with volatility scaling.** The 40%/35%/25% values remain maximum allocations, while ATR14 and/or historical volatility scales a target below the cap. This is the recommended default for the long-only staged investment strategy.
+
+A stress-loss/risk-budget check may remain as a secondary cap under Option B, but it is not a guaranteed loss limit without an enforced stop.
 
 Initial maximum allocation reference:
 
@@ -806,9 +831,20 @@ Default tranches within a target allocation:
 - Tranche 2: 30%.
 - Tranche 3: 40%.
 
+Discrete quantities use cumulative legal targets rather than independently flooring three order quantities:
+
+- calculate the legal cumulative target after tranche 1;
+- calculate the legal cumulative target after tranche 2;
+- tranche 3 cumulative target equals the full legal target;
+- next order quantity equals the current legal cumulative target minus confirmed cumulative filled quantity.
+
+Small targets may adapt into fewer executable tranches but must never exceed total legal target, settled cash, allocation cap, or approved risk limit. Explain adjustments with `SMALL_TARGET_SINGLE_TRANCHE` or `DISCRETE_TRANCHE_ADJUSTMENT`.
+
+A one-share/one-lot 50% reduction must not create a zero-quantity fictional order. Return `REDUCE_NOT_EXECUTABLE_DUE_TO_LOT_SIZE` and require a separately approved choice between `HOLD_REVIEW` and full `EXIT`.
+
 PositionSizer must convert theoretical capital to a legal order quantity using broker capabilities and security metadata.
 
-It must never round above available cash, allocation cap, or risk budget.
+It must never round above available cash, allocation cap, or any risk constraint selected by the separately approved sizing policy.
 
 If the intended amount cannot buy the minimum legal unit, return:
 
@@ -916,6 +952,8 @@ Required capabilities:
 
 Synthetic fixtures are allowed for unit/integration tests only. They must be clearly marked and must never be displayed as real production market data or used to issue a real recommendation.
 
+Phase 2 does not yet have an automatic market-data matching source. It therefore implements accounting, order lifecycle, and explicitly user-supplied/manual simulation fills only. Every manual fill price is labelled `MANUAL_SIMULATION_PRICE` and stores price, currency, `observed_at`, `available_at`, actor, and source. PaperBroker must not invent a price or claim a market/limit fill without an identified observation. Automatic market/limit matching begins no earlier than Phase 3 after an approved historical/manual market-data path exists.
+
 ---
 
 ## 15. Live-trading safety
@@ -1008,6 +1046,7 @@ GET    /api/v1/performance
 GET    /api/v1/watchlist
 POST   /api/v1/watchlist
 DELETE /api/v1/watchlist/{security_id}
+POST   /api/v1/securities
 GET    /api/v1/securities/{security_id}
 GET    /api/v1/securities/{security_id}/indicators
 GET    /api/v1/securities/{security_id}/score
@@ -1092,6 +1131,7 @@ Use pytest. Phase 0 must recommend lint/type-check tools; Phase 1 must configure
 At minimum, test:
 
 - Decimal-safe accounting.
+- Exact dialect-aware SQLite decimal round trips for required extreme/fractional values, range validation, numeric ordering behavior, and Python-Decimal ledger balancing without SQLite text arithmetic.
 - MA20/MA50/MA200.
 - ATR14.
 - 60-day drawdown.
@@ -1102,12 +1142,14 @@ At minimum, test:
 - Fundamental veto.
 - Dual momentum.
 - Strategy state transitions.
-- ATR position sizing.
+- The separately approved position-sizing formula, including ATR inputs if the approved option uses them.
 - Legal order rounding, lot size, and fractional capability.
+- Cumulative legal tranche targets for one share, two shares, fractional quantity, HK board lot, and one-share/one-lot reduce.
 - Weighted-average cost.
 - Realized/unrealized P&L.
 - FX conversion and FX P&L.
 - Deposit/withdrawal not changing NAV/TWR.
+- External flow rejection with `PORTFOLIO_VALUATION_UNAVAILABLE` when any position mark or required FX observation is missing.
 - Unit issuance/redemption.
 - Corporate actions.
 - Broker canonical responses.
@@ -1115,6 +1157,8 @@ At minimum, test:
 - Duplicate-order prevention.
 - Order reconciliation.
 - No future-data leakage.
+- User-supplied unverified security creation, uniqueness, truthful metadata state, and strategy/order blocking.
+- Missing/stale valuation or fundamental inputs produce `HOLD_REVIEW`, never a score-based REDUCE.
 
 Synthetic fixtures are allowed under `tests/fixtures/` but must never enter production tables as real data.
 
@@ -1219,6 +1263,8 @@ Deliver:
 
 Resolve/report contradictions and open design decisions. Stop and wait for `APPROVE PHASE 1`.
 
+`APPROVE PHASE 1` authorizes Phase 1 foundation work only. It does not approve `STRATEGY_SPEC.md`; strategy approval uses the separate exact instruction `APPROVE STRATEGY SPEC V1` before Phase 3.
+
 ### Phase 1 — Foundation and contracts
 
 Implement:
@@ -1233,8 +1279,9 @@ Implement:
 - Capability models.
 - Minimal portfolio/account entities.
 - Initial AI Infra portfolio, HKD 20,000 cash, NAV 100.
-- Watchlist CRUD.
-- Minimal read-only dashboard/API.
+- Security creation for user-supplied unverified canonical securities.
+- Watchlist CRUD for seeded or user-created securities.
+- Minimal read-only financial dashboard/API plus canonical-security creation and watchlist administration; no financial mutation route.
 
 Do not implement live integration or full paper execution.
 
@@ -1243,6 +1290,7 @@ Phase 1 acceptance:
 - Application starts.
 - Database initializes through migrations.
 - Initial portfolio and watchlist exist.
+- A new user-supplied security can be created and added to the watchlist while remaining blocked from strategy/orders until verified.
 - Watchlist can be added/removed.
 - Broker/provider boundaries are demonstrably decoupled.
 - Missing data is shown truthfully.
@@ -1257,7 +1305,7 @@ Implement:
 - PaperBroker.
 - ExecutionEngine baseline.
 - RiskManager baseline.
-- Orders/fills/positions.
+- Orders, explicitly user-supplied/manual simulation fills with full price provenance, and positions.
 - Multi-currency cash and explicit/auto FX.
 - Cash reservation and settlement model.
 - Deposits/withdrawals.
@@ -1266,19 +1314,22 @@ Implement:
 - P&L and performance snapshots.
 - Paper buy/sell UI.
 
+Automatic market/limit matching is out of Phase 2 scope. Deposits/withdrawals after positions exist require a complete `FLOW_PRE` snapshot or fail with `PORTFOLIO_VALUATION_UNAVAILABLE`.
+
 Stop and wait for `APPROVE PHASE 3`.
 
 ### Phase 3 — Market data, indicators, and AIInfraStrategy
 
-Implement only after `STRATEGY_SPEC.md` is approved:
+Implement only after the exact separate instruction `APPROVE STRATEGY SPEC V1` has approved `STRATEGY_SPEC.md`:
 
 - Historical market-data interface implementation.
 - Trading calendars/time zones.
 - MA, ATR, drawdown, M3, M6.
 - Valuation/manual fundamental data path with provenance.
 - AIInfraStrategy score, coverage gate, confirmation, dual momentum, veto, state machine.
-- ATR sizing and legal order-quantity calculation.
+- The separately approved sizing formula and legal order-quantity calculation; do not infer approval of either OD-006 option from this phase label.
 - Recommendation panel and strategy explanations.
+- Automatic paper market/limit matching only against an approved, provenance-bearing market-data path.
 
 Stop and wait for `APPROVE PHASE 4`.
 
@@ -1292,6 +1343,8 @@ Implement:
 - Buy-and-hold benchmarks.
 - Before/after-cost statistics.
 - Anti-look-ahead tests.
+
+Backtest completion does not establish profitability or predictive validity. `AIInfraStrategy` remains `RESEARCH_UNVALIDATED` through Phase 4 and until adequate subsequent forward observation is reviewed.
 
 Stop and wait for `APPROVE PHASE 5`.
 

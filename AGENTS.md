@@ -13,12 +13,12 @@ Always:
 - Use a modular monolith; do not introduce unnecessary distributed infrastructure.
 - Keep broker-specific and provider-specific code inside `integrations/`.
 - Keep Strategy, Portfolio, Accounting, Risk, Performance, and Backtest broker-agnostic.
-- Use `Decimal`/database `NUMERIC` for money, price, quantity, fees, and FX.
+- Use Python `Decimal` for all financial values. Persist exact decimals through the approved dialect-aware design: fixed-scale canonical `TEXT` with no numeric affinity on SQLite, and `NUMERIC(p,s)` on PostgreSQL. Never use binary float for financial data.
 - Keep external cash flows separate from investment return.
 - Never fabricate market, valuation, fundamental, or broker data.
 - Mark missing or unsupported data truthfully.
 - Keep live trading disabled by default and blocked server-side.
-- Never hard-code or commit credentials, account IDs, trade passwords, tokens, databases, logs, or private broker exports.
+- Never hard-code or commit credentials, external/private broker account IDs, trade passwords, tokens, databases, logs, or private broker exports. Internal canonical UUIDs and deterministic test identifiers are permitted when they contain no private broker information.
 - Never update a position before a confirmed fill.
 - Run the application, tests, lint, and type checks before claiming a phase is complete.
 - Update documentation and the requirements matrix when behavior or architecture changes.
