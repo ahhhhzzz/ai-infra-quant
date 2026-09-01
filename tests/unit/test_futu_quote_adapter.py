@@ -243,16 +243,51 @@ def test_hk_current_day_daily_bar_is_included_after_authoritative_close() -> Non
     assert current_bar.provider_time.date() != current_bar.session_date
 
 
-def test_us_current_day_daily_bar_is_excluded_during_market_hours() -> None:
+@pytest.mark.parametrize(
+    ("provider_state", "current_session_is_completed"),
+    [
+        ("AFTERNOON", False),
+        ("AFTER_HOURS_BEGIN", True),
+        ("AFTER_HOURS_END", True),
+        ("OVERNIGHT", True),
+    ],
+)
+def test_us_current_day_daily_completion_uses_regular_session_provider_state(
+    provider_state: str,
+    current_session_is_completed: bool,
+) -> None:
     context = FakeQuoteContext()
     _configure_daily_result(
         context,
         US_AVGO,
-        "MORNING",
+        provider_state,
         ["2026-08-31 00:00:00", "2026-09-01 00:00:00"],
     )
 
     with _adapter(context) as adapter:
+        market_status = adapter.get_market_status(US_AVGO)
+        result = adapter.get_daily_bars(US_AVGO)
+
+    assert market_status.data is not None
+    assert market_status.data.provider_state == provider_state
+    assert isinstance(result.data, tuple)
+    expected_sessions = ["2026-08-31"]
+    if current_session_is_completed:
+        expected_sessions.append("2026-09-01")
+    assert [bar.session_date.isoformat() for bar in result.data] == expected_sessions
+
+
+def test_us_daily_completion_is_not_inferred_from_wall_clock_alone() -> None:
+    context = FakeQuoteContext()
+    _configure_daily_result(
+        context,
+        US_AVGO,
+        "AFTERNOON",
+        ["2026-08-31 00:00:00", "2026-09-01 00:00:00"],
+    )
+    after_regular_close_by_clock = datetime(2026, 9, 1, 21, 0, tzinfo=UTC)
+
+    with _adapter(context, now=lambda: after_regular_close_by_clock) as adapter:
         result = adapter.get_daily_bars(US_AVGO)
 
     assert isinstance(result.data, tuple)

@@ -216,28 +216,31 @@ class FutuQuoteAdapter:
             has_current_session_bar = any(
                 session_date == market_today for _, session_date in rows_with_session_dates
             )
-            current_session_closed = False
+            current_regular_session_closed = False
             if has_current_session_bar:
                 market_status = self.get_market_status(security)
-                current_session_closed = (
+                current_regular_session_closed = (
                     market_status.status is DataAvailabilityStatus.AVAILABLE
                     and market_status.data is not None
-                    and market_status.data.state is CanonicalMarketState.CLOSED
+                    and _regular_session_is_closed(
+                        security,
+                        market_status.data.provider_state,
+                    )
                 )
             bars = tuple(
                 _daily_bar(row, security, retrieved_at)
                 for row, session_date in rows_with_session_dates
                 if session_date < market_today
-                or (session_date == market_today and current_session_closed)
+                or (session_date == market_today and current_regular_session_closed)
             )
         except (KeyError, TypeError, ValueError) as exc:
             return _failure(DataAvailabilityStatus.INVALID, retrieved_at, _safe_reason(exc))
         if not bars:
             reason = "no completed daily bars"
-            if has_current_session_bar and not current_session_closed:
+            if has_current_session_bar and not current_regular_session_closed:
                 reason = (
                     "current daily bar excluded because provider market state does not "
-                    "authoritatively show CLOSED"
+                    "authoritatively show the regular session is closed"
                 )
             return _failure(
                 DataAvailabilityStatus.UNAVAILABLE,
@@ -461,6 +464,23 @@ def _market_state(raw_state: str) -> CanonicalMarketState:
         "CLOSED": CanonicalMarketState.CLOSED,
     }
     return exact.get(normalized, CanonicalMarketState.UNKNOWN)
+
+
+def _regular_session_is_closed(
+    security: MarketDataSecurity,
+    provider_state: str,
+) -> bool:
+    normalized = provider_state.strip().upper()
+    if security.market == "US":
+        return normalized in {
+            "AFTER_HOURS_BEGIN",
+            "AFTER_HOURS_END",
+            "OVERNIGHT",
+            "CLOSED",
+        }
+    if security.market == "HK":
+        return normalized == "CLOSED"
+    return False
 
 
 def _provider_failure(retrieved_at: datetime, error: object) -> ProviderResult[Any]:
