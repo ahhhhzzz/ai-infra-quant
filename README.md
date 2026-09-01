@@ -1,10 +1,15 @@
 # AI Infra Quant
 
-AI Infra Quant is a local-first, single-user, end-of-day quantitative research, portfolio
-accounting, and investment decision-support platform. Its authoritative future direction is
-defined in `docs/ROADMAP.md`: completed daily data, one Composite Quant Score per tracked
-security, one Daily Portfolio Decision Summary, and manual execution by the user in the broker's
-official client. Optional broker connectivity is read-only.
+AI Infra Quant is a local-first, single-user, read-only quantitative research and investment
+decision-support tool. Its authoritative future direction is defined in `docs/ROADMAP.md`: daily
+plus current-session completed 1-minute market data, a broker-style dashboard, approximately
+60-second refresh/recalculation, and a dual-timeframe Composite Quant Score. Daily and 1-minute
+charts are separate views.
+
+Market data may come from a future independent read-only Market Data Provider. No provider is
+selected yet. The application never connects to a brokerage account, reads real-account facts,
+imports or reconciles real trades, or sends a broker command. The user performs every real trade
+manually in the broker's official client.
 
 The accepted Phase 1 implementation is the local FastAPI/SQLite foundation. It exposes opening
 portfolio facts, identity/watchlist administration, and truthful provider capability descriptors;
@@ -63,5 +68,5 @@ ORM metadata. A local development database created by the earlier metadata-drive
 recreated before running this remediated revision. The application never deletes a database.
 
 Phase 1 remains intentionally limited: no PaperBroker, paper fill/order, external provider,
-Futu/OpenD integration, strategy calculation, backtest, or real-order route exists. Phase 1 has
+market-data dashboard, strategy calculation, backtest, or real-order route exists. Phase 1 has
 passed independent review. Phase 2 has not begun and requires separate explicit approval.

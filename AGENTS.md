@@ -17,10 +17,15 @@ Always:
 - Keep external cash flows separate from investment return.
 - Never fabricate market, valuation, fundamental, or broker data.
 - Mark missing or unsupported data truthfully.
-- Keep the product end-of-day only. Real trades are executed manually in the broker's official client.
-- Never implement broker-write calls, real-order endpoints, streaming/intraday execution, or autonomous trading; `docs/ROADMAP.md` decision `EOD-001` permanently excludes them.
+- Keep the product read-only and decision-support only. Daily data and current-session completed
+  1-minute data are allowed; real trades are executed manually in the broker's official client.
+- Keep independent read-only Market Data Provider access separate from brokerage-account access.
+  No brokerage-account connection, real-account observation/import/matching, broker-write
+  call, real-order endpoint, streaming execution, or autonomous trading is permitted; see
+  `docs/ROADMAP.md` decision `MTF-001`.
 - Never hard-code or commit credentials, external/private broker account IDs, trade passwords, tokens, databases, logs, or private broker exports. Internal canonical UUIDs and deterministic test identifiers are permitted when they contain no private broker information.
-- Update paper positions only from a confirmed PaperFill and real positions only from a reconciled ManualRealTradeRecord or BrokerObservation.
+- Update simulated paper positions only from a confirmed PaperFill. The product has no real-position
+  state.
 - Run the application, tests, lint, and type checks before claiming a phase is complete.
 - Update documentation and the requirements matrix when behavior or architecture changes.
 - Stop after the current phase and wait for explicit approval.

@@ -1,54 +1,30 @@
-# AI Infra Quant Platform — Master Specification v2.0
+# AI Infra Quant Platform — Master Specification v3.0
 
-Status: **AUTHORITATIVE — EOD/no-live direction**
+Status: **AUTHORITATIVE — daily + 1-minute read-only direction**
 
-Superseding decision: `EOD-001` in `docs/ROADMAP.md`, approved 2026-09-01
+Superseding decision: `MTF-001` in `docs/ROADMAP.md`, approved 2026-09-01
 
 ## 0. Authority, precedence, and history
 
-This specification defines the product and engineering boundary. Instruction precedence is:
+Instruction precedence is:
 
-1. the current explicit user instruction;
+1. current explicit user instruction;
 2. root `AGENTS.md`;
 3. `docs/ROADMAP.md`;
 4. this specification;
-5. the current explicitly approved phase plan;
+5. the current explicitly approved phase plan or Task Contract;
 6. other documentation.
 
-Decision `EOD-001` supersedes older future-scope clauses that contemplated real-time data,
-broker-write execution, or phases beyond the current Roadmap. It does not rewrite history:
+Decision `MTF-001` supersedes `EOD-001` for future scope without reverting its traceable commit or
+rewriting history. Phase 0 remains historically completed. Phase 1 remains accepted at reviewed
+commit `f6decf2fbe171c1b9eb46340a9174bc21f293ede`; its PASS status, implementation, plan, tests, and two
+review files are unchanged. Phase 2 has not begun.
 
-- Phase 0 design work remains completed historical evidence;
-- Phase 1 remains accepted under its approved historical scope;
-- the two Phase 1 review files remain immutable;
-- Phase 1's abstract broker-write signatures are historical contract artifacts, not future
-  implementation authority.
+## 1. Product objective and boundary
 
-The accepted Phase 1 review object is commit
-`f6decf2fbe171c1b9eb46340a9174bc21f293ede` with tree
-`f03d23ededaef37096b508a3040c87ae69d89e32`.
-
-## 1. Product objective
-
-Build a **Personal End-of-Day Quant Research, Portfolio Accounting and Investment Decision Support
-Platform**.
-
-The platform is local-first and single-user. It analyzes completed daily market sessions, maintains
-reproducible paper and real-portfolio accounting facts, and explains portfolio decisions. It does
-not execute a real trade.
-
-Primary outputs are:
-
-- one Composite Quant Score for each tracked security and completed session;
-- one Daily Portfolio Decision Summary per portfolio/report run;
-- Current Portfolio versus Target Portfolio;
-- Rebalance Suggestions;
-- suggested buy/sell amounts and estimated quantities;
-- explicit data-quality, risk, cost, FX, liquidity, and assumption warnings.
-
-The user reviews the output and manually trades in the broker's official client. Completed real
-trades enter the platform later by manual entry, file import, or an optional read-only broker
-observation.
+Build a local-first, single-user quantitative research and decision-support tool. The product uses
+daily data and current-session completed 1-minute bars, presents a visible read-only dashboard, and
+refreshes/recalculates approximately every 60 seconds while that dashboard is visible.
 
 Initial tracked securities remain configurable:
 
@@ -56,81 +32,73 @@ Initial tracked securities remain configurable:
 - `US.VRT`
 - `HK.09698`
 
-Accepted opening facts remain configurable:
+Accepted opening Phase 1 facts remain configurable: HKD base currency, initial capital 20000,
+inception date 2026-08-31, initial NAV 100, and 200 units.
 
-- base reporting currency `HKD`;
-- initial capital `20000`;
-- inception date `2026-08-31`;
-- initial NAV `100` and 200 units.
+The product may read market information from an independent Market Data Provider. It never accesses
+a brokerage account, real cash, real positions, completed broker orders, or real trades. It neither
+imports real trades nor matches real-account state. It does not need to know whether the user
+acted on an advisory output.
+
+> 用户在券商官方客户端手工完成所有真实交易。
 
 ## 2. Operating model
 
-The daily workflow is:
+During an active visible dashboard session:
 
-1. wait for each required market session to complete;
-2. obtain completed daily OHLCV and other approved EOD observations;
-3. validate calendar/session completeness, provenance, availability, and staleness;
-4. calculate daily indicators and factor components;
-5. calculate Composite Quant Scores;
-6. derive Target Portfolio and Rebalance Suggestions;
-7. generate the Daily Portfolio Decision Summary;
-8. stop after the report is available;
-9. let the user decide and manually act outside the platform;
-10. update accounting only from confirmed paper facts or completed real-trade facts.
+1. obtain or refresh latest market state from an independent read-only provider;
+2. obtain daily bars and incremental current-session completed 1-minute bars;
+3. validate provenance, timestamps, latency, completeness, and quality;
+4. calculate indicators and the approved Composite Quant Score model when one exists;
+5. rank tracked securities and calculate reference/risk state;
+6. render separate daily and 1-minute chart views;
+7. repeat approximately every 60 seconds, or refresh on manual request;
+8. stop automatic activity when the page is hidden or closed.
 
-Manual triggering after market close is sufficient for Core MVP. A local scheduler may later run
-read-only EOD ingestion, analysis, report generation, and report-ready notification. It can never
-perform a broker command.
+When a hidden page becomes visible it refreshes immediately. Polling requests never overlap. The
+UI provides `刷新最新行情` and an automatic-refresh countdown. Ordinary HTTP/REST polling is the
+MVP transport; WebSocket or streaming infrastructure is not required.
 
 ## 3. Scope and permanent non-goals
 
-The operating scope is:
+In scope:
 
-- single-user;
-- local-first;
-- single-process modular monolith;
-- completed daily data only;
-- long-only portfolio research and accounting;
-- SQLite runtime through Core MVP;
-- FastAPI backend and local HTML/CSS/JavaScript frontend;
-- optional read-only broker reconciliation;
-- manual real-trade execution outside the application.
+- local, single-process modular monolith;
+- daily market data and completed current-session 1-minute OHLCV;
+- latest price and market status;
+- separate daily/minute candlestick charts and volume;
+- indicators, score, ranking, and reference/risk state;
+- later-approved lightweight simulated/paper research state;
+- deterministic backtesting and analytics;
+- SQLite runtime and FastAPI/local frontend.
 
-Decision `EOD-001` permanently excludes:
+Permanently outside product scope:
 
-- real-time quotes, tick/order-book feeds, streaming/WebSocket feeds, and minute bars;
-- intraday calculations, intraday rebalancing, or latency-sensitive design;
-- application-submitted real orders or any real-order UI/API;
+- any brokerage-account connection or observation;
+- real cash, positions, trades, imports, synchronization, or account matching;
+- application-submitted real orders or real-order UI/API;
 - broker-write adapters or `place_order`, `cancel_order`, `modify_order` calls;
-- live OMS/EMS, broker-side order state machines, or broker buying-power reservation;
-- real-order approval/submission, retry, recovery, failover, and execution workers;
-- trade-password unlock or write-capable credentials;
-- execution kill switches;
-- unattended/autonomous trading and autonomous trading agents;
-- EastMoney trading integration;
-- microservices, Kafka/message queues, Redis/Celery workers, Kubernetes, multi-tenancy,
-  distributed execution locks, cloud high availability, and 24/7 execution infrastructure.
+- live OMS/EMS, buying-power reservation, password unlock, execution workers, retries, recovery,
+  kill switches, or autonomous/unattended trading;
+- tick/order-book persistence and full historical minute replay as MVP requirements;
+- microservices, Kafka/queues, distributed workers, Kubernetes, multi-tenancy, cloud high
+  availability, and 24/7 execution infrastructure.
 
-These items are outside product scope, not disabled or deferred features.
+Read-only minute data and intraday calculation are research capabilities, not execution.
 
 ## 4. Engineering principles
 
-1. Strategy, Portfolio, Accounting, Risk, Performance, and Backtest remain broker-agnostic.
-2. External adapters live only under `integrations/`.
-3. Broker observations and market/fundamental/event data use separate read-only ports.
-4. Paper simulation, advisory output, real-trade records, and broker observations are distinct.
-5. Financial values use Python `Decimal`, never binary float.
-6. SQLite persists exact financial values as validated fixed-scale canonical `TEXT` with no
-   numeric affinity; PostgreSQL portability uses `NUMERIC(p,s)`.
-7. External cash flows are separate from investment return.
-8. Accounting is reproducible from immutable facts.
-9. Missing/stale data is explicit and never fabricated.
-10. All timestamps are aware UTC; market sessions also retain local date, timezone, and calendar.
-11. Point-in-time records require `available_at <= data_as_of`.
-12. A recommendation acknowledgement is metadata only and has no broker effect.
-13. Real portfolio state changes only from a reconciled ManualRealTradeRecord or approved
-    accounting fact.
-14. Every phase is approved, implemented, verified, and stopped independently.
+1. Strategy, Portfolio, Accounting, Risk, Performance, and Backtest remain provider-agnostic.
+2. Provider-specific adapters live under `integrations/` and expose read-only market data only.
+3. Financial values use Python `Decimal`, never binary float.
+4. SQLite persists exact financial values as fixed-scale canonical `TEXT` with no numeric affinity;
+   PostgreSQL portability uses `NUMERIC(p,s)`.
+5. External cash flows remain separate from investment return.
+6. Missing, delayed, stale, unavailable, and erroneous data are explicit and never fabricated.
+7. Instants are aware UTC; market sessions retain local date, timezone, and calendar.
+8. Point-in-time research records require `available_at <= data_as_of`.
+9. Simulated PaperFill state and advisory output are distinct and have no external effect.
+10. Each task and phase is explicitly approved, verified, and stopped independently.
 
 ## 5. Target architecture
 
@@ -138,284 +106,130 @@ These items are outside product scope, not disabled or deferred features.
 Browser
   -> local FastAPI presentation
       -> application use cases / unit of work
-          -> EOD data validation and manifests
-          -> indicator/factor calculation
-          -> Composite Quant Score
-          -> Target Portfolio / Rebalance Suggestions
-          -> Daily Portfolio Decision Summary
-          -> accounting / performance / backtest
+          -> dashboard market-state query
+          -> daily and completed-minute validation
+          -> indicators / Composite Quant Score / ranking / risk state
+          -> optional later paper research / performance / backtest
               -> SQLite
 
-Optional read-only paths:
-  EOD data provider or file import -> immutable observations
-  Broker read-only connector       -> BrokerObservation -> reconciliation
+Independent read-only Market Data Provider
+  -> provider adapter under integrations/
+      -> canonical quotes, daily bars, completed minute bars, market status
 
-External manual action:
-  Decision Summary -> user -> broker official client
-  completed trade  -> ManualRealTradeRecord/import/observation -> reconciliation -> accounting
+External manual action
+  advisory display -> user -> broker official client
 ```
 
-The platform has no path from a Recommendation or RebalanceSuggestion to a broker command.
+There is no brokerage-account path and no path from an advisory result to an external command.
 
 ## 6. Module boundaries
 
 | Module | Owns | Must not own or call |
 |---|---|---|
-| Strategy | Daily indicators, factor components, Composite Quant Score, advisory classifications, target weights, explanations | Broker SDKs, broker commands, accounting mutation, ORM/API objects |
-| Portfolio | Current/Target Portfolio, weights, deviations, concentration, Rebalance Suggestions | Ledger posting, broker commands, provider-native models |
-| Accounting | Append-only ledger, cash, positions, cost basis, fees/taxes, units, NAV | Strategy scoring, broker commands |
-| Risk | EOD portfolio/assumption checks and explainable warnings | Broker SDKs or order submission |
-| Performance | TWR, NAV, drawdown, attribution, benchmark analytics | External calls during calculation or portfolio mutation |
-| Backtest | Historical daily clock, point-in-time cursor, EOD execution assumptions, reports | Intraday simulation, production portfolio mutation |
-| Paper | PaperOrder/PaperFill simulation and paper-only state | Broker identifiers, broker commands, real-trade records |
-| Import/reconciliation | ManualRealTradeRecord, BrokerObservation, CSV import, discrepancies | Initiating or representing a pending broker order |
-| EOD providers | Completed daily observations and provenance | Broker execution, streaming subscriptions |
+| Dashboard | Selector, separate timeframes, polling state/countdown, freshness/error display | Provider SDK models, broker/account concepts |
+| Strategy | Daily Base Score, Intraday Minute Adjustment, combined score, explanation | Provider SDKs, broker commands, accounting mutation |
+| Portfolio | Tracked-security ranking and later simulated research allocations | Real-account state or broker commands |
+| Accounting | Accepted Phase 1 opening facts and later approved paper bookkeeping | Strategy scoring or real-account facts |
+| Risk | Explainable security/reference states | Broker SDKs or execution |
+| Performance | Paper/research analytics | External calls during calculation |
+| Backtest | Deterministic historical clock, point-in-time cursor, reports | Production mutation or assumed minute history |
+| Market data port | Canonical quote, daily bars, completed minute bars, market status, timestamps | Brokerage account or execution capability |
 
-Only the composition root selects concrete read-only providers/connectors. Core packages do not
-read environment variables, import provider SDKs, or branch on provider names.
+Only the composition root selects a provider. Core modules do not read environment variables,
+import provider SDKs, or branch on provider names.
 
-## 7. Canonical domain concepts
+## 7. Market-data and time contract
 
-### 7.1 Security
+The provider boundary may offer equivalents of `get_latest_quote()`, `get_daily_bars()`,
+`get_minute_bars()`, and `get_market_status()`. Exact interfaces and provider choice remain
+unapproved. A later implementation task must validate credentials, entitlements, price, latency,
+US/HK coverage, and a real-data proof of concept.
 
-Security identity is vendor-neutral: internal UUID plus canonical `(market, symbol)`. Provider
-symbols are mappings. User-created identities remain `USER_SUPPLIED_UNVERIFIED` until required
-metadata and provenance are verified.
+Daily data remains supported. The minute MVP uses only completed 1-minute bars from the current
+trading day. Daily and 1-minute bars are displayed in separate coordinate systems selected by a
+timeframe control.
 
-### 7.2 PaperOrder and PaperFill
+At minimum, canonical state distinguishes:
 
-PaperOrder and PaperFill are internal simulations only. They are marked simulated, never sent to a
-broker, and use completed EOD price data or an explicit manual paper price with a versioned
-execution assumption. Paper submission/fill terminology must never imply an external broker action.
+```text
+latest_quote_at
+latest_completed_minute_bar_at
+latest_completed_daily_session
+score_calculated_at
+```
 
-### 7.3 Recommendation and RebalanceSuggestion
+Polling frequency is not provider latency. An unfinished minute bar is excluded from completed-bar
+results. A latest/intraday price is never described as a final daily close.
 
-These are advisory. They may carry side, target weight, suggested amount, estimated quantity,
-explanation, expiration, and assumptions. Acceptance/rejection records a user decision only.
+## 8. Composite Quant Score governance
 
-### 7.4 ManualRealTradeRecord
+Approved architecture:
 
-This records a real trade already completed outside the platform. Required facts include security,
-account/portfolio, side, quantity, price, currency, actual execution time, fees, taxes, source,
-import identity, and provenance. It cannot represent a pending order.
+```text
+Composite Quant Score = Daily Base Score + Intraday Minute Adjustment
+```
 
-### 7.5 BrokerObservation
+The daily component may later represent trend, absolute/relative momentum, volatility, drawdown,
+and medium-term risk. The minute component may later represent current-session momentum, price
+relative to open/previous close, short averages, VWAP, volume, and intraday volatility/risk.
 
-This is an immutable read-only observation of account metadata, cash, positions, completed orders,
-completed trades/fills, fees, taxes, or settlements. It is not authoritative until reconciled and
-is never a command.
+No formula, weight, threshold, band, normalization, sizing rule, or profitability claim is approved
+by this master revision. `docs/STRATEGY_SPEC.md` remains `PROPOSED / RESEARCH_UNVALIDATED`; the
+earlier completed-daily-only proposal is not authoritative for implementation. A separate strategy Task
+Contract and explicit approval are required before score implementation.
 
-## 8. Data boundary and provenance
+## 9. Dashboard contract
 
-Approved granularity is completed daily:
+The first usable dashboard shows a security selector, latest price, market status, daily chart,
+current-day completed 1-minute chart, volume, Composite Quant Score, security ranking,
+reference/risk state, timestamps, and explicit missing/delayed/stale/error status. It contains no
+real-order control and makes no claim that the user executed a recommendation.
 
-- raw and adjusted daily OHLCV;
-- completed session date, calendar, and market timezone;
-- EOD FX;
-- daily fundamental/valuation snapshots when legitimate;
-- daily event/corporate-action observations.
+## 10. Backtesting
 
-Each observation stores source, source record/version, observed/session time, `available_at`,
-`retrieved_at`, quality status, and a payload/content hash where appropriate. Restatements append
-and supersede; they do not change historical runs.
+Daily-bar backtesting is the baseline. It uses deterministic point-in-time data selection,
+versioned transaction-cost assumptions, benchmark comparison, and reproducible reports. Current
+minute data does not imply historical minute replay, tick simulation, or market-microstructure
+storage. Any expansion beyond daily-bar baseline requires separate approval and legitimate data.
 
-Cross-market reports carry a session manifest. If HK and US inputs come from different latest
-completed sessions, the report says so. Incomplete same-day bars cannot be mixed into an official
-daily report.
+## 11. Infrastructure and secrets
 
-No availability is claimed until a legitimate source, entitlement, and provenance path is verified.
-Manual import remains a first-class source when labelled and auditable.
-
-## 9. Accounting, cash, and portfolio state
-
-Use an append-only double-entry ledger and rebuildable projections. Corrections use reversals or
-superseding facts.
-
-Required accounting capabilities, phased after Phase 1, include:
-
-- deposits/withdrawals and unitized NAV;
-- cash by currency and explicit FX;
-- positions and weighted-average cost;
-- realized/unrealized P&L;
-- fees and taxes;
-- corporate actions;
-- portfolio snapshots and performance series;
-- manual cash flows and completed real-trade records;
-- reconciliation discrepancies and approved adjustments.
-
-Deposits and withdrawals are external flows, not investment return. With positions, a flow requires
-a complete point-in-time `FLOW_PRE` valuation or fails atomically with
-`PORTFOLIO_VALUATION_UNAVAILABLE`.
-
-Paper positions update only from PaperFill. Real positions update only after a ManualRealTradeRecord
-or BrokerObservation is reconciled and approved as an accounting fact.
-
-## 10. Composite Quant Score and portfolio summary
-
-The Phase 3 security-level contract is one Composite Quant Score per tracked security/completed
-session. It includes:
-
-- Decimal score 0–100;
-- component breakdown and coverage;
-- data-quality/missing status;
-- concise explanation and advisory classification;
-- target weight and risk flags;
-- session date, data-as-of, generated-at, expiration;
-- optional amount and estimated quantity;
-- price, FX, lot-size, minimum-notional, fee/tax, liquidity, rounding, and stale-data assumptions.
-
-The Phase 3 portfolio-level contract is one Daily Portfolio Decision Summary containing:
-
-- portfolio value/cash/positions and current weights;
-- Target Portfolio;
-- Current versus Target deviations;
-- concentration, exposure, and aggregate risk;
-- positions requiring review;
-- Rebalance Suggestions;
-- estimated cash impact and all relevant warnings;
-- completed-session manifest and expiration.
-
-Formulae, weights, thresholds, and factor definitions are not approved by this master revision.
-They require separate approval of the Phase 3 Strategy Specification. No score is a promise of
-profit.
-
-## 11. Strategy governance
-
-`docs/STRATEGY_SPEC.md` remains `PROPOSED / RESEARCH_UNVALIDATED`. Its existing formula proposal
-is not approved by Phase 1 acceptance or this Roadmap refactor. Before implementation, it must be
-reviewed for:
-
-- completed-daily-data inputs only;
-- point-in-time correctness;
-- interpretable components;
-- advisory classification and expiration;
-- Current/Target portfolio behavior;
-- estimated-quantity assumptions;
-- no broker call or real-order object;
-- deterministic golden cases.
-
-The separate exact strategy-approval gate remains `APPROVE STRATEGY SPEC V1` unless a later user
-instruction explicitly replaces it.
-
-## 12. Daily-bar backtesting
-
-Backtests use the same strategy object and canonical daily observations. They must defend against
-look-ahead, future data, survivorship errors, bad corporate-action handling, impossible same-bar
-assumptions, omitted costs/FX, and calendar/timezone errors.
-
-Baseline execution assumptions are versioned EOD/daily-bar research assumptions, not a broker
-execution claim. Reports include before/after-cost return, turnover, trades, exposure, cash,
-drawdown, benchmark comparison, and assumptions.
-
-Intraday backtesting and market-microstructure simulation are outside scope.
-
-## 13. Broker/read-only integration
-
-The platform works without a broker connection. Manual entry and CSV/file import are first-class.
-
-An optional connector, including Futu, may read:
-
-- account identity/metadata;
-- cash balances and positions;
-- completed orders and completed trades/fills;
-- fees, taxes, and settlements;
-- capability and connection status.
-
-It may create BrokerObservation and reconciliation/discrepancy records. It may not place, cancel,
-replace, modify, unlock, reserve, retry, recover, or execute anything. Write-capable credentials
-must not enter normal application code. If least-privilege read-only access cannot be isolated, the
-connector is rejected pending a separate security decision.
-
-## 14. API boundary
-
-Future APIs may expose:
-
-- EOD data, indicators, Composite Quant Scores, and Daily Portfolio Decision Summaries;
-- Current/Target portfolios and Rebalance Suggestions;
-- paper-only mutations and paper facts;
-- accounting cash flows and snapshots;
-- backtest requests/results;
-- manual completed-trade recording and CSV import;
-- read-only broker synchronization/observations and reconciliation;
-- Recommendation acknowledgement/rejection with no external effect.
-
-No endpoint may transmit or prepare a real broker command.
-
-## 15. Frontend boundary
-
-The local dashboard should show:
-
-- EOD session/provenance/quality status;
-- portfolio value, cash, NAV, return, drawdown, and exposure;
-- one Composite Quant Score and component explanation per tracked security;
-- Current versus Target Portfolio;
-- Rebalance Suggestions and estimated amounts/quantities;
-- assumptions, expiration, and risk warnings;
-- clear separation between paper simulation and recorded completed real trades.
-
-It has no real-order submission control. It tells the user to act, if desired, in the broker's
-official client.
-
-## 16. Infrastructure and secrets
-
-The sufficient topology is:
+Sufficient topology:
 
 ```text
 Browser -> local FastAPI -> SQLite
-                         -> optional local EOD batch
-                         -> optional read-only providers/connectors
+                         -> independent read-only Market Data Provider
 ```
 
-PostgreSQL compatibility may remain for portability but deployment is not required. Do not plan
-distributed workers, queues, high availability, horizontal scaling, or execution infrastructure.
+PostgreSQL compatibility is an engineering portability property, not a deployment requirement.
+Never commit credentials, external/private account IDs, passwords, tokens, databases, logs, or
+private exports. Provider secrets remain environment/external-secret inputs and are redacted.
 
-Never commit credentials, account IDs, passwords, tokens, private keys, databases, logs, or broker
-exports. Read-only connector secrets remain environment/external-secret inputs and are redacted.
+## 12. Authoritative phases
 
-## 17. Authoritative phases
+The authoritative sequence is exactly:
 
-The authoritative phase model is exactly:
+- Phase 0 — Product Definition & Architecture (historically completed);
+- Phase 1 — Foundation (accepted historical implementation);
+- Phase 2 — Market Data, Dashboard & First Composite Score MVP;
+- Phase 3 — Quant Research Expansion & Lightweight Paper Tracking;
+- Phase 4 — Backtesting & Analytics (final product phase).
 
-- Phase 0 — Product Definition, Architecture and Contracts (historically completed; future scope
-  superseded by `EOD-001`);
-- Phase 1 — Foundation and Contracts (accepted historical implementation);
-- Phase 2 — Portfolio Accounting and Lightweight Paper Portfolio;
-- Phase 3 — EOD Market Data, Indicators and Composite Score;
-- Phase 4 — Daily-bar Backtesting and Analytics — Core MVP;
-- Phase 5 — Real Portfolio Tracking and Decision Support.
+Detailed scope and stop conditions are in `docs/ROADMAP.md`. No later phase exists.
 
-Detailed scope and stop conditions are in `docs/ROADMAP.md`. No phase exists after Phase 5.
+## 13. Quality and change control
 
-## 18. Quality and change control
+For each approved implementation task: read governing docs; preserve unrelated changes; state the
+exact file set; implement only approved scope; run the required proportional validation; verify
+provenance, freshness, Decimal, UTC, and exclusions; update documentation/evidence; report exact
+results; and stop.
 
-For every approved implementation phase:
+This documentation revision implements no Phase 2 functionality, selects no provider, and approves
+no score formula.
 
-1. read `AGENTS.md`, Roadmap, master, architecture, database/API contracts, strategy spec, and the
-   current phase plan;
-2. verify Git status and preserve unrelated changes;
-3. state the exact file set;
-4. implement only the approved phase;
-5. run migrations/application paths relevant to that phase;
-6. run pytest, Ruff, and mypy as applicable;
-7. verify provenance, missing-data, Decimal, UTC, and scope boundaries;
-8. update documentation and matrix with actual evidence;
-9. report exact results and stop.
+## 14. Accepted Phase 1 boundary
 
-Never claim a phase complete without evidence. Never start the next phase without explicit user
-approval.
-
-## 19. Accepted Phase 1 boundary
-
-Phase 1 remains the reviewed foundation:
-
-- packaging/configuration/logging;
-- deterministic Alembic revision 0001 and exact cross-dialect Decimal design;
-- UTC and signed-zero invariants;
-- canonical Security identity and user-supplied unverified securities;
-- watchlist administration;
-- opening HKD 20,000, 200 units, NAV 100 accounting facts;
-- read-only portfolio/performance/status APIs and dashboard;
-- inert broker/provider capability descriptors;
-- no PaperBroker behavior, strategy calculation, external provider call, or later-phase mutation.
-
-This master revision neither implements Phase 2 nor changes that acceptance status.
+Phase 1 remains the reviewed foundation: packaging/configuration/logging; deterministic migration
+0001; exact Decimal and UTC invariants; canonical Security identity; Watchlist; opening HKD 20,000,
+200 units, and NAV 100 facts; read-only portfolio/performance/status APIs; accepted dashboard; and
+inert capability descriptors. This revision changes none of that implementation or evidence.
