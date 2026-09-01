@@ -1,24 +1,36 @@
 # API Contracts
 
-Status: Phase 0 design freeze candidate
+Status: **AUTHORITATIVE — EOD/no-live API direction**
 
-Media types: JSON unless stated otherwise
+Decision: `EOD-001` in `docs/ROADMAP.md`
+
+Media type: JSON unless stated otherwise
 
 Base path: `/api/v1`
 
+## 0. Scope and historical boundary
+
+Phase 1 routes remain accepted exactly as implemented. This document plans future EOD research,
+paper accounting, daily-bar analytics, and completed real-trade tracking. It does not register a
+route or change runtime code.
+
+Earlier future real-order concepts are superseded. No API request may place, cancel, replace,
+modify, approve, retry, recover, or otherwise transmit a real broker operation.
+
 ## 1. Contract rules
 
-- `/api/v1` is the first compatibility boundary. Breaking field/semantic changes require `/api/v2`; additive optional fields may be added to v1.
-- Request and response models are versioned Python schemas independent of ORM and vendor SDK models.
-- UUIDs are lowercase canonical strings. Timestamps are ISO-8601 UTC strings ending in `Z`; dates are `YYYY-MM-DD`.
-- Decimal values are JSON strings matching `^-?(0|[1-9][0-9]*)(\.[0-9]+)?$`. Financial endpoints reject JSON numeric/float values with `INVALID_DECIMAL`. Ratios are fractional (`"0.250000000000"` means 25%); strategy scores are 0-100 strings.
-- Signed zero is normalized before comparison, serialization, persistence, and canonical hashing;
-  no API decimal string begins with `-` when its numeric value is zero.
-- Currency uses uppercase ISO-4217 codes. Enum values are uppercase strings.
-- Missing numeric data is `null` plus an explicit status/reason. `0` never means missing.
-- Responses never expose credentials, trade passwords, tokens, raw broker payloads, or external account IDs.
-- Mutation requests use `Content-Type: application/json`. Financial mutations from Phase 2 onward require `Idempotency-Key`; identical replay returns the first semantic result, while different content returns 409.
-- Cursor pagination is stable by `(created_at, id)`. `limit` defaults to 50 and is constrained to 1-200.
+- `/api/v1` is the compatibility boundary.
+- Schemas are independent of ORM and provider SDK types.
+- UUIDs are lowercase canonical strings.
+- Instants are UTC `Z` strings; completed sessions are `YYYY-MM-DD` plus timezone/calendar.
+- Financial Decimal values serialize as strings; JSON floats are rejected.
+- Signed zero normalizes to positive zero.
+- Missing numeric facts are `null` plus status/reason, never fake zero.
+- Point-in-time responses identify `data_as_of` and source availability.
+- Responses never expose credentials, private external account IDs, or raw provider payloads.
+- Financial mutations require `Idempotency-Key` where applicable.
+- Recommendation acknowledgement/rejection is non-executing metadata.
+- Paper, advisory, completed real-trade, and broker-observation schemas are distinct.
 
 ## 2. Common models
 
@@ -34,677 +46,359 @@ Base path: `/api/v1`
 }
 ```
 
-`status` is one of `AVAILABLE`, `MISSING`, `UNAVAILABLE`, `NOT_SUPPORTED`, or `INVALID`. `value` is non-null only for `AVAILABLE`; `as_of` and `source` may be null when no observation exists.
+Availability status is `AVAILABLE`, `MISSING`, `UNAVAILABLE`, `NOT_SUPPORTED`, or `INVALID`.
+Snapshot/score quality and capability status use their own taxonomies.
 
-This is `DataAvailabilityStatus`. Snapshot `quality_status` instead uses
-`SnapshotQualityStatus` (`COMPLETE`, `PARTIAL`, `INVALID`), and score coverage uses the separate
-`ScoreCoverageStatus` with those same values. Capability fields use only `CapabilityStatus`.
-
-### 2.2 `CapabilityItem`
+### 2.2 `CompletedSessionRef`
 
 ```json
 {
-  "name": "MARKET_ORDER",
-  "status": "NOT_IMPLEMENTED",
-  "reason": "PaperBroker begins in Phase 2"
+  "market": "US",
+  "session_date": "2026-08-31",
+  "market_timezone": "America/New_York",
+  "calendar_id": "XNYS@version",
+  "data_as_of": "2026-09-01T00:15:00Z",
+  "available_at": "2026-09-01T00:10:00Z",
+  "source": "approved_eod_source",
+  "quality_status": "COMPLETE",
+  "stale": false
 }
 ```
 
-Capability status is `SUPPORTED`, `NOT_SUPPORTED`, `NOT_IMPLEMENTED`, `UNAVAILABLE`, or `UNKNOWN`.
+### 2.3 `AssumptionSet`
 
-### 2.3 `Page[T]`
+Used by scores, suggestions, and backtests:
 
 ```json
 {
-  "items": [],
-  "next_cursor": null,
-  "has_more": false
+  "price_observation_id": "uuid",
+  "price": "100.000000000000000000",
+  "fx_observation_id": "uuid",
+  "fx_rate": "7.800000000000000000",
+  "lot_size": "1.000000000000000000",
+  "minimum_notional": null,
+  "fee_policy_id": "policy-id",
+  "tax_policy_id": "policy-id",
+  "liquidity_status": "AVAILABLE",
+  "rounding_rule": "FLOOR_TO_LEGAL_INCREMENT",
+  "expires_at": "2026-09-02T00:00:00Z"
 }
 ```
-
-Clients treat cursors as opaque.
 
 ### 2.4 `Problem`
 
-Errors use `application/problem+json` and an RFC-7807-compatible model:
-
-```json
-{
-  "type": "https://local.ai-infra-quant/errors/resource-not-found",
-  "title": "Resource not found",
-  "status": 404,
-  "code": "RESOURCE_NOT_FOUND",
-  "detail": "Security was not found.",
-  "instance": "/api/v1/securities/00000000-0000-0000-0000-000000000000",
-  "request_id": "4d52d4a0-60e1-4ed4-a6f3-2a8a664d2ea0",
-  "errors": []
-}
-```
-
-Validation entries contain `field`, `code`, and a safe `message`. Stack traces, SQL, raw provider responses, and secrets never appear.
+Errors use `application/problem+json` with stable `code`, safe detail, request ID, and field errors.
+No stack trace, SQL, secret, or raw external payload is exposed.
 
 ## 3. Phase availability
 
-Defining a future contract here does not expose its route.
+Defining a future contract does not expose its route.
 
-| Route group | First registered | Phase 1 behavior before registration |
+| Route group | First phase | Before registration |
 |---|---:|---|
-| Health; portfolio/positions/performance reads | 1 | Available, internal/bootstrap data only |
-| Canonical user-supplied security creation/read; default watchlist CRUD | 1 | Available; new records remain unverified/non-tradable |
-| Strategy definition list | 1 | Available; no strategy run |
-| Broker/provider status descriptors | 1 | Available; operational capabilities unavailable/not implemented |
-| Indicators, scores, signals, strategy run/recommendations | 3 | Ordinary 404 in Phase 1 |
-| Paper deposit/withdraw/FX/orders/cancel/manual simulation fills | 2 | Ordinary 404 in Phase 1 |
-| Orders/fills reads | 2 | Ordinary 404 in Phase 1 |
-| Backtest requests/results | 4 | Ordinary 404 in Phase 1 |
-| Futu read-only account data | 5 | Ordinary 404 or provider descriptor only |
-| Live order/approval/kill-switch | 7 | **No route is registered in Phases 1-6** |
+| Health, portfolio/positions/performance reads | 1 | Available from accepted foundation |
+| Security create/read and default-watchlist CRUD | 1 | Available |
+| Strategy/broker/provider inert descriptors | 1 | Available |
+| Paper/accounting mutations and paper reads | 2 | Ordinary 404 |
+| Completed EOD data, indicators, scores, targets, suggestions, daily summary | 3 | Ordinary 404 |
+| Daily-bar backtest requests/results | 4 | Ordinary 404 |
+| Manual completed real trades, file import, BrokerObservation sync, reconciliation | 5 | Ordinary 404 |
 
-In particular, `POST /api/v1/live/orders` and `POST /api/v1/live/kill-switch` do not exist in Phase 1. A disabled handler, UI-only hiding, or handler that accidentally reaches an adapter is not acceptable.
+No route group exists after Phase 5.
 
-## 4. Phase 1 request/response contracts
+## 4. Accepted Phase 1 contracts
 
-### 4.1 `GET /health`
+The accepted runtime allowlist remains:
 
-Unversioned process health; it does not probe or connect to a broker.
-
-Response 200:
-
-```json
-{
-  "status": "OK",
-  "app_version": "0.1.0",
-  "database": "READY",
-  "migration_revision": "0001_phase1_foundation",
-  "trading_mode": "PAPER",
-  "auto_execution": false
-}
+```text
+GET    /health
+GET    /api/v1/portfolio
+GET    /api/v1/positions
+GET    /api/v1/performance
+GET    /api/v1/watchlist
+POST   /api/v1/watchlist
+DELETE /api/v1/watchlist/{security_id}
+POST   /api/v1/securities
+GET    /api/v1/securities/{security_id}
+GET    /api/v1/strategies
+GET    /api/v1/brokers
+GET    /api/v1/brokers/{broker}/status
+GET    /api/v1/market-data/providers
+GET    /api/v1/fundamental-data/providers
+GET    /api/v1/event-data/providers
 ```
 
-Readiness is 503 with `DATABASE_NOT_READY` when migrations are missing. External-provider offline status does not make the local process unhealthy.
+### 4.1 Health
 
-### 4.2 `GET /api/v1/portfolio`
+`GET /health` checks local process/database/migration readiness and never connects to an external
+source.
 
-Returns the configured default portfolio. An optional future `portfolio_id` query parameter is not accepted in Phase 1.
+### 4.2 Portfolio, positions, and performance
 
-```json
-{
-  "id": "6c831a02-bb22-4a02-b41c-0aa0f860787f",
-  "name": "AI Infra",
-  "base_currency": "HKD",
-  "inception_date": "2026-08-31",
-  "valuation_timezone": "Asia/Hong_Kong",
-  "valuation_at": "2026-08-30T16:00:00Z",
-  "total_equity": "20000.00000000",
-  "cash_value": "20000.00000000",
-  "market_value": "0.00000000",
-  "cost_basis": "0.00000000",
-  "realized_pnl": "0.00000000",
-  "unrealized_pnl": "0.000000000000000000",
-  "fees": "0.00000000",
-  "taxes": "0.00000000",
-  "equity_pnl": "0.00000000",
-  "fx_pnl": "0.00000000",
-  "units_outstanding": "200.000000000000000000",
-  "nav": "100.000000000000000000",
-  "cash_ratio": "1.000000000000",
-  "invested_ratio": "0.000000000000",
-  "quality_status": "COMPLETE",
-  "missing_data": [],
-  "capabilities": {
-    "market_data": "UNAVAILABLE",
-    "fx_data": "UNAVAILABLE",
-    "fundamental_data": "UNAVAILABLE",
-    "event_data": "UNAVAILABLE"
-  }
-}
+`GET /portfolio` returns the opening portfolio with HKD 20,000, 200 units, NAV 100, zero positions,
+and separate capability statuses. `GET /positions` is empty. `GET /performance` returns the one
+inception point; daily/weekly/monthly return is unavailable while since-inception return and
+drawdown are exact zero.
+
+### 4.3 Security and watchlist
+
+`POST /securities` creates only a canonical user-supplied unverified identity. It cannot accept
+exchange/calendar, provider mapping, lot/tick rules, verification, or tradability claims.
+Watchlist add/remove is idempotent and preserves history.
+
+### 4.4 Descriptor reads
+
+Strategy, broker, and provider descriptors are inert. They report truthful
+`NOT_IMPLEMENTED`/`UNAVAILABLE` status and cause no connection.
+
+The accepted Phase 1 contract is historical; this Roadmap refactor neither expands nor removes a
+runtime route.
+
+## 5. Phase 2 paper/accounting contracts
+
+All records are internal paper/accounting facts.
+
+### 5.1 Cash flows
+
+```text
+POST /api/v1/paper/deposits
+POST /api/v1/paper/withdrawals
+POST /api/v1/paper/fx
 ```
 
-The example IDs are illustrative, not seed constants. With exactly zero positions, unrealized P&L is economically and exactly zero even though market-data capability is unavailable. Capability status is reported separately and does not convert a known zero to missing.
+Requests include portfolio/account, currency, Decimal amount, effective time, reason, and explicit
+FX/fee/tax assumptions as needed. With positions, an incomplete `FLOW_PRE` valuation returns
+`PORTFOLIO_VALUATION_UNAVAILABLE` and writes nothing.
 
-### 4.3 `GET /api/v1/positions`
+### 5.2 PaperOrder and PaperFill
 
-Query: `cursor`, `limit`.
+```text
+POST /api/v1/paper/orders
+GET  /api/v1/paper/orders
+POST /api/v1/paper/orders/{paper_order_id}/cancel
+POST /api/v1/paper/orders/{paper_order_id}/fills
+GET  /api/v1/paper/fills
+```
 
-Response `Page[PositionRead]`. Phase 1 returns an empty page. Future item model:
+PaperOrder requests are always internal simulations. The response includes
+`is_simulated=true`, execution-assumption ID, completed-session reference, and no external
+broker-order identifier.
+
+PaperFill requests identify quantity, price, currency, completed session, source, observed/available
+times, fee/tax assumptions, and actor. They may update paper accounting only. Paper cancellation
+changes only an internal simulated object.
+
+There is no real-time paper exchange, automatic intraday matching, or broker connection in Phase 2.
+
+## 6. Phase 3 EOD research and decision-support contracts
+
+### 6.1 Completed daily data
+
+```text
+GET  /api/v1/eod/securities/{security_id}/bars
+GET  /api/v1/eod/fx
+POST /api/v1/eod/import
+```
+
+Only completed daily observations are accepted. Each response includes `CompletedSessionRef`,
+provenance, quality, and version/hash. Incomplete daily data cannot be official.
+
+### 6.2 Analysis run
+
+`POST /api/v1/eod/analysis-runs` is a synchronous local analysis request or a report-only scheduled
+job target. Input identifies portfolio/securities, completed sessions, strategy definition, and
+`data_as_of`. No execution flag or broker destination exists.
+
+### 6.3 Indicators
+
+`GET /api/v1/eod/securities/{security_id}/indicators` returns completed-session indicators,
+dataset hash, source row IDs, availability, and quality.
+
+### 6.4 Composite Quant Score
+
+`GET /api/v1/eod/securities/{security_id}/composite-score` returns:
 
 ```json
 {
   "id": "uuid",
-  "portfolio_id": "uuid",
-  "account_id": "uuid",
-  "security_id": "uuid",
-  "quantity": "10.000000000000000000",
-  "settled_quantity": "10.000000000000000000",
-  "currency": "USD",
-  "average_cost": "100.000000000000000000",
-  "cost_basis_local": "1000.00000000",
-  "market_price": {"value": null, "status": "UNAVAILABLE", "as_of": null, "source": null, "reason": "Provider unavailable"},
-  "market_value_base": {"value": null, "status": "UNAVAILABLE", "as_of": null, "source": null, "reason": "Provider unavailable"},
-  "as_of": "2026-08-31T00:00:00Z"
-}
-```
-
-### 4.4 `GET /api/v1/performance`
-
-Query: `range` one of `1D`, `1W`, `1M`, `3M`, `YTD`, `SINCE_INCEPTION`; optional `frequency` (`DAILY`, `WEEKLY`, `MONTHLY`).
-
-```json
-{
-  "portfolio_id": "uuid",
-  "range": "SINCE_INCEPTION",
-  "frequency": "DAILY",
-  "summary": {
-    "twr": "0.000000000000",
-    "daily_return": {"value": null, "status": "UNAVAILABLE", "as_of": null, "source": null, "reason": "At least two valuation points are required"},
-    "weekly_return": {"value": null, "status": "UNAVAILABLE", "as_of": null, "source": null, "reason": "Insufficient valuation history"},
-    "monthly_return": {"value": null, "status": "UNAVAILABLE", "as_of": null, "source": null, "reason": "Insufficient valuation history"},
-    "since_inception_return": "0.000000000000",
-    "maximum_drawdown": "0.000000000000",
-    "benchmark_return": {"value": null, "status": "UNAVAILABLE", "as_of": null, "source": null, "reason": "No benchmark data source is configured"}
-  },
-  "points": [
-    {"at": "2026-08-30T16:00:00Z", "nav": "100.000000000000000000", "twr_index": "1.000000000000", "quality_status": "COMPLETE"}
-  ]
-}
-```
-
-Phase 1 exposes only the exact inception point. With one point, daily/weekly/monthly returns are unavailable; since-inception return and maximum drawdown are exactly zero. It does not fabricate a second point or a daily return.
-
-### 4.5 `GET /api/v1/watchlist`
-
-Returns the default watchlist and active membership:
-
-```json
-{
-  "id": "uuid",
-  "name": "AI Infra",
-  "portfolio_id": "uuid",
-  "is_default": true,
-  "items": [
-    {
-      "security": {
-        "id": "uuid",
-        "market": "US",
-        "symbol": "AVGO",
-        "display_symbol": "US.AVGO",
-        "display_name": "AVGO",
-        "exchange": null,
-        "currency": "USD",
-        "instrument_type": "EQUITY",
-        "metadata_status": "UNAVAILABLE"
-      },
-      "added_at": "2026-08-31T00:00:00Z",
-      "display_order": 1
-    }
-  ]
-}
-```
-
-Unverified exchange, lot, tick, and name fields remain null/unavailable. Initial display names may equal their symbols rather than claim verified issuer metadata.
-
-### 4.6 `POST /api/v1/watchlist`
-
-Request `WatchlistAddRequestV1`:
-
-```json
-{
-  "security_id": "uuid"
-}
-```
-
-- 201 with `{ "created": true, "item": WatchlistItemRead }` when added.
-- 200 with `{ "created": false, "item": WatchlistItemRead }` for an identical active membership; this is idempotent.
-- 404 `SECURITY_NOT_FOUND` for an unknown ID.
-- 409 `SECURITY_DISABLED` when the security is disabled.
-
-This endpoint adds an existing canonical security. A new symbol is first created through `POST /api/v1/securities` and then added by returned `security_id`.
-
-### 4.7 `DELETE /api/v1/watchlist/{security_id}`
-
-Returns 204 whether the active membership existed or was already absent. It tombstones membership and never deletes the security or history. Invalid UUID syntax returns 422.
-
-### 4.8 `GET /api/v1/securities/{security_id}`
-
-Response:
-
-```json
-{
-  "id": "uuid",
-  "market": "HK",
-  "symbol": "09698",
-  "display_symbol": "HK.09698",
-  "exchange": null,
-  "currency": "HKD",
-  "display_name": "09698",
-  "instrument_type": "EQUITY",
-  "enabled": true,
-  "record_source": "SYSTEM_SEED",
-  "verification_status": "SYSTEM_SEED_UNVERIFIED",
-  "tradability_status": "UNVERIFIED",
-  "trading_rules": {
-    "lot_size": null,
-    "min_order_quantity": null,
-    "quantity_step": null,
-    "tick_size": null,
-    "min_notional": null,
-    "fractional_supported": false,
-    "status": "UNAVAILABLE"
-  },
-  "market_timezone": "Asia/Hong_Kong",
-  "trading_calendar": null,
-  "provider_mappings": []
-}
-```
-
-Provider mappings returned here include only non-sensitive symbol mappings.
-
-### 4.9 `POST /api/v1/securities`
-
-Creates a canonical security from user-supplied identity fields; it does not verify tradability or fetch data.
-
-Request `SecurityCreateV1`:
-
-```json
-{
-  "market": "US",
-  "symbol": "EXAMPLE",
-  "currency": "USD",
-  "instrument_type": "EQUITY",
-  "display_name": "Optional user label"
-}
-```
-
-The server uses a fail-closed market-specific identity canonicalizer. US symbols are trimmed,
-uppercased, limited to 32 characters, and accept only ASCII letters, digits, period, and hyphen.
-HK symbols must contain one to five trimmed ASCII digits and are left-padded to five (`9698`
-becomes `09698`). Markets without a configured canonicalizer return `INVALID_MARKET`. Currency is
-trimmed and uppercased; `instrument_type` is one of `EQUITY`, `ETF`, or `UNKNOWN`. `display_name`
-is optional, length-limited plain text. Clients cannot submit exchange, calendar, provider
-mappings, lot/tick/minimum/fractional rules, verification, metadata, or tradability status.
-
-Response 201 `SecurityReadV1` always includes:
-
-```json
-{
-  "id": "uuid",
-  "market": "US",
-  "symbol": "EXAMPLE",
-  "display_symbol": "US.EXAMPLE",
-  "currency": "USD",
-  "display_name": "Optional user label",
-  "instrument_type": "EQUITY",
-  "enabled": true,
-  "record_source": "USER_SUPPLIED",
-  "verification_status": "USER_SUPPLIED_UNVERIFIED",
-  "tradability_status": "UNVERIFIED",
-  "metadata_status": "UNAVAILABLE",
-  "market_timezone": null,
-  "trading_calendar": null,
-  "trading_rules": {"status": "UNAVAILABLE"},
-  "provider_mappings": []
-}
-```
-
-- 409 `SECURITY_ALREADY_EXISTS` returns the existing canonical `security_id` for the normalized `(market,symbol)` and does not create a duplicate.
-- 422 `INVALID_MARKET`, `INVALID_SYMBOL`, `INVALID_CURRENCY`, or `INVALID_INSTRUMENT_TYPE` covers validation failures.
-- The new security may be added to a watchlist. Strategy runs/recommendations and all order routes fail closed with `SECURITY_NOT_VERIFIED` and the specific missing prerequisites until calendar, FX where required, lot/tick/trading rules, provider mapping, and source provenance are valid.
-
-### 4.10 `GET /api/v1/strategies`
-
-Response `Page[StrategyDefinitionRead]`:
-
-```json
-{
-  "items": [
-    {
-      "id": "uuid",
-      "name": "AIInfraStrategy",
-      "version": "1.0.0",
-      "implementation_status": "NOT_IMPLEMENTED",
-      "research_status": "RESEARCH_UNVALIDATED",
-      "enabled": false,
-      "required_data_status": "UNAVAILABLE"
-    }
-  ],
-  "next_cursor": null,
-  "has_more": false
-}
-```
-
-Phase 1 has no run endpoint and cannot produce a score/recommendation.
-`implementation_status` is resolved from the build-time strategy registry, `research_status` and
-`enabled` are persisted audited configuration, and `required_data_status` is derived at request
-time from configured provider capabilities. The implementation status is not persisted.
-
-### 4.11 `GET /api/v1/brokers`
-
-```json
-{
-  "items": [
-    {
-      "name": "paper",
-      "implementation_status": "NOT_IMPLEMENTED",
-      "connection_status": "UNAVAILABLE",
-      "environment": "PAPER",
-      "capabilities": []
-    },
-    {
-      "name": "futu",
-      "implementation_status": "NOT_IMPLEMENTED",
-      "connection_status": "UNAVAILABLE",
-      "environment": "READ_ONLY",
-      "capabilities": []
-    }
-  ]
-}
-```
-
-This is registry metadata, not proof that an SDK, OpenD, account, or entitlement exists.
-
-### 4.12 `GET /api/v1/brokers/{broker}/status`
-
-Returns a descriptor without initiating a connection:
-
-```json
-{
-  "name": "futu",
-  "implementation_status": "NOT_IMPLEMENTED",
-  "connection_status": "UNAVAILABLE",
-  "last_checked_at": null,
-  "message": "Futu integration begins in Phase 5",
-  "capabilities": []
-}
-```
-
-Unknown registry key is 404 `BROKER_NOT_FOUND`.
-
-### 4.13 Provider descriptors
-
-Phase 1 registers three independent read routes:
-
-- `GET /api/v1/market-data/providers`
-- `GET /api/v1/fundamental-data/providers`
-- `GET /api/v1/event-data/providers`
-
-The same descriptor shape is used with independent capability lists. Phase 1 includes `none` as each active provider and reports `UNAVAILABLE`. No provider call occurs, and configuring one registry never selects another.
-
-## 5. Future strategy read contracts (Phase 3)
-
-These schemas are frozen for planning but their routes do not exist in Phase 1.
-
-### 5.1 `GET /api/v1/securities/{security_id}/indicators`
-
-Query requires optional `as_of`; default is latest fully available session. Response pins sources:
-
-```json
-{
-  "security_id": "uuid",
-  "data_as_of": "2026-08-31T20:00:00Z",
-  "dataset_hash": "sha256:...",
-  "price": {"value": "100.0", "status": "AVAILABLE", "as_of": "...", "source": "approved_provider", "reason": null},
-  "ma20": {"value": "98.0", "status": "AVAILABLE", "as_of": "...", "source": "derived", "reason": null},
-  "ma50": {"value": "95.0", "status": "AVAILABLE", "as_of": "...", "source": "derived", "reason": null},
-  "ma200": {"value": "90.0", "status": "AVAILABLE", "as_of": "...", "source": "derived", "reason": null},
-  "atr14": {"value": "3.0", "status": "AVAILABLE", "as_of": "...", "source": "derived", "reason": null},
-  "drawdown_60": {"value": "-0.10", "status": "AVAILABLE", "as_of": "...", "source": "derived", "reason": null}
-}
-```
-
-### 5.2 `GET /api/v1/securities/{security_id}/score`
-
-```json
-{
   "strategy_run_id": "uuid",
   "security_id": "uuid",
-  "data_as_of": "...",
-  "strategy_name": "AIInfraStrategy",
-  "strategy_version": "1.0.0",
+  "session": {"market": "US", "session_date": "2026-08-31"},
+  "data_as_of": "2026-09-01T00:15:00Z",
+  "generated_at": "2026-09-01T00:16:00Z",
+  "expires_at": "2026-09-02T00:00:00Z",
   "score": "73.500000000000000000",
-  "score_lower_bound": "73.500000000000000000",
-  "score_upper_bound": "73.500000000000000000",
-  "score_status": "COMPLETE",
-  "data_coverage": "1.000000000000",
-  "components": {
-    "m6": {"score": "90.000000000000000000", "coverage": "1.0"},
-    "m3": {"score": "70.000000000000000000", "coverage": "1.0"},
-    "trend": {"score": "80.000000000000000000", "coverage": "1.0"},
-    "drawdown": {"score": "60.000000000000000000", "coverage": "1.0"},
-    "valuation": {"score": "50.000000000000000000", "coverage": "1.0"}
-  },
+  "classification": "POSITIVE",
+  "coverage_status": "COMPLETE",
+  "data_coverage": "1.000000000000000000",
+  "components": [],
   "missing_components": [],
-  "action": "ACCUMULATE",
-  "confidence": "1.000000000000",
-  "confirmation_status": "CONFIRMED",
-  "target_weight": "0.150000000000",
-  "requires_manual_review": false,
-  "reason_codes": ["SCORE_ACCUMULATE", "CONFIRMATION_MA20_RECLAIM"],
-  "risk_flags": []
+  "explanation": "Advisory EOD output",
+  "target_weight": "0.150000000000000000",
+  "risk_flags": [],
+  "suggested_side": "BUY",
+  "suggested_base_amount": "1000.000000000000000000",
+  "estimated_quantity": "1.000000000000000000",
+  "assumptions": {},
+  "dataset_hash": "sha256:..."
 }
 ```
 
-### 5.3 `GET /api/v1/signals`
+Classification vocabulary is advisory. Formulae/weights remain subject to separate Strategy
+Specification approval. The output is not a promise and cannot become a real order.
 
-Cursor-paged; filters: `security_id`, `strategy_name`, `action`, `from`, `to`. Point-in-time records are immutable.
+### 6.5 Target Portfolio
 
-### 5.4 `POST /api/v1/strategies/run`
+`GET /api/v1/portfolios/{portfolio_id}/target` returns target weights/values, optional estimated
+quantities, methodology, quality, assumptions, session manifest, generated-at, and expiration.
 
-This is a synchronous local analysis request in Phase 3, not an order command.
+### 6.6 Rebalance Suggestions
 
-```json
-{
-  "strategy_definition_id": "uuid",
-  "security_ids": ["uuid"],
-  "data_as_of": "2026-08-31T20:00:00Z",
-  "mode": "ANALYSIS"
-}
+`GET /api/v1/portfolios/{portfolio_id}/rebalance-suggestions` returns Current versus Target
+deviations and advisory actions. Each suggestion includes current/target weight, suggested amount,
+estimated quantity, expected cash impact, risk/data warnings, `AssumptionSet`, and expiration.
+
+### 6.7 Daily Portfolio Decision Summary
+
+`GET /api/v1/portfolios/{portfolio_id}/daily-decision-summary` returns:
+
+- portfolio value, cash, positions, and current weights;
+- target weights and Current versus Target deviations;
+- concentration/exposure and aggregate risk;
+- positions requiring review;
+- Rebalance Suggestions and estimated cash impact;
+- price, FX, lot-size, minimum-notional, fee/tax, liquidity, and stale-data warnings;
+- per-market completed-session manifest;
+- provenance, generated-at, expiration, and quality.
+
+### 6.8 Recommendation decision
+
+```text
+POST /api/v1/rebalance-suggestions/{suggestion_id}/acknowledge
+POST /api/v1/rebalance-suggestions/{suggestion_id}/reject
 ```
 
-It returns 201 with a completed/invalid run or 503 `PROVIDER_UNAVAILABLE`. `mode=LIVE` and any execution flag are rejected with 422 `UNSUPPORTED_RUN_MODE`.
+These routes store the user's review decision and optional note. They cannot create PaperOrder,
+ManualRealTradeRecord, BrokerObservation, accounting fact, or external operation.
 
-## 6. Future paper/accounting contracts (Phase 2)
+## 7. Phase 4 daily-bar backtest contracts
 
-All financial request decimals are strings and require `Idempotency-Key`.
+```text
+POST /api/v1/backtests
+GET  /api/v1/backtests/{backtest_id}
+GET  /api/v1/backtests/{backtest_id}/report
+```
 
-### 6.1 Cash flow
+Inputs select completed daily data, strategy/parameter version, EOD execution assumption, costs,
+calendar, benchmark, and date range. Reports expose reproducibility hashes, return before/after
+costs, drawdown, turnover, exposure, cash, diagnostics, and warnings. Intraday or
+market-microstructure modes are rejected.
 
-`POST /api/v1/paper/deposit` and `/withdraw`:
+## 8. Phase 5 completed real-portfolio tracking
+
+### 8.1 ManualRealTradeRecord
+
+```text
+POST /api/v1/real-portfolio/trades
+GET  /api/v1/real-portfolio/trades
+POST /api/v1/real-portfolio/trades/import
+```
+
+Create requests record a trade already completed outside the platform:
 
 ```json
 {
   "portfolio_id": "uuid",
   "account_id": "uuid",
-  "currency": "HKD",
-  "amount": "1000.00",
-  "effective_at": "2026-09-01T01:00:00Z",
-  "reason": "User-directed paper cash flow"
-}
-```
-
-Response 201 contains cash-flow ID, pre/post units/NAV, applied FX observation if needed, ledger transaction ID, and balances. Withdrawal failures use 409 `INSUFFICIENT_SETTLED_CASH` or `INSUFFICIENT_PORTFOLIO_UNITS`.
-
-When any position exists, request processing must first create/select a complete official `FLOW_PRE` snapshot with a valid point-in-time mark for every position and all required FX rates. If not possible, return 409 `PORTFOLIO_VALUATION_UNAVAILABLE` and create no cash-flow, unit, or ledger rows.
-
-### 6.2 FX
-
-`POST /api/v1/paper/fx`:
-
-```json
-{
-  "portfolio_id": "uuid",
-  "account_id": "uuid",
-  "mode": "EXPLICIT_FX",
-  "sold_currency": "HKD",
-  "sold_amount": "1000.00",
-  "bought_currency": "USD",
-  "rate_quote": {
-    "rate": "0.128000000000000000",
-    "source": "MANUAL",
-    "observed_at": "2026-09-01T01:00:00Z"
-  },
-  "spread_rate": "0.000000000000000000",
-  "fee_amount": "0.00",
-  "fee_currency": "HKD"
-}
-```
-
-No rate is invented when a provider is unavailable. A manual rate is explicitly labelled and audited.
-
-### 6.3 Paper order
-
-`POST /api/v1/paper/orders` accepts `StandardOrderCreateV1`:
-
-```json
-{
-  "client_order_id": "user-generated-unique-value",
-  "portfolio_id": "uuid",
-  "account_id": "uuid",
-  "broker_profile_id": "uuid",
   "security_id": "uuid",
   "side": "BUY",
-  "order_type": "LIMIT",
-  "quantity": "10.000000000000000000",
-  "limit_price": "100.000000000000000000",
-  "currency": "USD",
-  "time_in_force": "DAY",
-  "expires_at": null,
-  "recommendation_id": null,
-  "strategy_run_id": null,
-  "auto_fx": false
-}
-```
-
-Response 201 is a canonical order with state `CREATED`, `RISK_REJECTED`, or `SUBMITTED`. In Phase 2 it cannot become filled from invented or automatic market matching. A submission acknowledgement alone does not alter holdings.
-
-`GET /api/v1/orders` and future `/fills` are cursor-paged. Paper cancellation is `POST /api/v1/paper/orders/{order_id}/cancel` with a reason and required idempotency key. Modification creates a new canonical request/event and never overwrites fill history.
-
-Phase 2 manual simulation fill route: `POST /api/v1/paper/orders/{order_id}/manual-fills`.
-
-```json
-{
   "quantity": "10.000000000000000000",
   "price": "100.000000000000000000",
   "currency": "USD",
-  "observed_at": "2026-09-01T01:00:00Z",
-  "available_at": "2026-09-01T01:00:00Z",
-  "source": "User-entered paper simulation observation",
-  "actor": "local-user"
+  "executed_at": "2026-09-01T14:30:00Z",
+  "fee_amount": "1.000000000000000000",
+  "tax_amount": "0.000000000000000000",
+  "source": "MANUAL",
+  "source_record_id": null,
+  "note": "Already executed in broker official client"
 }
 ```
 
-The server records `price_source_type=MANUAL_SIMULATION_PRICE`. It validates order state, remaining quantity, currency, timestamps, and idempotency. It may produce `PARTIALLY_FILLED` or `FILLED` only from this identified observation. Synthetic automatic fill inputs are permitted only in isolated tests. Automatic market/limit matching is absent until Phase 3 has an approved provenance-bearing market-data path.
+The server rejects pending/future intent. Recording the fact does not contact a broker.
 
-### 6.4 Canonical order/fill reads (Phase 2+)
+### 8.2 BrokerObservation
 
-`GET /api/v1/orders` returns `Page[OrderReadV1]`:
-
-```json
-{
-  "id": "uuid",
-  "client_order_id": "user-generated-unique-value",
-  "portfolio_id": "uuid",
-  "account_id": "uuid",
-  "broker_name": "paper",
-  "security_id": "uuid",
-  "side": "BUY",
-  "order_type": "LIMIT",
-  "quantity": "10.000000000000000000",
-  "limit_price": "100.000000000000000000",
-  "currency": "USD",
-  "time_in_force": "DAY",
-  "state": "SUBMITTED",
-  "filled_quantity": "0.000000000000000000",
-  "average_fill_price": null,
-  "created_at": "2026-09-01T01:00:00Z",
-  "updated_at": "2026-09-01T01:00:01Z",
-  "strategy_run_id": null,
-  "recommendation_id": null
-}
+```text
+POST /api/v1/broker-observations/sync
+GET  /api/v1/broker-observations
+GET  /api/v1/broker-observations/status
 ```
 
-Filters are `portfolio_id`, `account_id`, `security_id`, `state`, `from`, `to`, `cursor`, and `limit`. `GET /api/v1/fills` uses the same filters and returns immutable `FillReadV1` items with fill/order IDs, canonical account/security, side, quantity, price, gross/fee/tax/net Decimal strings, currency, execution/received times, and simulation flag. External broker order/fill/account identifiers and raw payloads are omitted.
+Sync invokes only an approved read-only connector and returns immutable observations of account
+metadata, cash, positions, completed orders, completed trades/fills, fees, taxes, or settlements.
+Manual/CSV import remains available when no connector exists.
 
-### 6.5 Broker account reads (Phase 5 for external accounts)
+The request has no account-selection-for-execution, write credential, or command field.
 
-`GET /api/v1/brokers/{broker}/accounts` is absent in Phase 1. When a read-only adapter is implemented, it returns:
+### 8.3 Reconciliation
 
-```json
-{
-  "items": [
-    {
-      "id": "internal-account-uuid",
-      "broker_name": "futu",
-      "display_label": "Redacted account",
-      "account_type": "CASH",
-      "base_currency": "HKD",
-      "status": "AVAILABLE",
-      "is_read_only": true,
-      "observed_at": "2026-09-01T01:00:00Z",
-      "cash_balances_status": "AVAILABLE",
-      "positions_status": "AVAILABLE"
-    }
-  ],
-  "next_cursor": null,
-  "has_more": false
-}
+```text
+POST /api/v1/reconciliation-runs
+GET  /api/v1/reconciliation-runs/{run_id}
+POST /api/v1/reconciliation-discrepancies/{id}/resolve
 ```
 
-No call returns the external account ID. Offline/unentitled access returns an explicit provider problem/status and never synthetic balances.
+Resolution records match, reasoned ignore, or a separately approved accounting adjustment.
+It never changes an external system or silently overwrites ledger facts.
 
-## 7. Live-order contract boundary
+## 9. Permanent endpoint exclusions
 
-There is intentionally no Phase 1-6 live-order request model exposed through FastAPI. The eventual Phase 7 contract must be distinct from paper ordering and include:
+The following are forbidden, not future placeholders:
 
-- authenticated identity and authorization result;
-- immutable order draft and server-generated confirmation challenge;
-- a second explicit approval command;
-- idempotency key and request hash;
-- risk-decision ID and passed-control list;
-- market-data observation ID/age, market status, settled cash, currency and connectivity evidence;
-- persistent kill-switch state and all configured limits;
-- broker acknowledgement separated from confirmed fills;
-- reconciliation status.
+- any `/live` or real-order submission route;
+- any endpoint mapped to `place_order`, `cancel_order`, or `modify_order`;
+- trade-password unlock or broker buying-power reservation;
+- execution kill-switch, retry, recovery, or worker control;
+- streaming/WebSocket, tick, order-book, minute-bar, or intraday strategy routes;
+- recommendation acknowledgement that triggers another operation.
 
-`TRADING_MODE=LIVE` alone is insufficient. Until every safety prerequisite is satisfied and the user separately authorizes enablement, the server returns 403 `LIVE_TRADING_DISABLED`; missing authentication returns 401 and insufficient authorization 403. Phase 7 must test that no alternate route/use case bypasses these gates.
+## 10. Error semantics
 
-## 8. Error semantics
+Representative stable codes:
 
-| HTTP | Stable code examples | Meaning/retry |
+| HTTP | Codes | Meaning |
 |---:|---|---|
-| 400 | `MALFORMED_REQUEST` | Invalid JSON/protocol; fix request |
-| 401 | `AUTHENTICATION_REQUIRED` | Future protected endpoint; authenticate |
-| 403 | `LIVE_TRADING_DISABLED`, `AUTHORIZATION_DENIED`, `KILL_SWITCH_ACTIVE` | Policy denial; do not blindly retry |
-| 404 | `RESOURCE_NOT_FOUND`, `SECURITY_NOT_FOUND`, `BROKER_NOT_FOUND` | Resource/route absent; future-phase routes naturally return 404 |
-| 409 | `IDEMPOTENCY_CONFLICT`, `INSUFFICIENT_SETTLED_CASH`, `INVALID_STATE_TRANSITION`, `STALE_VERSION`, `SECURITY_ALREADY_EXISTS`, `PORTFOLIO_VALUATION_UNAVAILABLE` | State conflict; refresh/resolve; incomplete NAV never issues/redeems units |
-| 422 | `VALIDATION_ERROR`, `INVALID_DECIMAL`, `CAPABILITY_NOT_SUPPORTED`, `UNSUPPORTED_RUN_MODE`, `INSUFFICIENT_CAPITAL_FOR_MINIMUM_ORDER`, `SECURITY_NOT_VERIFIED`, `REDUCE_NOT_EXECUTABLE_DUE_TO_LOT_SIZE` | Semantically invalid/unsupported or intentionally fail-closed |
-| 429 | `RATE_LIMITED` | Future provider protection; respect retry metadata |
-| 502 | `PROVIDER_ERROR`, `BROKER_PROTOCOL_ERROR` | External response invalid/failure; no success assumed |
-| 503 | `DATABASE_NOT_READY`, `PROVIDER_UNAVAILABLE`, `BROKER_OFFLINE`, `STALE_MARKET_DATA` | Temporarily unavailable; retry only when safe |
-| 500 | `INTERNAL_ERROR` | Unexpected server failure; request ID for audit |
+| 400 | `MALFORMED_REQUEST` | Invalid protocol |
+| 404 | `RESOURCE_NOT_FOUND`, `ROUTE_NOT_AVAILABLE` | Missing resource or unregistered phase route |
+| 409 | `IDEMPOTENCY_CONFLICT`, `STALE_VERSION`, `PORTFOLIO_VALUATION_UNAVAILABLE`, `RECONCILIATION_DISCREPANCY` | State/provenance conflict |
+| 422 | `INVALID_DECIMAL`, `INVALID_SESSION`, `INCOMPLETE_EOD_DATA`, `SECURITY_NOT_VERIFIED`, `UNSUPPORTED_OPERATION` | Invalid or permanently unsupported |
+| 502 | `PROVIDER_ERROR`, `BROKER_OBSERVATION_ERROR` | Read-only source returned invalid/failure |
+| 503 | `DATABASE_NOT_READY`, `PROVIDER_UNAVAILABLE`, `STALE_EOD_DATA` | Required local/read-only input unavailable |
 
-Provider errors are mapped to stable platform codes while preserving a redacted internal cause. An uncertain broker submission is not retried automatically as a new order; it becomes an explicit reconciliation/unknown state.
+Provider-read retry is bounded and read-only. No uncertainty can create a write.
 
-## 9. Concurrency, cache, and security headers
+## 11. Local security and headers
 
-- Mutable resource reads may return `ETag`; updates in future phases use `If-Match` and return 409 `STALE_VERSION` on conflict.
-- Financial and status responses use `Cache-Control: no-store`. Static assets may be cached by content hash.
-- Loopback Phase 1 CORS is disabled unless an explicit origin is configured; wildcard production CORS is forbidden.
-- State-changing browser endpoints in the future require the authentication/CSRF model selected for Phase 7. Phase 1 security creation and watchlist administration are local-only but still validate `Origin` when browser origin enforcement is configured.
-- Every response carries `X-Request-ID`; logs use it without sensitive request bodies.
+- Financial/status responses use `Cache-Control: no-store`.
+- CORS defaults to disabled/loopback allowlist.
+- State-changing local endpoints validate origin and future auth requirements proportionally.
+- Every response carries a request ID.
+- Logs redact connector configuration, external account IDs, and private import content.
+- A Phase 5 connector must prove least-privilege read-only authority before use.
 
-## 10. Contract tests
+## 12. Contract tests
 
 Phase-relevant tests must prove:
 
-- OpenAPI exposes exactly the Phase 1 allowlist and contains no `/live`, paper-order, deposit, FX, strategy-run, or broker-account route;
-- every financial Decimal serializes as a string and float input is rejected;
-- inception-only daily/weekly/monthly returns are unavailable, while since-inception return/drawdown and zero-position unrealized P&L are exact zero;
-- missing provider/price/benchmark data is null plus an explicit truthful status;
-- API schemas do not include external account IDs, secrets, raw payloads, or adapter models;
-- watchlist add/delete idempotency and tombstone behavior;
-- security creation normalization/uniqueness, forced unverified/tradability state, unavailable mappings/rules, and strategy/order blocking;
-- errors use the stable problem shape and request ID;
-- provider descriptor reads do not instantiate or connect an adapter;
-- later-phase idempotency conflict semantics and fill-versus-submission separation before those routes are accepted;
-- Phase 2 manual-fill provenance and absence of automatic price matching;
-- `PORTFOLIO_VALUATION_UNAVAILABLE` produces no partial flow/unit/ledger write.
+- Phase 1 OpenAPI remains its accepted allowlist;
+- future routes are absent before their approved phase;
+- Decimal strings, UTC, explicit missing status, and stable errors;
+- EOD imports reject incomplete/intraday granularity;
+- cross-market session manifests preserve different completed dates;
+- one score per security/session/run and one summary per portfolio/run;
+- suggested quantities expose all assumptions and expiration;
+- acknowledgement/rejection has no paper, accounting, or external side effect;
+- PaperOrder/PaperFill remain simulated;
+- ManualRealTradeRecord requires an already completed trade;
+- BrokerObservation sync is read-only and reconciliation cannot silently overwrite;
+- no route, schema, or connector capability represents a real broker write.

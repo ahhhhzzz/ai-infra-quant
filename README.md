@@ -1,9 +1,14 @@
 # AI Infra Quant
 
-Phase 1 is a local-only FastAPI/SQLite foundation for a broker-agnostic quantitative
-portfolio application. It exposes opening portfolio facts, identity/watchlist administration,
-and truthful provider capability descriptors. It does not execute paper or live trades and it
-does not fetch external data.
+AI Infra Quant is a local-first, single-user, end-of-day quantitative research, portfolio
+accounting, and investment decision-support platform. Its authoritative future direction is
+defined in `docs/ROADMAP.md`: completed daily data, one Composite Quant Score per tracked
+security, one Daily Portfolio Decision Summary, and manual execution by the user in the broker's
+official client. Optional broker connectivity is read-only.
+
+The accepted Phase 1 implementation is the local FastAPI/SQLite foundation. It exposes opening
+portfolio facts, identity/watchlist administration, and truthful provider capability descriptors;
+it does not fetch external data or implement later-phase portfolio behavior.
 
 ## Local setup
 
@@ -58,5 +63,5 @@ ORM metadata. A local development database created by the earlier metadata-drive
 recreated before running this remediated revision. The application never deletes a database.
 
 Phase 1 remains intentionally limited: no PaperBroker, paper fill/order, external provider,
-Futu/OpenD integration, strategy calculation, backtest, or live route exists. Independent
-Phase 1 review is required before any later phase.
+Futu/OpenD integration, strategy calculation, backtest, or real-order route exists. Phase 1 has
+passed independent review. Phase 2 has not begun and requires separate explicit approval.

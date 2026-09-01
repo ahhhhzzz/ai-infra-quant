@@ -2,227 +2,189 @@
 
 Status: Phase 1 accepted after independent post-remediation review — PASS; reviewed commit: `f6decf2fbe171c1b9eb46340a9174bc21f293ede`; reviewed tree: `f03d23ededaef37096b508a3040c87ae69d89e32`; GitHub Actions run: `33458517601`; job: `99703528272`; artifact: `9782355130`; result: `119 passed`
 
-Source baseline: `docs/MASTER_SPEC.md` v1.0 and the Phase 0 user instruction
+Future-scope authority: `docs/ROADMAP.md` decision `EOD-001`
 
-## 1. Status and evidence rules
+## 1. Disposition and status rules
+
+| Disposition | Meaning |
+|---|---|
+| `RETAINED` | Requirement remains and is assigned to authoritative Phase 0–5 |
+| `REPLACED_EOD` | Older future requirement is replaced by the named EOD/no-live equivalent |
+| `REMOVED_EOD-001` | Permanently outside product scope; never deferred |
+| `HISTORICAL_PHASE_1` | Accepted Phase 1 implementation/evidence retained without future authority |
 
 | Status | Meaning |
 |---|---|
-| `DOCUMENTED` | Phase 0 design/contract exists; no business implementation is claimed |
-| `NOT_STARTED` | Assigned to a future phase; no implementation/evidence yet |
-| `DECISION_REQUIRED` | Design is explicit, but a user/source choice is required before the target phase |
-| `IMPLEMENTED` | Reserved for later phases after code and acceptance evidence exist |
-| `BLOCKED_EXTERNAL` | Reserved for a verified external blocker; unavailable data alone is not disguised as implementation |
+| `IMPLEMENTED` | Accepted implementation evidence exists for the complete listed scope |
+| `DOCUMENTED` | Authoritative future contract exists but is not implemented |
+| `DECISION_REQUIRED` | A named choice must be approved before its target phase |
+| `OUT_OF_SCOPE` | Permanently removed by `EOD-001` |
 
-Evidence in this Phase 0 matrix is either a design section or a named future acceptance test. A test name is a plan, not a passing result, until a later phase records its exact command/result or CI artifact. Every future phase must update status and replace planned evidence with actual evidence.
+Only Phase 0 through Phase 5 are valid target phases.
 
-## 2. Architecture and phase control
+## 2. Governance and historical baseline
 
-| ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
-|---|---|---:|---|---|---|
-| ARC-001 | Single-user, local-first, single-process modular monolith | 1 | `ARCHITECTURE.md` §§1,8 | IMPLEMENTED | Loopback Uvicorn startup and dependency scan passed on 2026-08-31 |
-| ARC-002 | No microservices, Kafka, Redis, Celery, Kubernetes, distributed event sourcing, or autonomous trading | all | `ARCHITECTURE.md` §§1,8 | DOCUMENTED | Dependency/config scan each phase |
-| ARC-003 | Strategy separated from broker, API, ORM, portfolio mutation, and execution | 1/3 | `ARCHITECTURE.md` §§2-4 | DOCUMENTED | `test_core_import_boundaries`; strategy unit tests use canonical context only |
-| ARC-004 | Portfolio separated from Accounting and broker SDKs | 1/2 | `ARCHITECTURE.md` §3 | DOCUMENTED | import-boundary and use-case tests |
-| ARC-005 | Accounting owns ledger/cash/position/NAV facts and is separated from execution/strategy | 2 | `ARCHITECTURE.md` §§3,6 | DOCUMENTED | ledger rebuild and forbidden-import tests |
-| ARC-006 | Execution owns order lifecycle/idempotency and updates accounting only on confirmed facts | 2 | `ARCHITECTURE.md` §§3,6-7 | DOCUMENTED | order-state/fill integration tests |
-| ARC-007 | Risk is broker-agnostic and cannot submit orders | 2 | `ARCHITECTURE.md` §3 | DOCUMENTED | risk decision unit tests and import-boundary test |
-| ARC-008 | Performance is read-only/reproducible from accounting facts | 2 | `ARCHITECTURE.md` §§3,6 | DOCUMENTED | deterministic snapshot/TWR rebuild |
-| ARC-009 | Backtest reuses Strategy and canonical signals but has isolated clock/simulator | 4 | `ARCHITECTURE.md` §3; `STRATEGY_SPEC.md` §17 | DOCUMENTED | shared-strategy identity and future-data injection tests |
-| ARC-010 | BrokerAdapter separated from all data-provider ports | 1 | `ARCHITECTURE.md` §§3-4 | IMPLEMENTED | `test_registries` and `test_import_boundaries` passed |
-| ARC-011 | Market, fundamental, and event providers are three separate ports/capability models | 1 | `ARCHITECTURE.md` §3 | IMPLEMENTED | `test_capabilities` and `test_registries` passed |
-| ARC-012 | Broker and market-data provider independently selectable | 1/5 | `ARCHITECTURE.md` §§1-4 | DOCUMENTED | composition test with independent registry keys; real adapter evidence in Phase 5 |
-| ARC-013 | One portfolio may aggregate multiple broker accounts, without conflating entities | 1 | `ARCHITECTURE.md` §5; `DATABASE_SCHEMA.md` §5 | IMPLEMENTED | Separate portfolio/account/link models exist in migration 0001 |
-| ARC-014 | Registries/factories avoid scattered provider-specific conditionals | 1 | `ARCHITECTURE.md` §§1-4 | IMPLEMENTED | registration/unknown/duplicate and namespace-independence tests passed |
-| ARC-015 | Domain/provider responses use platform-owned canonical models | 1 | `ARCHITECTURE.md` §5; `API_CONTRACTS.md` §1 | IMPLEMENTED | Core/application import-boundary tests and API mapping tests passed |
-| ARC-016 | In-process transaction/unit-of-work and idempotency rules | 1/2 | `ARCHITECTURE.md` §7 | DOCUMENTED | UoW rollback and idempotency tests |
-| ARC-017 | Preserve phase gates; Phase 1 and strategy approval are separate exact instructions | every phase | `ARCHITECTURE.md` §§9-11; Phase plans | DOCUMENTED | `APPROVE PHASE 1` authorizes foundation only; `APPROVE STRATEGY SPEC V1` required before strategy implementation |
-| ARC-018 | Preserve unrelated user changes; no unauthorized push/remote/global Git changes | every phase | `AGENTS.md`; `PHASE_1_PLAN.md` | DOCUMENTED | before/after `git status`, remote/config not mutated |
+| ID | Requirement | Disposition | Phase | Status | Evidence/acceptance |
+|---|---|---|---:|---|---|
+| GOV-001 | Local-first, single-user, single-process modular monolith | RETAINED | 0–5 | DOCUMENTED | Roadmap sections 2,8; Architecture sections 1,9 |
+| GOV-002 | EOD/no-live decision governs every future phase | REPLACED_EOD | 0 | DOCUMENTED | `EOD-001` and supersession language in all authoritative specs |
+| GOV-003 | Authoritative Roadmap contains exactly Phase 0–5 | REPLACED_EOD | 0 | DOCUMENTED | Roadmap section 9 |
+| GOV-004 | Future phase requires explicit approval and plan; stop after each phase | RETAINED | 0–5 | DOCUMENTED | Roadmap section 10; Master section 18 |
+| GOV-005 | Phase 0 design and accepted Phase 1 evidence remain historical facts | HISTORICAL_PHASE_1 | 0/1 | IMPLEMENTED | Immutable review files and accepted commit/tree |
+| GOV-006 | Phase 1 acceptance status remains PASS | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Independent run 33458517601; 119 passed |
+| GOV-007 | Abstract Phase 1 broker-write signatures are artifacts, not implementation authority | REPLACED_EOD | 1 | DOCUMENTED | Roadmap section 1; Architecture section 4 |
+| GOV-008 | Preserve unrelated work and require explicit push authority | RETAINED | all | DOCUMENTED | `AGENTS.md` and Git evidence |
 
-## 3. Canonical security, configuration, and missing data
+## 3. Accepted Phase 1 requirements
 
-| ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
-|---|---|---:|---|---|---|
-| DOM-001 | Vendor-neutral security IDs and full security metadata | 1 | `DATABASE_SCHEMA.md` §3.1; `API_CONTRACTS.md` §4.8 | IMPLEMENTED | uniqueness, normalization, validation, and API contract tests passed |
-| DOM-002 | Provider symbol mappings separate from security | 1 | `DATABASE_SCHEMA.md` §3.2 | IMPLEMENTED | separate table/port registry tests and user-unverified mapping trigger passed |
-| DOM-003 | Initial AVGO, VRT, HK.09698 defaults configurable, not core constants | 1 | `DATABASE_SCHEMA.md` §12; `PHASE_1_PLAN.md` | IMPLEMENTED | seed and idempotency tests passed |
-| DOM-004 | HKD 20,000, inception 2026-08-31, NAV 100 defaults configurable | 1 | `DATABASE_SCHEMA.md` §12; `API_CONTRACTS.md` §4.2 | IMPLEMENTED | exact bootstrap/API invariant tests passed |
-| DOM-005 | Missing facts explicitly MISSING/UNAVAILABLE/NOT_SUPPORTED; never fabricated | 1 | `ARCHITECTURE.md` §5; `API_CONTRACTS.md` §§1-2 | IMPLEMENTED | missing-data, status, performance, and offline tests passed |
-| DOM-006 | Typed capability models for broker/market/fundamental/event | 1 | `ARCHITECTURE.md` §3; `API_CONTRACTS.md` §2.2 | IMPLEMENTED | capability and descriptor tests passed |
-| DOM-007 | Settings contain no secrets; credentials remain environment/external storage | 1 | `DATABASE_SCHEMA.md` §10.1 | IMPLEMENTED | settings constraint, redaction test, and secret scan passed |
-| DOM-008 | Environment configuration; live disabled and auto execution false | 1 | `ARCHITECTURE.md` §8; `PHASE_1_PLAN.md` | IMPLEMENTED | configuration safety tests and `/health` evidence passed |
-| DOM-009 | Decimal domain/API; exact SQLite fixed-scale TEXT and PostgreSQL NUMERIC physical persistence | 1/2 | `DATABASE_SCHEMA.md` §1.3; `API_CONTRACTS.md` §1 | DOCUMENTED | required vector tuple round trips, `typeof=text`, float/scale/range/order tests |
-| DOM-010 | All timestamps/calendar/timezones point-in-time explicit | 1/3 | `DATABASE_SCHEMA.md` §1.2; `STRATEGY_SPEC.md` §2 | DOCUMENTED | timezone/calendar validation and PIT tests |
-| DOM-011 | User may create canonical unverified security; watchlist allowed but strategy/orders fail closed | 1 | `DATABASE_SCHEMA.md` §3.1; `API_CONTRACTS.md` §4.9 | IMPLEMENTED | US/HK canonicalization, normalized conflicts, invalid-market/symbol, DB forced-status, insert/update mapping guards, and watchlist tests passed |
+| ID | Requirement | Disposition | Phase | Status | Evidence/acceptance |
+|---|---|---|---:|---|---|
+| P1-001 | CPython/FastAPI/SQLite modular-monolith foundation | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Accepted Phase 1 review |
+| P1-002 | Explicit deterministic Alembic revision and pristine configuration behavior | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | H1/H2 independent evidence |
+| P1-003 | Exact Decimal: SQLite canonical TEXT, PostgreSQL NUMERIC portability | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Required vectors and PostgreSQL migration evidence |
+| P1-004 | Aware UTC persistence and positive signed zero | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Independent regression evidence |
+| P1-005 | Vendor-neutral canonical Security and fail-closed user identities | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Security/API/database tests |
+| P1-006 | Opening HKD 20,000, 200 units, NAV 100 and balanced ledger | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Seed/accounting evidence |
+| P1-007 | Security/watchlist administration and read-only portfolio/status APIs | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Accepted OpenAPI/test evidence |
+| P1-008 | Inert broker/provider descriptors with no connection side effect | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Architecture/status tests |
+| P1-009 | No Phase 2 behavior retrofitted into Phase 1 | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Accepted phase boundary |
 
-## 4. Database, accounting, cash, NAV, and performance
+## 4. EOD operating and data requirements
 
-| ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
-|---|---|---:|---|---|---|
-| DB-001 | Normalized minimum schema and relationships | 1-3 | `DATABASE_SCHEMA.md` §§2-10 | DOCUMENTED | Alembic schema/FK/index inspection by assigned phase |
-| DB-002 | Alembic migrations; no ad hoc normal-startup schema creation | 1 | `DATABASE_SCHEMA.md` §12 | IMPLEMENTED | explicit revision 0001, static metadata-independence test, later-ORM isolation, fresh upgrade/current, and downgrade/upgrade passed |
-| ACC-001 | Append-only balanced ledger and explicit reversals; SQLite balances in Python Decimal UoW | 1/2 | `DATABASE_SCHEMA.md` §§1.3,1.6,6.1-6.3 | DOCUMENTED | exact UoW balance/rollback, no TEXT SUM/CAST, immutability trigger, reversal tests |
-| ACC-002 | Orders/fills/cash flows not silently overwritten/deleted | 2 | `DATABASE_SCHEMA.md` §§1.6,6-7 | DOCUMENTED | update/delete rejection and event-history tests |
-| ACC-003 | Multi-currency cash per account/currency; settled/unsettled/reserved/buying power | 2 | `DATABASE_SCHEMA.md` §§6.7-6.9 | DOCUMENTED | cash projection/settlement/reservation tests |
-| ACC-004 | Explicit and recorded AUTO_FX/EXPLICIT_FX with rate/spread/fee | 2 | `DATABASE_SCHEMA.md` §6.6; `API_CONTRACTS.md` §6.2 | DOCUMENTED | FX direction, balance, disclosure tests |
-| ACC-005 | Deposits/withdrawals separated from return and require complete FLOW_PRE valuation with positions | 2 | `DATABASE_SCHEMA.md` §§6.4-6.5,9; `API_CONTRACTS.md` §6.1 | DOCUMENTED | NAV/TWR continuity and atomic `PORTFOLIO_VALUATION_UNAVAILABLE` tests |
-| ACC-006 | Initial equity 20,000, 200 units, NAV 100 | 1 | `DATABASE_SCHEMA.md` §§6.5,12 | IMPLEMENTED | exact Decimal opening ledger/unit/cash/snapshot tests passed |
-| ACC-007 | Unitized NAV and TWR; daily/weekly/monthly/since inception | 2 | `DATABASE_SCHEMA.md` §9 | DOCUMENTED | unit issue/redeem/geometric-link tests |
-| ACC-008 | Weighted-average cost consistently used | 2 | `DATABASE_SCHEMA.md` §7.4; `ARCHITECTURE.md` DR-015 | DOCUMENTED | multi-fill buy/sell/fee realized P&L tests |
-| ACC-009 | Cost basis, realized/unrealized, fee/tax, equity/FX P&L reporting | 2 | `DATABASE_SCHEMA.md` §§7.4,9 | DOCUMENTED | accounting equation and attribution fixtures |
-| ACC-010 | Corporate actions model: dividends/tax/splits/reverse/symbol/delist/fees/rebates | 2/4 | `DATABASE_SCHEMA.md` §§6,8.5 | DOCUMENTED | idempotent corporate-action ledger tests |
-| ACC-011 | Cash/position projections update only from confirmed fills/economic facts | 2 | `ARCHITECTURE.md` §6; `DATABASE_SCHEMA.md` §7 | DOCUMENTED | submitted-versus-filled integration test |
-| ACC-012 | Portfolio valuation cutoff across markets | 2 | `ARCHITECTURE.md` OD-002 | DECISION_REQUIRED | user-approved cutoff and close-series acceptance tests |
-| ACC-013 | Versioned settlement and fee/tax policy | 2 | `ARCHITECTURE.md` OD-003; `DATABASE_SCHEMA.md` §6.9 | DECISION_REQUIRED | verified/simplified policy fixtures and provenance |
-| ACC-014 | Maximum drawdown, benchmark, cash/invested ratios | 2/3 | `DATABASE_SCHEMA.md` §9; `API_CONTRACTS.md` §4.4 | DOCUMENTED | return/drawdown tests; benchmark unavailable until legitimate source |
-| ACC-015 | Zero positions imply exact zero unrealized P&L independent of unavailable market-data capability | 1 | `API_CONTRACTS.md` §4.2 | IMPLEMENTED | opening portfolio response/capability-separation test passed |
+| ID | Requirement | Disposition | Phase | Status | Evidence/acceptance |
+|---|---|---|---:|---|---|
+| EOD-001 | Completed daily OHLCV only | REPLACED_EOD | 3 | DOCUMENTED | Roadmap section 3; Database section 5.1 |
+| EOD-002 | Adjusted daily prices with adjustment provenance | RETAINED | 3 | DOCUMENTED | Master section 8; Database section 5.1 |
+| EOD-003 | Completed session date, calendar, and market timezone | REPLACED_EOD | 3 | DOCUMENTED | Architecture section 6.1; API section 2.2 |
+| EOD-004 | EOD FX with source/version/availability | REPLACED_EOD | 3 | DOCUMENTED | Database section 5.2 |
+| EOD-005 | Optional daily fundamental/valuation snapshots | REPLACED_EOD | 3 | DECISION_REQUIRED | OD-EOD-001 source approval |
+| EOD-006 | Daily event/corporate-action observations | REPLACED_EOD | 3 | DOCUMENTED | Database section 5.3 |
+| EOD-007 | Point-in-time `available_at <= data_as_of` | RETAINED | 3/4/5 | DOCUMENTED | Master section 8 |
+| EOD-008 | Cross-market report exposes differing completed-session dates | REPLACED_EOD | 3 | DOCUMENTED | Roadmap section 3; API section 6 |
+| EOD-009 | Incomplete same-day data cannot become official | REPLACED_EOD | 3 | DOCUMENTED | Database section 1.2; API contract tests |
+| EOD-010 | Manual MVP analysis trigger after close | REPLACED_EOD | 3 | DOCUMENTED | Roadmap section 2 |
+| EOD-011 | Optional scheduler may only fetch, calculate, report, and notify | REPLACED_EOD | 3 | DOCUMENTED | Roadmap section 2; Architecture section 9 |
+| EOD-012 | Missing/stale data is explicit and never fabricated | RETAINED | all | DOCUMENTED | Master sections 4,8 |
+| EOD-013 | Legitimate data source/entitlement required | RETAINED | 3 | DECISION_REQUIRED | OD-EOD-001 |
 
-## 5. Orders, PaperBroker, execution, and risk
+## 5. Composite score and decision-support requirements
 
-| ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
-|---|---|---:|---|---|---|
-| EXE-001 | StandardOrder contains all required canonical identifiers/terms | 1 | `DATABASE_SCHEMA.md` §7.1; `API_CONTRACTS.md` §6.3 | IMPLEMENTED | canonical boundary model/validation test passed; no execution behavior exists |
-| EXE-002 | Required order states and valid state machine | 2 | `DATABASE_SCHEMA.md` §§7.1-7.2 | DOCUMENTED | exhaustive transition-table tests |
-| EXE-003 | Submitted is not filled; multiple/partial fills supported | 2 | `ARCHITECTURE.md` §6.1; `DATABASE_SCHEMA.md` §7.3 | DOCUMENTED | acknowledgement/no-position and partial-fill tests |
-| EXE-004 | Same idempotency key never creates two broker orders | 2/7 | `ARCHITECTURE.md` §7; `API_CONTRACTS.md` §§1,8 | DOCUMENTED | identical replay/conflicting replay/concurrency tests |
-| EXE-005 | PaperBroker behaves as persistent broker account | 2 | `ARCHITECTURE.md` §9; database accounting/order schema | DOCUMENTED | restart persistence and canonical adapter tests |
-| EXE-006 | Paper deposits, withdrawals, FX, reservations, settlement, costs, P&L | 2 | `DATABASE_SCHEMA.md` §6; `API_CONTRACTS.md` §6 | DOCUMENTED | Phase 2 end-to-end paper fixtures |
-| EXE-007 | Phase 2 permits explicit manual simulation fills with complete price provenance; no automatic matching | 2 | `ARCHITECTURE.md` DR-026/DR-049; `DATABASE_SCHEMA.md` §7.3; `API_CONTRACTS.md` §6.3 | DOCUMENTED | manual full/partial fill, actor/source/time, no-auto-match, synthetic-test isolation |
-| EXE-008 | Pre-trade long-only/cash/limits/capability/price/currency checks | 2 | `ARCHITECTURE.md` §3; `STRATEGY_SPEC.md` §14 | DOCUMENTED | risk rejection table tests |
-| EXE-009 | Legal cumulative quantity never exceeds target/cash/cap/approved risk; explicit discrete statuses | 3 | `STRATEGY_SPEC.md` §14 | DOCUMENTED | G-18..G-22 and never-exceed property tests |
-| EXE-010 | Reconciliation observes discrepancies and never silently overwrites ledger | 5 | `ARCHITECTURE.md` §6.4; `DATABASE_SCHEMA.md` §10.2 | DOCUMENTED | startup/reconnect discrepancy tests |
+| ID | Requirement | Disposition | Phase | Status | Evidence/acceptance |
+|---|---|---|---:|---|---|
+| QNT-001 | One Composite Quant Score per tracked security/completed session | REPLACED_EOD | 3 | DOCUMENTED | Roadmap section 4.1; Database section 5.5 |
+| QNT-002 | Score scale 0–100 with interpretable component breakdown | RETAINED | 3 | DOCUMENTED | API section 6.4 |
+| QNT-003 | Coverage/quality, missing inputs, explanation, risk flags | RETAINED | 3 | DOCUMENTED | Roadmap section 4.1 |
+| QNT-004 | Interpretable advisory classification vocabulary | REPLACED_EOD | 3 | DECISION_REQUIRED | Roadmap section 4.1; final labels require Strategy Spec approval |
+| QNT-005 | Target weight plus optional suggested amount/estimated quantity | REPLACED_EOD | 3 | DOCUMENTED | API sections 6.4–6.6 |
+| QNT-006 | Suggested quantity exposes price/FX/lot/minimum/cost/liquidity assumptions | REPLACED_EOD | 3/5 | DOCUMENTED | API section 2.3 |
+| QNT-007 | Session, generated/data-as-of, provenance, and expiration | REPLACED_EOD | 3 | DOCUMENTED | Database section 5.5 |
+| QNT-008 | Formulae/weights/thresholds require separate Strategy Spec approval | RETAINED | 3 | DECISION_REQUIRED | OD-EOD-004; Strategy status |
+| QNT-009 | Strategy uses completed daily data only | REPLACED_EOD | 3 | DOCUMENTED | Strategy section 1 |
+| QNT-010 | Advisory output never automatically becomes an order or accounting fact | REPLACED_EOD | 3/5 | DOCUMENTED | Roadmap sections 4.2,5; API section 6.8 |
+| QNT-011 | No profitability or predictive-validity claim | RETAINED | 3/4 | DOCUMENTED | Strategy sections 1,17 |
 
-## 6. Strategy and recommendations
+## 6. Portfolio summary and recommendation requirements
 
-| ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
-|---|---|---:|---|---|---|
-| STR-001 | Strategy interface/registry; same strategy in analysis/paper/backtest/live recommendation | 1/3/4 | `ARCHITECTURE.md` §3; `STRATEGY_SPEC.md` §§1,17 | DOCUMENTED | registry and shared-object execution tests |
-| STR-002 | Per-security database assignment and parameter set | 1/3 | `DATABASE_SCHEMA.md` §§4.1-4.2 | DOCUMENTED | assignment overlap/schema/hash tests |
-| STR-003 | 30/20/20/15/15 composite and exact decimal score bands | 3 | `STRATEGY_SPEC.md` §9 | DOCUMENTED | G-07/G-08/G-09 |
-| STR-004 | M3=63, M6=126 simple return, Decimal log sample RV, annualization/floor | 3 | `STRATEGY_SPEC.md` §5 | DOCUMENTED | G-01/G-02 and formula tests |
-| STR-005 | Own-history normalization; 252 prior M6 observations need ~379 closes, full 756 need ~883 | 3 | `STRATEGY_SPEC.md` §5.4 | DOCUMENTED | G-03, exact history-boundary/tie/winsor tests |
-| STR-006 | Cross-section is priority overlay only | 3 | `STRATEGY_SPEC.md` §11 | DOCUMENTED | overlay invariance test |
-| STR-007 | MA20/50/200 and exact trend entry filter/scoring | 3 | `STRATEGY_SPEC.md` §§4,6 | DOCUMENTED | G-04 and MA fixtures |
-| STR-008 | 60-high drawdown, ATR/vol scaling, healthy-pullback/falling-knife function | 3 | `STRATEGY_SPEC.md` §§4.2-4.3,7 | DOCUMENTED | G-05 and boundary/property tests |
-| STR-009 | Point-in-time valuation 40/30/20/10 with no fabricated fields | 3 | `STRATEGY_SPEC.md` §8; `DATABASE_SCHEMA.md` §8 | DOCUMENTED | G-06/G-17, missing/stale/provenance tests |
-| STR-010 | Exact coverage/bounds and COMPLETE/PARTIAL/INVALID gates | 3 | `STRATEGY_SPEC.md` §9 | DOCUMENTED | G-08/G-09 |
-| STR-011 | Missing valuation/fundamental data forces review and no buy/add | 3 | `STRATEGY_SPEC.md` §§8-9 | DOCUMENTED | G-08 and stale-review tests |
-| STR-012 | Exact three-signal confirmation; otherwise waiting | 3 | `STRATEGY_SPEC.md` §10 | DOCUMENTED | G-10 and current-bar exclusion tests |
-| STR-013 | Exact annual-effective dual-momentum hurdle/block and relative priority | 3 | `STRATEGY_SPEC.md` §11 | DOCUMENTED | G-11 and no-source/unavailable tests |
-| STR-014 | Provenance-aware manual/data-assisted fundamental veto | 3 | `STRATEGY_SPEC.md` §12 | DOCUMENTED | severity/staleness/unverified-source tests |
-| STR-015 | State machine; score-based REDUCE requires complete/current/no-review inputs | 3 | `STRATEGY_SPEC.md` §13 | DOCUMENTED | G-12..G-15, G-23, and transition matrix |
-| STR-016 | Choose hard-stop risk budget versus target-allocation volatility-scaled sizing | 3 | `ARCHITECTURE.md` OD-006; `STRATEGY_SPEC.md` §14 | DECISION_REQUIRED | separate sizing approval; G-16 exposes conflict; no implementation yet |
-| STR-017 | Explainable canonical output including coverage/missing/reason/risk | 3 | `STRATEGY_SPEC.md` §15; `API_CONTRACTS.md` §5 | DOCUMENTED | response/golden snapshot tests |
-| STR-018 | Strategy remains PROPOSED/RESEARCH_UNVALIDATED and needs separate exact approval | 3 | `STRATEGY_SPEC.md` status | DECISION_REQUIRED | exact `APPROVE STRATEGY SPEC V1`; `APPROVE PHASE 1` is insufficient |
-| STR-019 | Legitimate Phase 3 historical market-data path | 3 | `ARCHITECTURE.md` OD-001 | DECISION_REQUIRED | approved provider/import provenance and integration tests |
-| STR-020 | Legitimate fundamental/valuation/event source or truthful unavailable status | 3 | `ARCHITECTURE.md` OD-005 | DECISION_REQUIRED | source entitlement/provenance verification or unavailable-gate tests |
-| STR-021 | Cumulative legal tranche targets adapt one/two/fractional/board-lot quantities | 3 | `STRATEGY_SPEC.md` §14.3 | DOCUMENTED | G-18..G-21 and confirmed-cumulative-fill tests |
-| STR-022 | No profitability/predictive claim; research status persists through backtest and forward review | 3/4+ | `STRATEGY_SPEC.md` §§1,17 | DOCUMENTED | report labels and acceptance review; backtest pass cannot change status automatically |
+| ID | Requirement | Disposition | Phase | Status | Evidence/acceptance |
+|---|---|---|---:|---|---|
+| DEC-001 | One Daily Portfolio Decision Summary per portfolio/report run | REPLACED_EOD | 3 | DOCUMENTED | Roadmap section 4.2; Database section 5.8 |
+| DEC-002 | Current Portfolio and current weights | RETAINED | 3/5 | DOCUMENTED | API section 6.7 |
+| DEC-003 | Target Portfolio and target weights | REPLACED_EOD | 3 | DOCUMENTED | Database sections 5.6,5.8 |
+| DEC-004 | Current versus Target deviations | REPLACED_EOD | 3/5 | DOCUMENTED | Roadmap section 4.2 |
+| DEC-005 | Rebalance Suggestions | REPLACED_EOD | 3/5 | DOCUMENTED | Database section 5.7; API section 6.6 |
+| DEC-006 | Suggested buy/sell amount and estimated quantity | REPLACED_EOD | 3/5 | DOCUMENTED | API section 6.6 |
+| DEC-007 | Estimated cash impact, concentration, exposure, and aggregate risk | RETAINED | 3/5 | DOCUMENTED | Roadmap section 4.2 |
+| DEC-008 | Price/FX/lot/fee/tax/liquidity/stale-data warnings | REPLACED_EOD | 3/5 | DOCUMENTED | API section 6.7 |
+| DEC-009 | Recommendation acknowledgement/rejection is metadata only | REPLACED_EOD | 3 | DOCUMENTED | API section 6.8 |
+| DEC-010 | User executes every real trade in broker official client | REPLACED_EOD | 3/5 | DOCUMENTED | Roadmap sections 2,9 |
 
-## 7. Market/fundamental/event data
+## 7. Portfolio accounting and paper-only requirements
 
-| ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
-|---|---|---:|---|---|---|
-| DAT-001 | MarketDataProvider quote/snapshot/history/subscription/order-book contract | 1 | `ARCHITECTURE.md` §3; Phase 1 port plan | IMPLEMENTED | abstract canonical port and architecture tests passed |
-| DAT-002 | FundamentalDataProvider financial/estimate/valuation/history/balance contract | 1 | `ARCHITECTURE.md` §3; `DATABASE_SCHEMA.md` §8 | IMPLEMENTED | abstract canonical port and architecture tests passed |
-| DAT-003 | EventDataProvider earnings/corporate/regulatory/manual flag contract | 1 | `ARCHITECTURE.md` §3; `DATABASE_SCHEMA.md` §§8.5-8.6 | IMPLEMENTED | abstract canonical port and architecture tests passed |
-| DAT-004 | Preserve source IDs, period/publish/available/effective/retrieval, currency, restatement | 3 | `DATABASE_SCHEMA.md` §§8.3-8.4 | DOCUMENTED | G-17 and restatement PIT queries |
-| DAT-005 | Distinguish raw, split-adjusted, total-return prices/corporate actions | 3/4 | `DATABASE_SCHEMA.md` §8.1; `STRATEGY_SPEC.md` §2 | DOCUMENTED | adjustment-factor and strategy-source tests |
-| DAT-006 | Correct US/HK calendars/timezones; no missing-session forward fill | 3/4 | `STRATEGY_SPEC.md` §§2-3 | DOCUMENTED | calendar gap/DST/session tests |
-| DAT-007 | Synthetic fixtures isolated from production tables/recommendations | 1 onward | `DATABASE_SCHEMA.md` §12; `STRATEGY_SPEC.md` §17 | DOCUMENTED | fixture provenance and seed-path isolation tests |
-| DAT-008 | No external availability claim without legitimate verification | 0 onward | `ARCHITECTURE.md` §12; `API_CONTRACTS.md` §4 | DOCUMENTED | Phase 0 report; provider statuses unavailable |
+| ID | Requirement | Disposition | Phase | Status | Evidence/acceptance |
+|---|---|---|---:|---|---|
+| ACC-001 | Append-only balanced ledger and explicit reversals | RETAINED | 2 | DOCUMENTED | Database sections 4,8 |
+| ACC-002 | Deposits/withdrawals separate from return with unitized NAV/TWR | RETAINED | 2 | DOCUMENTED | Master section 9 |
+| ACC-003 | Cash by currency and explicit FX | RETAINED | 2 | DOCUMENTED | Roadmap Phase 2 |
+| ACC-004 | Fees, taxes, settlements, cost basis, realized/unrealized P&L | RETAINED | 2 | DOCUMENTED | Database section 4.1 |
+| ACC-005 | Complete `FLOW_PRE` valuation required with positions | RETAINED | 2 | DOCUMENTED | Master section 9 |
+| ACC-006 | Deterministic snapshots and performance | RETAINED | 2/4 | DOCUMENTED | Database sections 4,6 |
+| PAP-001 | PaperOrder/PaperFill are simulated only and never sent to broker | REPLACED_EOD | 2 | DOCUMENTED | Roadmap section 5.1; Database sections 4.2–4.3 |
+| PAP-002 | PaperFill uses explicit EOD/manual price source and assumptions | REPLACED_EOD | 2 | DECISION_REQUIRED | OD-EOD-003 |
+| PAP-003 | Lightweight paper bookkeeping; no real-time paper exchange | REPLACED_EOD | 2 | DOCUMENTED | Roadmap Phase 2 |
+| PAP-004 | No intraday matching or market-microstructure simulation | REMOVED_EOD-001 | — | OUT_OF_SCOPE | `EOD-001` |
+| PAP-005 | Idempotency, reversal, and reconciliation foundations | RETAINED | 2 | DOCUMENTED | Architecture section 7 |
+| PAP-006 | Paper and real facts use separate schemas/UI language | REPLACED_EOD | 2/5 | DOCUMENTED | Roadmap section 5 |
 
-## 8. Backtest correctness
+## 8. Daily-bar backtesting and analytics
 
-| ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
-|---|---|---:|---|---|---|
-| BT-001 | Indicators/signals use only data known at signal time | 4 | `ARCHITECTURE.md` §3; `STRATEGY_SPEC.md` §§1-3 | DOCUMENTED | future-record injection and PIT provider tests |
-| BT-002 | Default T-close signal to T+1-open fill; no same-bar fill | 4 | `ARCHITECTURE.md` DR-027 | DOCUMENTED | explicit timing golden test |
-| BT-003 | Commission/platform fee/tax/slippage/minimum fee/FX cost | 4 | `DATABASE_SCHEMA.md` §§6-7 | DOCUMENTED | before/after-cost deterministic fixture |
-| BT-004 | Corporate actions, raw/adjusted prices, survivorship awareness | 4 | `DATABASE_SCHEMA.md` §8; `STRATEGY_SPEC.md` §2 | DOCUMENTED | split/dividend/delist universe tests |
-| BT-005 | US/HK calendars/timezones and impossible execution prevention | 4 | `STRATEGY_SPEC.md` §2 | DOCUMENTED | closed-market/DST/next-open tests |
-| BT-006 | Run records data/provider/version/strategy/parameters/execution assumption | 3/4 | `DATABASE_SCHEMA.md` §4.3 | DOCUMENTED | manifest/hash reproducibility test |
-| BT-007 | PIT historical fundamentals/valuation; no later publications | 4 | `DATABASE_SCHEMA.md` §8; `STRATEGY_SPEC.md` G-17 | DOCUMENTED | later-publication/restatement test |
-| BT-008 | Before/after-cost return, turnover, trades, exposure, cash, drawdown, benchmark | 4 | `DATABASE_SCHEMA.md` §9 | DOCUMENTED | report schema/snapshot fixtures |
+| ID | Requirement | Disposition | Phase | Status | Evidence/acceptance |
+|---|---|---|---:|---|---|
+| BT-001 | Deterministic daily-bar backtest with PIT controls | REPLACED_EOD | 4 | DOCUMENTED | Master section 12 |
+| BT-002 | Versioned EOD execution-price assumptions | REPLACED_EOD | 4 | DOCUMENTED | Database section 6 |
+| BT-003 | Fees/taxes/FX/cost assumptions and before/after-cost result | RETAINED | 4 | DOCUMENTED | Roadmap Phase 4 |
+| BT-004 | Benchmark, attribution, drawdown, volatility, turnover, exposure | RETAINED | 4 | DOCUMENTED | Roadmap Phase 4 |
+| BT-005 | Reproducibility hashes and anti-look-ahead evidence | RETAINED | 4 | DOCUMENTED | API section 7 |
+| BT-006 | Scenario/stress analysis where justified | RETAINED | 4 | DOCUMENTED | Roadmap Phase 4 |
+| BT-007 | Intraday backtest and microstructure simulation | REMOVED_EOD-001 | — | OUT_OF_SCOPE | `EOD-001` |
+| BT-008 | Phase 4 completes Core MVP | REPLACED_EOD | 4 | DOCUMENTED | Roadmap section 9 |
 
-## 9. Futu, future brokers, and live safety
+## 9. Completed real-trade tracking and read-only broker requirements
 
-| ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
-|---|---|---:|---|---|---|
-| INT-001 | No Futu SDK in Phase 0/1; no OpenD connection | 0/1 | `ARCHITECTURE.md` §8; `PHASE_1_PLAN.md` | IMPLEMENTED | dependency/import scan and offline startup passed; descriptor is inert |
-| INT-002 | Shared FutuConnectionManager, SDK imports confined to Futu integration | 5 | `ARCHITECTURE.md` dependency rule | DOCUMENTED | import scan, lifecycle/connect/close tests |
-| INT-003 | Futu read-only market/account/cash/position/order/fill and offline-safe startup | 5 | `ARCHITECTURE.md` §9 | DOCUMENTED | mocked protocol plus verified offline status; no availability claimed now |
-| INT-004 | Disabled Futu canonical order conversion before live routes | 6 | `ARCHITECTURE.md` §§8-9; `API_CONTRACTS.md` §7 | DOCUMENTED | route absence and mapping simulation tests |
-| INT-005 | EastMoney skeleton only until legitimate stable interface selected | 8 | `ARCHITECTURE.md` OD-005 | DECISION_REQUIRED | capability `NOT_IMPLEMENTED`; later source/interface approval |
-| LIVE-001 | Long-only cash, no margin/short/options/futures, AUTO_EXECUTION false | 2/7 | `ARCHITECTURE.md` §8; `STRATEGY_SPEC.md` §14 | DOCUMENTED | risk model and configuration tests |
-| LIVE-002 | No functional/live route in Phase 1 (indeed Phases 1-6) | 1-6 | `API_CONTRACTS.md` §§3,7 | DOCUMENTED | OpenAPI route denylist test every phase |
-| LIVE-003 | Authentication/authorization and CSRF where session auth used | 7 | `ARCHITECTURE.md` OD-004; `API_CONTRACTS.md` §7 | DECISION_REQUIRED | auth/CSRF bypass tests after approval |
-| LIVE-004 | Persistent kill switch and position/daily-order/exposure limits | 7 | `API_CONTRACTS.md` §7 | DOCUMENTED | restart persistence and limit rejection tests |
-| LIVE-005 | Duplicate, invalid-price, market-status, cash, currency, stale-data, connectivity checks | 7 | `API_CONTRACTS.md` §§7-8 | DOCUMENTED | each server-side rejection and fail-closed tests |
-| LIVE-006 | Explicit immutable order confirmation/manual approval every order | 7 | `API_CONTRACTS.md` §7 | DOCUMENTED | challenge mismatch/expiry/replay tests |
-| LIVE-007 | Startup/reconnect reconciliation of open orders/fills/positions/cash | 5/7 | `DATABASE_SCHEMA.md` §10.2 | DOCUMENTED | discrepancy and no-silent-overwrite tests |
-| LIVE-008 | Completing safety code does not authorize enabling live mode | 7 | `ARCHITECTURE.md` §8 | DOCUMENTED | config default/explicit separate authorization report |
+| ID | Requirement | Disposition | Phase | Status | Evidence/acceptance |
+|---|---|---|---:|---|---|
+| REAL-001 | ManualRealTradeRecord stores an already completed trade | REPLACED_EOD | 5 | DOCUMENTED | Roadmap section 5.3; Database section 7.1 |
+| REAL-002 | Actual execution time/price/quantity/currency/fees/tax/provenance | REPLACED_EOD | 5 | DOCUMENTED | API section 8.1 |
+| REAL-003 | Manual entry and CSV/file import are first-class | REPLACED_EOD | 5 | DOCUMENTED | Roadmap section 6 |
+| REAL-004 | Manual cash-flow records | RETAINED | 5 | DOCUMENTED | Roadmap Phase 5 |
+| BR-001 | BrokerObservation is immutable and read-only | REPLACED_EOD | 5 | DOCUMENTED | Roadmap section 5.4; Database section 7.2 |
+| BR-002 | Optional connector may read account/cash/positions/completed orders/trades/fees/taxes/settlements | REPLACED_EOD | 5 | DOCUMENTED | Master section 13 |
+| BR-003 | Reconciliation/discrepancy handling never silently overwrites | RETAINED | 5 | DOCUMENTED | Database section 7.3 |
+| BR-004 | Product remains usable without broker connection | REPLACED_EOD | 5 | DOCUMENTED | Roadmap section 6 |
+| BR-005 | Connector must prove least-privilege read-only authority | REPLACED_EOD | 5 | DECISION_REQUIRED | OD-EOD-005 |
+| BR-006 | External IDs exist only for observed/imported completed facts | REPLACED_EOD | 5 | DOCUMENTED | Database sections 7.1–7.2 |
+| BR-007 | No write-capable credentials in normal application code | REPLACED_EOD | 5 | DOCUMENTED | Roadmap section 6; Master section 16 |
 
-## 10. API and frontend
+## 10. API, UI, quality, and infrastructure
 
-| ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
-|---|---|---:|---|---|---|
-| API-001 | Versioned request/response models and stable error semantics | 1 | `API_CONTRACTS.md` §§1-2,8 | IMPLEMENTED | OpenAPI, problem media type/shape, and request-ID tests passed |
-| API-002 | Decimal strings, UTC, UUID, explicit missing-data values | 1 | `API_CONTRACTS.md` §§1-2 | IMPLEMENTED | schema/serialization and exact portfolio/performance tests passed |
-| API-003 | Phase 1 security creation/read, portfolio/positions/performance, and watchlist CRUD | 1 | `API_CONTRACTS.md` §4 | IMPLEMENTED | all Phase 1 endpoint integration tests passed |
-| API-004 | Strategy/indicator/signal endpoints only with Phase 3 behavior | 3 | `API_CONTRACTS.md` §5 | DOCUMENTED | route absence before Phase 3; contract tests in Phase 3 |
-| API-005 | Paper financial endpoints only in Phase 2 | 2 | `API_CONTRACTS.md` §6 | DOCUMENTED | Phase 1 route denylist; Phase 2 idempotency tests |
-| API-006 | Broker/provider status truthful and no connection side effect | 1 | `API_CONTRACTS.md` §§4.11-4.13 | IMPLEMENTED | repeated inert descriptor/no-connection tests passed |
-| API-007 | Local-only CORS/no-store/request IDs/no secret/raw provider exposure | 1/7 | `API_CONTRACTS.md` §9 | DOCUMENTED | header/schema/redaction tests |
-| API-008 | Inception-only daily return unavailable; since-inception/drawdown exact zero | 1 | `API_CONTRACTS.md` §4.4 | IMPLEMENTED | one-point performance contract test passed |
-| UI-001 | Minimal professional dark read-only dashboard in Phase 1 | 1 | `PHASE_1_PLAN.md`; master §18 | IMPLEMENTED | actual dashboard 200 and offline/static safety smoke passed |
-| UI-002 | Summary NAV/equity/cash/invested and truthful unavailable status | 1 | `API_CONTRACTS.md` §§4.2-4.4 | IMPLEMENTED | dashboard/API bootstrap and provider-state tests passed |
-| UI-003 | Security cards, indicators, components, explanations, recommendation panel | 3 | `API_CONTRACTS.md` §5; `STRATEGY_SPEC.md` §15 | DOCUMENTED | Phase 3 UI contract/e2e tests |
-| UI-004 | Paper and live actions visually/functionally separate; live unmistakable | 2/7 | `API_CONTRACTS.md` §§6-7 | DOCUMENTED | DOM/route/action separation tests |
+| ID | Requirement | Disposition | Phase | Status | Evidence/acceptance |
+|---|---|---|---:|---|---|
+| API-001 | Stable versioned schemas, Problem errors, Decimal strings, UTC | RETAINED | 1–5 | DOCUMENTED | API sections 1–2 |
+| API-002 | Accepted Phase 1 allowlist remains unchanged | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Independent OpenAPI evidence |
+| API-003 | Future EOD/score/target/summary reads | REPLACED_EOD | 3 | DOCUMENTED | API section 6 |
+| API-004 | Paper/accounting mutations remain internal | REPLACED_EOD | 2 | DOCUMENTED | API section 5 |
+| API-005 | Completed real-trade import/read-only sync/reconciliation | REPLACED_EOD | 5 | DOCUMENTED | API section 8 |
+| UI-001 | EOD terminal shows score components, summary, Current/Target, suggestions | REPLACED_EOD | 3/5 | DOCUMENTED | Master section 15 |
+| UI-002 | Paper simulation and completed real trades are visually distinct | REPLACED_EOD | 2/5 | DOCUMENTED | Roadmap section 5 |
+| UI-003 | No real-order submission control | REMOVED_EOD-001 | — | OUT_OF_SCOPE | `EOD-001` |
+| INF-001 | Local FastAPI + SQLite + manual/simple EOD batch is sufficient | REPLACED_EOD | 0–5 | DOCUMENTED | Roadmap section 8 |
+| INF-002 | PostgreSQL compatibility is portability, not deployment requirement | REPLACED_EOD | 0–5 | DOCUMENTED | Master section 16 |
+| QLT-001 | pytest/Ruff/mypy and relevant executable path per phase | RETAINED | 1–5 | DOCUMENTED | `AGENTS.md`; Master section 18 |
+| QLT-002 | Requirements/docs updated with actual evidence | RETAINED | all | DOCUMENTED | This matrix |
+| QLT-003 | No secrets/private exports committed | RETAINED | all | DOCUMENTED | `AGENTS.md` |
+| QLT-004 | Scope scan rejects invalid future residual requirements | REPLACED_EOD | all | DOCUMENTED | Roadmap governance |
 
-## 11. Testing, tooling, and delivery
+## 11. Permanently removed capabilities
 
-| ID | Requirement | Target phase | Design document | Status | Test/acceptance evidence |
-|---|---|---:|---|---|---|
-| QLT-001 | pytest configured and phase-relevant unit/integration/golden suites | 1 onward | `PHASE_1_PLAN.md`; `STRATEGY_SPEC.md` §§16-17 | DOCUMENTED | exact `python -m pytest` result each phase |
-| QLT-002 | Ruff lint/format and mypy strict-enough project type check | 1 onward | `PHASE_1_PLAN.md` | DOCUMENTED | exact Ruff/mypy results each phase |
-| QLT-003 | Application/migrations run before phase completion claim | 1 onward | `PHASE_1_PLAN.md` | DOCUMENTED | exact startup/health/Alembic commands |
-| QLT-004 | Requirements matrix/docs updated with behavior/architecture changes | every phase | this document | DOCUMENTED | diff/review checklist |
-| QLT-005 | `.gitignore` excludes env, DB, logs, caches, secrets, private exports | 1 | `PHASE_1_PLAN.md` | DOCUMENTED | ignored-file and secret scan tests/checks |
-| QLT-006 | No Git push/force-push/remote/global-config mutation without approval | every phase | `AGENTS.md`; `PHASE_1_PLAN.md` | DOCUMENTED | command log and unchanged remote/config review |
-| QLT-007 | SQLite exact-decimal persistence never relies on NUMERIC affinity/TEXT arithmetic | 1 onward | `DATABASE_SCHEMA.md` §1.3; `PHASE_1_PLAN.md` | DOCUMENTED | three vectors, typeof/DDL, ordering/range, UoW balance, forbidden SQL scan |
+| ID | Removed requirement/capability | Disposition | Decision |
+|---|---|---|---|
+| REM-001 | Real-time quotes, tick data, order books, streaming/WebSocket, minute bars | REMOVED_EOD-001 | `EOD-001` |
+| REM-002 | Intraday calculations, rebalancing, or continuous execution monitoring | REMOVED_EOD-001 | `EOD-001` |
+| REM-003 | Application-submitted real orders or real-order UI/API | REMOVED_EOD-001 | `EOD-001` |
+| REM-004 | Real `place_order`, `cancel_order`, `modify_order` or broker-write adapter | REMOVED_EOD-001 | `EOD-001` |
+| REM-005 | Live OMS/EMS and broker-side order state machine | REMOVED_EOD-001 | `EOD-001` |
+| REM-006 | Broker-side cash reservation or account selection for execution | REMOVED_EOD-001 | `EOD-001` |
+| REM-007 | Real-order approval, submission, retry, recovery, failover, worker | REMOVED_EOD-001 | `EOD-001` |
+| REM-008 | Execution kill switch and trade-password unlock | REMOVED_EOD-001 | `EOD-001` |
+| REM-009 | Unattended/autonomous trading or agents | REMOVED_EOD-001 | `EOD-001` |
+| REM-010 | EastMoney trading integration | REMOVED_EOD-001 | `EOD-001` |
+| REM-011 | Microservices, queues, Kubernetes, cloud HA, multi-tenancy, distributed execution | REMOVED_EOD-001 | `EOD-001` |
+| REM-012 | Any authoritative phase after Phase 5 | REMOVED_EOD-001 | `EOD-001` |
 
-## 12. Phase 0 deliverables
+## 12. Current implementation statement
 
-| ID | Requirement | Target phase | Design document | Status | Evidence |
-|---|---|---:|---|---|---|
-| P0-001 | Architecture and separation verification | 0 | `ARCHITECTURE.md` §§1-9 | DOCUMENTED | file review/diff |
-| P0-002 | Contradiction, ambiguity, and missing-decision register | 0 | `ARCHITECTURE.md` §§10-11 | DOCUMENTED | DR-001..DR-055 and OD-001..OD-006 |
-| P0-003 | Exact database design | 0 | `DATABASE_SCHEMA.md` | DOCUMENTED | table/invariant review |
-| P0-004 | Versioned API and no Phase 1 live route | 0 | `API_CONTRACTS.md` | DOCUMENTED | availability/denylist contract |
-| P0-005 | Proposed research strategy formulas/state/golden cases; sizing still decision-required | 0 | `STRATEGY_SPEC.md` | DOCUMENTED | G-01..G-23; no strategy approval implied |
-| P0-006 | Requirements traceability | 0 | `REQUIREMENTS_MATRIX.md` | DOCUMENTED | this matrix |
-| P0-007 | Exact Phase 1 file/order/acceptance/test/out-of-scope plan | 0 | `phases/PHASE_1_PLAN.md` | DOCUMENTED | plan review |
+Phase 1 is accepted. Independent evidence for the reviewed implementation commit records
+`119 passed` on GitHub Actions run `33458517601`.
 
-## 13. Current implementation statement
-
-Phase 1 remediation is implemented locally and awaiting independent re-review. Rows marked `IMPLEMENTED` have
-runtime evidence for their complete Phase 1 scope. Multi-phase rows remain `DOCUMENTED` or
-`DECISION_REQUIRED` when later behavior is still intentionally absent.
-
-Actual Phase 1 evidence on CPython 3.12.13:
-
-- fresh Alembic upgrade/current: `0001_phase1_foundation (head)`;
-- complete pytest suite: `111 passed`;
-- Ruff check and format check: passed;
-- mypy: `Success: no issues found in 94 source files`;
-- Uvicorn loopback startup and `/health`, `/openapi.json`, `/`: 200;
-- exact Decimal vectors: identical tuples, canonical fixed-scale SQLite storage,
-  `typeof(value)='text'`, PostgreSQL `NUMERIC(38,18)` compilation;
-- architecture, migration isolation, partial uniqueness/FK/check/trigger, Python-Decimal ledger,
-  seed idempotency/drift, UTC/signed-zero, security fail-closed/race, frontend injection-safety,
-  no-connection descriptor, and OpenAPI allowlist/denylist tests: passed.
-
-No PaperBroker, order/fill, deposit/withdrawal/FX route, strategy calculation, sizing decision,
-external provider call, broker SDK, OpenD connection, backtest, live route, or live authentication
-is implemented or claimed. Phase 2 has not begun.
+Phase 2 has not begun. No PaperOrder/PaperFill behavior, EOD data ingestion, Composite Quant Score,
+Target Portfolio, Daily Portfolio Decision Summary, backtest, ManualRealTradeRecord, broker
+connector, or reconciliation behavior is implemented or claimed by this documentation refactor.

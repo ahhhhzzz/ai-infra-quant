@@ -1,6 +1,6 @@
 # AIInfraStrategy v1 Specification
 
-Status: **PROPOSED / RESEARCH_UNVALIDATED**; not approved and not implemented
+Status: **PROPOSED / RESEARCH_UNVALIDATED**; not approved and not implemented. Future scope is EOD-only under `docs/ROADMAP.md` decision `EOD-001`.
 
 Proposed strategy identity: `AIInfraStrategy` / `1.0.0`
 
@@ -8,7 +8,9 @@ Approval gate: `APPROVE PHASE 1` does not approve this document. Strategy implem
 
 ## 1. Purpose and safety boundary
 
-The strategy ranks a long-only, cash-account AI-infrastructure watchlist and emits explainable recommendations. It does not submit, approve, modify, cancel, or fill an order. Portfolio allocation, accounting, execution, and live approval remain separate modules.
+The strategy runs only on completed daily market sessions, ranks a long-only, cash-account AI-infrastructure watchlist, and emits one explainable Composite Quant Score per tracked security plus advisory recommendations. It does not submit, approve, modify, cancel, or fill a real order. The user alone decides whether to trade and executes any real trade manually in the broker's official client.
+
+The formulae, weights, thresholds, sizing options, and golden cases below remain an unapproved research proposal. This Roadmap refactor changes only the EOD/manual-execution boundary and does not approve or freeze the proposal.
 
 The formulas are research hypotheses. This document makes no claim of profitability, predictive validity, or future performance. Status remains `RESEARCH_UNVALIDATED` through Phase 4 backtesting and until adequate subsequent forward observation is reviewed.
 
@@ -34,7 +36,7 @@ For each security/run, `StrategyContext` supplies:
 - at least 220 split-adjusted sessions plus the histories required for momentum normalization (Section 5); minimum normalized M6 requires approximately 379 contiguous closes, while a full 756-observation M6 reference window requires approximately 883 contiguous closes;
 - point-in-time valuation/fundamental inputs and provenance;
 - active manual/data-assisted risk flags as known at the cutoff;
-- current strategy state, confirmed fills, current position, allocation cap, portfolio equity/cash, FX observation, and legal-order metadata/capabilities;
+- current strategy state, confirmed PaperFills or reconciled ManualRealTradeRecords, current position, allocation cap, portfolio equity/cash, FX observation, and legal-quantity metadata/capabilities;
 - parameter-set ID/hash and strategy version;
 - no broker SDK or provider-native object.
 
@@ -297,7 +299,7 @@ INVALID:  C < 0.60
 
 Hard gates override the numeric status:
 
-- BUY/ACCUMULATE requires `C_M6=C_M3=C_Trend=C_Drawdown=C_Valuation=1`, valid current price/calendar/FX/legal-order metadata, and an approved current fundamental review.
+- BUY/ACCUMULATE requires `C_M6=C_M3=C_Trend=C_Drawdown=C_Valuation=1`, valid current price/calendar/FX/legal-quantity metadata, and an approved current fundamental review.
 - Missing price, calendar, required trend data, adjustment provenance, or FX makes any executable-sized recommendation invalid.
 - Missing/partial valuation or fundamental review may leave coverage `COMPLETE`, but action is at most WATCH with `REVIEW_REQUIRED`.
 - `PARTIAL` is at most WATCH. `INVALID` is `NO_SIGNAL` and `STAY_IN_CASH` for a non-holder.
@@ -321,7 +323,7 @@ At least one confirmation must be true at `t`; all use split-adjusted bars avail
 
 The current bar cannot be used inside its own lookback comparison except as the breakout close. Equality is not a break. Without confirmation, an otherwise eligible candidate is `WAITING_FOR_CONFIRMATION` and action is WATCH/HOLD, never BUY/ACCUMULATE.
 
-A confirmation is “fresh” for an entry/add through the next three completed sessions. An add requires a confirmation after the preceding tranche's last confirmed fill.
+A confirmation is “fresh” for an entry/add through the next three completed sessions. An add requires a confirmation after the preceding tranche's last confirmed PaperFill or reconciled ManualRealTradeRecord.
 
 ## 11. Dual-momentum filter and relative priority
 
@@ -351,7 +353,7 @@ For an existing holding:
 - `HIGH`: recommend REDUCE by 50% and require separate human approval.
 - `CRITICAL`: recommend EXIT and require separate human approval.
 
-These are recommendations only. A flag never sends or approves a live order. If provenance is invalid/stale, the result is `REVIEW_REQUIRED`, not a fabricated no-risk outcome.
+These are recommendations only. A flag never sends or approves a real trade. If provenance is invalid/stale, the result is `REVIEW_REQUIRED`, not a fabricated no-risk outcome.
 
 ## 13. State machine and action precedence
 
@@ -362,7 +364,7 @@ WATCH -> ENTRY_READY -> TRANCHE_1 -> TRANCHE_2 -> TRANCHE_3 -> HOLD
 HOLD/TRANCHE_* -> REDUCE -> HOLD or EXIT -> COOLDOWN -> WATCH
 ```
 
-`ENTRY_READY`, `REDUCE`, and `EXIT` are recommendation states. Tranche advancement and full exit occur only after confirmed fills supplied in a later context. Submitted/open orders do not advance state.
+`ENTRY_READY`, `REDUCE`, and `EXIT` are advisory states. Tranche advancement and full exit occur only after a confirmed PaperFill or a reconciled ManualRealTradeRecord supplied in a later context. A Recommendation acknowledgement never advances state and never invokes a broker.
 
 Evaluate one action per security/session in this precedence order:
 
@@ -397,13 +399,13 @@ Score `>=80` changes the classification to strong candidate, not tranche count o
 
 An ADD to tranche 2 or 3 requires all entry conditions plus:
 
-- the prior tranche is complete from confirmed cumulative fill quantity;
-- at least five completed sessions elapsed since its last fill;
-- a fresh confirmation occurred after that fill;
-- current price is no more than one `ATR14` above the prior tranche's volume-weighted average fill price;
+- the prior tranche is complete from confirmed cumulative paper/manual quantity;
+- at least five completed sessions elapsed since its last confirmed paper/manual fact;
+- a fresh confirmation occurred after that fact;
+- current price is no more than one `ATR14` above the prior tranche's volume-weighted average confirmed paper/manual price;
 - current holding and proposed tranche remain below target/cap/risk/cash limits.
 
-A tranche is complete when confirmed cumulative filled quantity reaches the current cumulative legal target in Section 14. A partial fill below that cumulative target retains the current tranche state. Cancelling the unfilled remainder requires a new sizing decision; it does not pretend completion.
+A tranche is complete when confirmed cumulative paper/manual quantity reaches the current cumulative legal target in Section 14. A partial PaperFill below that cumulative target retains the current tranche state. Cancelling an internal PaperOrder remainder requires a new sizing decision; it does not pretend completion.
 
 Stop adding when any add condition fails, score falls below 65, price/fundamental data becomes incomplete/stale, the primary trend filter fails, `p>=D`, a veto appears, cash/FX/fee policy is unavailable, or a portfolio risk limit binds. Stop-adding produces HOLD or WATCH, not an automatic sale.
 
@@ -426,9 +428,9 @@ Independent higher-precedence responses remain valid without the composite-score
 - a hard portfolio-cap breach above 0.02 absolute may recommend a reduction to the cap;
 - severe trend EXIT, a CRITICAL flag, or an approved non-tradability event follows Section 13.5.
 
-For a cap breach, size is the reduction needed to return to the cap; a 50% target applies only when another eligible reduce trigger also applies. It never rounds above the position. After a confirmed reduce fill, state returns to HOLD and another score/trend-based reduce cannot occur for ten sessions unless an EXIT condition or renewed portfolio limit breach occurs.
+For a cap breach, size is the reduction needed to return to the cap; a 50% target applies only when another eligible reduce trigger also applies. It never rounds above the position. After a confirmed reducing PaperFill or reconciled ManualRealTradeRecord, state returns to HOLD and another score/trend-based reduce cannot occur for ten sessions unless an EXIT condition or renewed portfolio limit breach occurs.
 
-Reduce quantity is floored to a legal increment. If a one-share/one-lot or other discrete position yields zero legal reduce quantity, no order/recommendation quantity is fabricated: status is `REDUCE_NOT_EXECUTABLE_DUE_TO_LOT_SIZE`. The strategy emits `HOLD_REVIEW` pending a separately approved choice to continue holding or change the action to full EXIT.
+Reduce quantity is floored to a legal increment. If a one-share/one-lot or other discrete position yields zero legal reduce quantity, no paper-transaction/recommendation quantity is fabricated: status is `REDUCE_NOT_EXECUTABLE_DUE_TO_LOT_SIZE`. The strategy emits `HOLD_REVIEW` pending the user's choice to continue holding or manually exit outside the platform.
 
 ### 13.5 Exit
 
@@ -438,11 +440,11 @@ Recommend full legal EXIT when:
 - a CRITICAL, provenance-valid fundamental flag applies; or
 - an approved delisting/non-tradability event requires closure.
 
-Exit remains a separately approved order decision. If the instrument cannot legally trade, action is `EXIT_REVIEW_REQUIRED` with no estimated executable quantity rather than a fictitious fill.
+Exit remains a separately reviewed user decision for manual action outside the platform. If the instrument cannot legally trade, action is `EXIT_REVIEW_REQUIRED` with no estimated quantity rather than a fictitious PaperFill.
 
 ### 13.6 Portfolio-risk response and rebalance
 
-Strategy consumes risk-limit results but does not calculate broker buying power or mutate allocations. A hard portfolio-risk block prevents entry/add. A cap breach may create the Section 13.4 reduce recommendation. There is no calendar rebalance and being underweight never causes a buy without the full entry/add signal.
+Strategy consumes risk-limit results but does not treat broker-observed buying power as execution authority or mutate allocations. A hard portfolio-risk block prevents entry/add. A cap breach may create the Section 13.4 reduce recommendation. There is no calendar rebalance and being underweight never causes a buy suggestion without the full entry/add signal.
 
 ### 13.7 Cooldown and re-entry
 
@@ -480,12 +482,12 @@ Q_target = floor(Q_raw / increment) * increment
 N = Q_target / increment  # non-negative integer legal units
 raw cumulative units = [floor(0.30*N), floor(0.60*N), N]
 cumulative targets = strictly increasing positive values from raw cumulative units
-next order quantity = next cumulative target*increment - confirmed cumulative filled quantity
+next suggested quantity = next cumulative target*increment - confirmed cumulative paper/manual quantity
 ```
 
 Zero or duplicate cumulative targets are skipped. This adapts small targets into fewer executable tranches. `Q_target=1*increment` becomes one tranche (`SMALL_TARGET_SINGLE_TRANCHE`); `Q_target=2*increment` becomes cumulative targets `[1,2]` (`DISCRETE_TRANCHE_ADJUSTMENT`). The standard 30/30/40 shape is exact only when discrete units permit it.
 
-Before every proposed order, recalculate/validate target, settled cash, allocation cap, approved risk/stress cap, fees/taxes/slippage buffer, currency/FX mode, minimum quantity/notional, tick, and capabilities. `next order quantity` is floored to the legal increment and may never make confirmed-plus-open quantity exceed `Q_target`. If no positive legal quantity exists, return `INSUFFICIENT_CAPITAL_FOR_MINIMUM_ORDER` and retain cash.
+Before every suggested paper transaction or manual-trade amount, recalculate/validate target, settled cash, allocation cap, approved risk/stress cap, fees/taxes/slippage buffer, currency/FX mode, minimum quantity/notional, tick, and capabilities. Estimated quantity is floored to the legal increment and may never make confirmed paper/manual holdings exceed `Q_target`. If no positive legal quantity exists, return `INSUFFICIENT_CAPITAL_FOR_MINIMUM_ORDER` and retain cash.
 
 For reductions:
 
@@ -518,7 +520,7 @@ review_factor = 1 if approved/not required, 0.5 if review required, 0 if blocked
 confidence = Coverage * confirmation_factor * review_factor
 ```
 
-It is used only to communicate evidence completeness, never to bypass a gate or scale a live order automatically.
+It is used only to communicate evidence completeness, never to bypass a gate or scale a real-trade suggestion automatically.
 
 ## 16. Deterministic golden cases
 
@@ -633,11 +635,11 @@ With configured `h=0`, `R63=-.06`, `R126=-.08`, and Trend `40`, all three block 
 
 ### G-12 — State advances only on fills
 
-Start WATCH, all entry rules true -> recommendation state ENTRY_READY/action BUY. An order event `SUBMITTED` leaves persistent tranche state unchanged. A confirmed full tranche-1 fill changes state to TRANCHE_1. A 40% partial fill keeps the tranche incomplete and no tranche-2 recommendation is allowed.
+Start WATCH, all entry rules true -> recommendation state ENTRY_READY/action BUY. A simulated PaperOrder event `SUBMITTED_SIMULATED` leaves persistent tranche state unchanged. A confirmed full tranche-1 PaperFill changes state to TRANCHE_1. A 40% partial PaperFill keeps the tranche incomplete and no tranche-2 recommendation is allowed.
 
 ### G-13 — Add timing
 
-Last tranche fill is session 10. At session 14 only four completed sessions have elapsed: HOLD. At session 15, with a new post-fill confirmation and every other add condition true: ACCUMULATE next tranche. A confirmation from session 9 is not fresh and cannot authorize the add.
+Last confirmed tranche fact is session 10. At session 14 only four completed sessions have elapsed: HOLD. At session 15, with a new post-fact confirmation and every other add condition true: ACCUMULATE next tranche. A confirmation from session 9 is not fresh and cannot authorize the add.
 
 ### G-14 — Complete score reduce and exit
 
@@ -670,11 +672,11 @@ A valuation record has `period_end=2026-06-30`, `published_at=2026-09-10`, `avai
 
 ### G-18 — One-share target
 
-`Q_target=1`, `increment=1`, raw cumulative units `[0,0,1]`. Positive distinct cumulative targets are `[1]`; next order is one share minus confirmed cumulative fills. Expected status: `SMALL_TARGET_SINGLE_TRANCHE`. It never returns zero or exceeds one share.
+`Q_target=1`, `increment=1`, raw cumulative units `[0,0,1]`. Positive distinct cumulative targets are `[1]`; next suggested quantity is one share minus confirmed cumulative paper/manual quantity. Expected status: `SMALL_TARGET_SINGLE_TRANCHE`. It never returns zero or exceeds one share.
 
 ### G-19 — Two-share target
 
-`Q_target=2`, `increment=1`, raw cumulative units `[0,1,2]`. Positive distinct cumulative targets are `[1,2]`; orders are one share then `2-confirmed_cumulative_fills`. Expected status: `DISCRETE_TRANCHE_ADJUSTMENT` and no order above two cumulative shares.
+`Q_target=2`, `increment=1`, raw cumulative units `[0,1,2]`. Positive distinct cumulative targets are `[1,2]`; suggestions are one share then `2-confirmed_cumulative_quantity`. Expected status: `DISCRETE_TRANCHE_ADJUSTMENT` and no suggestion above two cumulative shares.
 
 ### G-20 — Fractional target
 
@@ -686,7 +688,7 @@ With verified `increment=100` shares and `Q_target=200`, `N=2`; cumulative targe
 
 ### G-22 — One-share/one-lot reduce
 
-For current quantity equal to one legal increment, desired 50% reduction is `0.5*increment` and legal floor is zero. Expected: no order, `REDUCE_NOT_EXECUTABLE_DUE_TO_LOT_SIZE`, action `HOLD_REVIEW`. Full EXIT requires a separate approved decision.
+For current quantity equal to one legal increment, desired 50% reduction is `0.5*increment` and legal floor is zero. Expected: no suggested quantity, `REDUCE_NOT_EXECUTABLE_DUE_TO_LOT_SIZE`, action `HOLD_REVIEW`. Full EXIT requires a separate user decision outside the platform.
 
 ### G-23 — Incomplete score cannot sell
 
@@ -702,10 +704,10 @@ In addition to the golden cases:
 - confirmation exclusion of current bar from lookback; calendar gaps and duplicate bars;
 - every state/action precedence path, partial fills, cooldown, fresh confirmation, veto severity, and incomplete-score `HOLD_REVIEW`;
 - relative priority cannot alter absolute score/action block;
-- both sizing options as research candidates; no sizing implementation before OD-006 approval;
+- both sizing options as research candidates; no sizing implementation before OD-EOD-004 approval;
 - cumulative target quantities across one/two units, fractional steps, HK board lots, tick/minimum notional, cash/FX/fee unavailable, reductions, and never-exceed-target properties;
 - deterministic replay and a future-record injection test proving no output changes;
-- the same strategy object/signals in analysis, paper, and backtest contexts.
+- the same strategy object/signals in EOD analysis, paper, and daily-bar backtest contexts.
 
 Synthetic data is allowed only in clearly labelled test fixtures. No golden input or expected result may be shown as real market, valuation, broker, or issuer data.
 
