@@ -186,7 +186,8 @@ class FutuQuoteAdapter:
 
     def get_daily_bars(self, security: MarketDataSecurity) -> ProviderResult[tuple[DailyBar, ...]]:
         retrieved_at = self._retrieved_at()
-        market_today = retrieved_at.astimezone(ZoneInfo(security.market_timezone)).date()
+        market_timezone = ZoneInfo(security.market_timezone)
+        market_today = retrieved_at.astimezone(market_timezone).date()
         call = self._history_call(
             security,
             start=market_today - timedelta(days=14),
@@ -199,16 +200,45 @@ class FutuQuoteAdapter:
         if isinstance(rows, ProviderResult):
             return cast(ProviderResult[tuple[DailyBar, ...]], rows)
         try:
+            rows_with_session_dates = tuple(
+                (
+                    row,
+                    _provider_datetime(row["time_key"], security)
+                    .astimezone(market_timezone)
+                    .date(),
+                )
+                for row in rows
+            )
+            has_current_session_bar = any(
+                session_date == market_today for _, session_date in rows_with_session_dates
+            )
+            current_session_closed = False
+            if has_current_session_bar:
+                market_status = self.get_market_status(security)
+                current_session_closed = (
+                    market_status.status is DataAvailabilityStatus.AVAILABLE
+                    and market_status.data is not None
+                    and market_status.data.state is CanonicalMarketState.CLOSED
+                )
             bars = tuple(
                 _daily_bar(row, security, retrieved_at)
-                for row in rows
-                if _provider_datetime(row["time_key"], security).date() < market_today
+                for row, session_date in rows_with_session_dates
+                if session_date < market_today
+                or (session_date == market_today and current_session_closed)
             )
         except (KeyError, TypeError, ValueError) as exc:
             return _failure(DataAvailabilityStatus.INVALID, retrieved_at, _safe_reason(exc))
         if not bars:
+            reason = "no completed daily bars"
+            if has_current_session_bar and not current_session_closed:
+                reason = (
+                    "current daily bar excluded because provider market state does not "
+                    "authoritatively show CLOSED"
+                )
             return _failure(
-                DataAvailabilityStatus.UNAVAILABLE, retrieved_at, "no completed daily bars"
+                DataAvailabilityStatus.UNAVAILABLE,
+                retrieved_at,
+                reason,
             )
         return ProviderResult(
             status=DataAvailabilityStatus.AVAILABLE, retrieved_at=retrieved_at, data=bars

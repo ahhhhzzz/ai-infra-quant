@@ -18,6 +18,7 @@ from ai_infra_quant.integrations.futu_quote.symbols import POC_SECURITIES, futu_
 
 FIXED_NOW = datetime(2026, 9, 1, 14, 35, 30, tzinfo=UTC)
 US_AVGO = POC_SECURITIES[0]
+HK_09698 = POC_SECURITIES[2]
 
 
 class FakeTable:
@@ -32,6 +33,7 @@ class FakeTable:
 class FakeQuoteContext:
     def __init__(self) -> None:
         self.closed = False
+        self.expected_code = "US.AVGO"
         self.snapshot_result: tuple[object, object] = (
             0,
             FakeTable(
@@ -65,11 +67,11 @@ class FakeQuoteContext:
         )
 
     def get_market_snapshot(self, code_list: list[str]) -> tuple[object, object]:
-        assert code_list == ["US.AVGO"]
+        assert code_list == [self.expected_code]
         return self.snapshot_result
 
     def get_market_state(self, code_list: list[str]) -> tuple[object, object]:
-        assert code_list == ["US.AVGO"]
+        assert code_list == [self.expected_code]
         return self.state_result
 
     def request_history_kline(
@@ -81,7 +83,7 @@ class FakeQuoteContext:
         autype: object,
         max_count: int,
     ) -> tuple[object, object, object]:
-        assert code == "US.AVGO"
+        assert code == self.expected_code
         assert autype == "QFQ"
         assert max_count == 1000
         assert start <= end
@@ -117,6 +119,24 @@ def _adapter(
         sdk_version="test-sdk",
     )
     return FutuQuoteAdapter("127.0.0.1", 11111, bindings_loader=lambda: bindings, now=now)
+
+
+def _configure_daily_result(
+    context: FakeQuoteContext,
+    security: MarketDataSecurity,
+    provider_state: str,
+    timestamps: list[str],
+) -> None:
+    context.expected_code = security.display_symbol
+    context.state_result = (
+        0,
+        FakeTable([{"code": security.display_symbol, "market_state": provider_state}]),
+    )
+    context.daily_result = (
+        0,
+        FakeTable([_bar(timestamp, close="350.25") for timestamp in timestamps]),
+        None,
+    )
 
 
 def test_explicit_canonical_symbol_mapping() -> None:
@@ -181,6 +201,62 @@ def test_unfinished_minute_is_excluded_and_latest_is_not_daily_close() -> None:
     assert not hasattr(quote_result.data, "close")
     assert isinstance(daily_result.data, tuple)
     assert quote_result.data.price != daily_result.data[0].close
+
+
+def test_hk_current_day_daily_bar_is_excluded_during_market_hours() -> None:
+    context = FakeQuoteContext()
+    _configure_daily_result(
+        context,
+        HK_09698,
+        "AFTERNOON",
+        ["2026-08-31 00:00:00", "2026-09-01 00:00:00"],
+    )
+    hk_market_hours = datetime(2026, 9, 1, 4, 0, tzinfo=UTC)
+
+    with _adapter(context, now=lambda: hk_market_hours) as adapter:
+        result = adapter.get_daily_bars(HK_09698)
+
+    assert isinstance(result.data, tuple)
+    assert [bar.session_date.isoformat() for bar in result.data] == ["2026-08-31"]
+
+
+def test_hk_current_day_daily_bar_is_included_after_authoritative_close() -> None:
+    context = FakeQuoteContext()
+    _configure_daily_result(
+        context,
+        HK_09698,
+        "CLOSED",
+        ["2026-08-31 00:00:00", "2026-09-01 00:00:00"],
+    )
+    hk_after_close = datetime(2026, 9, 1, 9, 0, tzinfo=UTC)
+
+    with _adapter(context, now=lambda: hk_after_close) as adapter:
+        result = adapter.get_daily_bars(HK_09698)
+
+    assert isinstance(result.data, tuple)
+    assert [bar.session_date.isoformat() for bar in result.data] == [
+        "2026-08-31",
+        "2026-09-01",
+    ]
+    current_bar = result.data[-1]
+    assert current_bar.provider_time == datetime(2026, 8, 31, 16, 0, tzinfo=UTC)
+    assert current_bar.provider_time.date() != current_bar.session_date
+
+
+def test_us_current_day_daily_bar_is_excluded_during_market_hours() -> None:
+    context = FakeQuoteContext()
+    _configure_daily_result(
+        context,
+        US_AVGO,
+        "MORNING",
+        ["2026-08-31 00:00:00", "2026-09-01 00:00:00"],
+    )
+
+    with _adapter(context) as adapter:
+        result = adapter.get_daily_bars(US_AVGO)
+
+    assert isinstance(result.data, tuple)
+    assert [bar.session_date.isoformat() for bar in result.data] == ["2026-08-31"]
 
 
 @pytest.mark.parametrize(
