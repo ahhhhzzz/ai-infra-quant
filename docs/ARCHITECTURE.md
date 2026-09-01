@@ -77,13 +77,19 @@ get_minute_bars()
 get_market_status()
 ```
 
-TASK-003 separately approves a minimal Futu OpenD quote-only adapter for the provider proof of
-concept. It maps explicit provider symbols to canonical quote, market-status, completed-daily, and
-completed-current-session-minute results. OpenD availability, login, entitlements, and observed
-delay remain external facts and are never fabricated.
+TASK-003 separately approved a minimal Futu OpenD quote-only adapter for the provider proof of
+concept. TASK-004 composes it behind a provider-neutral application query service and FastAPI
+presentation layer. It maps only the three explicit provider symbols to canonical quote,
+market-status, completed-daily, and completed-current-session-minute results. OpenD availability,
+login, entitlements, and observed delay remain external facts and are never fabricated.
 
 The port is read-only and exposes no account identity, cash, position, order, trade, account matching,
 or command surface.
+
+Each backend request opens at most one short-lived quote context for the requested capability (the
+state query shares one context across quote and market-status reads) and closes it at request end.
+Provider-native SDK objects and tabular values remain inside `integrations/`. Provider mode `none`
+returns structured unavailability without attempting an external connection.
 
 ## 5. Canonical market-data boundaries
 
@@ -189,7 +195,7 @@ No later phase exists.
 These remain open and do not authorize implementation:
 
 - operational OpenD availability, quote entitlements, pricing, latency, and live US/HK evidence;
-- any production provider interface beyond the bounded TASK-003 PoC;
+- any provider capability beyond the bounded TASK-004 read-through backend;
 - minute-data retention policy;
 - exact Composite Score formula, weights, thresholds, bands, and normalization;
 - later paper research assumptions;
@@ -198,5 +204,5 @@ These remain open and do not authorize implementation:
 ## 13. Historical evidence boundary
 
 The accepted Phase 1 plan and review files contain terminology from earlier directions. They remain
-immutable historical evidence and do not govern future scope. TASK-003 changes no Phase 1 plan,
-review, migration, route, or runtime behavior.
+immutable historical evidence and do not govern future scope. TASK-003 and TASK-004 change no
+Phase 1 plan, review, or migration.

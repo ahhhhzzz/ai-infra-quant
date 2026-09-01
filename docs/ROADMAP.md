@@ -20,7 +20,8 @@ Historical facts are unchanged:
 - the reviewed Phase 1 commit is `f6decf2fbe171c1b9eb46340a9174bc21f293ede`;
 - Phase 1 status remains PASS;
 - both Phase 1 review files remain immutable evidence;
-- TASK-003 begins only the bounded Phase 2 Futu quote-only market-data PoC.
+- TASK-003 completed the bounded Phase 2 Futu quote-only market-data PoC;
+- TASK-004 adds only the provider-neutral read-through market-data backend.
 
 Earlier Phase 1 broker/provider abstractions are historical artifacts, not authority to implement
 broker-account or broker-write behavior.
@@ -59,6 +60,11 @@ These names are illustrative only. `MTF-001` did not itself select a provider. T
 approved TASK-003 selects Futu OpenD quote-market-data APIs for a bounded PoC covering the three
 initial securities; OpenD availability, login, quote entitlements, and observed delay remain
 environmental live-verification facts.
+
+TASK-004 exposes that accepted quote-only adapter through provider-neutral FastAPI queries for
+current market state, completed daily bars, and current-session completed 1-minute bars. The
+default provider mode remains offline (`none`); `futu` is explicit configuration. No market-data
+persistence, background polling, dashboard, or score behavior is introduced.
 
 Provider-specific code remains under `integrations/`; Strategy, Dashboard, Portfolio, Risk,
 Performance, and Backtest consume provider-agnostic canonical data.
@@ -180,8 +186,9 @@ Highest priority is a visible, usable product. Planned scope includes:
 - score display, ranking, and reference/risk state.
 
 The exact Composite Score formula requires a separate Task Contract and explicit approval. Complex
-accounting must not block the visible deliverables. This documentation decision does not implement
-any Phase 2 behavior.
+accounting must not block the visible deliverables. The approved TASK-004 increment implements only
+the market-data backend portion of this phase. Dashboard, polling, charting, and Composite Score
+behavior remain unimplemented.
 
 ### Phase 3 — Quant Research Expansion & Lightweight Paper Tracking
 
@@ -234,9 +241,9 @@ execution capabilities.
 
 ## 9. Governance and stop conditions
 
-- Phase 1 remains accepted and unchanged; TASK-003 begins only the bounded provider PoC in Phase 2.
+- Phase 1 remains accepted and unchanged; TASK-003 and TASK-004 are bounded Phase 2 increments.
 - Each implementation phase requires explicit approval and a phase-specific plan or Task Contract.
-- No provider, formula, or retention policy is selected unless separately approved; TASK-003 is
-  the separate approval for the Futu quote-only PoC only.
+- No provider, formula, or retention policy is selected unless separately approved; TASK-003
+  selected only the Futu quote-only provider and TASK-004 approved only its read-through backend.
 - Documentation and requirements must preserve explicit data freshness and non-fabrication rules.
 - Every task reports evidence and stops before the next task or phase.

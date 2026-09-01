@@ -184,13 +184,17 @@ class FutuQuoteAdapter:
             status=DataAvailabilityStatus.AVAILABLE, retrieved_at=retrieved_at, data=snapshot
         )
 
-    def get_daily_bars(self, security: MarketDataSecurity) -> ProviderResult[tuple[DailyBar, ...]]:
+    def get_daily_bars(
+        self, security: MarketDataSecurity, limit: int = 10
+    ) -> ProviderResult[tuple[DailyBar, ...]]:
+        if not 1 <= limit <= 260:
+            raise ValueError("daily bar limit must be between 1 and 260")
         retrieved_at = self._retrieved_at()
         market_timezone = ZoneInfo(security.market_timezone)
         market_today = retrieved_at.astimezone(market_timezone).date()
         call = self._history_call(
             security,
-            start=market_today - timedelta(days=14),
+            start=market_today - timedelta(days=max(14, limit * 2)),
             end=market_today,
             ktype=self._require_bindings().k_day,
         )
@@ -241,7 +245,9 @@ class FutuQuoteAdapter:
                 reason,
             )
         return ProviderResult(
-            status=DataAvailabilityStatus.AVAILABLE, retrieved_at=retrieved_at, data=bars
+            status=DataAvailabilityStatus.AVAILABLE,
+            retrieved_at=retrieved_at,
+            data=bars[-limit:],
         )
 
     def get_current_session_minute_bars(

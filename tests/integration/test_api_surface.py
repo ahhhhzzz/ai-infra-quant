@@ -13,12 +13,15 @@ EXPECTED_PATHS = {
     "/api/v1/brokers",
     "/api/v1/brokers/{broker}/status",
     "/api/v1/market-data/providers",
+    "/api/v1/market-data/securities/{security_id}/state",
+    "/api/v1/market-data/securities/{security_id}/daily-bars",
+    "/api/v1/market-data/securities/{security_id}/minute-bars",
     "/api/v1/fundamental-data/providers",
     "/api/v1/event-data/providers",
 }
 
 
-def test_openapi_has_exact_phase_one_allowlist(client: TestClient) -> None:
+def test_openapi_has_exact_approved_allowlist(client: TestClient) -> None:
     document = client.get("/openapi.json").json()
     assert set(document["paths"]) == EXPECTED_PATHS
     serialized = str(document).lower()

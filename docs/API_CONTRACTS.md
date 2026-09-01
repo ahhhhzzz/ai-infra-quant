@@ -10,9 +10,10 @@ Base path: `/api/v1`
 
 ## 0. Scope and historical boundary
 
-Phase 1 routes remain accepted exactly as implemented. This document describes future read-only
-market-data/dashboard, research, simulated paper, and analytics directions. TASK-003 begins only a
-provider integration PoC and registers no route.
+Phase 1 routes remain accepted exactly as implemented. This document describes implemented
+TASK-004 read-only market-data routes plus future dashboard, research, simulated paper, and
+analytics directions. TASK-003 established the provider integration PoC; TASK-004 registers only
+the three approved market-data route groups.
 
 No API may connect to a brokerage account; read/import real-account cash, positions, orders, or
 trades; match real-account state; or transmit a broker operation.
@@ -51,8 +52,8 @@ Future market/score responses distinguish at minimum:
 `polling_interval_seconds` is local cadence; `provider_delay_seconds` describes source latency.
 They are not interchangeable.
 
-Availability/status values include explicit `AVAILABLE`, `MISSING`, `DELAYED`, `STALE`,
-`UNAVAILABLE`, `INVALID`, and `ERROR` semantics. Exact enums require the Phase 2 API Task Contract.
+Availability/status values include explicit `AVAILABLE`, `DELAYED`, `STALE`, `MISSING`,
+`UNAVAILABLE`, `NOT_ENTITLED`, `PROVIDER_ERROR`, `NOT_SUPPORTED`, and `INVALID` semantics.
 
 ## 3. Phase availability
 
@@ -61,7 +62,8 @@ Defining a future direction does not expose a route.
 | Route group | First phase | Before registration |
 |---|---:|---|
 | Accepted health/portfolio/identity/watchlist/status reads | 1 | Available from accepted foundation |
-| Market state, daily/minute bars, dashboard refresh, first approved score/ranking/risk state | 2 | Ordinary 404 |
+| TASK-004 market state and daily/minute bars | 2 | Available from TASK-004 |
+| Dashboard refresh and first approved score/ranking/risk state | 2 | Ordinary 404 |
 | Expanded research and simulated paper tracking | 3 | Ordinary 404 |
 | Backtest and analytics | 4 | Ordinary 404 |
 
@@ -93,10 +95,20 @@ These routes retain their reviewed Phase 1 behavior. Inert historical descriptor
 a future brokerage-account connection. This documentation task neither expands nor removes the
 allowlist.
 
-## 5. Phase 2 market data and dashboard direction
+## 5. Phase 2 market data backend and dashboard direction
 
-Exact route names and schemas require a Phase 2 Task Contract. The following groups describe the
-required behavior, not implemented endpoints.
+TASK-004 registers exactly these application-facing market-data routes:
+
+```text
+GET /api/v1/market-data/securities/{security_id}/state
+GET /api/v1/market-data/securities/{security_id}/daily-bars
+GET /api/v1/market-data/securities/{security_id}/minute-bars
+```
+
+They resolve the existing canonical Security UUID and support only `US.AVGO`, `US.VRT`, and
+`HK.09698`. A missing Security returns `404 SECURITY_NOT_FOUND`; an existing Security without an
+approved mapping returns `422 MARKET_DATA_SECURITY_NOT_SUPPORTED`. Expected provider failures
+remain structured HTTP 200 responses. All responses use `Cache-Control: no-store`.
 
 ### 5.1 Independent Market Data Provider status
 
@@ -104,26 +116,31 @@ A provider-status response must report configuration/capability, entitlement, US
 source delay, last success, last error, and freshness without exposing secrets. Market-data status
 contains no brokerage-account concept.
 
-This document does not select a concrete provider. TASK-003 separately selects Futu OpenD
-quote-market-data APIs for a bounded local PoC without registering an API route.
+TASK-003 selected Futu OpenD quote-market-data APIs. TASK-004 makes provider modes `none` and
+`futu` available at the application composition boundary; `none` is the safe default.
 
 ### 5.2 Latest quote and market status
 
-A future latest-market-state response includes Security identity, latest Decimal price, currency,
-market status, `latest_quote_at`, retrieval time, provider delay, and explicit availability/error
-state. It must not claim the price is the final daily close.
+`GET /market-data/securities/{security_id}/state` returns Security identity, provider, latest
+Decimal price, currency, canonical/provider market state, `latest_quote_at`, `retrieved_at`,
+truthful optional `provider_delay_seconds`, independent `quote_status` and `market_status`, and a
+safe optional reason. `latest_price` is never labelled or represented as the final daily close.
 
 ### 5.3 Daily bars
 
-A future daily-bars response includes completed sessions, Decimal OHLCV, adjustment provenance,
-market timezone/calendar, source timestamps, and freshness/quality status. Daily data remains
-supported for AVGO, VRT, and HK.09698.
+`GET /market-data/securities/{security_id}/daily-bars` accepts `limit` from 1 through 260, default
+120. It returns provider/status/retrieval metadata, `latest_completed_daily_session`, and completed
+bars with market-local `session_date`, Decimal-string OHLCV, UTC `provider_time`, and
+`is_completed=true`. A current market-local session is included only when provider market state
+authoritatively identifies the regular session as closed; its UTC calendar date alone is never
+completion evidence.
 
 ### 5.4 Current-session completed 1-minute bars
 
-A future minute-bars response includes only completed 1-minute bars for the requested current
-trading day. Each item includes interval start/end, Decimal OHLCV, `is_completed=true`, source
-timestamps, and quality status. Unfinished bars are excluded.
+`GET /market-data/securities/{security_id}/minute-bars` returns only completed 1-minute bars for
+the provider retrieval time's current market-local session. It includes provider/status,
+`session_date`, `retrieved_at`, `latest_completed_minute_bar_at`, and bars with UTC interval
+start/end, Decimal-string OHLCV, and `is_completed=true`. Unfinished bars are excluded.
 
 Daily and minute responses remain separate and are rendered in separate chart coordinate systems.
 Full historical minute replay, ticks, and order-book history are not MVP contracts.

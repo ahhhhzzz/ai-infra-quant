@@ -32,7 +32,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | GOV-004 | Each implementation task requires explicit approval and stop | RETAINED | 0–4 | DOCUMENTED | Roadmap 9; Master 13 |
 | GOV-005 | Phase 0 history and accepted Phase 1 evidence are unchanged | HISTORICAL_PHASE_1 | 0/1 | IMPLEMENTED | Immutable plan/reviews and accepted commit |
 | GOV-006 | Phase 1 PASS status remains unchanged | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Run `33458517601`; `119 passed` |
-| GOV-007 | Phase 2 work begins only through explicit bounded Task Contracts | RETAINED | 2 | IMPLEMENTED | TASK-003 quote-only PoC; Roadmap 1,7 |
+| GOV-007 | Phase 2 work begins only through explicit bounded Task Contracts | RETAINED | 2 | IMPLEMENTED | TASK-003 quote-only PoC; TASK-004 backend; Roadmap 1,7 |
 
 ## 3. Accepted Phase 1 requirements
 
@@ -50,16 +50,16 @@ Only Phase 0 through Phase 4 are valid target phases.
 
 | ID | Requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
-| MKT-001 | Independent read-only Market Data Provider is allowed | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 3; Architecture 4 |
-| MKT-002 | Provider must not require brokerage-account access | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 2–3; Master 1 |
+| MKT-001 | Independent read-only Market Data Provider is allowed | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-004 query port; Roadmap 3; Architecture 4 |
+| MKT-002 | Provider must not require brokerage-account access | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-004 quote-only boundary; Roadmap 2–3; Master 1 |
 | MKT-003 | Futu OpenD quote-only APIs are selected for the bounded provider PoC | RETAINED | 2 | IMPLEMENTED | TASK-003 adapter and smoke runner |
 | MKT-004 | Live OpenD availability, login, entitlements, pricing, delay, and coverage remain truthful environmental evidence | RETAINED | 2 | DECISION_REQUIRED | TASK-003 live PoC result; Roadmap 3 |
-| MKT-005 | Initial tracked set is AVGO, VRT, HK.09698 with US/HK support | RETAINED | 2 | DOCUMENTED | Roadmap 3 |
-| MKT-006 | Daily OHLCV remains supported | RETAINED | 2 | DOCUMENTED | Roadmap 7; Database 4.3 |
-| MKT-007 | Current-session completed 1-minute OHLCV is supported | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 4; Database 4.4 |
-| MKT-008 | Unfinished minute bars are excluded | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 5.4 |
-| MKT-009 | Latest/intraday price is distinct from final daily close | RETAINED | 2 | DOCUMENTED | Roadmap 5; Database 1.3 |
-| MKT-010 | Missing/delayed/stale/unavailable/error states are explicit | RETAINED | 2 | DOCUMENTED | Roadmap 4–5; API 2 |
+| MKT-005 | Initial tracked set is AVGO, VRT, HK.09698 with US/HK support | RETAINED | 2 | IMPLEMENTED | TASK-004 canonical Security resolution; Roadmap 3 |
+| MKT-006 | Daily OHLCV remains supported | RETAINED | 2 | IMPLEMENTED | TASK-004 daily-bars API; Roadmap 7; Database 4.3 |
+| MKT-007 | Current-session completed 1-minute OHLCV is supported | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-004 minute-bars API; Roadmap 4; Database 4.4 |
+| MKT-008 | Unfinished minute bars are excluded | RETAINED | 2 | IMPLEMENTED | TASK-003 adapter tests; TASK-004 API; Roadmap 5 |
+| MKT-009 | Latest/intraday price is distinct from final daily close | RETAINED | 2 | IMPLEMENTED | TASK-004 state API/tests; Roadmap 5; Database 1.3 |
+| MKT-010 | Missing/delayed/stale/unavailable/error states are explicit | RETAINED | 2 | IMPLEMENTED | TASK-004 provider results/API tests; Roadmap 4–5 |
 | MKT-011 | No market value is fabricated | RETAINED | all | DOCUMENTED | `AGENTS.md`; Roadmap 5 |
 | MKT-012 | Minute retention policy is deferred to Phase 2 plan | RETAINED | 2 | DECISION_REQUIRED | Roadmap 4 |
 
@@ -80,9 +80,9 @@ Only Phase 0 through Phase 4 are valid target phases.
 
 | ID | Requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
-| TIME-001 | `latest_quote_at` is explicit | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 2 |
-| TIME-002 | `latest_completed_minute_bar_at` is explicit | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 2 |
-| TIME-003 | `latest_completed_daily_session` is explicit | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 2 |
+| TIME-001 | `latest_quote_at` is explicit | RETAINED | 2 | IMPLEMENTED | TASK-004 state API; Roadmap 5; API 2 |
+| TIME-002 | `latest_completed_minute_bar_at` is explicit | RETAINED | 2 | IMPLEMENTED | TASK-004 minute-bars API; Roadmap 5; API 2 |
+| TIME-003 | `latest_completed_daily_session` is explicit | RETAINED | 2 | IMPLEMENTED | TASK-004 daily-bars API; Roadmap 5; API 2 |
 | TIME-004 | `score_calculated_at` is explicit | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 2 |
 | TIME-005 | Provider latency and polling cadence are different facts | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 2 |
 | QNT-001 | Composite architecture is Daily Base + Intraday Minute Adjustment | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 6; Strategy 3 |
@@ -131,6 +131,8 @@ they are non-executing Phase 2 research capabilities.
 
 Phase 1 remains accepted with `119 passed` in independent GitHub Actions run `33458517601`.
 
-TASK-003 implements only a Futu OpenD quote-only provider PoC with no production persistence or
-route. No daily/minute chart, 60-second polling, dashboard refresh behavior, Composite Quant Score,
-ranking/risk calculation, paper behavior, or backtest behavior is implemented or claimed.
+TASK-003 implements the Futu OpenD quote-only provider PoC. TASK-004 adds a provider-neutral
+read-through application service and the state, completed daily-bars, and completed current-session
+minute-bars APIs, with no production market-data persistence. No daily/minute chart, 60-second
+polling, dashboard refresh behavior, Composite Quant Score, ranking/risk calculation, paper
+behavior, or backtest behavior is implemented or claimed.

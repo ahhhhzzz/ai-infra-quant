@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from ai_infra_quant.backend.api.v1 import (
     brokers,
+    market_data,
     performance,
     portfolio,
     positions,
@@ -20,3 +21,4 @@ api_router.include_router(securities.router)
 api_router.include_router(strategies.router)
 api_router.include_router(brokers.router)
 api_router.include_router(providers.router)
+api_router.include_router(market_data.router)

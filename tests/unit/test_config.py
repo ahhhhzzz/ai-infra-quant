@@ -17,6 +17,10 @@ def test_safe_defaults() -> None:
     assert settings.futu_opend_port == 11111
 
 
+def test_futu_market_data_provider_is_allowed_without_changing_safe_default() -> None:
+    assert Settings(market_data_provider="futu").market_data_provider == "futu"
+
+
 @pytest.mark.parametrize(
     ("override", "message"),
     [
@@ -24,7 +28,7 @@ def test_safe_defaults() -> None:
         ({"host": "0.0.0.0"}, "loopback"),
         ({"api_base_url": "http://example.com"}, "loopback"),
         ({"active_broker": "futu"}, "paper"),
-        ({"market_data_provider": "futu"}, "none"),
+        ({"market_data_provider": "other"}, "none or futu"),
         ({"initial_base_currency": "HK"}, "three uppercase"),
         ({"initial_portfolio_name": "   "}, "portfolio name"),
         ({"valuation_timezone": "Not/A_Timezone"}, "IANA timezone"),

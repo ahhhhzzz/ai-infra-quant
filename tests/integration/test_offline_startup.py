@@ -2,11 +2,13 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import Engine
 
 from ai_infra_quant.application.bootstrap import DatabaseNotReadyError
 from ai_infra_quant.backend.main import create_app
 from ai_infra_quant.config import Settings
 from ai_infra_quant.database.session import create_database_engine
+from ai_infra_quant.integrations.futu_quote import adapter as futu_adapter
 
 
 def sqlite_url(path: Path) -> str:
@@ -33,3 +35,25 @@ def test_unmigrated_database_refuses_startup(tmp_path: Path) -> None:
     with pytest.raises(DatabaseNotReadyError), TestClient(app):
         pass
     engine.dispose()
+
+
+def test_futu_configuration_starts_without_importing_optional_sdk(
+    database_url: str,
+    migrated_engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def missing_sdk(_name: str) -> object:
+        raise ImportError("futu intentionally unavailable in test")
+
+    monkeypatch.setattr(futu_adapter, "import_module", missing_sdk)
+    app = create_app(
+        Settings(database_url=database_url, market_data_provider="futu"),
+        migrated_engine,
+    )
+    with TestClient(app) as test_client:
+        assert test_client.get("/health").status_code == 200
+        security_id = test_client.get("/api/v1/watchlist").json()["items"][0]["security"]["id"]
+        response = test_client.get(f"/api/v1/market-data/securities/{security_id}/state")
+    assert response.status_code == 200
+    assert response.json()["quote_status"] == "UNAVAILABLE"
+    assert "optional dependency missing" in response.json()["reason"]

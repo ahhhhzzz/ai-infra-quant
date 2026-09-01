@@ -7,15 +7,22 @@ from fastapi import Depends, Request
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from ai_infra_quant.application.market_data_queries import (
+    MarketDataProviderFactory,
+    MarketDataQueries,
+)
 from ai_infra_quant.application.portfolio_queries import PortfolioQueries
 from ai_infra_quant.application.security_service import SecurityService
 from ai_infra_quant.application.status_queries import StatusQueries
 from ai_infra_quant.application.watchlist_service import WatchlistService
 from ai_infra_quant.config import Settings
 from ai_infra_quant.core.domain.enums import CapabilityStatus, DataAvailabilityStatus
+from ai_infra_quant.core.domain.market_data import PROVIDER_FUTU_QUOTE
 from ai_infra_quant.core.domain.strategy import StrategyDefinition
 from ai_infra_quant.core.strategy.registry import StrategyRegistry
 from ai_infra_quant.database.repositories.unit_of_work import SQLAlchemyUnitOfWork
+from ai_infra_quant.integrations.futu_quote.adapter import FutuQuoteAdapter
+from ai_infra_quant.integrations.futu_quote.symbols import POC_SECURITIES
 from ai_infra_quant.integrations.registry import Registries
 
 
@@ -30,6 +37,7 @@ class AppContainer:
     security_service: SecurityService
     watchlist_service: WatchlistService
     status_queries: StatusQueries
+    market_data_queries: MarketDataQueries
 
 
 def build_container(
@@ -63,6 +71,19 @@ def build_container(
             return DataAvailabilityStatus.NOT_SUPPORTED
         return DataAvailabilityStatus.UNAVAILABLE
 
+    provider_name = "none"
+    provider_factory: MarketDataProviderFactory | None = None
+    if settings.market_data_provider == "futu":
+        provider_name = PROVIDER_FUTU_QUOTE
+
+        def create_futu_provider() -> FutuQuoteAdapter:
+            return FutuQuoteAdapter(
+                settings.futu_opend_host,
+                settings.futu_opend_port,
+            )
+
+        provider_factory = create_futu_provider
+
     return AppContainer(
         settings=settings,
         engine=engine,
@@ -77,6 +98,12 @@ def build_container(
             registries.market_data,
             registries.fundamental_data,
             registries.event_data,
+        ),
+        market_data_queries=MarketDataQueries(
+            uow_factory,
+            provider_name=provider_name,
+            provider_factory=provider_factory,
+            supported_securities=POC_SECURITIES,
         ),
     )
 

@@ -41,18 +41,23 @@ def build_phase_one_registries() -> Registries:
             message="No approved legitimate interface; Phase 8 decision required",
         )
     )
-    for registry in (
-        registries.market_data,
-        registries.fundamental_data,
-        registries.event_data,
-    ):
+    registries.market_data.register(
+        AdapterDescriptor(
+            name="futu",
+            implementation_status=CapabilityStatus.SUPPORTED,
+            connection_status=CapabilityStatus.UNKNOWN,
+            environment=BrokerEnvironment.READ_ONLY,
+            message="Request-scoped Futu OpenD quote-only market data",
+        )
+    )
+    for registry in (registries.market_data, registries.fundamental_data, registries.event_data):
         registry.register(
             AdapterDescriptor(
                 name="none",
                 implementation_status=CapabilityStatus.UNAVAILABLE,
                 connection_status=CapabilityStatus.UNAVAILABLE,
                 environment=None,
-                message="No provider is configured in Phase 1",
+                message="No provider is configured",
             )
         )
     return registries

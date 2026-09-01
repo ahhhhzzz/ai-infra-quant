@@ -109,9 +109,17 @@ class Settings(BaseSettings):
             raise ValueError("Phase 1 active broker descriptor must be paper")
         return normalized
 
-    @field_validator("market_data_provider", "fundamental_data_provider", "event_data_provider")
+    @field_validator("market_data_provider")
     @classmethod
-    def validate_provider(cls, value: str) -> str:
+    def validate_market_data_provider(cls, value: str) -> str:
+        normalized = value.strip().lower()
+        if normalized not in {"none", "futu"}:
+            raise ValueError("MARKET_DATA_PROVIDER must be none or futu")
+        return normalized
+
+    @field_validator("fundamental_data_provider", "event_data_provider")
+    @classmethod
+    def validate_unimplemented_provider(cls, value: str) -> str:
         normalized = value.strip().lower()
         if normalized != "none":
             raise ValueError("Phase 1 providers must be none")

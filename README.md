@@ -6,10 +6,12 @@ plus current-session completed 1-minute market data, a broker-style dashboard, a
 60-second refresh/recalculation, and a dual-timeframe Composite Quant Score. Daily and 1-minute
 charts are separate views.
 
-TASK-003 adds a bounded Futu OpenD proof of concept using quote-market-data APIs only. It does not
-register an application route or connect to brokerage-account state. The application never reads
-real-account facts, imports or reconciles real trades, or sends a broker command. The user performs
-every real trade manually in the broker's official client.
+TASK-003 established a bounded Futu OpenD proof of concept using quote-market-data APIs only.
+TASK-004 exposes that provider through three provider-neutral, read-through FastAPI endpoints for
+market state, completed daily bars, and completed current-session 1-minute bars. It does not add a
+dashboard or connect to brokerage-account state. The application never reads real-account facts,
+imports or reconciles real trades, or sends a broker command. The user performs every real trade
+manually in the broker's official client.
 
 The accepted Phase 1 implementation is the local FastAPI/SQLite foundation. It exposes opening
 portfolio facts, identity/watchlist administration, and truthful provider capability descriptors;
@@ -27,19 +29,28 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m uvicorn ai_infra_quant.backend.main:app --host 127.0.0.1 --port 8000
 ```
 
-Open `http://127.0.0.1:8000`. All external providers remain unavailable and the paper broker
-is only a non-operational descriptor in Phase 1.
+Open `http://127.0.0.1:8000`. With the safe default `MARKET_DATA_PROVIDER=none`, external provider
+calls remain disabled; the paper broker is only a non-operational historical descriptor.
 
-To run the optional quote-only Futu PoC against an already configured local OpenD:
+To run the optional quote-only Futu backend against an already configured local OpenD:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -e ".[dev,futu]"
-.\.venv\Scripts\python.exe -m ai_infra_quant.integrations.futu_quote.poc
+$env:MARKET_DATA_PROVIDER = "futu"
+.\.venv\Scripts\python.exe -m uvicorn ai_infra_quant.backend.main:app --host 127.0.0.1 --port 8000
 ```
 
-`FUTU_OPEND_HOST` and `FUTU_OPEND_PORT` default to `127.0.0.1:11111`. The runner reports
-`LIVE_POC_BLOCKED` without attempting an SDK connection when that TCP endpoint is unreachable.
-OpenD login and quote entitlements are external prerequisites; no credential belongs in this app.
+`FUTU_OPEND_HOST` and `FUTU_OPEND_PORT` default to `127.0.0.1:11111`. OpenD login and quote
+entitlements are external prerequisites; no credential belongs in this app. The safe default
+`MARKET_DATA_PROVIDER=none` keeps the endpoints available with structured `UNAVAILABLE` results.
+
+The TASK-004 API surface is:
+
+```text
+GET /api/v1/market-data/securities/{security_id}/state
+GET /api/v1/market-data/securities/{security_id}/daily-bars?limit=120
+GET /api/v1/market-data/securities/{security_id}/minute-bars
+```
 
 Alembic selects its database URL in this order: an explicit
 `-x database_url=...` override, `DATABASE_URL` from application settings or `.env`, then the
@@ -78,6 +89,6 @@ Revision `0001_phase1_foundation` is an explicit historical schema: it does not 
 ORM metadata. A local development database created by the earlier metadata-driven draft must be
 recreated before running this remediated revision. The application never deletes a database.
 
-Phase 1 remains intentionally limited and has passed independent review. TASK-003 is the first
-bounded Phase 2 integration PoC; no PaperBroker, paper fill/order, market-data API/dashboard,
-strategy calculation, backtest, or real-order route was added.
+Phase 1 remains intentionally limited and has passed independent review. TASK-004 adds only the
+first Phase 2 market-data backend. No Dashboard, browser polling, PaperBroker, paper fill/order,
+strategy calculation, Composite Quant Score, backtest, persistence, or real-order route was added.

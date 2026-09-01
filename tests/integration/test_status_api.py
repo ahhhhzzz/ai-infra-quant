@@ -9,11 +9,12 @@ def test_broker_and_provider_statuses_are_truthful(client: TestClient) -> None:
     assert by_name["paper"]["implementation_status"] == "NOT_IMPLEMENTED"
     assert by_name["futu"]["connection_status"] == "UNAVAILABLE"
     assert by_name["eastmoney"]["implementation_status"] == "NOT_IMPLEMENTED"
-    for path in (
-        "/api/v1/market-data/providers",
-        "/api/v1/fundamental-data/providers",
-        "/api/v1/event-data/providers",
-    ):
+    market_data = client.get("/api/v1/market-data/providers").json()["items"]
+    market_data_by_name = {item["name"]: item for item in market_data}
+    assert market_data_by_name["futu"]["implementation_status"] == "SUPPORTED"
+    assert market_data_by_name["futu"]["connection_status"] == "UNKNOWN"
+    assert market_data_by_name["none"]["implementation_status"] == "UNAVAILABLE"
+    for path in ("/api/v1/fundamental-data/providers", "/api/v1/event-data/providers"):
         item = client.get(path).json()["items"][0]
         assert item["name"] == "none"
         assert item["implementation_status"] == "UNAVAILABLE"
