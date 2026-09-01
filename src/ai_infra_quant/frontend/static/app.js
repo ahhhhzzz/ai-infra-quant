@@ -1,5 +1,9 @@
 const REFRESH_INTERVAL_SECONDS = 60;
 const API_BASE = "/api/v1";
+const DAILY_HISTORY_LIMIT = 1300;
+const DAILY_INCREMENTAL_LIMIT = 5;
+const MINUTE_HISTORY_DAYS = 30;
+const MINUTE_INCREMENTAL_DAYS = 2;
 
 let watchlistSecurities = [];
 let selectedSecurity = null;
@@ -17,9 +21,13 @@ let chartResizeObserver = null;
 let stateSnapshot = null;
 let dailySnapshot = null;
 let minuteSnapshot = null;
+let fullHistorySecurityId = null;
+let dailyCache = {
+  securityId: null,
+  barsBySession: new Map(),
+};
 let minuteCache = {
   securityId: null,
-  sessionDate: null,
   barsByInterval: new Map(),
 };
 
@@ -243,7 +251,16 @@ const volumeBar = (bar, time) => ({
   color: Number(bar.close) >= Number(bar.open) ? "rgba(38, 166, 154, .55)" : "rgba(239, 83, 80, .55)",
 });
 
-const renderChart = () => {
+const setRecentViewport = (barCount) => {
+  if (!chart || barCount === 0) return;
+  const recentBars = activeTimeframe === "daily" ? 252 : 900;
+  chart.timeScale().setVisibleLogicalRange({
+    from: Math.max(0, barCount - recentBars),
+    to: barCount + 2,
+  });
+};
+
+const renderChart = ({ resetViewport = false } = {}) => {
   if (!chart || !candleSeries || !volumeSeries || !selectedSecurity) return;
   const timeZone = stateSnapshot?.market_timezone
     || dailySnapshot?.market_timezone
@@ -253,7 +270,7 @@ const renderChart = () => {
 
   if (activeTimeframe === "daily") {
     element("#chart-caption").textContent = "Completed daily OHLCV · market-local sessions";
-    const bars = dailySnapshot?.status === "AVAILABLE" ? dailySnapshot.bars : [];
+    const bars = dailySnapshot?.bars || [];
     if (!bars.length) {
       clearChart();
       showChartMessage(
@@ -265,14 +282,14 @@ const renderChart = () => {
     candleSeries.setData(bars.map((bar) => numericBar(bar, bar.session_date)));
     volumeSeries.setData(bars.map((bar) => volumeBar(bar, bar.session_date)));
   } else {
-    element("#chart-caption").textContent = "Completed 1-minute OHLCV · current session";
-    const bars = minuteSnapshot?.status === "AVAILABLE" ? minuteSnapshot.bars : [];
+    element("#chart-caption").textContent = "Completed 1-minute OHLCV · recent 30 calendar days";
+    const bars = minuteSnapshot?.bars || [];
     if (!bars.length) {
       clearChart();
       const currentState = stateSnapshot?.market_state || "UNKNOWN";
       showChartMessage(
         "1分钟行情暂不可用",
-        `当前市场：${currentState} · ${minuteSnapshot?.reason || "No completed current-session candles."}`,
+        `当前市场：${currentState} · ${minuteSnapshot?.reason || "No completed recent candles."}`,
       );
       return;
     }
@@ -287,7 +304,9 @@ const renderChart = () => {
     volumeSeries.setData(volumeData);
   }
   hideChartMessage();
-  chart.timeScale().fitContent();
+  if (resetViewport) setRecentViewport(activeTimeframe === "daily"
+    ? dailySnapshot.bars.length
+    : minuteSnapshot.bars.length);
 };
 
 const renderSecurityHeader = () => {
@@ -302,9 +321,13 @@ const resetMarketView = () => {
   stateSnapshot = null;
   dailySnapshot = null;
   minuteSnapshot = null;
+  fullHistorySecurityId = null;
+  dailyCache = {
+    securityId: selectedSecurity?.id || null,
+    barsBySession: new Map(),
+  };
   minuteCache = {
     securityId: selectedSecurity?.id || null,
-    sessionDate: null,
     barsByInterval: new Map(),
   };
   element("#latest-price").textContent = "—";
@@ -352,34 +375,107 @@ const renderStateFailure = (reason) => {
   return reason;
 };
 
-const renderDaily = (data) => {
-  dailySnapshot = data.status === "AVAILABLE" ? data : { ...data, bars: [] };
+const renderDaily = (data, fullHistory) => {
+  if (dailyCache.securityId !== data.security_id) {
+    dailyCache = { securityId: data.security_id, barsBySession: new Map() };
+  }
+  if (fullHistory) dailyCache.barsBySession.clear();
+  if (data.status === "AVAILABLE") {
+    for (const bar of data.bars) dailyCache.barsBySession.set(bar.session_date, bar);
+  }
+  const sortedBars = [...dailyCache.barsBySession.values()]
+    .sort((left, right) => left.session_date.localeCompare(right.session_date))
+    .slice(-DAILY_HISTORY_LIMIT);
+  dailyCache.barsBySession = new Map(sortedBars.map((bar) => [bar.session_date, bar]));
+  dailySnapshot = { ...data, bars: sortedBars };
   setStatus("#daily-status", data.status);
-  element("#latest-daily-session").textContent = data.latest_completed_daily_session || "—";
+  element("#latest-daily-session").textContent = sortedBars.at(-1)?.session_date || "—";
 };
 
-const renderDailyFailure = (reason) => {
-  dailySnapshot = { status: "PROVIDER_ERROR", bars: [], reason };
+const renderDailyFailure = (reason, fullHistory) => {
+  if (fullHistory) dailyCache.barsBySession.clear();
+  const bars = [...dailyCache.barsBySession.values()];
+  dailySnapshot = { status: "PROVIDER_ERROR", bars, reason };
   setStatus("#daily-status", "PROVIDER_ERROR");
-  element("#latest-daily-session").textContent = "—";
+  element("#latest-daily-session").textContent = bars.at(-1)?.session_date || "—";
   return reason;
 };
 
-const renderMinute = (data) => {
-  if (minuteCache.securityId !== data.security_id || minuteCache.sessionDate !== data.session_date) {
+const marketLocalWindowStart = (retrievedAt, timeZone, days) => {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+  const parts = Object.fromEntries(formatter.formatToParts(new Date(retrievedAt))
+    .filter((part) => part.type !== "literal")
+    .map((part) => [part.type, Number(part.value)]));
+  const localTarget = new Date(Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day - days,
+    parts.hour,
+    parts.minute,
+    parts.second,
+  ));
+  const targetParts = {
+    year: localTarget.getUTCFullYear(),
+    month: localTarget.getUTCMonth() + 1,
+    day: localTarget.getUTCDate(),
+    hour: localTarget.getUTCHours(),
+    minute: localTarget.getUTCMinutes(),
+    second: localTarget.getUTCSeconds(),
+  };
+  let utcGuess = localTarget.getTime();
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const actual = Object.fromEntries(formatter.formatToParts(new Date(utcGuess))
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, Number(part.value)]));
+    const targetClock = Date.UTC(
+      targetParts.year,
+      targetParts.month - 1,
+      targetParts.day,
+      targetParts.hour,
+      targetParts.minute,
+      targetParts.second,
+    );
+    const actualClock = Date.UTC(
+      actual.year,
+      actual.month - 1,
+      actual.day,
+      actual.hour,
+      actual.minute,
+      actual.second,
+    );
+    utcGuess += targetClock - actualClock;
+  }
+  return utcGuess;
+};
+
+const renderMinute = (data, fullHistory) => {
+  if (minuteCache.securityId !== data.security_id) {
     minuteCache = {
       securityId: data.security_id,
-      sessionDate: data.session_date,
       barsByInterval: new Map(),
     };
   }
-
+  if (fullHistory) minuteCache.barsByInterval.clear();
   if (data.status === "AVAILABLE") {
     for (const bar of data.bars) minuteCache.barsByInterval.set(bar.interval_start, bar);
-  } else {
-    minuteCache.barsByInterval.clear();
   }
-
+  const cutoff = marketLocalWindowStart(
+    data.window_end || data.retrieved_at,
+    data.market_timezone,
+    MINUTE_HISTORY_DAYS,
+  );
+  for (const [intervalStart] of minuteCache.barsByInterval) {
+    if (Date.parse(intervalStart) < cutoff) minuteCache.barsByInterval.delete(intervalStart);
+  }
   minuteSnapshot = {
     ...data,
     bars: [...minuteCache.barsByInterval.values()].sort((left, right) =>
@@ -392,9 +488,11 @@ const renderMinute = (data) => {
   );
 };
 
-const renderMinuteFailure = (reason) => {
-  minuteCache.barsByInterval.clear();
-  minuteSnapshot = { status: "PROVIDER_ERROR", bars: [], reason };
+const renderMinuteFailure = (reason, fullHistory) => {
+  if (fullHistory) minuteCache.barsByInterval.clear();
+  const bars = [...minuteCache.barsByInterval.values()]
+    .sort((left, right) => left.interval_start.localeCompare(right.interval_start));
+  minuteSnapshot = { status: "PROVIDER_ERROR", bars, reason };
   setStatus("#minute-status", "PROVIDER_ERROR");
   element("#latest-minute-at").textContent = "—";
   return reason;
@@ -468,11 +566,16 @@ const refreshSelectedSecurity = async (_trigger) => {
   setRefreshLoading(true);
 
   const basePath = `${API_BASE}/market-data/securities/${securityId}`;
+  const fullHistory = _trigger === "security-switch" || fullHistorySecurityId !== securityId;
+  const dailyLimit = fullHistory ? DAILY_HISTORY_LIMIT : DAILY_INCREMENTAL_LIMIT;
+  const minuteLookbackDays = fullHistory ? MINUTE_HISTORY_DAYS : MINUTE_INCREMENTAL_DAYS;
   try {
     const results = await Promise.allSettled([
       api(`${basePath}/state`, { signal: request.controller.signal }),
-      api(`${basePath}/daily-bars?limit=120`, { signal: request.controller.signal }),
-      api(`${basePath}/minute-bars`, { signal: request.controller.signal }),
+      api(`${basePath}/daily-bars?limit=${dailyLimit}`, { signal: request.controller.signal }),
+      api(`${basePath}/minute-bars?lookback_days=${minuteLookbackDays}`, {
+        signal: request.controller.signal,
+      }),
     ]);
 
     if (
@@ -480,6 +583,7 @@ const refreshSelectedSecurity = async (_trigger) => {
       || request.generation !== requestGeneration
       || selectedSecurity?.id !== request.securityId
     ) return;
+    if (fullHistory) fullHistorySecurityId = securityId;
 
     const reasons = [];
     const state = fulfilledValue(results[0]);
@@ -494,21 +598,27 @@ const refreshSelectedSecurity = async (_trigger) => {
     }
 
     if (daily) {
-      renderDaily(daily);
+      renderDaily(daily, fullHistory);
       if (daily.reason) reasons.push(`Daily: ${daily.reason}`);
     } else {
-      reasons.push(renderDailyFailure(rejectedReason(results[1]) || "Daily data unavailable"));
+      reasons.push(renderDailyFailure(
+        rejectedReason(results[1]) || "Daily data unavailable",
+        fullHistory,
+      ));
     }
 
     if (minute) {
-      renderMinute(minute);
+      renderMinute(minute, fullHistory);
       if (minute.reason) reasons.push(`1 minute: ${minute.reason}`);
     } else {
-      reasons.push(renderMinuteFailure(rejectedReason(results[2]) || "Minute data unavailable"));
+      reasons.push(renderMinuteFailure(
+        rejectedReason(results[2]) || "Minute data unavailable",
+        fullHistory,
+      ));
     }
 
     element("#market-data-reason").textContent = [...new Set(reasons)].join(" · ");
-    renderChart();
+    renderChart({ resetViewport: fullHistory });
   } finally {
     if (activeRequest === request) {
       activeRequest = null;
@@ -659,7 +769,7 @@ for (const tab of document.querySelectorAll(".timeframe-tab")) {
       candidate.classList.toggle("active", selected);
       candidate.setAttribute("aria-selected", String(selected));
     }
-    renderChart();
+    renderChart({ resetViewport: true });
   });
 }
 

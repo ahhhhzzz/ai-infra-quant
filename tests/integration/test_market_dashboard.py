@@ -145,7 +145,7 @@ def test_dashboard_exposes_truthful_capability_and_empty_states() -> None:
     for status_id in ("quote-status", "market-status", "daily-status", "minute-status"):
         assert f'id="{status_id}"' in page
     assert "1分钟行情暂不可用" in source
-    assert 'dailySnapshot = data.status === "AVAILABLE" ? data : { ...data, bars: [] }' in source
+    assert "dailySnapshot = { ...data, bars: sortedBars }" in source
     assert "minuteCache.barsByInterval.clear()" in source
     assert ".status-not-entitled" in css
     assert ".status-provider-error" in css
@@ -164,3 +164,46 @@ def test_frontend_has_no_fake_market_values_or_forbidden_controls() -> None:
     assert "closing price" not in lowered
     assert "today's close" not in lowered
     assert not re.search(r'latest_price\s*:\s*["\']?\d', owned_sources)
+
+
+def test_dashboard_full_history_and_incremental_requests_are_bounded() -> None:
+    source = _source(APP_JS)
+
+    for required in (
+        "const DAILY_HISTORY_LIMIT = 1300",
+        "const DAILY_INCREMENTAL_LIMIT = 5",
+        "const MINUTE_HISTORY_DAYS = 30",
+        "const MINUTE_INCREMENTAL_DAYS = 2",
+        'const fullHistory = _trigger === "security-switch" '
+        "|| fullHistorySecurityId !== securityId",
+        "daily-bars?limit=${dailyLimit}",
+        "minute-bars?lookback_days=${minuteLookbackDays}",
+    ):
+        assert required in source
+    assert 'refreshSelectedSecurity("automatic")' in source
+    assert 'refreshSelectedSecurity("visibility-restored")' in source
+    assert 'refreshSelectedSecurity("manual")' in source
+    assert "if (fullHistory) fullHistorySecurityId = securityId" in source
+
+
+def test_dashboard_history_caches_dedupe_sort_and_prune() -> None:
+    source = _source(APP_JS)
+
+    assert "dailyCache.barsBySession.set(bar.session_date, bar)" in source
+    assert ".slice(-DAILY_HISTORY_LIMIT)" in source
+    assert "minuteCache.barsByInterval.set(bar.interval_start, bar)" in source
+    assert "marketLocalWindowStart(" in source
+    assert "Date.parse(intervalStart) < cutoff" in source
+    assert "minuteCache.barsByInterval.delete(intervalStart)" in source
+    assert "left.interval_start.localeCompare(right.interval_start)" in source
+    assert "if (fullHistory) minuteCache.barsByInterval.clear()" in source
+
+
+def test_automatic_refresh_preserves_manual_chart_viewport() -> None:
+    source = _source(APP_JS)
+
+    assert "setVisibleLogicalRange" in source
+    assert 'recentBars = activeTimeframe === "daily" ? 252 : 900' in source
+    assert "renderChart({ resetViewport: fullHistory })" in source
+    assert "renderChart({ resetViewport: true })" in source
+    assert "fitContent()" not in source

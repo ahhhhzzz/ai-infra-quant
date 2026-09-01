@@ -2,14 +2,16 @@
 
 AI Infra Quant is a local-first, single-user, read-only quantitative research and investment
 decision-support tool. Its authoritative future direction is defined in `docs/ROADMAP.md`: daily
-plus current-session completed 1-minute market data, a broker-style dashboard, approximately
+plus recent completed 1-minute market data, a broker-style dashboard, approximately
 60-second refresh/recalculation, and a dual-timeframe Composite Quant Score. Daily and 1-minute
 charts are separate views.
 
 TASK-003 established a bounded Futu OpenD proof of concept using quote-market-data APIs only.
 TASK-004 exposes that provider through three provider-neutral, read-through FastAPI endpoints for
-market state, completed daily bars, and completed current-session 1-minute bars. TASK-005 adds the
-local, market-first Dashboard on top of those endpoints. It does not connect to brokerage-account
+market state, completed daily bars, and completed 1-minute bars. TASK-005 adds the local,
+market-first Dashboard on top of those endpoints. TASK-005B expands its bounded chart history to
+approximately five trading years of Daily K and 30 market-local calendar days of minute K. It does
+not connect to brokerage-account
 state. The application never reads real-account facts, imports or reconciles real trades, or sends
 a broker command. The user performs every real trade manually in the broker's official client.
 
@@ -33,9 +35,13 @@ Open `http://127.0.0.1:8000`. With the safe default `MARKET_DATA_PROVIDER=none`,
 calls remain disabled; the paper broker is only a non-operational historical descriptor.
 
 The homepage uses the canonical Watchlist to select AVGO, VRT, or HK.09698 and shows latest price,
-market state, separate completed daily and current-session 1-minute candlestick/volume views,
-provider timestamps/status, manual refresh, and a non-overlapping 60-second visible-page refresh
-cycle. TradingView Lightweight Charts 5.2.1 is vendored under the frontend static assets, so no
+market state, separate completed daily and recent 1-minute candlestick/volume views, provider
+timestamps/status, manual refresh, and a non-overlapping 60-second visible-page refresh cycle. A
+full Security load requests up to 1300 completed Daily bars and 30 calendar days of minute bars;
+ordinary refreshes request only five Daily bars and two minute-history days, then deduplicate and
+prune the browser caches without resetting the user's viewport. US minute history uses Futu
+`Session.ALL` (overnight, pre-market, regular, and after-hours provider bars); HK retains normal HK
+sessions. TradingView Lightweight Charts 5.2.1 is vendored under the frontend static assets, so no
 runtime CDN or frontend build step is required. Its Apache-2.0 license, NOTICE, and visible
 TradingView attribution are preserved with the vendored asset.
 
@@ -73,8 +79,8 @@ The TASK-004 API surface is:
 
 ```text
 GET /api/v1/market-data/securities/{security_id}/state
-GET /api/v1/market-data/securities/{security_id}/daily-bars?limit=120
-GET /api/v1/market-data/securities/{security_id}/minute-bars
+GET /api/v1/market-data/securities/{security_id}/daily-bars?limit=1300
+GET /api/v1/market-data/securities/{security_id}/minute-bars?lookback_days=30
 ```
 
 Alembic selects its database URL in this order: an explicit
@@ -115,6 +121,7 @@ ORM metadata. A local development database created by the earlier metadata-drive
 recreated before running this remediated revision. The application never deletes a database.
 
 Phase 1 remains intentionally limited and has passed independent review. TASK-004 adds the first
-Phase 2 market-data backend, and TASK-005 adds only its read-only Dashboard client. No PaperBroker,
+Phase 2 market-data backend, TASK-005 adds its read-only Dashboard client, and TASK-005B adds only
+bounded paged chart history and incremental refresh. No market-data persistence, PaperBroker,
 paper fill/order, strategy calculation, Composite Quant Score, backtest, market-data persistence,
 or real-order route was added.

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
+from types import SimpleNamespace
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -13,7 +15,12 @@ from ai_infra_quant.core.domain.market_data import (
     MinuteBar,
     QuoteSnapshot,
 )
-from ai_infra_quant.integrations.futu_quote.adapter import FutuQuoteAdapter, FutuSdkBindings
+from ai_infra_quant.integrations.futu_quote import adapter as adapter_module
+from ai_infra_quant.integrations.futu_quote.adapter import (
+    FutuQuoteAdapter,
+    FutuSdkBindings,
+    load_futu_sdk,
+)
 from ai_infra_quant.integrations.futu_quote.symbols import POC_SECURITIES, futu_code_for
 
 FIXED_NOW = datetime(2026, 9, 1, 14, 35, 30, tzinfo=UTC)
@@ -33,6 +40,8 @@ class FakeTable:
 class FakeQuoteContext:
     def __init__(self) -> None:
         self.closed = False
+        self.history_calls: list[dict[str, object]] = []
+        self.history_pages: dict[tuple[object, object | None], tuple[object, object, object]] = {}
         self.expected_code = "US.AVGO"
         self.snapshot_result: tuple[object, object] = (
             0,
@@ -82,11 +91,26 @@ class FakeQuoteContext:
         ktype: object,
         autype: object,
         max_count: int,
+        page_req_key: object | None,
+        session: object = "DEFAULT",
     ) -> tuple[object, object, object]:
         assert code == self.expected_code
         assert autype == "QFQ"
         assert max_count == 1000
         assert start <= end
+        self.history_calls.append(
+            {
+                "code": code,
+                "start": start,
+                "end": end,
+                "ktype": ktype,
+                "page_req_key": page_req_key,
+                "session": session,
+            }
+        )
+        page = self.history_pages.get((ktype, page_req_key))
+        if page is not None:
+            return page
         return self.daily_result if ktype == "K_DAY" else self.minute_result
 
     def close(self) -> None:
@@ -116,6 +140,7 @@ def _adapter(
         k_day="K_DAY",
         k_1m="K_1M",
         au_qfq="QFQ",
+        session_all="ALL",
         sdk_version="test-sdk",
     )
     return FutuQuoteAdapter("127.0.0.1", 11111, bindings_loader=lambda: bindings, now=now)
@@ -187,7 +212,7 @@ def test_unfinished_minute_is_excluded_and_latest_is_not_daily_close() -> None:
     context = FakeQuoteContext()
     with _adapter(context) as adapter:
         quote_result = adapter.get_latest_quote(US_AVGO)
-        minute_result = adapter.get_current_session_minute_bars(US_AVGO)
+        minute_result = adapter.get_recent_minute_bars(US_AVGO, 1)
         daily_result = adapter.get_daily_bars(US_AVGO)
 
     assert isinstance(minute_result.data, tuple)
@@ -348,3 +373,215 @@ def test_provider_status_is_explicit_before_and_during_context() -> None:
         assert result.data is not None
         assert result.data.quote_context_open is True
         assert result.data.sdk_version == "test-sdk"
+
+
+def test_lazy_sdk_bindings_include_official_session_all(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sdk = SimpleNamespace(
+        OpenQuoteContext=object,
+        RET_OK=0,
+        KLType=SimpleNamespace(K_DAY="K_DAY", K_1M="K_1M"),
+        AuType=SimpleNamespace(QFQ="QFQ"),
+        Session=SimpleNamespace(ALL="ALL"),
+        __version__="test-sdk",
+    )
+    monkeypatch.setattr(adapter_module, "import_module", lambda _name: sdk)
+
+    bindings = load_futu_sdk()
+
+    assert bindings.session_all == "ALL"
+
+
+def test_us_minute_history_uses_session_all_and_hk_omits_it() -> None:
+    us_context = FakeQuoteContext()
+    with _adapter(us_context) as adapter:
+        adapter.get_recent_minute_bars(US_AVGO, 30)
+
+    us_call = us_context.history_calls[0]
+    assert us_call["session"] == "ALL"
+    assert us_call["page_req_key"] is None
+    assert us_call["start"] == "2026-08-01"
+
+    hk_context = FakeQuoteContext()
+    hk_context.expected_code = HK_09698.display_symbol
+    with _adapter(hk_context) as adapter:
+        adapter.get_recent_minute_bars(HK_09698, 30)
+
+    hk_call = hk_context.history_calls[0]
+    assert hk_call["session"] == "DEFAULT"
+    assert hk_call["start"] == "2026-08-02"
+
+
+def test_hk_recent_minute_history_keeps_provider_returned_multi_day_sessions() -> None:
+    context = FakeQuoteContext()
+    context.expected_code = HK_09698.display_symbol
+    context.minute_result = (
+        0,
+        FakeTable(
+            [
+                _bar("2026-08-31 10:00:00", close="350.00"),
+                _bar("2026-09-01 10:34:00", close="351.00"),
+            ]
+        ),
+        None,
+    )
+
+    with _adapter(context) as adapter:
+        result = adapter.get_recent_minute_bars(HK_09698, 2)
+
+    assert result.status is DataAvailabilityStatus.AVAILABLE
+    assert result.data is not None
+    assert [
+        bar.interval_start.astimezone(ZoneInfo(HK_09698.market_timezone)).date()
+        for bar in result.data
+    ] == [date(2026, 8, 31), date(2026, 9, 1)]
+    assert context.history_calls[0]["session"] == "DEFAULT"
+
+
+def test_history_paging_passes_keys_sorts_and_deduplicates() -> None:
+    context = FakeQuoteContext()
+    context.history_pages = {
+        ("K_1M", None): (
+            0,
+            FakeTable(
+                [
+                    _bar("2026-08-31 20:01:00", close="351.00"),
+                    _bar("2026-08-31 20:02:00", close="352.00"),
+                ]
+            ),
+            b"page-2",
+        ),
+        ("K_1M", b"page-2"): (
+            0,
+            FakeTable(
+                [
+                    _bar("2026-08-31 20:00:00", close="350.00"),
+                    _bar("2026-08-31 20:01:00", close="351.50"),
+                ]
+            ),
+            None,
+        ),
+    }
+
+    with _adapter(context) as adapter:
+        result = adapter.get_recent_minute_bars(US_AVGO, 30)
+
+    assert [call["page_req_key"] for call in context.history_calls] == [None, b"page-2"]
+    assert result.status is DataAvailabilityStatus.AVAILABLE
+    assert result.data is not None
+    assert [bar.interval_start for bar in result.data] == sorted(
+        bar.interval_start for bar in result.data
+    )
+    assert len(result.data) == 3
+    assert result.data[1].close == Decimal("351.50")
+
+
+def test_later_history_page_failure_does_not_return_partial_available() -> None:
+    context = FakeQuoteContext()
+    context.history_pages = {
+        ("K_1M", None): (
+            0,
+            FakeTable([_bar("2026-08-31 20:00:00", close="350.00")]),
+            "page-2",
+        ),
+        ("K_1M", "page-2"): (1, "provider later-page failure", None),
+    }
+
+    with _adapter(context) as adapter:
+        result = adapter.get_recent_minute_bars(US_AVGO, 30)
+
+    assert result.status is DataAvailabilityStatus.PROVIDER_ERROR
+    assert result.data is None
+    assert result.reason == "provider later-page failure"
+
+
+def test_history_pagination_ceiling_prevents_provider_loop(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = FakeQuoteContext()
+    context.history_pages = {
+        ("K_1M", None): (
+            0,
+            FakeTable([_bar("2026-08-31 20:00:00", close="350.00")]),
+            "loop",
+        ),
+        ("K_1M", "loop"): (
+            0,
+            FakeTable([_bar("2026-08-31 20:00:00", close="350.00")]),
+            "loop",
+        ),
+    }
+    monkeypatch.setattr(adapter_module, "MAX_HISTORY_PAGES", 2)
+
+    with _adapter(context) as adapter:
+        result = adapter.get_recent_minute_bars(US_AVGO, 30)
+
+    assert result.status is DataAvailabilityStatus.PROVIDER_ERROR
+    assert result.reason == "historical K-line pagination exceeded 2 pages"
+    assert len(context.history_calls) == 2
+
+
+def test_rolling_minute_window_filters_boundary_and_unfinished_bar() -> None:
+    context = FakeQuoteContext()
+    context.minute_result = (
+        0,
+        FakeTable(
+            [
+                _bar("2026-08-02 10:34:00", close="349.00"),
+                _bar("2026-08-02 10:36:00", close="350.00"),
+                _bar("2026-08-31 20:00:00", close="351.00"),
+                _bar("2026-09-01 10:35:00", close="352.00"),
+            ]
+        ),
+        None,
+    )
+
+    with _adapter(context) as adapter:
+        result = adapter.get_recent_minute_bars(US_AVGO, 30)
+
+    assert result.data is not None
+    assert [bar.interval_start for bar in result.data] == [
+        datetime(2026, 8, 2, 14, 36, tzinfo=UTC),
+        datetime(2026, 9, 1, 0, 0, tzinfo=UTC),
+    ]
+    assert all(bar.interval_start >= FIXED_NOW - timedelta(days=30) for bar in result.data)
+    assert all(bar.interval_end <= FIXED_NOW for bar in result.data)
+
+
+def test_daily_five_year_limit_pages_past_one_thousand() -> None:
+    context = FakeQuoteContext()
+    first_dates = [
+        datetime(2022, 1, 1, tzinfo=UTC) + timedelta(days=offset) for offset in range(1000)
+    ]
+    second_dates = [
+        datetime(2024, 9, 26, tzinfo=UTC) + timedelta(days=offset) for offset in range(400)
+    ]
+    context.history_pages = {
+        ("K_DAY", None): (
+            0,
+            FakeTable(
+                [_bar(value.strftime("%Y-%m-%d 00:00:00"), close="350.00") for value in first_dates]
+            ),
+            "daily-2",
+        ),
+        ("K_DAY", "daily-2"): (
+            0,
+            FakeTable(
+                [
+                    _bar(value.strftime("%Y-%m-%d 00:00:00"), close="351.00")
+                    for value in second_dates
+                ]
+            ),
+            None,
+        ),
+    }
+
+    with _adapter(context) as adapter:
+        result = adapter.get_daily_bars(US_AVGO, 1300)
+
+    assert result.status is DataAvailabilityStatus.AVAILABLE
+    assert result.data is not None
+    assert len(result.data) == 1300
+    assert len(context.history_calls) == 2
+    assert result.data == tuple(sorted(result.data, key=lambda bar: bar.session_date))

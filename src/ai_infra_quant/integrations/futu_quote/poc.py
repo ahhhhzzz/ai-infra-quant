@@ -46,7 +46,7 @@ def run_live_poc(settings: Settings | None = None) -> dict[str, object]:
                     "latest": adapter.get_latest_quote(security),
                     "market_status": adapter.get_market_status(security),
                     "daily": adapter.get_daily_bars(security),
-                    "1m": adapter.get_current_session_minute_bars(security),
+                    "1m": adapter.get_recent_minute_bars(security, 30),
                 }
                 statuses.extend(result.status.value for result in capabilities.values())
                 security_reports[security.display_symbol] = capabilities

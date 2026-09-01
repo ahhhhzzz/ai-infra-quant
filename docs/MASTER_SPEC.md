@@ -25,7 +25,7 @@ Dashboard that consumes it.
 ## 1. Product objective and boundary
 
 Build a local-first, single-user quantitative research and decision-support tool. The product uses
-daily data and current-session completed 1-minute bars, presents a visible read-only dashboard, and
+daily data and a bounded recent window of completed 1-minute bars, presents a visible read-only dashboard, and
 refreshes/recalculates approximately every 60 seconds while that dashboard is visible.
 
 Initial tracked securities remain configurable:
@@ -49,7 +49,7 @@ acted on an advisory output.
 During an active visible dashboard session:
 
 1. obtain or refresh latest market state from an independent read-only provider;
-2. obtain daily bars and incremental current-session completed 1-minute bars;
+2. obtain paged Daily history and incremental completed 1-minute bars;
 3. validate provenance, timestamps, latency, completeness, and quality;
 4. calculate indicators and the approved Composite Quant Score model when one exists;
 5. rank tracked securities and calculate reference/risk state;
@@ -66,7 +66,7 @@ MVP transport; WebSocket or streaming infrastructure is not required.
 In scope:
 
 - local, single-process modular monolith;
-- daily market data and completed current-session 1-minute OHLCV;
+- bounded Daily history and recent 30-calendar-day completed 1-minute OHLCV;
 - latest price and market status;
 - separate daily/minute candlestick charts and volume;
 - indicators, score, ranking, and reference/risk state;
@@ -148,9 +148,10 @@ quote-market-data implementation. TASK-004 exposes it through a provider-neutral
 layer and three read-through API groups. OpenD availability, login, entitlements, latency, and
 US/HK live observations remain environmental facts.
 
-Daily data remains supported. The minute MVP uses only completed 1-minute bars from the current
-trading day. Daily and 1-minute bars are displayed in separate coordinate systems selected by a
-timeframe control.
+Daily data remains supported with a bounded 1300-session Dashboard request. The minute Dashboard
+uses only completed provider bars from a rolling 30 market-local calendar-day window. US history
+uses Futu `Session.ALL`; HK keeps normal provider sessions. Daily and 1-minute bars are displayed
+in separate coordinate systems selected by a timeframe control.
 
 At minimum, canonical state distinguishes:
 
@@ -183,8 +184,8 @@ Contract and explicit approval are required before score implementation.
 
 ## 9. Dashboard contract
 
-The first usable dashboard shows a security selector, latest price, market status, daily chart,
-current-day completed 1-minute chart, volume, Composite Quant Score, security ranking,
+The first usable dashboard shows a security selector, latest price, market status, bounded Daily
+history, recent completed 1-minute history, volume, Composite Quant Score, security ranking,
 reference/risk state, timestamps, and explicit missing/delayed/stale/error status. It contains no
 real-order control and makes no claim that the user executed a recommendation.
 
@@ -228,11 +229,10 @@ provenance, freshness, Decimal, UTC, and exclusions; update documentation/eviden
 results; and stop.
 
 TASK-003 implements the bounded Futu quote-only provider PoC. TASK-004 registers only the market
-state, completed daily-bar, and completed current-session 1-minute-bar API groups. TASK-005 adds the
-market-first Dashboard with separate daily/minute candle and volume views, truthful capability
-states, IANA market-time labels, manual refresh, and a guarded visible-page 60-second refresh cycle.
-It adds no persistence or route group, selects no score formula, and does not start later Phase 2
-features.
+state, completed daily-bar, and completed minute-bar API groups. TASK-005 adds the market-first
+Dashboard. TASK-005B expands only bounded chart history, US `Session.ALL` minute retrieval,
+historical paging, incremental refresh, and long-history viewport behavior. It adds no persistence
+or route group, selects no score formula, and does not start later Phase 2 features.
 
 ## 14. Accepted Phase 1 boundary
 

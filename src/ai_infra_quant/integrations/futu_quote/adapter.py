@@ -24,6 +24,10 @@ from ai_infra_quant.core.domain.market_data import (
 )
 from ai_infra_quant.integrations.futu_quote.symbols import futu_code_for
 
+MAX_HISTORY_PAGES = 100
+MAX_DAILY_BARS = 1500
+MAX_MINUTE_LOOKBACK_DAYS = 31
+
 
 class TabularResponse(Protocol):
     def to_dict(self, orient: str) -> list[dict[str, object]]: ...
@@ -42,6 +46,8 @@ class FutuQuoteContext(Protocol):
         ktype: object,
         autype: object,
         max_count: int,
+        page_req_key: object | None,
+        session: object = ...,
     ) -> tuple[object, object, object]: ...
 
     def close(self) -> None: ...
@@ -54,6 +60,7 @@ class FutuSdkBindings:
     k_day: object
     k_1m: object
     au_qfq: object
+    session_all: object
     sdk_version: str | None
 
 
@@ -70,6 +77,7 @@ def load_futu_sdk() -> FutuSdkBindings:
             k_day=sdk.KLType.K_DAY,
             k_1m=sdk.KLType.K_1M,
             au_qfq=sdk.AuType.QFQ,
+            session_all=sdk.Session.ALL,
             sdk_version=cast(str | None, getattr(sdk, "__version__", None)),
         )
     except AttributeError as exc:
@@ -187,20 +195,17 @@ class FutuQuoteAdapter:
     def get_daily_bars(
         self, security: MarketDataSecurity, limit: int = 10
     ) -> ProviderResult[tuple[DailyBar, ...]]:
-        if not 1 <= limit <= 260:
-            raise ValueError("daily bar limit must be between 1 and 260")
+        if not 1 <= limit <= MAX_DAILY_BARS:
+            raise ValueError(f"daily bar limit must be between 1 and {MAX_DAILY_BARS}")
         retrieved_at = self._retrieved_at()
         market_timezone = ZoneInfo(security.market_timezone)
         market_today = retrieved_at.astimezone(market_timezone).date()
-        call = self._history_call(
+        rows = self._history_rows(
             security,
             start=market_today - timedelta(days=max(14, limit * 2)),
             end=market_today,
             ktype=self._require_bindings().k_day,
         )
-        if isinstance(call, ProviderResult):
-            return cast(ProviderResult[tuple[DailyBar, ...]], call)
-        rows = _rows(call, retrieved_at)
         if isinstance(rows, ProviderResult):
             return cast(ProviderResult[tuple[DailyBar, ...]], rows)
         try:
@@ -227,12 +232,13 @@ class FutuQuoteAdapter:
                         market_status.data.provider_state,
                     )
                 )
-            bars = tuple(
-                _daily_bar(row, security, retrieved_at)
+            bars_by_session = {
+                session_date: _daily_bar(row, security, retrieved_at)
                 for row, session_date in rows_with_session_dates
                 if session_date < market_today
                 or (session_date == market_today and current_regular_session_closed)
-            )
+            }
+            bars = tuple(bars_by_session[key] for key in sorted(bars_by_session))
         except (KeyError, TypeError, ValueError) as exc:
             return _failure(DataAvailabilityStatus.INVALID, retrieved_at, _safe_reason(exc))
         if not bars:
@@ -253,47 +259,54 @@ class FutuQuoteAdapter:
             data=bars[-limit:],
         )
 
-    def get_current_session_minute_bars(
-        self, security: MarketDataSecurity
+    def get_recent_minute_bars(
+        self, security: MarketDataSecurity, lookback_days: int = 30
     ) -> ProviderResult[tuple[MinuteBar, ...]]:
+        if not 1 <= lookback_days <= MAX_MINUTE_LOOKBACK_DAYS:
+            raise ValueError(
+                f"minute lookback must be between 1 and {MAX_MINUTE_LOOKBACK_DAYS} days"
+            )
         retrieved_at = self._retrieved_at()
-        market_today = retrieved_at.astimezone(ZoneInfo(security.market_timezone)).date()
-        call = self._history_call(
+        market_timezone = ZoneInfo(security.market_timezone)
+        market_retrieved_at = retrieved_at.astimezone(market_timezone)
+        window_start = (market_retrieved_at - timedelta(days=lookback_days)).astimezone(UTC)
+        request_start = window_start.astimezone(market_timezone).date()
+        if security.market == "US":
+            request_start -= timedelta(days=1)
+        rows = self._history_rows(
             security,
-            start=market_today,
-            end=market_today,
+            start=request_start,
+            end=market_retrieved_at.date(),
             ktype=self._require_bindings().k_1m,
+            session=(self._require_bindings().session_all if security.market == "US" else None),
         )
-        if isinstance(call, ProviderResult):
-            return cast(ProviderResult[tuple[MinuteBar, ...]], call)
-        rows = _rows(call, retrieved_at)
         if isinstance(rows, ProviderResult):
             return cast(ProviderResult[tuple[MinuteBar, ...]], rows)
         try:
-            bars = []
+            bars_by_interval: dict[datetime, MinuteBar] = {}
             for row in rows:
                 interval_start = _provider_datetime(row["time_key"], security)
                 interval_end = interval_start + timedelta(minutes=1)
-                if (
-                    interval_start.astimezone(ZoneInfo(security.market_timezone)).date()
-                    != market_today
-                ):
+                if interval_start < window_start:
                     continue
                 if interval_end > retrieved_at:
                     continue
-                bars.append(_minute_bar(row, security, interval_start, interval_end, retrieved_at))
+                bars_by_interval[interval_start] = _minute_bar(
+                    row, security, interval_start, interval_end, retrieved_at
+                )
+            bars = tuple(bars_by_interval[key] for key in sorted(bars_by_interval))
         except (KeyError, TypeError, ValueError) as exc:
             return _failure(DataAvailabilityStatus.INVALID, retrieved_at, _safe_reason(exc))
         if not bars:
             return _failure(
                 DataAvailabilityStatus.UNAVAILABLE,
                 retrieved_at,
-                "no completed current-session 1-minute bars",
+                "no completed 1-minute bars in requested lookback window",
             )
         return ProviderResult(
             status=DataAvailabilityStatus.AVAILABLE,
             retrieved_at=retrieved_at,
-            data=tuple(bars),
+            data=bars,
         )
 
     def _call(self, method_name: str, code_list: list[str]) -> object | ProviderResult[Any]:
@@ -307,24 +320,57 @@ class FutuQuoteAdapter:
             return _provider_failure(retrieved_at, payload)
         return cast(object, payload)
 
-    def _history_call(
-        self, security: MarketDataSecurity, *, start: date, end: date, ktype: object
-    ) -> object | ProviderResult[Any]:
+    def _history_rows(
+        self,
+        security: MarketDataSecurity,
+        *,
+        start: date,
+        end: date,
+        ktype: object,
+        session: object | None = None,
+    ) -> list[Mapping[str, object]] | ProviderResult[Any]:
         retrieved_at = self._retrieved_at()
-        try:
-            ret, payload, _page_req_key = self._require_context().request_history_kline(
-                code=futu_code_for(security),
-                start=start.isoformat(),
-                end=end.isoformat(),
-                ktype=ktype,
-                autype=self._require_bindings().au_qfq,
-                max_count=1000,
-            )
-        except Exception as exc:
-            return _provider_failure(retrieved_at, exc)
-        if ret != self._require_bindings().ret_ok:
-            return _provider_failure(retrieved_at, payload)
-        return payload
+        page_req_key: object | None = None
+        combined_rows: list[Mapping[str, object]] = []
+        for _page_number in range(1, MAX_HISTORY_PAGES + 1):
+            try:
+                if session is None:
+                    ret, payload, next_page_req_key = self._require_context().request_history_kline(
+                        code=futu_code_for(security),
+                        start=start.isoformat(),
+                        end=end.isoformat(),
+                        ktype=ktype,
+                        autype=self._require_bindings().au_qfq,
+                        max_count=1000,
+                        page_req_key=page_req_key,
+                    )
+                else:
+                    ret, payload, next_page_req_key = self._require_context().request_history_kline(
+                        code=futu_code_for(security),
+                        start=start.isoformat(),
+                        end=end.isoformat(),
+                        ktype=ktype,
+                        autype=self._require_bindings().au_qfq,
+                        max_count=1000,
+                        page_req_key=page_req_key,
+                        session=session,
+                    )
+            except Exception as exc:
+                return _provider_failure(retrieved_at, exc)
+            if ret != self._require_bindings().ret_ok:
+                return _provider_failure(retrieved_at, payload)
+            page_rows = _rows(payload, retrieved_at)
+            if isinstance(page_rows, ProviderResult):
+                return page_rows
+            combined_rows.extend(page_rows)
+            if next_page_req_key is None:
+                return combined_rows
+            page_req_key = next_page_req_key
+        return _failure(
+            DataAvailabilityStatus.PROVIDER_ERROR,
+            retrieved_at,
+            f"historical K-line pagination exceeded {MAX_HISTORY_PAGES} pages",
+        )
 
     def _retrieved_at(self) -> datetime:
         value = self._now()

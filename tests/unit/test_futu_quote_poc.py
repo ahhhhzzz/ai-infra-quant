@@ -54,7 +54,10 @@ class FakeAdapter:
     def get_daily_bars(self, security: MarketDataSecurity) -> ProviderResult[str]:
         return _available(security)
 
-    def get_current_session_minute_bars(self, security: MarketDataSecurity) -> ProviderResult[str]:
+    def get_recent_minute_bars(
+        self, security: MarketDataSecurity, lookback_days: int
+    ) -> ProviderResult[str]:
+        assert lookback_days == 30
         return _available(security)
 
 

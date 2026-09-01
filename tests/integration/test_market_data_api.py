@@ -38,6 +38,7 @@ class FakeMarketDataProvider:
         self.closed = False
         self.enter_count = 0
         self.daily_limit: int | None = None
+        self.minute_lookback_days: int | None = None
         self.quote_status = DataAvailabilityStatus.AVAILABLE
         self.quote_reason: str | None = None
         self.quote_error = False
@@ -127,9 +128,10 @@ class FakeMarketDataProvider:
             data=bars,
         )
 
-    def get_current_session_minute_bars(
-        self, security: MarketDataSecurity
+    def get_recent_minute_bars(
+        self, security: MarketDataSecurity, lookback_days: int
     ) -> ProviderResult[tuple[MinuteBar, ...]]:
+        self.minute_lookback_days = lookback_days
         bars = tuple(
             MinuteBar(
                 security=security.display_symbol,
@@ -243,10 +245,14 @@ def test_daily_and_minute_routes_return_completed_canonical_bars(
     assert daily.json()["bars"][0]["provider_time"].endswith("Z")
     assert fake_provider.daily_limit == 1
     assert minute.json()["session_date"] == "2026-09-01"
+    assert minute.json()["lookback_calendar_days"] == 30
+    assert minute.json()["window_start"] == "2026-08-02T14:35:30Z"
+    assert minute.json()["window_end"] == "2026-09-01T14:35:30Z"
     assert minute.json()["latest_completed_minute_bar_at"] == "2026-09-01T14:35:00Z"
     assert all(bar["is_completed"] is True for bar in minute.json()["bars"])
     assert all(isinstance(bar["open"], str) for bar in minute.json()["bars"])
     assert "FakeMarketDataProvider" not in response_text(daily, minute)
+    assert fake_provider.minute_lookback_days == 30
 
 
 def response_text(*responses: object) -> str:
@@ -296,6 +302,7 @@ def test_provider_none_daily_and_minute_routes_are_structured(client: TestClient
 
 def test_security_not_found_unsupported_and_limit_validation_are_stable(
     market_client: TestClient,
+    fake_provider: FakeMarketDataProvider,
 ) -> None:
     missing = market_client.get(f"/api/v1/market-data/securities/{uuid4()}/state")
     assert missing.status_code == 404
@@ -315,7 +322,18 @@ def test_security_not_found_unsupported_and_limit_validation_are_stable(
     assert unsupported.json()["code"] == "MARKET_DATA_SECURITY_NOT_SUPPORTED"
 
     security_id = _security_ids(market_client)["US.AVGO"]
+    full_daily = market_client.get(
+        f"/api/v1/market-data/securities/{security_id}/daily-bars?limit=1300"
+    )
+    assert full_daily.status_code == 200
+    assert fake_provider.daily_limit == 1300
+
     invalid_limit = market_client.get(
-        f"/api/v1/market-data/securities/{security_id}/daily-bars?limit=261"
+        f"/api/v1/market-data/securities/{security_id}/daily-bars?limit=1501"
     )
     assert invalid_limit.status_code == 422
+
+    invalid_lookback = market_client.get(
+        f"/api/v1/market-data/securities/{security_id}/minute-bars?lookback_days=32"
+    )
+    assert invalid_lookback.status_code == 422

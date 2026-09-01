@@ -55,13 +55,13 @@ Only Phase 0 through Phase 4 are valid target phases.
 | MKT-003 | Futu OpenD quote-only APIs are selected for the bounded provider PoC | RETAINED | 2 | IMPLEMENTED | TASK-003 adapter and smoke runner |
 | MKT-004 | Live OpenD availability, login, entitlements, pricing, delay, and coverage remain truthful environmental evidence | RETAINED | 2 | DECISION_REQUIRED | TASK-003 live PoC result; Roadmap 3 |
 | MKT-005 | Initial tracked set is AVGO, VRT, HK.09698 with US/HK support | RETAINED | 2 | IMPLEMENTED | TASK-004 canonical Security resolution; Roadmap 3 |
-| MKT-006 | Daily OHLCV remains supported | RETAINED | 2 | IMPLEMENTED | TASK-004 daily-bars API; Roadmap 7; Database 4.3 |
-| MKT-007 | Current-session completed 1-minute OHLCV is supported | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-004 minute-bars API; Roadmap 4; Database 4.4 |
+| MKT-006 | Daily OHLCV remains supported with a bounded 1300-session Dashboard history | RETAINED | 2 | IMPLEMENTED | TASK-005B paged daily-bars API/Dashboard; Roadmap 7; Database 4.3 |
+| MKT-007 | Recent 30-calendar-day completed 1-minute OHLCV is supported | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-005B minute-bars API/Dashboard; API 5.4 |
 | MKT-008 | Unfinished minute bars are excluded | RETAINED | 2 | IMPLEMENTED | TASK-003 adapter tests; TASK-004 API; Roadmap 5 |
 | MKT-009 | Latest/intraday price is distinct from final daily close | RETAINED | 2 | IMPLEMENTED | TASK-004 state API/tests; Roadmap 5; Database 1.3 |
 | MKT-010 | Missing/delayed/stale/unavailable/error states are explicit | RETAINED | 2 | IMPLEMENTED | TASK-004 provider results/API tests; Roadmap 4–5 |
 | MKT-011 | No market value is fabricated | RETAINED | all | DOCUMENTED | `AGENTS.md`; Roadmap 5 |
-| MKT-012 | Minute retention policy is deferred to Phase 2 plan | RETAINED | 2 | DECISION_REQUIRED | Roadmap 4 |
+| MKT-012 | Dashboard minute window is bounded to recent 30 market-local calendar days without persistence | RETAINED | 2 | IMPLEMENTED | TASK-005B adapter/API/Dashboard tests |
 
 | ID | Dashboard requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
@@ -124,17 +124,19 @@ Only Phase 0 through Phase 4 are valid target phases.
 | REM-011 | Microservices, Kafka, distributed workers, Kubernetes, multi-tenancy, 24/7 execution | REMOVED_MTF-001 | OUT_OF_SCOPE |
 | REM-012 | Any authoritative phase after Phase 4 | REMOVED_MTF-001 | OUT_OF_SCOPE |
 
-Read-only current-session minute data and intraday score calculation are expressly not removed;
-they are non-executing Phase 2 research capabilities.
+Read-only recent minute data and intraday score calculation are expressly not removed; they are
+non-executing Phase 2 research capabilities.
 
 ## 8. Current implementation statement
 
 Phase 1 remains accepted with `119 passed` in independent GitHub Actions run `33458517601`.
 
 TASK-003 implements the Futu OpenD quote-only provider PoC. TASK-004 adds a provider-neutral
-read-through application service and the state, completed daily-bars, and completed current-session
-minute-bars APIs, with no production market-data persistence. TASK-005 adds the local read-only
+read-through application service and the state, completed daily-bars, and completed minute-bars
+APIs, with no production market-data persistence. TASK-005 adds the local read-only
 Dashboard with canonical security switching, separate daily/minute candle and volume views,
 market-local time labels, guarded 60-second polling, manual refresh, countdown, and visibility/race
-handling. No Composite Quant Score, ranking/risk calculation, paper behavior, or backtest behavior
-is implemented or claimed.
+handling. TASK-005B adds paged 1300-session Daily history, a rolling 30-calendar-day minute window,
+US `Session.ALL`, incremental cache refresh, and pannable long-history viewports. No persistence,
+Composite Quant Score, ranking/risk calculation, paper behavior, or backtest behavior is
+implemented or claimed.

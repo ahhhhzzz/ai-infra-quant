@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, replace
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from ai_infra_quant.application.unit_of_work import UnitOfWorkFactory
@@ -50,6 +50,9 @@ class MinuteBarsView:
     security: Security
     market_timezone: str
     session_date: str
+    lookback_calendar_days: int
+    window_start: datetime
+    window_end: datetime
     result: ProviderResult[tuple[MinuteBar, ...]]
 
 
@@ -111,18 +114,21 @@ class MarketDataQueries:
             result=result,
         )
 
-    def minute_bars(self, security_id: str) -> MinuteBarsView:
+    def minute_bars(self, security_id: str, lookback_days: int) -> MinuteBarsView:
         security, market_security = self._resolve_security(security_id)
         result = self._single_capability(
-            lambda provider: provider.get_current_session_minute_bars(market_security)
+            lambda provider: provider.get_recent_minute_bars(market_security, lookback_days)
         )
-        session_date = result.retrieved_at.astimezone(
-            ZoneInfo(market_security.market_timezone)
-        ).date()
+        market_timezone = ZoneInfo(market_security.market_timezone)
+        market_retrieved_at = result.retrieved_at.astimezone(market_timezone)
+        window_start = (market_retrieved_at - timedelta(days=lookback_days)).astimezone(UTC)
         return MinuteBarsView(
             security=security,
             market_timezone=market_security.market_timezone,
-            session_date=session_date.isoformat(),
+            session_date=market_retrieved_at.date().isoformat(),
+            lookback_calendar_days=lookback_days,
+            window_start=window_start,
+            window_end=result.retrieved_at,
             result=result,
         )
 

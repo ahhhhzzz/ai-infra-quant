@@ -68,6 +68,9 @@ class MinuteBarsRead(StrictSchema):
     provider: str
     status: DataAvailabilityStatus
     session_date: str
+    lookback_calendar_days: int
+    window_start: str
+    window_end: str
     retrieved_at: str
     latest_completed_minute_bar_at: str | None
     bars: list[MinuteBarRead]
@@ -165,6 +168,9 @@ def minute_bars_read(view: MinuteBarsView) -> MinuteBarsRead:
         provider=view.result.provider,
         status=view.result.status,
         session_date=view.session_date,
+        lookback_calendar_days=view.lookback_calendar_days,
+        window_start=_utc_string(view.window_start),
+        window_end=_utc_string(view.window_end),
         retrieved_at=_utc_string(view.result.retrieved_at),
         latest_completed_minute_bar_at=(
             None if not data else _utc_string(max(bar.interval_end for bar in data))

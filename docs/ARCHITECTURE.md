@@ -80,13 +80,16 @@ get_market_status()
 TASK-003 separately approved a minimal Futu OpenD quote-only adapter for the provider proof of
 concept. TASK-004 composes it behind a provider-neutral application query service and FastAPI
 presentation layer. It maps only the three explicit provider symbols to canonical quote,
-market-status, completed-daily, and completed-current-session-minute results. OpenD availability,
+market-status, completed-daily, and completed-minute results. OpenD availability,
 login, entitlements, and observed delay remain external facts and are never fabricated.
 
-TASK-005 consumes those provider-neutral responses directly from the local browser. The Dashboard
-uses locally vendored TradingView Lightweight Charts 5.2.1, renders daily and minute OHLCV in
-separate candle/volume panes, and formats chart timestamps with the canonical IANA market timezone.
-It adds no backend route group, provider dependency, or persistence.
+TASK-005 consumes those provider-neutral responses directly from the local browser. TASK-005B
+extends the existing routes with bounded historical K-line paging, a 1300-session Daily request,
+and a rolling 30-calendar-day minute window. US minute requests use Futu `Session.ALL`; HK requests
+retain normal HK sessions. The Dashboard uses locally vendored TradingView Lightweight Charts
+5.2.1, renders daily and minute OHLCV in separate candle/volume panes, and formats chart timestamps
+with the canonical IANA market timezone. It adds no backend route group, provider dependency, or
+persistence.
 
 The port is read-only and exposes no account identity, cash, position, order, trade, account matching,
 or command surface.
@@ -107,9 +110,10 @@ returns structured unavailability without attempting an external connection.
 - Raw observations are immutable or versioned with provenance.
 - No market value is fabricated.
 
-Daily bars remain supported. The first minute implementation uses only completed 1-minute bars
-from the current trading day. Unfinished minute bars are not returned as completed. Daily and
-1-minute bars are rendered in separate coordinate systems selected by a timeframe control.
+Daily bars remain supported with up to 1500 requested completed sessions. The Dashboard full load
+uses 1300 Daily bars and 30 market-local calendar days of completed minute bars. Unfinished minute
+bars are not returned as completed. Daily and 1-minute bars are rendered in separate coordinate
+systems selected by a timeframe control.
 
 Canonical responses distinguish:
 
@@ -126,11 +130,15 @@ labelled as a final daily close.
 ## 6. Dashboard refresh flow
 
 ```text
-visible page or manual refresh
+initial load or Security switch
+  -> request full bounded Daily/minute history
+  -> establish a recent pannable viewport
+
+visible page incremental or manual refresh
   -> if no request is active, request local market state
-  -> request completed daily and current-session minute data independently
+  -> request five completed daily bars and two calendar days of minute data independently
   -> adapter reads provider state and bars
-  -> return explicit data or per-capability error state
+  -> merge/deduplicate/prune browser caches or return explicit per-capability error state
   -> render selected daily or 1-minute chart
   -> reset approximately 60-second countdown
 ```

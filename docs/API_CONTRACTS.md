@@ -130,29 +130,36 @@ represented as the final daily close. Daily and minute responses expose the same
 
 ### 5.3 Daily bars
 
-`GET /market-data/securities/{security_id}/daily-bars` accepts `limit` from 1 through 260, default
-120. It returns provider/status/retrieval metadata, `latest_completed_daily_session`, and completed
+`GET /market-data/securities/{security_id}/daily-bars` accepts `limit` from 1 through 1500, default
+120. The Dashboard full load requests 1300 completed sessions, an approximation of five trading
+years. It returns provider/status/retrieval metadata, `latest_completed_daily_session`, and completed
 bars with market-local `session_date`, Decimal-string OHLCV, UTC `provider_time`, and
 `is_completed=true`. A current market-local session is included only when provider market state
 authoritatively identifies the regular session as closed; its UTC calendar date alone is never
 completion evidence.
 
-### 5.4 Current-session completed 1-minute bars
+### 5.4 Recent completed 1-minute bars
 
-`GET /market-data/securities/{security_id}/minute-bars` returns only completed 1-minute bars for
-the provider retrieval time's current market-local session. It includes provider/status,
-`session_date`, `retrieved_at`, `latest_completed_minute_bar_at`, and bars with UTC interval
-start/end, Decimal-string OHLCV, and `is_completed=true`. Unfinished bars are excluded.
+`GET /market-data/securities/{security_id}/minute-bars` accepts `lookback_days` from 1 through 31,
+default 30, and returns completed provider bars in that rolling market-local calendar window. It
+includes provider/status, the compatibility `session_date` (the retrieval market-local date),
+`lookback_calendar_days`, UTC `window_start`/`window_end`, `retrieved_at`,
+`latest_completed_minute_bar_at`, and bars with UTC interval start/end, Decimal-string OHLCV, and
+`is_completed=true`. Unfinished bars are excluded. US history uses Futu `Session.ALL`; HK history
+uses normal HK provider sessions. Historical K-line pages are bounded, combined chronologically,
+and deduplicated without returning partial history as AVAILABLE after a later-page error.
 
 Daily and minute responses remain separate and are rendered in separate chart coordinate systems.
-Full historical minute replay, ticks, and order-book history are not MVP contracts.
+Unbounded historical minute replay, ticks, and order-book history are not MVP contracts.
 
 ### 5.5 Dashboard refresh behavior
 
-TASK-005 performs three direct requests to the existing state, daily-bars, and minute-bars routes.
-It merges completed minute bars in browser memory by interval identity, keeps the timeframes
-separate, and uses `market_timezone` for IANA market-local labels. No aggregate dashboard endpoint
-is registered.
+TASK-005B keeps the same three direct routes. Initial load and Security switch request 1300 Daily
+bars and 30 calendar days of minute bars. Ordinary manual, automatic, and visibility-restored
+refreshes request only five Daily bars and two minute-history days, merge by `session_date` and
+`interval_start`, and prune the caches to their approved bounds. Refresh does not reset manual
+chart pan/zoom. The timeframes remain separate and use `market_timezone` for IANA market-local
+labels. No aggregate dashboard endpoint is registered.
 
 A future coherent aggregate dashboard response may include:
 
@@ -251,7 +258,7 @@ Phase-relevant tests must prove:
 - future routes are absent before approval;
 - Decimal strings, UTC, explicit missing states, and stable errors;
 - daily and minute series remain separate;
-- only completed current-session minute bars are returned;
+- only completed minute bars inside the requested bounded window are returned;
 - latest quote and daily close cannot be conflated;
 - polling cadence and provider latency are distinct;
 - no overlapping client polling, hidden-page pause, visible-page refresh, manual refresh/countdown;

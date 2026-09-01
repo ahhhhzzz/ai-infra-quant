@@ -30,7 +30,7 @@ broker-account or broker-write behavior.
 ## 2. Product operating model
 
 The product is local-first, single-user, and read-only with respect to external financial systems.
-It supports daily market data and completed 1-minute bars for the current trading session. During
+It supports daily market data and a bounded recent window of completed 1-minute bars. During
 an active visible dashboard session it refreshes or recalculates approximately every 60 seconds.
 
 The application may obtain market information from an independent read-only Market Data Provider,
@@ -63,8 +63,10 @@ initial securities; OpenD availability, login, quote entitlements, and observed 
 environmental live-verification facts.
 
 TASK-004 exposes that accepted quote-only adapter through provider-neutral FastAPI queries for
-current market state, completed daily bars, and current-session completed 1-minute bars. TASK-005
-adds the local read-only Dashboard over those routes, including page-local guarded polling. The
+current market state, completed daily bars, and completed 1-minute bars. TASK-005 adds the local
+read-only Dashboard over those routes, including page-local guarded polling. TASK-005B expands the
+same routes to bounded paged history: about five trading years of Daily K and 30 market-local
+calendar days of minute K, with Futu `Session.ALL` for US minute history and normal HK sessions. The
 default provider mode remains offline (`none`); `futu` is explicit configuration. No market-data
 persistence, backend background polling, aggregate Dashboard route, or score behavior is
 introduced.
@@ -89,7 +91,7 @@ The first usable product prioritizes a broker-style read-only dashboard with:
 - security selector;
 - latest price and market status;
 - daily candlestick chart;
-- current trading day's completed 1-minute candlestick chart;
+- recent 30-calendar-day completed 1-minute candlestick chart;
 - volume;
 - Composite Quant Score;
 - tracked-security ranking;
@@ -100,10 +102,9 @@ The first usable product prioritizes a broker-style read-only dashboard with:
 Daily and 1-minute candles are separate timeframes and must never be overlaid in the same coordinate
 system. A timeframe tab or button switches between them.
 
-The first minute-bar implementation requires only the current trading day's completed 1-minute
-bars. Full historical minute replay, tick history, order-book history, and market-microstructure
-storage are not MVP requirements. Minute-data retention is deferred to the Phase 2 implementation
-plan.
+TASK-005B supersedes the first current-day-only minute display with a bounded rolling 30
+market-local calendar-day window. Unbounded historical minute replay, tick history, order-book
+history, market-microstructure storage, and minute persistence are not MVP requirements.
 
 ## 5. Refresh and time semantics
 
@@ -179,7 +180,7 @@ Highest priority is a visible, usable product. Planned scope includes:
 - independent Market Data Provider integration;
 - AVGO, VRT, and HK.09698;
 - latest price and market status;
-- daily OHLCV and current-session completed 1-minute OHLCV;
+- approximately 1300 completed Daily OHLCV sessions and recent 30-calendar-day minute OHLCV;
 - separate daily/1-minute chart switching;
 - approximately 60-second polling and recalculation;
 - manual refresh and automatic-refresh countdown;
@@ -190,9 +191,9 @@ Highest priority is a visible, usable product. Planned scope includes:
 
 The exact Composite Score formula requires a separate Task Contract and explicit approval. Complex
 accounting must not block the visible deliverables. TASK-004 implements the market-data backend;
-TASK-005 implements the read-only Dashboard, separate daily/minute candle and volume views, and
-visible-page refresh behavior. Composite Score, ranking, and reference/risk calculation remain
-unimplemented.
+TASK-005 implements the read-only Dashboard; TASK-005B adds bounded historical paging, US 24H
+minute semantics, incremental browser-cache refresh, and pannable long-history viewports.
+Composite Score, ranking, and reference/risk calculation remain unimplemented.
 
 ### Phase 3 — Quant Research Expansion & Lightweight Paper Tracking
 

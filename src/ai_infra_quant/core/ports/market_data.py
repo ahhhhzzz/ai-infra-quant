@@ -90,6 +90,6 @@ class ReadOnlyMarketDataProvider(Protocol):
         self, security: MarketDataSecurity, limit: int
     ) -> ProviderResult[tuple[DailyBar, ...]]: ...
 
-    def get_current_session_minute_bars(
-        self, security: MarketDataSecurity
+    def get_recent_minute_bars(
+        self, security: MarketDataSecurity, lookback_days: int
     ) -> ProviderResult[tuple[MinuteBar, ...]]: ...

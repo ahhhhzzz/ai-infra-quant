@@ -56,7 +56,7 @@ def get_daily_bars(
     security_id: UUID,
     request: Request,
     container: ContainerDep,
-    limit: int = Query(default=120, ge=1, le=260),
+    limit: int = Query(default=120, ge=1, le=1500),
 ) -> DailyBarsRead | JSONResponse:
     try:
         return daily_bars_read(container.market_data_queries.daily_bars(str(security_id), limit))
@@ -69,8 +69,11 @@ def get_minute_bars(
     security_id: UUID,
     request: Request,
     container: ContainerDep,
+    lookback_days: int = Query(default=30, ge=1, le=31),
 ) -> MinuteBarsRead | JSONResponse:
     try:
-        return minute_bars_read(container.market_data_queries.minute_bars(str(security_id)))
+        return minute_bars_read(
+            container.market_data_queries.minute_bars(str(security_id), lookback_days)
+        )
     except (MarketDataSecurityNotFound, MarketDataSecurityNotSupported) as exc:
         return _security_problem(request, exc)
