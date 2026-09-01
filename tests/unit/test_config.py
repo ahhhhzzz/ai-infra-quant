@@ -13,6 +13,8 @@ def test_safe_defaults() -> None:
     assert settings.auto_execution is False
     assert settings.active_broker == "paper"
     assert settings.market_data_provider == "none"
+    assert settings.futu_opend_host == "127.0.0.1"
+    assert settings.futu_opend_port == 11111
 
 
 @pytest.mark.parametrize(
@@ -26,6 +28,8 @@ def test_safe_defaults() -> None:
         ({"initial_base_currency": "HK"}, "three uppercase"),
         ({"initial_portfolio_name": "   "}, "portfolio name"),
         ({"valuation_timezone": "Not/A_Timezone"}, "IANA timezone"),
+        ({"futu_opend_host": "192.0.2.1"}, "loopback"),
+        ({"futu_opend_port": 0}, "between 1 and 65535"),
         ({"trading_mode": "LIVE"}, "PAPER"),
     ],
 )

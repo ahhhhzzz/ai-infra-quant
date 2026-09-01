@@ -77,9 +77,10 @@ get_minute_bars()
 get_market_status()
 ```
 
-Exact interfaces are not approved here. No provider is selected. A later implementation task must
-approve provider choice, credentials, entitlements, pricing, latency, US/HK support, and a real-data
-proof of concept.
+TASK-003 separately approves a minimal Futu OpenD quote-only adapter for the provider proof of
+concept. It maps explicit provider symbols to canonical quote, market-status, completed-daily, and
+completed-current-session-minute results. OpenD availability, login, entitlements, and observed
+delay remain external facts and are never fabricated.
 
 The port is read-only and exposes no account identity, cash, position, order, trade, account matching,
 or command surface.
@@ -185,10 +186,10 @@ No later phase exists.
 
 ## 12. Open decisions
 
-These do not authorize implementation:
+These remain open and do not authorize implementation:
 
-- provider selection, credentials, entitlements, pricing, latency, and US/HK proof of concept;
-- exact provider interfaces and canonical payloads;
+- operational OpenD availability, quote entitlements, pricing, latency, and live US/HK evidence;
+- any production provider interface beyond the bounded TASK-003 PoC;
 - minute-data retention policy;
 - exact Composite Score formula, weights, thresholds, bands, and normalization;
 - later paper research assumptions;
@@ -197,5 +198,5 @@ These do not authorize implementation:
 ## 13. Historical evidence boundary
 
 The accepted Phase 1 plan and review files contain terminology from earlier directions. They remain
-immutable historical evidence and do not govern future scope. This documentation-only decision
-changes no code, migration, test, Phase 1 evidence, or Phase 2 runtime behavior.
+immutable historical evidence and do not govern future scope. TASK-003 changes no Phase 1 plan,
+review, migration, route, or runtime behavior.

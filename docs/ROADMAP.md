@@ -20,7 +20,7 @@ Historical facts are unchanged:
 - the reviewed Phase 1 commit is `f6decf2fbe171c1b9eb46340a9174bc21f293ede`;
 - Phase 1 status remains PASS;
 - both Phase 1 review files remain immutable evidence;
-- Phase 2 has not begun.
+- TASK-003 begins only the bounded Phase 2 Futu quote-only market-data PoC.
 
 Earlier Phase 1 broker/provider abstractions are historical artifacts, not authority to implement
 broker-account or broker-write behavior.
@@ -55,9 +55,10 @@ get_minute_bars()
 get_market_status()
 ```
 
-These names are illustrative only. Exact Python interfaces are not approved here. No concrete
-provider is selected by this decision. Provider selection, credentials, entitlements, pricing, and
-a real-data proof of concept require a later Market Data implementation task.
+These names are illustrative only. `MTF-001` did not itself select a provider. The separately
+approved TASK-003 selects Futu OpenD quote-market-data APIs for a bounded PoC covering the three
+initial securities; OpenD availability, login, quote entitlements, and observed delay remain
+environmental live-verification facts.
 
 Provider-specific code remains under `integrations/`; Strategy, Dashboard, Portfolio, Risk,
 Performance, and Backtest consume provider-agnostic canonical data.
@@ -233,8 +234,9 @@ execution capabilities.
 
 ## 9. Governance and stop conditions
 
-- Phase 1 remains accepted and unchanged; this decision does not begin Phase 2.
+- Phase 1 remains accepted and unchanged; TASK-003 begins only the bounded provider PoC in Phase 2.
 - Each implementation phase requires explicit approval and a phase-specific plan or Task Contract.
-- No provider, formula, or retention policy is selected unless separately approved.
+- No provider, formula, or retention policy is selected unless separately approved; TASK-003 is
+  the separate approval for the Futu quote-only PoC only.
 - Documentation and requirements must preserve explicit data freshness and non-fabrication rules.
 - Every task reports evidence and stops before the next task or phase.

@@ -6,10 +6,10 @@ plus current-session completed 1-minute market data, a broker-style dashboard, a
 60-second refresh/recalculation, and a dual-timeframe Composite Quant Score. Daily and 1-minute
 charts are separate views.
 
-Market data may come from a future independent read-only Market Data Provider. No provider is
-selected yet. The application never connects to a brokerage account, reads real-account facts,
-imports or reconciles real trades, or sends a broker command. The user performs every real trade
-manually in the broker's official client.
+TASK-003 adds a bounded Futu OpenD proof of concept using quote-market-data APIs only. It does not
+register an application route or connect to brokerage-account state. The application never reads
+real-account facts, imports or reconciles real trades, or sends a broker command. The user performs
+every real trade manually in the broker's official client.
 
 The accepted Phase 1 implementation is the local FastAPI/SQLite foundation. It exposes opening
 portfolio facts, identity/watchlist administration, and truthful provider capability descriptors;
@@ -29,6 +29,17 @@ python -m venv .venv
 
 Open `http://127.0.0.1:8000`. All external providers remain unavailable and the paper broker
 is only a non-operational descriptor in Phase 1.
+
+To run the optional quote-only Futu PoC against an already configured local OpenD:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[dev,futu]"
+.\.venv\Scripts\python.exe -m ai_infra_quant.integrations.futu_quote.poc
+```
+
+`FUTU_OPEND_HOST` and `FUTU_OPEND_PORT` default to `127.0.0.1:11111`. The runner reports
+`LIVE_POC_BLOCKED` without attempting an SDK connection when that TCP endpoint is unreachable.
+OpenD login and quote entitlements are external prerequisites; no credential belongs in this app.
 
 Alembic selects its database URL in this order: an explicit
 `-x database_url=...` override, `DATABASE_URL` from application settings or `.env`, then the
@@ -67,6 +78,6 @@ Revision `0001_phase1_foundation` is an explicit historical schema: it does not 
 ORM metadata. A local development database created by the earlier metadata-driven draft must be
 recreated before running this remediated revision. The application never deletes a database.
 
-Phase 1 remains intentionally limited: no PaperBroker, paper fill/order, external provider,
-market-data dashboard, strategy calculation, backtest, or real-order route exists. Phase 1 has
-passed independent review. Phase 2 has not begun and requires separate explicit approval.
+Phase 1 remains intentionally limited and has passed independent review. TASK-003 is the first
+bounded Phase 2 integration PoC; no PaperBroker, paper fill/order, market-data API/dashboard,
+strategy calculation, backtest, or real-order route was added.

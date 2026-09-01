@@ -32,7 +32,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | GOV-004 | Each implementation task requires explicit approval and stop | RETAINED | 0–4 | DOCUMENTED | Roadmap 9; Master 13 |
 | GOV-005 | Phase 0 history and accepted Phase 1 evidence are unchanged | HISTORICAL_PHASE_1 | 0/1 | IMPLEMENTED | Immutable plan/reviews and accepted commit |
 | GOV-006 | Phase 1 PASS status remains unchanged | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Run `33458517601`; `119 passed` |
-| GOV-007 | Phase 2 has not begun | RETAINED | 2 | DOCUMENTED | Roadmap 1,7; current repository state |
+| GOV-007 | Phase 2 work begins only through explicit bounded Task Contracts | RETAINED | 2 | IMPLEMENTED | TASK-003 quote-only PoC; Roadmap 1,7 |
 
 ## 3. Accepted Phase 1 requirements
 
@@ -52,8 +52,8 @@ Only Phase 0 through Phase 4 are valid target phases.
 |---|---|---|---:|---|---|
 | MKT-001 | Independent read-only Market Data Provider is allowed | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 3; Architecture 4 |
 | MKT-002 | Provider must not require brokerage-account access | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 2–3; Master 1 |
-| MKT-003 | No concrete provider selected by this task | RETAINED | 2 | DECISION_REQUIRED | Roadmap 3; Architecture 12 |
-| MKT-004 | Provider choice, credentials, entitlements, pricing, and proof of concept require later approval | RETAINED | 2 | DECISION_REQUIRED | Roadmap 3 |
+| MKT-003 | Futu OpenD quote-only APIs are selected for the bounded provider PoC | RETAINED | 2 | IMPLEMENTED | TASK-003 adapter and smoke runner |
+| MKT-004 | Live OpenD availability, login, entitlements, pricing, delay, and coverage remain truthful environmental evidence | RETAINED | 2 | DECISION_REQUIRED | TASK-003 live PoC result; Roadmap 3 |
 | MKT-005 | Initial tracked set is AVGO, VRT, HK.09698 with US/HK support | RETAINED | 2 | DOCUMENTED | Roadmap 3 |
 | MKT-006 | Daily OHLCV remains supported | RETAINED | 2 | DOCUMENTED | Roadmap 7; Database 4.3 |
 | MKT-007 | Current-session completed 1-minute OHLCV is supported | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 4; Database 4.4 |
@@ -131,6 +131,6 @@ they are non-executing Phase 2 research capabilities.
 
 Phase 1 remains accepted with `119 passed` in independent GitHub Actions run `33458517601`.
 
-Phase 2 has not begun. No Market Data Provider integration, market-data fetch, daily/minute chart,
-60-second polling, dashboard refresh behavior, Composite Quant Score, ranking/risk calculation,
-paper behavior, or backtest behavior is implemented or claimed by this documentation task.
+TASK-003 implements only a Futu OpenD quote-only provider PoC with no production persistence or
+route. No daily/minute chart, 60-second polling, dashboard refresh behavior, Composite Quant Score,
+ranking/risk calculation, paper behavior, or backtest behavior is implemented or claimed.

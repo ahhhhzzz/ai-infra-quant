@@ -11,8 +11,8 @@ Base path: `/api/v1`
 ## 0. Scope and historical boundary
 
 Phase 1 routes remain accepted exactly as implemented. This document describes future read-only
-market-data/dashboard, research, simulated paper, and analytics directions. It registers no route
-and changes no runtime code. Phase 2 has not begun.
+market-data/dashboard, research, simulated paper, and analytics directions. TASK-003 begins only a
+provider integration PoC and registers no route.
 
 No API may connect to a brokerage account; read/import real-account cash, positions, orders, or
 trades; match real-account state; or transmit a broker operation.
@@ -104,7 +104,8 @@ A provider-status response must report configuration/capability, entitlement, US
 source delay, last success, last error, and freshness without exposing secrets. Market-data status
 contains no brokerage-account concept.
 
-No concrete provider is selected by this document.
+This document does not select a concrete provider. TASK-003 separately selects Futu OpenD
+quote-market-data APIs for a bounded local PoC without registering an API route.
 
 ### 5.2 Latest quote and market status
 

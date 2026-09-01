@@ -3,8 +3,12 @@ from enum import StrEnum
 
 class DataAvailabilityStatus(StrEnum):
     AVAILABLE = "AVAILABLE"
+    DELAYED = "DELAYED"
+    STALE = "STALE"
     MISSING = "MISSING"
     UNAVAILABLE = "UNAVAILABLE"
+    NOT_ENTITLED = "NOT_ENTITLED"
+    PROVIDER_ERROR = "PROVIDER_ERROR"
     NOT_SUPPORTED = "NOT_SUPPORTED"
     INVALID = "INVALID"
 

@@ -20,6 +20,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+futu = [
+  "futu-api==10.10.7008",
+]
 dev = [
   "httpx==0.28.1",
   "mypy==1.17.1",
@@ -28,6 +31,9 @@ dev = [
   "pytest-cov==6.2.1",
   "ruff==0.12.9",
 ]
+
+[project.scripts]
+ai-infra-futu-poc = "ai_infra_quant.integrations.futu_quote.poc:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ai_infra_quant"]

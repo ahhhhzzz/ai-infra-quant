@@ -18,7 +18,7 @@ Instruction precedence is:
 Decision `MTF-001` supersedes `EOD-001` for future scope without reverting its traceable commit or
 rewriting history. Phase 0 remains historically completed. Phase 1 remains accepted at reviewed
 commit `f6decf2fbe171c1b9eb46340a9174bc21f293ede`; its PASS status, implementation, plan, tests, and two
-review files are unchanged. Phase 2 has not begun.
+review files are unchanged. TASK-003 begins only a bounded Phase 2 quote-only provider PoC.
 
 ## 1. Product objective and boundary
 
@@ -141,9 +141,9 @@ import provider SDKs, or branch on provider names.
 ## 7. Market-data and time contract
 
 The provider boundary may offer equivalents of `get_latest_quote()`, `get_daily_bars()`,
-`get_minute_bars()`, and `get_market_status()`. Exact interfaces and provider choice remain
-unapproved. A later implementation task must validate credentials, entitlements, price, latency,
-US/HK coverage, and a real-data proof of concept.
+`get_minute_bars()`, and `get_market_status()`. TASK-003 approves a minimal Futu OpenD
+quote-market-data implementation for its PoC only. OpenD availability, login, entitlements,
+latency, and US/HK live observations must still be reported as environmental facts.
 
 Daily data remains supported. The minute MVP uses only completed 1-minute bars from the current
 trading day. Daily and 1-minute bars are displayed in separate coordinate systems selected by a
@@ -224,8 +224,8 @@ exact file set; implement only approved scope; run the required proportional val
 provenance, freshness, Decimal, UTC, and exclusions; update documentation/evidence; report exact
 results; and stop.
 
-This documentation revision implements no Phase 2 functionality, selects no provider, and approves
-no score formula.
+TASK-003 implements only the bounded Futu quote-only provider PoC. It registers no API/dashboard,
+selects no score formula, and does not start later Phase 2 features.
 
 ## 14. Accepted Phase 1 boundary
 

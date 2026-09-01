@@ -53,6 +53,8 @@ class Settings(BaseSettings):
     initial_nav: Decimal = Decimal("100")
     inception_date: date = date(2026, 8, 31)
     valuation_timezone: str = "Asia/Hong_Kong"
+    futu_opend_host: str = "127.0.0.1"
+    futu_opend_port: int = 11111
 
     @field_validator("host")
     @classmethod
@@ -71,6 +73,25 @@ class Settings(BaseSettings):
     def validate_port(cls, value: int) -> int:
         if not 1 <= value <= 65535:
             raise ValueError("port must be between 1 and 65535")
+        return value
+
+    @field_validator("futu_opend_host")
+    @classmethod
+    def validate_futu_opend_host(cls, value: str) -> str:
+        try:
+            if not ip_address(value).is_loopback:
+                raise ValueError("FUTU_OPEND_HOST must be a loopback address")
+        except ValueError as exc:
+            if "loopback" in str(exc):
+                raise
+            raise ValueError("FUTU_OPEND_HOST must be a literal loopback IP address") from exc
+        return value
+
+    @field_validator("futu_opend_port")
+    @classmethod
+    def validate_futu_opend_port(cls, value: int) -> int:
+        if not 1 <= value <= 65535:
+            raise ValueError("FUTU_OPEND_PORT must be between 1 and 65535")
         return value
 
     @field_validator("database_url")
