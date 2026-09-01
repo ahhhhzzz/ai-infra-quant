@@ -113,6 +113,30 @@ def test_refresh_visibility_and_security_race_guards_are_explicit() -> None:
     assert "已暂停" in source
 
 
+def test_empty_watchlist_invalidates_requests_and_clears_market_state() -> None:
+    source = _source(APP_JS)
+    empty_state_start = source.index("const clearSelectedSecurity = () => {")
+    empty_state_end = source.index("\n};", empty_state_start)
+    empty_state = source[empty_state_start:empty_state_end]
+
+    for required in (
+        "requestGeneration += 1",
+        "cancelActiveRequest()",
+        "clearRefreshSchedule()",
+        "selectedSecurity = null",
+        "resetMarketView()",
+        'element("#selected-identity").textContent = "—"',
+        'element("#selected-title").textContent = "No tracked securities"',
+        'setStatus(selector, "MISSING")',
+        'element("#refresh-market").disabled = true',
+    ):
+        assert required in empty_state
+    assert 'showChartMessage(\n    "No tracked securities"' in empty_state
+    assert "if (!defaultSecurity) {\n    clearSelectedSecurity();\n    return;" in source
+    assert "if (!selectedSecurity || activeRequest" in source
+    assert "selectedSecurity = security;\n  setRefreshLoading(false);" in source
+
+
 def test_dashboard_exposes_truthful_capability_and_empty_states() -> None:
     page = _source(TEMPLATE)
     source = _source(APP_JS)

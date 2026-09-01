@@ -547,10 +547,35 @@ const selectSecurity = (security) => {
   cancelActiveRequest();
   clearRefreshSchedule();
   selectedSecurity = security;
+  setRefreshLoading(false);
   renderSecuritySelector();
   renderSecurityHeader();
   resetMarketView();
   if (document.visibilityState === "visible") refreshSelectedSecurity("security-switch");
+};
+
+const clearSelectedSecurity = () => {
+  requestGeneration += 1;
+  cancelActiveRequest();
+  clearRefreshSchedule();
+  selectedSecurity = null;
+  renderSecuritySelector();
+  resetMarketView();
+  element("#selected-identity").textContent = "—";
+  element("#selected-title").textContent = "No tracked securities";
+  element("#selected-name").textContent = "Add a Security to the Watchlist";
+  element("#latest-currency").textContent = "—";
+  element("#chart-caption").textContent = "Select a tracked Security to load market data";
+  element("#market-data-reason").textContent = "No tracked securities";
+  for (const selector of ["#quote-status", "#market-status", "#daily-status", "#minute-status"]) {
+    setStatus(selector, "MISSING");
+  }
+  showChartMessage(
+    "No tracked securities",
+    "Add a Security to the Watchlist to load market data.",
+  );
+  element("#refresh-market").disabled = true;
+  updateCountdown();
 };
 
 const renderAdminWatchlist = () => {
@@ -583,11 +608,15 @@ const loadWatchlist = async () => {
   const defaultSecurity = watchlistSecurities.find((item) => item.display_symbol === "US.AVGO")
     || watchlistSecurities[0]
     || null;
-  selectedSecurity = currentStillExists || null;
   renderAdminWatchlist();
-  if (!selectedSecurity && defaultSecurity) {
+  if (!defaultSecurity) {
+    clearSelectedSecurity();
+    return;
+  }
+  if (!currentStillExists) {
     selectSecurity(defaultSecurity);
   } else {
+    selectedSecurity = currentStillExists;
     renderSecuritySelector();
     renderSecurityHeader();
   }
