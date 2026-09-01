@@ -95,14 +95,6 @@ const timestampFormatter = (timeZone) =>
     hour12: false,
   });
 
-const clockFormatter = (timeZone) =>
-  new Intl.DateTimeFormat("zh-CN", {
-    timeZone,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
 const formatTimestamp = (value, timeZone) => {
   if (!value) return "—";
   const parsed = new Date(value);
@@ -110,23 +102,53 @@ const formatTimestamp = (value, timeZone) => {
   return `${timestampFormatter(timeZone).format(parsed)} · ${timeZone}`;
 };
 
-const formatChartTime = (time, timeZone, timeframe) => {
+const chartTimeParts = (time, timeZone) => {
   if (typeof time === "object" && time !== null) {
-    const month = String(time.month).padStart(2, "0");
-    const day = String(time.day).padStart(2, "0");
-    return `${month}/${day}`;
+    return {
+      year: String(time.year),
+      month: String(time.month).padStart(2, "0"),
+      day: String(time.day).padStart(2, "0"),
+      hour: null,
+      minute: null,
+    };
   }
-  if (typeof time === "string") return time.slice(5);
+  if (typeof time === "string") {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(time);
+    if (!match) return null;
+    return { year: match[1], month: match[2], day: match[3], hour: null, minute: null };
+  }
   const parsed = new Date(Number(time) * 1000);
-  if (Number.isNaN(parsed.getTime())) return "—";
-  if (timeframe === "daily") {
-    return new Intl.DateTimeFormat("zh-CN", {
+  if (Number.isNaN(parsed.getTime())) return null;
+  const values = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
       timeZone,
+      year: "numeric",
       month: "2-digit",
       day: "2-digit",
-    }).format(parsed);
-  }
-  return clockFormatter(timeZone).format(parsed);
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(parsed)
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  );
+  return values;
+};
+
+const formatChartAxisTime = (time, timeZone, timeframe) => {
+  const parts = chartTimeParts(time, timeZone);
+  if (!parts) return "—";
+  if (timeframe === "daily") return `${parts.year}/${parts.month}`;
+  return `${parts.month}/${parts.day} ${parts.hour}:${parts.minute}`;
+};
+
+const formatChartCrosshairTime = (time, timeZone, timeframe) => {
+  const parts = chartTimeParts(time, timeZone);
+  if (!parts) return "—";
+  const date = `${parts.year}-${parts.month}-${parts.day}`;
+  if (timeframe === "daily") return date;
+  return `${date} ${parts.hour}:${parts.minute}`;
 };
 
 const initializeChart = () => {
@@ -208,13 +230,15 @@ const initializeChart = () => {
 
 const configureChartTime = (timeZone) => {
   if (!chart) return;
-  const formatter = (time) => formatChartTime(time, timeZone, activeTimeframe);
+  const crosshairFormatter = (time) =>
+    formatChartCrosshairTime(time, timeZone, activeTimeframe);
+  const axisFormatter = (time) => formatChartAxisTime(time, timeZone, activeTimeframe);
   chart.applyOptions({
-    localization: { timeFormatter: formatter },
+    localization: { timeFormatter: crosshairFormatter },
     timeScale: {
       timeVisible: activeTimeframe === "minute",
       secondsVisible: false,
-      tickMarkFormatter: formatter,
+      tickMarkFormatter: axisFormatter,
     },
   });
 };

@@ -96,6 +96,22 @@ def test_daily_and_minute_modes_are_distinct_with_separate_volume_pane() -> None
     assert "barsByInterval.set(bar.interval_start, bar)" in source
 
 
+def test_chart_time_axis_and_crosshair_use_unambiguous_market_local_labels() -> None:
+    source = _source(APP_JS)
+
+    assert 'new Intl.DateTimeFormat("en-CA", {' in source
+    assert "timeZone," in source
+    assert 'if (timeframe === "daily") return `${parts.year}/${parts.month}`' in source
+    assert "return `${parts.month}/${parts.day} ${parts.hour}:${parts.minute}`" in source
+    assert "const date = `${parts.year}-${parts.month}-${parts.day}`" in source
+    assert 'if (timeframe === "daily") return date' in source
+    assert "return `${date} ${parts.hour}:${parts.minute}`" in source
+    assert "localization: { timeFormatter: crosshairFormatter }" in source
+    assert "tickMarkFormatter: axisFormatter" in source
+    assert 'selectedSecurity.market === "HK" ? "Asia/Hong_Kong" : "America/New_York"' in source
+    assert "getTimezoneOffset" not in source
+
+
 def test_refresh_visibility_and_security_race_guards_are_explicit() -> None:
     source = _source(APP_JS)
 
