@@ -51,6 +51,24 @@ $env:MARKET_DATA_PROVIDER = "futu"
 entitlements are external prerequisites; no credential belongs in this app. The safe default
 `MARKET_DATA_PROVIDER=none` keeps the endpoints available with structured `UNAVAILABLE` results.
 
+## Windows one-click Dashboard
+
+After completing the local setup, double-click `start_dashboard.bat` in the repository root. It
+reuses an already-running OpenD and FastAPI instance when healthy; otherwise it starts OpenD,
+waits for `127.0.0.1:11111`, starts FastAPI with the Futu market-data provider in a separate visible
+console, waits for `/health`, and then opens `http://127.0.0.1:8000` in the default browser.
+
+The launcher checks common Futu OpenD installation locations. If it cannot find the executable,
+configure its path once and launch the batch file again:
+
+```bat
+setx FUTU_OPEND_EXE "C:\path\to\Futu_OpenD.exe"
+```
+
+OpenD login and quote entitlements remain external and manual; the launcher never handles
+credentials. FastAPI logs remain visible in the separate server console. Stop FastAPI with
+`Ctrl+C` in that console or by closing the console window. The launcher may leave OpenD running.
+
 The TASK-004 API surface is:
 
 ```text
