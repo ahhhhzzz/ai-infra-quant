@@ -208,6 +208,7 @@ def test_state_route_uses_canonical_security_and_serializes_decimal_utc(
         "market": "US",
         "symbol": "AVGO",
         "currency": "USD",
+        "market_timezone": "America/New_York",
         "provider": PROVIDER,
         "latest_price": "123.4500",
         "latest_quote_at": "2026-09-01T14:35:18Z",
@@ -233,6 +234,8 @@ def test_daily_and_minute_routes_return_completed_canonical_bars(
 
     assert daily.status_code == minute.status_code == 200
     assert daily.json()["status"] == minute.json()["status"] == "AVAILABLE"
+    assert daily.json()["market_timezone"] == minute.json()["market_timezone"]
+    assert daily.json()["market_timezone"] == "Asia/Hong_Kong"
     assert daily.json()["latest_completed_daily_session"] == "2026-08-31"
     assert len(daily.json()["bars"]) == 1
     assert daily.json()["bars"][0]["close"] == "103.30"

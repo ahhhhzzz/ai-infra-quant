@@ -11,9 +11,9 @@ Base path: `/api/v1`
 ## 0. Scope and historical boundary
 
 Phase 1 routes remain accepted exactly as implemented. This document describes implemented
-TASK-004 read-only market-data routes plus future dashboard, research, simulated paper, and
-analytics directions. TASK-003 established the provider integration PoC; TASK-004 registers only
-the three approved market-data route groups.
+TASK-004 read-only market-data routes, the TASK-005 Dashboard client, and future research,
+simulated paper, and analytics directions. TASK-003 established the provider integration PoC;
+TASK-004 registers only the three approved market-data route groups, and TASK-005 adds no route.
 
 No API may connect to a brokerage account; read/import real-account cash, positions, orders, or
 trades; match real-account state; or transmit a broker operation.
@@ -63,7 +63,7 @@ Defining a future direction does not expose a route.
 |---|---:|---|
 | Accepted health/portfolio/identity/watchlist/status reads | 1 | Available from accepted foundation |
 | TASK-004 market state and daily/minute bars | 2 | Available from TASK-004 |
-| Dashboard refresh and first approved score/ranking/risk state | 2 | Ordinary 404 |
+| Aggregate dashboard refresh and first approved score/ranking/risk state | 2 | Ordinary 404 |
 | Expanded research and simulated paper tracking | 3 | Ordinary 404 |
 | Backtest and analytics | 4 | Ordinary 404 |
 
@@ -122,9 +122,11 @@ TASK-003 selected Futu OpenD quote-market-data APIs. TASK-004 makes provider mod
 ### 5.2 Latest quote and market status
 
 `GET /market-data/securities/{security_id}/state` returns Security identity, provider, latest
-Decimal price, currency, canonical/provider market state, `latest_quote_at`, `retrieved_at`,
-truthful optional `provider_delay_seconds`, independent `quote_status` and `market_status`, and a
-safe optional reason. `latest_price` is never labelled or represented as the final daily close.
+Decimal price, currency, canonical/provider market state, canonical `market_timezone`,
+`latest_quote_at`, `retrieved_at`, truthful optional `provider_delay_seconds`, independent
+`quote_status` and `market_status`, and a safe optional reason. `latest_price` is never labelled or
+represented as the final daily close. Daily and minute responses expose the same canonical IANA
+`market_timezone` for display without a fixed UTC offset.
 
 ### 5.3 Daily bars
 
@@ -145,9 +147,14 @@ start/end, Decimal-string OHLCV, and `is_completed=true`. Unfinished bars are ex
 Daily and minute responses remain separate and are rendered in separate chart coordinate systems.
 Full historical minute replay, ticks, and order-book history are not MVP contracts.
 
-### 5.5 Dashboard refresh response
+### 5.5 Dashboard refresh behavior
 
-A coherent dashboard refresh may aggregate:
+TASK-005 performs three direct requests to the existing state, daily-bars, and minute-bars routes.
+It merges completed minute bars in browser memory by interval identity, keeps the timeframes
+separate, and uses `market_timezone` for IANA market-local labels. No aggregate dashboard endpoint
+is registered.
+
+A future coherent aggregate dashboard response may include:
 
 - page market state;
 - latest price and market status;

@@ -8,10 +8,10 @@ charts are separate views.
 
 TASK-003 established a bounded Futu OpenD proof of concept using quote-market-data APIs only.
 TASK-004 exposes that provider through three provider-neutral, read-through FastAPI endpoints for
-market state, completed daily bars, and completed current-session 1-minute bars. It does not add a
-dashboard or connect to brokerage-account state. The application never reads real-account facts,
-imports or reconciles real trades, or sends a broker command. The user performs every real trade
-manually in the broker's official client.
+market state, completed daily bars, and completed current-session 1-minute bars. TASK-005 adds the
+local, market-first Dashboard on top of those endpoints. It does not connect to brokerage-account
+state. The application never reads real-account facts, imports or reconciles real trades, or sends
+a broker command. The user performs every real trade manually in the broker's official client.
 
 The accepted Phase 1 implementation is the local FastAPI/SQLite foundation. It exposes opening
 portfolio facts, identity/watchlist administration, and truthful provider capability descriptors;
@@ -31,6 +31,13 @@ python -m venv .venv
 
 Open `http://127.0.0.1:8000`. With the safe default `MARKET_DATA_PROVIDER=none`, external provider
 calls remain disabled; the paper broker is only a non-operational historical descriptor.
+
+The homepage uses the canonical Watchlist to select AVGO, VRT, or HK.09698 and shows latest price,
+market state, separate completed daily and current-session 1-minute candlestick/volume views,
+provider timestamps/status, manual refresh, and a non-overlapping 60-second visible-page refresh
+cycle. TradingView Lightweight Charts 5.2.1 is vendored under the frontend static assets, so no
+runtime CDN or frontend build step is required. Its Apache-2.0 license, NOTICE, and visible
+TradingView attribution are preserved with the vendored asset.
 
 To run the optional quote-only Futu backend against an already configured local OpenD:
 
@@ -89,6 +96,7 @@ Revision `0001_phase1_foundation` is an explicit historical schema: it does not 
 ORM metadata. A local development database created by the earlier metadata-driven draft must be
 recreated before running this remediated revision. The application never deletes a database.
 
-Phase 1 remains intentionally limited and has passed independent review. TASK-004 adds only the
-first Phase 2 market-data backend. No Dashboard, browser polling, PaperBroker, paper fill/order,
-strategy calculation, Composite Quant Score, backtest, persistence, or real-order route was added.
+Phase 1 remains intentionally limited and has passed independent review. TASK-004 adds the first
+Phase 2 market-data backend, and TASK-005 adds only its read-only Dashboard client. No PaperBroker,
+paper fill/order, strategy calculation, Composite Quant Score, backtest, market-data persistence,
+or real-order route was added.

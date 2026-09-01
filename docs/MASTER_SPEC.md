@@ -19,7 +19,8 @@ Decision `MTF-001` supersedes `EOD-001` for future scope without reverting its t
 rewriting history. Phase 0 remains historically completed. Phase 1 remains accepted at reviewed
 commit `f6decf2fbe171c1b9eb46340a9174bc21f293ede`; its PASS status, implementation, plan, tests, and two
 review files are unchanged. TASK-003 established the bounded Phase 2 quote-only provider PoC;
-TASK-004 adds only its provider-neutral read-through backend.
+TASK-004 adds its provider-neutral read-through backend; TASK-005 adds only the read-only local
+Dashboard that consumes it.
 
 ## 1. Product objective and boundary
 
@@ -227,8 +228,11 @@ provenance, freshness, Decimal, UTC, and exclusions; update documentation/eviden
 results; and stop.
 
 TASK-003 implements the bounded Futu quote-only provider PoC. TASK-004 registers only the market
-state, completed daily-bar, and completed current-session 1-minute-bar API groups. It adds no
-dashboard or persistence, selects no score formula, and does not start later Phase 2 features.
+state, completed daily-bar, and completed current-session 1-minute-bar API groups. TASK-005 adds the
+market-first Dashboard with separate daily/minute candle and volume views, truthful capability
+states, IANA market-time labels, manual refresh, and a guarded visible-page 60-second refresh cycle.
+It adds no persistence or route group, selects no score formula, and does not start later Phase 2
+features.
 
 ## 14. Accepted Phase 1 boundary
 

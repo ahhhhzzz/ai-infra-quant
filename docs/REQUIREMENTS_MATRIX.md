@@ -65,16 +65,16 @@ Only Phase 0 through Phase 4 are valid target phases.
 
 | ID | Dashboard requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
-| UI-001 | Selector, latest price, market status, volume, score, ranking, risk state, timestamps | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 4; Master 9 |
-| UI-002 | Daily and 1-minute candles are separate timeframes | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 4; API 5.3–5.4 |
-| UI-003 | Timeframe tab/button switches views; no same-coordinate overlay | RETAINED | 2 | DOCUMENTED | Roadmap 4; Architecture 5 |
-| UI-004 | Active visible session refreshes/recalculates approximately every 60 seconds | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 5; Architecture 6 |
-| UI-005 | Polling requests do not overlap | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 5.5 |
-| UI-006 | Hidden page pauses polling; visible page refreshes immediately | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 5.5 |
-| UI-007 | Manual `刷新最新行情` is provided | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 5.5 |
-| UI-008 | Automatic-refresh countdown is displayed | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 5.5 |
-| UI-009 | Closing the page requires no background processing | RETAINED | 2 | DOCUMENTED | Roadmap 5; Architecture 6 |
-| UI-010 | Ordinary HTTP/REST polling is MVP transport | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 5.5 |
+| UI-001 | Selector, latest price, market status, volume, score, ranking, risk state, timestamps | SUPERSEDED_MTF | 2 | PARTIAL | TASK-005 selector/market/volume/timestamps; score/ranking/risk remain unimplemented |
+| UI-002 | Daily and 1-minute candles are separate timeframes | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-005 Dashboard tests; API 5.3–5.4 |
+| UI-003 | Timeframe tab/button switches views; no same-coordinate overlay | RETAINED | 2 | IMPLEMENTED | TASK-005 Dashboard tests; Architecture 5 |
+| UI-004 | Active visible session refreshes/recalculates approximately every 60 seconds | SUPERSEDED_MTF | 2 | PARTIAL | TASK-005 market refresh; score recalculation remains unimplemented |
+| UI-005 | Polling requests do not overlap | RETAINED | 2 | IMPLEMENTED | TASK-005 in-flight guard/tests; API 5.5 |
+| UI-006 | Hidden page pauses polling; visible page refreshes immediately | RETAINED | 2 | IMPLEMENTED | TASK-005 visibility handler/tests; API 5.5 |
+| UI-007 | Manual `刷新最新行情` is provided | RETAINED | 2 | IMPLEMENTED | TASK-005 Dashboard/tests |
+| UI-008 | Automatic-refresh countdown is displayed | RETAINED | 2 | IMPLEMENTED | TASK-005 Dashboard/tests |
+| UI-009 | Closing the page requires no background processing | RETAINED | 2 | IMPLEMENTED | TASK-005 page-local timers; Architecture 6 |
+| UI-010 | Ordinary HTTP/REST polling is MVP transport | RETAINED | 2 | IMPLEMENTED | TASK-005 direct fetch; API 5.5 |
 
 ## 5. Time and Composite Score requirements
 
@@ -133,6 +133,8 @@ Phase 1 remains accepted with `119 passed` in independent GitHub Actions run `33
 
 TASK-003 implements the Futu OpenD quote-only provider PoC. TASK-004 adds a provider-neutral
 read-through application service and the state, completed daily-bars, and completed current-session
-minute-bars APIs, with no production market-data persistence. No daily/minute chart, 60-second
-polling, dashboard refresh behavior, Composite Quant Score, ranking/risk calculation, paper
-behavior, or backtest behavior is implemented or claimed.
+minute-bars APIs, with no production market-data persistence. TASK-005 adds the local read-only
+Dashboard with canonical security switching, separate daily/minute candle and volume views,
+market-local time labels, guarded 60-second polling, manual refresh, countdown, and visibility/race
+handling. No Composite Quant Score, ranking/risk calculation, paper behavior, or backtest behavior
+is implemented or claimed.

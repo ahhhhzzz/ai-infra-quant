@@ -83,6 +83,11 @@ presentation layer. It maps only the three explicit provider symbols to canonica
 market-status, completed-daily, and completed-current-session-minute results. OpenD availability,
 login, entitlements, and observed delay remain external facts and are never fabricated.
 
+TASK-005 consumes those provider-neutral responses directly from the local browser. The Dashboard
+uses locally vendored TradingView Lightweight Charts 5.2.1, renders daily and minute OHLCV in
+separate candle/volume panes, and formats chart timestamps with the canonical IANA market timezone.
+It adds no backend route group, provider dependency, or persistence.
+
 The port is read-only and exposes no account identity, cash, position, order, trade, account matching,
 or command surface.
 
@@ -123,17 +128,18 @@ labelled as a final daily close.
 ```text
 visible page or manual refresh
   -> if no request is active, request local market state
-  -> adapter reads provider state
-  -> validate quote, daily bars, completed minute bars, timestamps, quality
-  -> calculate approved indicators/score/ranking/risk state
-  -> return one coherent response or explicit partial/error state
+  -> request completed daily and current-session minute data independently
+  -> adapter reads provider state and bars
+  -> return explicit data or per-capability error state
   -> render selected daily or 1-minute chart
   -> reset approximately 60-second countdown
 ```
 
 Automatic polling pauses while the page is hidden and refreshes immediately when visible again.
-Requests do not overlap. Closing the page requires no background activity. MVP uses ordinary
-HTTP/REST polling; streaming infrastructure is not required.
+Requests do not overlap, and an abort controller plus request-generation/security checks prevent
+an older response from overwriting a newly selected Security. Closing the page requires no
+background activity. MVP uses ordinary HTTP/REST polling; streaming infrastructure is not
+required. Score/ranking/risk calculation remains future separately approved work.
 
 ## 7. Composite Score boundary
 

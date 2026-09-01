@@ -1,62 +1,164 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hans">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AI Infra Quant</title>
+    <title>AI Infra Quant · Market Dashboard</title>
     <link rel="stylesheet" href="/static/app.css">
   </head>
   <body>
-    <header>
-      <div>
-        <p class="eyebrow">LOCAL · PHASE 1</p>
+    <header class="terminal-header">
+      <div class="brand-block">
+        <p class="eyebrow">LOCAL QUANT TERMINAL</p>
         <h1>AI INFRA QUANT</h1>
       </div>
-      <div class="safety">PAPER BROKER: NOT IMPLEMENTED · LIVE ROUTES: ABSENT</div>
+      <div class="header-actions">
+        <span class="read-only-badge">READ ONLY · DECISION SUPPORT</span>
+        <span id="provider-mode" class="provider-mode">Provider —</span>
+        <button id="refresh-market" class="refresh-button" type="button">刷新最新行情</button>
+        <span id="refresh-countdown" class="countdown" aria-live="polite">自动刷新：—</span>
+      </div>
     </header>
 
     <main>
-      <section class="grid summary" aria-label="Opening portfolio facts">
-        <article><span>Portfolio equity</span><strong id="equity">—</strong></article>
-        <article><span>Cash</span><strong id="cash">—</strong></article>
-        <article><span>NAV</span><strong id="nav">—</strong></article>
-        <article><span>Units</span><strong id="units">—</strong></article>
-        <article><span>Invested</span><strong id="invested">—</strong></article>
-        <article><span>Since inception</span><strong id="return">—</strong></article>
-      </section>
-
-      <section class="two-column">
-        <article class="panel">
-          <div class="panel-title">
-            <div><p class="eyebrow">IDENTITY</p><h2>Watchlist</h2></div>
-            <span id="watchlist-status">Loading</span>
+      <section class="terminal-grid" aria-label="Market data Dashboard">
+        <aside class="watchlist-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">WATCHLIST</p>
+              <h2>Tracked securities</h2>
+            </div>
+            <span id="market-watchlist-status" class="small-status">Loading</span>
           </div>
-          <div id="watchlist" class="watchlist"></div>
-        </article>
+          <div id="security-selector" class="security-selector" role="listbox"
+               aria-label="Select security"></div>
+        </aside>
 
-        <article class="panel">
-          <p class="eyebrow">TRUTHFUL AVAILABILITY</p>
-          <h2>System boundaries</h2>
-          <div id="providers" class="status-list"></div>
-          <p class="note">No external price, FX, fundamental, valuation, event, broker, or
-            account data is requested by this page.</p>
+        <article class="market-panel">
+          <div class="instrument-header">
+            <div>
+              <p id="selected-identity" class="eyebrow">SELECTED SECURITY</p>
+              <h2 id="selected-title" class="instrument-title">—</h2>
+              <p id="selected-name" class="instrument-name">—</p>
+            </div>
+            <div class="market-state-block">
+              <span id="market-state" class="market-state status-unknown">UNKNOWN</span>
+              <span id="provider-market-state" class="provider-state">Provider state —</span>
+            </div>
+          </div>
+
+          <section class="quote-strip" aria-label="Latest market state">
+            <div>
+              <span class="metric-label">Latest price</span>
+              <strong id="latest-price" class="latest-price">—</strong>
+              <span id="latest-currency" class="price-currency">—</span>
+            </div>
+            <div class="quote-timestamps">
+              <span>Last quote <strong id="latest-quote-at">—</strong></span>
+              <span>Retrieved <strong id="state-retrieved-at">—</strong></span>
+            </div>
+          </section>
+
+          <div class="chart-toolbar">
+            <div class="timeframe-tabs" role="tablist" aria-label="Chart timeframe">
+              <button id="tab-daily" class="timeframe-tab active" type="button"
+                      role="tab" aria-selected="true" data-timeframe="daily">日 K</button>
+              <button id="tab-minute" class="timeframe-tab" type="button"
+                      role="tab" aria-selected="false" data-timeframe="minute">1 分钟</button>
+            </div>
+            <span id="chart-caption" class="chart-caption">Completed daily OHLCV</span>
+          </div>
+
+          <div id="chart-stage" class="chart-stage" aria-label="Candlestick and volume chart">
+            <div id="market-chart" class="market-chart"></div>
+            <div id="chart-empty" class="chart-empty" role="status">
+              <strong>Loading market data</strong>
+              <span>The chart will show completed candles only.</span>
+            </div>
+          </div>
+
+          <section class="data-status-panel" aria-label="Market data status and timestamps">
+            <div class="status-cell">
+              <span>Quote</span>
+              <strong id="quote-status" class="status-badge status-unknown">UNKNOWN</strong>
+            </div>
+            <div class="status-cell">
+              <span>Market</span>
+              <strong id="market-status" class="status-badge status-unknown">UNKNOWN</strong>
+            </div>
+            <div class="status-cell">
+              <span>Daily</span>
+              <strong id="daily-status" class="status-badge status-unknown">UNKNOWN</strong>
+            </div>
+            <div class="status-cell">
+              <span>1 minute</span>
+              <strong id="minute-status" class="status-badge status-unknown">UNKNOWN</strong>
+            </div>
+            <div class="status-cell wide">
+              <span>Latest completed daily session</span>
+              <strong id="latest-daily-session">—</strong>
+            </div>
+            <div class="status-cell wide">
+              <span>Latest completed minute</span>
+              <strong id="latest-minute-at">—</strong>
+            </div>
+          </section>
+
+          <p id="market-data-reason" class="market-data-reason" role="status"></p>
+          <p class="chart-attribution">
+            TradingView Lightweight Charts™ · Copyright © 2025 TradingView, Inc. ·
+            <a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">TradingView</a>
+          </p>
         </article>
       </section>
 
-      <section class="panel admin">
-        <p class="eyebrow">LOCAL IDENTITY ADMINISTRATION</p>
-        <h2>Create an unverified security</h2>
-        <form id="security-form">
-          <label>Market<input name="market" required maxlength="32" placeholder="US"></label>
-          <label>Symbol<input name="symbol" required maxlength="32" placeholder="EXAMPLE"></label>
-          <label>Currency<input name="currency" required maxlength="3" placeholder="USD"></label>
-          <label>Type<select name="instrument_type"><option>EQUITY</option><option>ETF</option><option>UNKNOWN</option></select></label>
-          <label>Name<input name="display_name" maxlength="120" placeholder="Optional local label"></label>
-          <button type="submit">Create unverified identity</button>
-        </form>
-        <p id="form-result" class="note" role="status"></p>
-      </section>
+      <details class="local-admin">
+        <summary>Portfolio facts and local administration</summary>
+        <div class="admin-content">
+          <section class="summary-grid" aria-label="Opening portfolio facts">
+            <article><span>Portfolio equity</span><strong id="equity">—</strong></article>
+            <article><span>Cash</span><strong id="cash">—</strong></article>
+            <article><span>NAV</span><strong id="nav">—</strong></article>
+            <article><span>Units</span><strong id="units">—</strong></article>
+            <article><span>Invested</span><strong id="invested">—</strong></article>
+            <article><span>Since inception</span><strong id="return">—</strong></article>
+          </section>
+
+          <section class="admin-grid">
+            <article class="panel">
+              <div class="section-heading">
+                <div><p class="eyebrow">LOCAL IDENTITY</p><h2>Watchlist administration</h2></div>
+                <span id="admin-watchlist-status" class="small-status">Loading</span>
+              </div>
+              <div id="watchlist-admin" class="watchlist-admin"></div>
+            </article>
+
+            <article class="panel">
+              <p class="eyebrow">SYSTEM BOUNDARIES</p>
+              <h2>Provider capabilities</h2>
+              <p class="note">Paper Broker: NOT IMPLEMENTED</p>
+              <p class="note">Live routes: ABSENT</p>
+              <div id="providers" class="status-list"></div>
+            </article>
+          </section>
+
+          <section class="panel identity-form-panel">
+            <p class="eyebrow">LOCAL IDENTITY ADMINISTRATION</p>
+            <h2>Create an unverified security</h2>
+            <form id="security-form">
+              <label>Market<input name="market" required maxlength="32" placeholder="US"></label>
+              <label>Symbol<input name="symbol" required maxlength="32" placeholder="EXAMPLE"></label>
+              <label>Currency<input name="currency" required maxlength="3" placeholder="USD"></label>
+              <label>Type<select name="instrument_type"><option>EQUITY</option><option>ETF</option><option>UNKNOWN</option></select></label>
+              <label>Name<input name="display_name" maxlength="120" placeholder="Optional local label"></label>
+              <button type="submit">Create unverified identity</button>
+            </form>
+            <p id="form-result" class="note" role="status"></p>
+          </section>
+        </div>
+      </details>
     </main>
+    <script src="/static/vendor/lightweight-charts.standalone.production.js" defer></script>
     <script src="/static/app.js" defer></script>
   </body>
 </html>

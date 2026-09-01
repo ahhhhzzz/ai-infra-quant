@@ -16,6 +16,7 @@ class MarketStateRead(StrictSchema):
     market: str
     symbol: str
     currency: str
+    market_timezone: str
     provider: str
     latest_price: str | None
     latest_quote_at: str | None
@@ -41,6 +42,7 @@ class DailyBarRead(StrictSchema):
 
 class DailyBarsRead(StrictSchema):
     security_id: str
+    market_timezone: str
     provider: str
     status: DataAvailabilityStatus
     retrieved_at: str
@@ -62,6 +64,7 @@ class MinuteBarRead(StrictSchema):
 
 class MinuteBarsRead(StrictSchema):
     security_id: str
+    market_timezone: str
     provider: str
     status: DataAvailabilityStatus
     session_date: str
@@ -94,6 +97,7 @@ def market_state_read(view: MarketStateView) -> MarketStateRead:
         market=view.security.market,
         symbol=view.security.symbol,
         currency=view.security.currency,
+        market_timezone=view.market_timezone,
         provider=quote.provider,
         latest_price=None if quote_data is None else decimal_string(quote_data.price),
         latest_quote_at=(None if quote_data is None else _utc_string(quote_data.latest_quote_at)),
@@ -128,6 +132,7 @@ def daily_bars_read(view: DailyBarsView) -> DailyBarsRead:
     data = view.result.data or ()
     return DailyBarsRead(
         security_id=view.security.id,
+        market_timezone=view.market_timezone,
         provider=view.result.provider,
         status=view.result.status,
         retrieved_at=_utc_string(view.result.retrieved_at),
@@ -156,6 +161,7 @@ def minute_bars_read(view: MinuteBarsView) -> MinuteBarsRead:
     data = view.result.data or ()
     return MinuteBarsRead(
         security_id=view.security.id,
+        market_timezone=view.market_timezone,
         provider=view.result.provider,
         status=view.result.status,
         session_date=view.session_date,

@@ -33,6 +33,7 @@ class MarketDataSecurityNotSupported(ValueError):
 @dataclass(frozen=True, slots=True)
 class MarketStateView:
     security: Security
+    market_timezone: str
     quote: ProviderResult[QuoteSnapshot]
     market_status: ProviderResult[MarketStatusSnapshot]
 
@@ -40,12 +41,14 @@ class MarketStateView:
 @dataclass(frozen=True, slots=True)
 class DailyBarsView:
     security: Security
+    market_timezone: str
     result: ProviderResult[tuple[DailyBar, ...]]
 
 
 @dataclass(frozen=True, slots=True)
 class MinuteBarsView:
     security: Security
+    market_timezone: str
     session_date: str
     result: ProviderResult[tuple[MinuteBar, ...]]
 
@@ -75,6 +78,7 @@ class MarketDataQueries:
             reason = "market data provider is not configured"
             return MarketStateView(
                 security=security,
+                market_timezone=market_security.market_timezone,
                 quote=_failure(self._provider_name, retrieved_at, reason),
                 market_status=_failure(self._provider_name, retrieved_at, reason),
             )
@@ -89,6 +93,7 @@ class MarketDataQueries:
             market_status = _failure(self._provider_name, retrieved_at, reason)
         return MarketStateView(
             security=security,
+            market_timezone=market_security.market_timezone,
             quote=quote,
             market_status=market_status,
         )
@@ -100,7 +105,11 @@ class MarketDataQueries:
         )
         if result.data is not None:
             result = replace(result, data=result.data[-limit:])
-        return DailyBarsView(security=security, result=result)
+        return DailyBarsView(
+            security=security,
+            market_timezone=market_security.market_timezone,
+            result=result,
+        )
 
     def minute_bars(self, security_id: str) -> MinuteBarsView:
         security, market_security = self._resolve_security(security_id)
@@ -112,6 +121,7 @@ class MarketDataQueries:
         ).date()
         return MinuteBarsView(
             security=security,
+            market_timezone=market_security.market_timezone,
             session_date=session_date.isoformat(),
             result=result,
         )
