@@ -8,9 +8,10 @@ Current research definition:
 
 ```text
 docs/research/PAQS_V0.3.1_COMPLETENESS_LOCK.md
+docs/research/PAQS_V0.3.1_REVIEW_AMENDMENT_A.md
 ```
 
-The PAQS research document is a design lock for research semantics, **not** an implementation contract. A later explicitly approved Task Contract must adopt a bounded subset before code is written.
+The PAQS research documents are a design lock for research semantics, **not** an implementation contract. `PAQS_V0.3.1_REVIEW_AMENDMENT_A.md` is normative within the v0.3.1 research definition where it is more specific than the base v0.3.1 document. A later explicitly approved Task Contract must adopt a bounded subset before code is written.
 
 ## 1. Governance and supersession
 
@@ -25,7 +26,7 @@ Instruction precedence remains:
 
 The former completed-daily-only `AIInfraStrategy v1` formula proposal—including its weights, thresholds, bands, gates, state machine, sizing candidates, and golden cases—is withdrawn as implementation authority. It may be recovered from Git history for research context but must not be implemented as the current strategy.
 
-`PAQS_V0.2_CORE_DEFINITION_LOCK.md` remains research history. `PAQS_V0.3.1_COMPLETENESS_LOCK.md` records the current Price Action research direction and closes identified semantic gaps, but it does not by itself authorize implementation.
+`PAQS_V0.2_CORE_DEFINITION_LOCK.md` remains research history. The v0.3.1 Completeness Lock plus Review Amendment A record the current Price Action research direction and close identified semantic gaps, but they do not by themselves authorize implementation.
 
 No rule, fixture, score, or example in these research documents is a profitability or predictive-validity claim.
 
@@ -142,7 +143,7 @@ Advisory State
 Optional derived Score / Ranking
 ```
 
-Research semantics are detailed in `docs/research/PAQS_V0.3.1_COMPLETENESS_LOCK.md`.
+Research semantics are detailed in the current v0.3.1 documents listed above.
 
 ## 5. Time, market data and point-in-time semantics
 
@@ -179,6 +180,8 @@ TTF = completed 30m REGULAR-session bars
 
 where 30m bars are derived only from legitimately completed 1-minute market data. US extended-session data remains valid market-data context but is not part of the initial structural TTF engine.
 
+W1 finalization follows `PAQS_V0.3.1_REVIEW_AMENDMENT_A.md`: a weekly bar is excluded while partial and may become completed only when the official calendar or legitimately reached historical/live clock establishes that the week is complete.
+
 ## 6. Missing-data and data-quality behavior
 
 Future implementation must expose component coverage and timestamps and distinguish at minimum:
@@ -206,13 +209,13 @@ During an active visible Dashboard session, a future approved strategy may recal
 
 ## 7. PAQS v0.3.1 research locks
 
-`PAQS_V0.3.1_COMPLETENESS_LOCK.md` now defines research semantics for the previously open P0 gaps:
+The v0.3.1 research documents now define semantics for the previously open P0 gaps:
 
 1. two-stage Entry / RR timing and next-open revalidation;
 2. separate Entry Advisory and conditional Holder Advisory states;
-3. setup-specific snapshotted structural invalidation;
+3. setup-specific snapshotted structural invalidation using explicit completed-close / ATR-buffer inequalities;
 4. nearest-obstacle structural T1 selection and target-shopping prohibition;
-5. initial US/HK `W1 -> D1 -> 30m regular-session` aggregation contract;
+5. initial US/HK `W1 -> D1 -> 30m regular-session` aggregation contract with deterministic W1 finalization;
 6. `REGULAR_SESSION_OPEN_GAP` semantics;
 7. explicit `POINT_IN_TIME_ADJUSTED` corporate-action basis requirement;
 8. PAQS state machine as primary decision logic with Score as a derived layer.
@@ -247,9 +250,9 @@ At minimum, proportional future tests must prove the rules actually included in 
 - completed-bar-only Trigger / Follow-through behavior;
 - Event != Setup != Advisory;
 - next-open Entry/RR revalidation without lookahead;
-- setup-specific invalidation immutability;
+- setup-specific invalidation immutability and explicit close/buffer thresholds;
 - nearest-target / no-target-shopping behavior;
-- US/HK session/calendar and 30m aggregation correctness;
+- US/HK session/calendar, W1 completion and 30m aggregation correctness;
 - corporate-action adjustment-basis consistency;
 - explicit missing/delayed/stale/unsupported states;
 - no provider-native, brokerage-account, or execution dependency;
@@ -268,7 +271,7 @@ TASK-006C — PAQS Setup & Risk Geometry
 TASK-006D — PAQS Advisory / Presentation Layer
 ```
 
-This list is research staging only. It creates no branch, Task Contract or implementation authority by itself.
+This list is research staging only. It creates no implementation authority by itself.
 
 ## 11. Current implementation statement
 
