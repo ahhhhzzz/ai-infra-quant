@@ -1,34 +1,34 @@
 # Architecture Specification
 
-Status: **AUTHORITATIVE — daily + 1-minute read-only architecture**
+Status: **AUTHORITATIVE — read-only PAQS decision-terminal architecture**
 
 Authority: subordinate to `AGENTS.md`, `docs/ROADMAP.md`, and `docs/MASTER_SPEC.md`
 
-Decision: `MTF-001`
+Decisions: `MTF-001`, `PAQS-MVP-001`
 
 ## 1. Architectural outcome
 
-The platform is a local, single-user, single-process modular monolith. FastAPI presents local REST
-APIs and HTML; application use cases coordinate provider-agnostic modules; SQLAlchemy/Alembic own
-persistence; an independent Market Data Provider adapter supplies read-only market information.
+The platform is a local, single-user, single-process modular monolith. FastAPI presents local REST APIs and HTML; application use cases coordinate provider-agnostic modules; SQLAlchemy/Alembic own approved persistence; an independent read-only Market Data Provider adapter supplies market information.
 
 ```text
 Local browser
     |
 FastAPI presentation
     |
-Application use cases / Unit of Work
+Application use cases
     |
     +-- dashboard refresh coordinator
-    +-- daily and completed-minute data validation
-    +-- Strategy: Daily Base + Intraday Minute Adjustment
-    +-- ranking / reference-risk state
-    +-- later paper research / performance / backtest
+    +-- dynamic supported US/HK watchlist administration
+    +-- market-data / calendar / session validation
+    +-- PAQS input timeframe derivation
+    +-- PAQS structure/events/setups/risk/advisory
+    +-- optional lightweight quality/ranking/history
     |
-SQLite
+SQLite where approved persistence exists
 
 Independent read-only boundary:
-    Market Data Provider -> canonical quote/daily/minute/status observations
+    Market Data Provider
+      -> canonical quote/Daily/minute/status/calendar/security metadata
 
 Human boundary:
     advisory display -> user -> broker official client
@@ -41,34 +41,32 @@ There is no brokerage-account integration and no application path to a broker co
 ```text
 backend -> application -> core
 database -----------------> core ports/domain
-integrations -------------> core market-data ports/domain
+integrations -------------> core ports/domain
 composition root -> backend + application + database + integrations
 ```
 
-`core` imports neither `backend`, `database`, nor `integrations`. Domain models are independent of
-Pydantic, SQLAlchemy, and provider SDKs. Only the composition root selects a concrete provider.
-Adapters do not import one another. The frontend calls only local REST endpoints.
+`core` imports neither `backend`, `database`, nor `integrations`. Domain models are independent of Pydantic, SQLAlchemy and provider SDKs. Only the composition root selects a concrete provider. Adapters do not import one another. Frontend calls only local REST endpoints.
 
 ## 3. Module separation
 
 | Module/port | Owns | May consume | Must not own or call |
 |---|---|---|---|
-| Dashboard | Selector, chart timeframe, visible-page polling/countdown, freshness/error display | Canonical API responses | Provider SDK models, account or execution concepts |
-| Strategy | Indicators, Daily Base Score, Intraday Minute Adjustment, combined score, explanation | Canonical daily/minute inputs | Provider SDKs, broker commands, accounting mutation |
-| Portfolio | Tracked-security ranking and later simulated allocations | Strategy/risk outputs | Real-account facts or broker commands |
-| Accounting | Accepted opening facts and later approved paper bookkeeping | Confirmed PaperFill | Real-account facts or Strategy scoring |
-| Risk | Explainable reference/risk states and data-quality warnings | Canonical market/score values | Provider SDKs or order submission |
-| Performance | Paper/research performance | Immutable internal facts | External calls during calculation |
-| Backtest | Historical daily clock, point-in-time cursor, reproducible reports | Canonical historical data and approved Strategy | Production mutation or invented minute history |
-| Market data port | Quote, daily bars, completed minute bars, market status, timestamps | Independent provider/import source | Brokerage account access or execution |
+| Dashboard | Selector/watchlist UI, chart views, polling/countdown, later PAQS presentation | Canonical local API responses | Provider SDK objects, real account/execution concepts |
+| Security/Watchlist | Canonical Security UUID identity and user-selected supported instruments | Provider-neutral security capability validation | Provider SDK objects in core, account state |
+| Market-data port | Quote, completed Daily/minute bars, market status, approved calendar/security metadata | Independent provider/import source | Brokerage-account access or execution |
+| PAQS input foundation | W1/D1/30m construction, session/calendar/coverage/adjustment metadata | Canonical market data | Provider SDK objects, broker/account state |
+| PAQS Strategy | Structure, events, setups, invalidation/target/RR/advisory by bounded task | PAQS input foundation | Provider SDKs, broker commands, accounting mutation |
+| Quality/Ranking | Optional derived prioritization/explanation | PAQS states/advisories | Creating setups or bypassing hard gates |
+| Accounting/Portfolio | Accepted Phase 1 historical facts; optional future paper work only if reactivated | Explicit approved internal facts | Real-account state, PAQS rule mutation |
+| Performance/Backtest | Dormant optional future extensions | Canonical historical data if explicitly reactivated | Production mutation, fabricated history |
 
-Provider-specific code belongs under `integrations/`. Core packages do not read environment
-variables, import SDKs, or branch on provider names.
+Provider-specific code belongs under `integrations/`. Core packages do not read environment variables, import SDKs, or branch on provider names.
 
 ## 4. Market Data Provider boundary
 
-Market-data access is independent from brokerage-account access. A future adapter may implement
-equivalents of:
+Market-data access is independent from brokerage-account access.
+
+Current accepted adapter path supports equivalents of:
 
 ```text
 get_latest_quote()
@@ -77,146 +75,171 @@ get_minute_bars()
 get_market_status()
 ```
 
-TASK-003 separately approved a minimal Futu OpenD quote-only adapter for the provider proof of
-concept. TASK-004 composes it behind a provider-neutral application query service and FastAPI
-presentation layer. It maps only the three explicit provider symbols to canonical quote,
-market-status, completed-daily, and completed-minute results. OpenD availability,
-login, entitlements, and observed delay remain external facts and are never fabricated.
+TASK-003 approved a minimal Futu OpenD quote-only adapter. TASK-004 composed it behind provider-neutral application/core boundaries. TASK-005/TASK-005B consume those responses through the local Dashboard.
 
-TASK-005 consumes those provider-neutral responses directly from the local browser. TASK-005B
-extends the existing routes with bounded historical K-line paging, a 1300-session Daily request,
-and a rolling 30-calendar-day minute window. US minute requests use Futu `Session.ALL`; HK requests
-retain normal HK sessions. The Dashboard uses locally vendored TradingView Lightweight Charts
-5.2.1, renders daily and minute OHLCV in separate candle/volume panes, and formats chart timestamps
-with the canonical IANA market timezone. It adds no backend route group, provider dependency, or
-persistence.
+TASK-006A is planned to extend the read-only provider-neutral boundary only as necessary for:
 
-The port is read-only and exposes no account identity, cash, position, order, trade, account matching,
-or command surface.
+- dynamic supported US/HK security validation/mapping;
+- trading-calendar/session metadata required for deterministic PAQS input preparation.
 
-Each backend request opens at most one short-lived quote context for the requested capability (the
-state query shares one context across quote and market-status reads) and closes it at request end.
-Provider-native SDK objects and tabular values remain inside `integrations/`. Provider mode `none`
-returns structured unavailability without attempting an external connection.
+This extension must not expose account identity, cash, positions, orders, trades, account matching or command capabilities.
 
-## 5. Canonical market-data boundaries
+The current three-symbol `POC_SECURITIES` restriction is historical Phase 2 PoC scaffolding, not the target architecture for TASK-006A.
 
-- Internal Security IDs are UUIDs; provider symbols are mappings.
-- Instants are aware UTC; sessions also carry local date, timezone, and calendar.
-- Financial values are Decimal. SQLite uses canonical fixed-scale TEXT with no numeric affinity;
-  PostgreSQL portability uses NUMERIC.
-- Point-in-time selection requires `available_at <= data_as_of` where applicable.
-- Missing, delayed, stale, unavailable, invalid, and error states are explicit.
-- Raw observations are immutable or versioned with provenance.
+Provider-native SDK/tabular objects remain inside `integrations/`.
+
+## 5. Canonical market-data and PAQS input boundaries
+
+- Internal Security IDs are UUIDs.
+- Provider symbols are mappings, not application identity.
+- Initial dynamic market scope remains US and HK only.
+- Instants are aware UTC; market sessions carry local date, IANA timezone and calendar semantics.
+- Financial values use Decimal.
+- Missing/delayed/stale/unavailable/invalid/unsupported/error states are explicit.
 - No market value is fabricated.
+- Unfinished minute bars are excluded from completed outputs.
+- Latest/intraday price is never labelled as a final Daily close.
 
-Daily bars remain supported with up to 1500 requested completed sessions. The Dashboard full load
-uses 1300 Daily bars and 30 market-local calendar days of completed minute bars. Unfinished minute
-bars are not returned as completed. Daily and 1-minute bars are rendered in separate coordinate
-systems selected by a timeframe control.
+Current Dashboard full load uses approximately 1300 completed Daily sessions and 30 market-local calendar days of completed minute data. US minute retrieval uses Futu `Session.ALL`; HK keeps normal provider sessions.
 
-Canonical responses distinguish:
+Initial PAQS derived timeframe direction:
 
 ```text
-latest_quote_at
-latest_completed_minute_bar_at
-latest_completed_daily_session
-score_calculated_at
+D1 canonical completed bars
+   -> completed W1
+
+completed 1m
+   -> market-aware REGULAR-session filtering
+   -> completed 30m
 ```
 
-Provider latency and local polling cadence are separate metadata. A latest/intraday price is never
-labelled as a final daily close.
+H1/H4 are not current MVP requirements.
+
+PAQS input must carry coverage/session/calendar/adjustment metadata. Current provider QFQ behavior must not be silently represented as strict historical point-in-time-safe replay.
 
 ## 6. Dashboard refresh flow
 
+Existing market-data flow remains:
+
 ```text
 initial load or Security switch
-  -> request full bounded Daily/minute history
-  -> establish a recent pannable viewport
+  -> request bounded Daily/minute history
+  -> establish recent pannable viewport
 
-visible page incremental or manual refresh
-  -> if no request is active, request local market state
-  -> request five completed daily bars and two calendar days of minute data independently
-  -> adapter reads provider state and bars
-  -> merge/deduplicate/prune browser caches or return explicit per-capability error state
-  -> render selected daily or 1-minute chart
+visible-page incremental/manual refresh
+  -> request state/latest incremental Daily/minute data
+  -> merge/deduplicate/prune browser caches
+  -> render selected market chart
   -> reset approximately 60-second countdown
 ```
 
-Automatic polling pauses while the page is hidden and refreshes immediately when visible again.
-Requests do not overlap, and an abort controller plus request-generation/security checks prevent
-an older response from overwriting a newly selected Security. Closing the page requires no
-background activity. MVP uses ordinary HTTP/REST polling; streaming infrastructure is not
-required. Score/ranking/risk calculation remains future separately approved work.
+Automatic polling pauses while hidden and refreshes immediately when visible again. Requests do not overlap; abort/generation/security guards prevent stale responses overwriting newly selected securities. Closing the page requires no background activity.
 
-## 7. Composite Score boundary
+Future TASK-006E may add PAQS advisory presentation without changing the read-only human boundary.
+
+## 7. PAQS causal architecture
+
+The causal strategy architecture is:
 
 ```text
-Composite Quant Score = Daily Base Score + Intraday Minute Adjustment
+Canonical completed market data
+        ↓
+PAQS Input Foundation
+        ↓
+Structure
+        ↓
+Events / Transition / Trigger / Follow-through
+        ↓
+Setup
+        ↓
+Structural Invalidation / Target / RR
+        ↓
+Entry / Holder Advisory
+        ↓
+Optional derived Quality / Ranking
 ```
 
-The daily component represents medium-term structure. The minute adjustment represents
-current-session strength/risk. The architecture carries component timestamps, coverage, missing
-inputs, and `score_calculated_at`.
+A numerical Quality/Composite Score is a derived presentation/ranking layer if retained. It must not create a setup, bypass RR or override hard structural invalidation.
 
-Exact formulae, weights, thresholds, bands, normalization, sizing, and profitability claims are
-unapproved. The existing completed-daily-only proposal in `docs/STRATEGY_SPEC.md` is research history, not an
-implementation contract. A later strategy Task Contract is required before implementation.
+## 8. TASK-006 architectural decomposition
 
-## 8. Paper and human boundaries
+`TASK-006` is an umbrella workstream only.
 
-Later lightweight paper state is simulated only. Paper positions may change only from confirmed
-PaperFill facts under a separately approved task. Advisory output does not create a paper fact.
+### TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation
 
-The application maintains no real-account or real-position state. It does not observe, import, or
-match real trades. Whether the user acts in the broker's official client is outside the system.
+Owns supported-security/watchlist flow and provider-agnostic W1/D1/30m input preparation. It must not implement ATR/Pivot/Zone/Range/Regime.
 
-## 9. Runtime and infrastructure
+### TASK-006B — PAQS Structure Engine
+
+Owns ATR, Micro/Major Pivot, Swing, Key Level geometry, Pivot Zones, Range and Base Regime. Must expose deterministic/no-lookahead structure debug evidence. Must stop for manual real-market structure review before 006C.
+
+### TASK-006C — PAQS Event Engine
+
+Owns Break Attempt/Breakout/Breakdown, Failed Breakout/Breakdown, Retest, role flip, Transition, Trigger and Follow-through. No Entry/Hold/Exit advisory.
+
+### TASK-006D — PAQS Setup & Risk Engine
+
+Owns approved setup families, expiry, structural invalidation, T1/T2, no-target-shopping, RR and next-open revalidation; may expose only explicitly approved Entry Advisory states.
+
+### TASK-006E — PAQS Advisory & Decision Dashboard
+
+Owns conditional Holder Advisory, explanations/reason codes, Dashboard integration and optional lightweight Quality/Ranking plus advisory history when approved.
+
+Each task is separately approved/reviewed/integrated. No implementation may skip the dependency order by implementing later semantics inside an earlier task.
+
+## 9. Paper, backtest and human boundaries
+
+The application maintains no real-account or real-position state. Whether the user acts in the broker official client remains outside system state.
+
+Paper Portfolio/PaperFill, position sizing and broad backtesting/analytics are dormant optional Phase 3/4 extensions under `PAQS-MVP-001`. They are not current committed MVP work and require no placeholder implementation.
+
+If later reactivated, they consume stable provider-agnostic PAQS/advisory facts rather than changing PAQS to depend on them.
+
+## 10. Runtime and infrastructure
 
 ```text
 Browser -> 127.0.0.1 FastAPI -> SQLite
                             -> independent read-only Market Data Provider
 ```
 
-No microservices, queues, distributed workers, Kubernetes, multi-tenancy, high availability,
-24/7 execution service, tick store, or institutional provider framework is planned. PostgreSQL
-compatibility remains portability, not a deployment requirement.
+No microservices, queues, distributed workers, Kubernetes, multi-tenancy, high availability, 24/7 execution service, tick store or institutional provider framework is planned. PostgreSQL compatibility remains portability, not a deployment requirement.
 
-## 10. Phase allocation
+## 11. Phase allocation
 
 | Phase | Architectural increment |
 |---:|---|
-| 0 | Historical product definition plus `MTF-001` future-scope supersession |
-| 1 | Accepted FastAPI/SQLite foundation, identity/watchlist/opening facts, read APIs, inert descriptors |
-| 2 | Independent market data, read-only dashboard, daily/current-minute views, 60-second refresh, first separately approved dual-timeframe score |
-| 3 | Richer research/risk analytics, signal history, lightweight simulated paper tracking |
-| 4 | Deterministic backtesting and analytics; final phase |
+| 0 | Historical product definition plus future-scope decisions |
+| 1 | Accepted FastAPI/SQLite foundation, identity/watchlist/opening facts, read APIs |
+| 2 | Active committed Market Data/Dashboard + TASK-006A–006E PAQS Decision Terminal MVP |
+| 3 | Dormant optional research/paper extensions; explicit reactivation required |
+| 4 | Dormant optional validation/backtest/analytics extensions; final possible phase |
 
-No later phase exists.
+The current product-completion line is Phase 2 after TASK-006E. No later phase exists after Phase 4.
 
-## 11. Supersession register
+## 12. Supersession register
 
 | ID | Earlier future direction | Current disposition |
 |---|---|---|
-| MTF-A001 | Product restricted to completed daily data | Superseded: daily plus current-session completed 1-minute data |
+| MTF-A001 | Product restricted to completed daily data | Superseded: Daily plus completed minute analysis allowed |
 | MTF-A002 | Minute/intraday analysis prohibited with execution | Superseded: read-only minute analysis allowed; execution remains forbidden |
-| MTF-A003 | Real-account observation/import/matching planned | Permanently removed from product scope |
-| MTF-A004 | Market data could be coupled to a broker connector | Replaced by an independent provider-agnostic read-only market-data port |
-| MTF-A005 | Future phases extended beyond analytics | Removed; final phase is Phase 4 |
+| MTF-A003 | Real-account observation/import/matching planned | Permanently removed |
+| MTF-A004 | Market data could be coupled to broker connector | Replaced by independent provider-agnostic read-only port |
+| MTF-A005 | Future phases extended beyond analytics | Removed; final possible phase is Phase 4 |
+| PAQS-A001 | Broad Paper/Backtest platform required before product completion | Superseded: product completion line is Phase 2 PAQS Decision Terminal MVP |
+| PAQS-A002 | Composite Score is the primary causal strategy | Superseded: PAQS state/hard-gate engine is primary; score is derived if retained |
+| PAQS-A003 | Three PoC symbols are permanent supported set | Superseded for future work by dynamic supported US/HK security direction |
 
-## 12. Open decisions
+## 13. Open decisions
 
 These remain open and do not authorize implementation:
 
-- operational OpenD availability, quote entitlements, pricing, latency, and live US/HK evidence;
-- any provider capability beyond the bounded TASK-004 read-through backend;
-- minute-data retention policy;
-- exact Composite Score formula, weights, thresholds, bands, and normalization;
-- later paper research assumptions;
-- any historical-minute expansion beyond the daily-bar backtest baseline.
+- exact TASK-006A supported-security validation/user flow and PAQS input contract until its Task Contract is approved;
+- exact PAQS structure/event/setup parameters beyond approved research locks;
+- exact Quality/Composite Score formula and ranking behavior;
+- whether lightweight advisory history is included in TASK-006E;
+- any optional Phase 3/4 reactivation;
+- any historical-minute expansion or strict real-market historical PAQS replay.
 
-## 13. Historical evidence boundary
+## 14. Historical evidence boundary
 
-The accepted Phase 1 plan and review files contain terminology from earlier directions. They remain
-immutable historical evidence and do not govern future scope. TASK-003 and TASK-004 change no
-Phase 1 plan, review, or migration.
+Accepted Phase 1 plan/review files remain immutable historical evidence and do not govern later PAQS future scope. Future docs/tasks must not rewrite them.
