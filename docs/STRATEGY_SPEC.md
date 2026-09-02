@@ -1,8 +1,8 @@
 # PAQS / Composite Quant Strategy Research Specification
 
-Status: **PROPOSED / RESEARCH_UNVALIDATED**; not approved for implementation
+Status: **PROPOSED / RESEARCH_UNVALIDATED**; not approved for implementation except through explicit bounded Task Contracts
 
-Future authority: `docs/ROADMAP.md` decision `MTF-001`
+Future authority: `docs/ROADMAP.md` decisions `MTF-001` and `PAQS-MVP-001`
 
 Current research definition:
 
@@ -11,7 +11,7 @@ docs/research/PAQS_V0.3.1_COMPLETENESS_LOCK.md
 docs/research/PAQS_V0.3.1_REVIEW_AMENDMENT_A.md
 ```
 
-The PAQS research documents are a design lock for research semantics, **not** an implementation contract. `PAQS_V0.3.1_REVIEW_AMENDMENT_A.md` is normative within the v0.3.1 research definition where it is more specific than the base v0.3.1 document. A later explicitly approved Task Contract must adopt a bounded subset before code is written.
+The PAQS research documents lock research semantics but are not implementation contracts. `PAQS_V0.3.1_REVIEW_AMENDMENT_A.md` governs where it is more specific than the base v0.3.1 document. Implementation authority is granted only by a user-approved bounded TASK-006A/006B/006C/006D/006E Task Contract.
 
 ## 1. Governance and supersession
 
@@ -24,15 +24,19 @@ Instruction precedence remains:
 5. the current explicitly approved Task Contract;
 6. this research specification and documents under `docs/research/`.
 
-The former completed-daily-only `AIInfraStrategy v1` formula proposal—including its weights, thresholds, bands, gates, state machine, sizing candidates, and golden cases—is withdrawn as implementation authority. It may be recovered from Git history for research context but must not be implemented as the current strategy.
+The former completed-daily-only `AIInfraStrategy v1` formula proposal remains withdrawn as implementation authority.
 
-`PAQS_V0.2_CORE_DEFINITION_LOCK.md` remains research history. The v0.3.1 Completeness Lock plus Review Amendment A record the current Price Action research direction and close identified semantic gaps, but they do not by themselves authorize implementation.
+`PAQS_V0.2_CORE_DEFINITION_LOCK.md` remains research history. The v0.3.1 Completeness Lock plus Review Amendment A record the current Price Action research direction.
 
-No rule, fixture, score, or example in these research documents is a profitability or predictive-validity claim.
+`PAQS-MVP-001` additionally makes the PAQS decision-terminal the current product-completion line and defines the authoritative future task decomposition. The earlier four-item research staging list is superseded.
+
+No rule, fixture, score or example in these research documents is a profitability or predictive-validity claim.
 
 ## 2. Product and safety boundary
 
-The strategy is read-only decision support for the configurable tracked set beginning with:
+PAQS is read-only decision support.
+
+The initial PoC tracked set remains:
 
 ```text
 US.AVGO
@@ -40,31 +44,28 @@ US.VRT
 HK.09698
 ```
 
-It consumes provider-agnostic canonical market data and may produce:
+but future Phase 2 scope now plans dynamic supported US/HK securities under TASK-006A. PAQS must not hard-code strategy logic to those three symbols.
+
+PAQS consumes provider-agnostic canonical market data and may eventually produce:
 
 - market-structure state;
 - Key Levels / Zones / Range;
 - Price Action events;
 - Setup and advisory states;
 - structural invalidation / target / RR;
-- explanation and reason codes;
-- optional later Quality / Composite Score and tracked-security ranking.
+- explanation/reason codes;
+- optional lightweight Quality/Composite Score and ranking;
+- optional lightweight immutable advisory/signal history if explicitly approved.
 
-It has no provider SDK object, brokerage-account fact, external order, or execution capability. Whether the user trades in the broker's official client is outside strategy/application state.
+It has no provider SDK object, brokerage-account fact, external order or execution capability. Whether the user trades in the broker official client is outside PAQS/application state.
 
-The strategy may say conditionally:
+Conditional language such as `EXIT_IF_HELD` never means the system knows a real position exists.
 
-```text
-EXIT_IF_HELD
-```
+Missing/delayed/stale/unavailable/invalid/unsupported/incomplete inputs remain explicit. No market, corporate-action, risk, position or execution value is fabricated.
 
-but this does not mean the application knows a real position exists and does not submit any broker command.
+## 3. PAQS is primary; Score is derived
 
-Missing, delayed, stale, unavailable, invalid, unsupported-adjustment, or incomplete inputs remain explicit. No market, valuation, corporate-action, fundamental, risk, position, or execution value is fabricated.
-
-## 3. Approved high-level score architecture and PAQS research relationship
-
-The currently approved high-level architecture remains:
+The historical/current score-level architecture remains recorded as:
 
 ```text
 Composite Quant Score
@@ -74,45 +75,51 @@ Daily Base Score
 Intraday Minute Adjustment
 ```
 
-Only this decomposition is authoritative at the score level. Exact numerical formulae remain unapproved.
+`PAQS-MVP-001` clarifies that this numerical decomposition is not the causal strategy engine.
 
-The PAQS v0.3.1 research direction does **not** treat that numerical score as the causal strategy engine. The proposed relationship is:
+The causal relationship is:
 
 ```text
 Completed canonical market data
         ↓
-PAQS structural / event / setup state machine
+PAQS input/session/timeframe foundation
         ↓
-Entry / Holder advisory + hard gates
+PAQS structure / event / setup state machine
         ↓
-Optional derived Quality / Composite Score
+structural invalidation / target / RR hard gates
+        ↓
+Entry / Holder advisory
+        ↓
+optional derived Quality / Composite Score + Ranking
 ```
 
-If Composite Score is retained by a future approved Task Contract, its PAQS-compatible interpretation is:
+If a numerical score is retained by a later approved Task Contract:
 
 ```text
 Daily Base Score
     = derived summary of completed higher/setup-timeframe structural context
 
 Intraday Minute Adjustment
-    = bounded derived summary of completed lower-timeframe trigger / follow-through / risk information
+    = bounded derived summary of completed lower-timeframe trigger/follow-through/risk information
 ```
 
 The score must never:
 
 - fabricate an Event or Setup;
-- override structural invalidation;
+- override hard structural invalidation;
 - bypass RR;
-- convert an unsupported/missing state to zero;
+- convert unsupported/missing data to zero;
 - convert `NO_TRADE` into `LONG_READY`;
-- represent a probability without a separately calibrated probability model.
+- represent probability without a separately validated/calibrated probability model.
+
+Exact numerical formulae remain unapproved.
 
 ## 4. Current PAQS research pipeline
 
-The current design sequence is:
-
 ```text
 Completed Price Data
+        ↓
+PAQS Input Foundation
         ↓
 ATR / Volatility Scale
         ↓
@@ -138,39 +145,28 @@ Structural Target
         ↓
 RR / Entry Revalidation
         ↓
-Advisory State
+Entry / Holder Advisory
         ↓
-Optional derived Score / Ranking
+Optional derived Quality / Ranking
 ```
 
 Research semantics are detailed in the current v0.3.1 documents listed above.
 
-## 5. Time, market data and point-in-time semantics
+## 5. Time, market-data and PAQS input semantics
 
-Strategy input/output must distinguish appropriate observation and calculation timestamps, including the existing canonical fields:
+Only completed source bars may enter confirmed PAQS calculations. An unfinished minute bar is excluded. A latest/intraday price is never a final Daily close.
 
-```text
-latest_quote_at
-latest_completed_minute_bar_at
-latest_completed_daily_session
-score_calculated_at
-```
+All instants are aware UTC; market sessions use canonical IANA timezones. Financial calculations use Decimal.
 
-PAQS additionally requires event/setup/advisory `as_of_timestamp` and confirmation timestamps.
-
-Only completed source bars may enter PAQS structure calculations. An unfinished minute bar is excluded. A latest/intraday price is never described as a final daily close. Provider latency remains independent from the approximately 60-second Dashboard polling cadence.
-
-All instants are aware UTC; market sessions use their canonical IANA market timezone. Decimal remains required for financial calculations.
-
-Point-in-time research must satisfy:
+Point-in-time semantics require:
 
 ```text
 feature[t] = f(data <= t)
 ```
 
-and must not inject future corporate-action information into a historical calculation.
+and future corporate-action information must not be injected into a historical state.
 
-The current PAQS research mapping for the initial US/HK equity set is:
+The current initial equity timeframe direction is:
 
 ```text
 HTF = completed W1
@@ -178,13 +174,17 @@ STF = completed D1
 TTF = completed 30m REGULAR-session bars
 ```
 
-where 30m bars are derived only from legitimately completed 1-minute market data. US extended-session data remains valid market-data context but is not part of the initial structural TTF engine.
+TASK-006A is planned to implement only the provider-agnostic input foundation required to construct/validate those timeframes and supported dynamic US/HK securities. It does not implement ATR/Pivot/structure semantics.
 
-W1 finalization follows `PAQS_V0.3.1_REVIEW_AMENDMENT_A.md`: a weekly bar is excluded while partial and may become completed only when the official calendar or legitimately reached historical/live clock establishes that the week is complete.
+US extended-session minute data remains valid market data but is not part of the initial structural 30m TTF engine. H1/H4 are not current MVP requirements.
+
+W1 finalization follows PAQS v0.3.1 Review Amendment A.
+
+Current provider QFQ data must not automatically be treated as strict real-market point-in-time-safe historical replay. Broad historical real-market PAQS backtesting is not current MVP work.
 
 ## 6. Missing-data and data-quality behavior
 
-Future implementation must expose component coverage and timestamps and distinguish at minimum:
+Future implementations must expose relevant component coverage/timestamps and distinguish truthful states such as:
 
 ```text
 AVAILABLE
@@ -196,87 +196,156 @@ INVALID
 UNSUPPORTED
 ```
 
-It must never silently:
+They must never silently:
 
-- substitute zero for a missing strategy component;
+- substitute zero for a missing component;
 - reuse an unfinished minute bar;
-- invent a missing Key Level or price;
-- mix inconsistent price-adjustment bases;
-- treat a corporate-action discontinuity as genuine Price Action;
-- infer intrabar event ordering from OHLC when the ordering is unknowable.
+- invent a Key Level or price;
+- mix inconsistent adjustment bases;
+- treat corporate-action discontinuity as genuine Price Action;
+- infer unknowable intrabar event order from OHLC.
 
-During an active visible Dashboard session, a future approved strategy may recalculate on manual refresh and approximately every 60 seconds. This cadence does not authorize background processing after the page closes.
+Dashboard recalculation cadence does not authorize background processing after page close.
 
 ## 7. PAQS v0.3.1 research locks
 
-The v0.3.1 research documents now define semantics for the previously open P0 gaps:
+The v0.3.1 research definition locks, at research level:
 
-1. two-stage Entry / RR timing and next-open revalidation;
+1. two-stage Entry/RR timing and next-open revalidation;
 2. separate Entry Advisory and conditional Holder Advisory states;
-3. setup-specific snapshotted structural invalidation using explicit completed-close / ATR-buffer inequalities;
-4. nearest-obstacle structural T1 selection and target-shopping prohibition;
-5. initial US/HK `W1 -> D1 -> 30m regular-session` aggregation contract with deterministic W1 finalization;
+3. setup-specific snapshotted structural invalidation using explicit close/ATR-buffer inequalities;
+4. nearest-obstacle T1 and no-target-shopping;
+5. initial `W1 -> D1 -> 30m regular-session` hierarchy plus deterministic W1 finalization;
 6. `REGULAR_SESSION_OPEN_GAP` semantics;
-7. explicit `POINT_IN_TIME_ADJUSTED` corporate-action basis requirement;
-8. PAQS state machine as primary decision logic with Score as a derived layer.
+7. point-in-time corporate-action basis requirement;
+8. PAQS state/hard-gate engine as primary with Score as a derived layer.
 
-These are **research locks**, not permission to implement them. A Task Contract must explicitly select scope, parameters, models, tests and migration/API/UI effects before any code work.
+These research locks do not authorize one large implementation task.
 
-## 8. Decisions still required before implementation
+## 8. Authoritative TASK-006 decomposition
 
-A later approved strategy Task Contract must still define its exact bounded implementation scope, including:
+`TASK-006` is an umbrella workstream only and must never be given to Codex as one implementation request.
 
-1. which PAQS modules are included in that task;
-2. exact Parameter Registry defaults/ranges adopted by the task;
-3. Decimal context and rounding where boundary comparisons require it;
-4. deterministic initialization/warm-up rules for ATR and Pivot engines;
-5. exact Key Level merge/expiry/version behavior included in scope;
-6. missing/stale/unsupported thresholds and result states;
-7. exact point-in-time corporate-action source/data plumbing;
-8. API/domain persistence/explanation contracts if introduced;
-9. synthetic golden fixtures and anti-look-ahead tests;
-10. any Quality / Composite Score formula, normalization, scale, bands and ranking behavior if score work is included;
-11. any exit variant, simulated-paper interpretation, sizing, trailing stop or position-management behavior if included.
+### TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation
 
-No default in an older strategy proposal silently resolves these decisions.
+Planned boundary:
 
-## 9. Validation requirements for future approved PAQS work
+- dynamic supported US/HK security/watchlist workflow;
+- provider support validation without account access;
+- provider-neutral calendar/session metadata;
+- completed W1 derivation from D1;
+- completed regular-session 30m derivation from completed 1m;
+- coverage/data-quality/adjustment metadata;
+- PAQS user/engineering documentation foundations.
 
-At minimum, proportional future tests must prove the rules actually included in an approved task, with particular attention to:
-
-- point-in-time Pivot confirmation and future-record injection resistance;
-- deterministic Key Level / Zone / Range geometry;
-- Base Regime vs Transition separation;
-- completed-bar-only Trigger / Follow-through behavior;
-- Event != Setup != Advisory;
-- next-open Entry/RR revalidation without lookahead;
-- setup-specific invalidation immutability and explicit close/buffer thresholds;
-- nearest-target / no-target-shopping behavior;
-- US/HK session/calendar, W1 completion and 30m aggregation correctness;
-- corporate-action adjustment-basis consistency;
-- explicit missing/delayed/stale/unsupported states;
-- no provider-native, brokerage-account, or execution dependency;
-- no profitability claim from passing tests or backtests.
-
-Synthetic fixtures must be clearly labelled and must not be presented as real market data.
-
-## 10. Research staging; not approved tasks
-
-A candidate decomposition for later discussion is:
+Not allowed in 006A:
 
 ```text
-TASK-006A — PAQS Structure Foundation
-TASK-006B — PAQS Event Engine
-TASK-006C — PAQS Setup & Risk Geometry
-TASK-006D — PAQS Advisory / Presentation Layer
+ATR
+Pivot
+Swing
+Key Level / Zone / Range
+Base Regime
+Event
+Setup
+Advisory
+Score
 ```
 
-This list is research staging only. It creates no implementation authority by itself.
+### TASK-006B — PAQS Structure Engine
 
-## 11. Current implementation statement
+Planned boundary:
 
-Phase 2 market-data and Dashboard work has already progressed through the approved TASK-003 / TASK-004 / TASK-005 / TASK-005A / TASK-005B increments described by the authoritative Roadmap and related documents.
+- ATR;
+- confirmed Micro/Major Pivot;
+- Swing labels;
+- Key Level geometry;
+- Pivot Zones;
+- Range detection;
+- Base Regime;
+- deterministic/no-lookahead fixtures/debug output.
 
-No PAQS Pivot/Key-Level/Regime/Event/Setup/Invalidation/Target/RR/Advisory engine is implemented by this documentation work. No concrete Composite Quant Score formula, ranking formula, or PAQS Quality Score is approved or implemented here.
+Mandatory real read-only structure-review checkpoint before TASK-006C approval.
 
-The next strategy implementation task remains blocked on an explicit user-approved Task Contract.
+### TASK-006C — PAQS Event Engine
+
+Planned boundary:
+
+- Break Attempt / Breakout / Breakdown;
+- Failed Breakout / Failed Breakdown;
+- Retest lifecycle;
+- Key Level role flip;
+- Regime Transition;
+- Trigger;
+- Follow-through.
+
+No Entry/Hold/Exit advisory.
+
+### TASK-006D — PAQS Setup & Risk Engine
+
+Planned boundary:
+
+- approved setup families;
+- Setup expiry;
+- setup-specific invalidation;
+- T1/T2 selection;
+- no-target-shopping;
+- RR hard gate;
+- next-open entry revalidation;
+- only explicitly approved Entry Advisory states.
+
+### TASK-006E — PAQS Advisory & Decision Dashboard
+
+Planned boundary:
+
+- conditional Holder Advisory;
+- explanations/reason codes;
+- Dashboard PAQS integration;
+- optional lightweight Quality/Ranking if explicitly approved;
+- optional lightweight immutable advisory/signal history if explicitly approved;
+- user-facing decision-terminal completion.
+
+Each Task Contract must explicitly state parameters, domain/API/UI/persistence effects, tests, documentation and stop conditions for that task only.
+
+## 9. Decisions still required before individual implementation tasks
+
+A bounded Task Contract must resolve only the decisions needed by its own scope.
+
+Examples include:
+
+- TASK-006A: supported-security validation/user flow, calendar/session contract, coverage, adjustment metadata and documentation contract;
+- TASK-006B: Decimal/rounding, ATR warm-up, Pivot initialization, deterministic Key Level/Zone/Range behavior and structure fixtures;
+- TASK-006C: exact Event/Transition/Trigger/Follow-through parameters adopted;
+- TASK-006D: setup variants, invalidation/target/RR/entry-revalidation parameters and advisory transitions;
+- TASK-006E: holder-state presentation, reason codes, Quality/Ranking formula if included, advisory-history persistence if included.
+
+No default in an older proposal silently resolves these task-level choices.
+
+## 10. Validation requirements
+
+Proportional future tests must prove only the behavior authorized by the current task, with emphasis on:
+
+- no-lookahead / future-record injection resistance;
+- deterministic Decimal arithmetic where applicable;
+- US/HK session/calendar correctness;
+- completed-bar-only semantics;
+- explicit missing/unsupported states;
+- provider-agnostic core boundaries;
+- no brokerage-account/execution dependency;
+- no profitability claim from passing tests or smoke evidence.
+
+Synthetic golden fixtures must be clearly labelled and not presented as real market observations.
+
+## 11. Optional future research boundary
+
+Paper Portfolio, PaperFill/accounting, position sizing, broad portfolio analytics and full backtesting are no longer current committed PAQS MVP work under `PAQS-MVP-001`.
+
+They remain dormant optional Phase 3/4 extension paths and may be reactivated later without changing the read-only/no-broker boundary or making PAQS depend on them.
+
+## 12. Current implementation statement
+
+Phase 2 market-data/Dashboard work has progressed through TASK-003/TASK-004/TASK-005/TASK-005A/TASK-005B.
+
+No TASK-006A input foundation, dynamic market-data security expansion, PAQS Structure/Event/Setup/Risk/Advisory engine, numerical Quality/Ranking or optional Phase 3/4 capability is implemented by this roadmap documentation change.
+
+The next implementation task is TASK-006A only after its explicit Task Contract is approved.
