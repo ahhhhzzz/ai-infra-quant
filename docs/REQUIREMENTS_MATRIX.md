@@ -2,23 +2,30 @@
 
 Status: Phase 1 accepted after independent post-remediation review — PASS; reviewed commit: `f6decf2fbe171c1b9eb46340a9174bc21f293ede`; reviewed tree: `f03d23ededaef37096b508a3040c87ae69d89e32`; GitHub Actions run: `33458517601`; job: `99703528272`; artifact: `9782355130`; result: `119 passed`
 
-Future-scope authority: `docs/ROADMAP.md` decision `MTF-001`
+Future-scope authority: `docs/ROADMAP.md` decisions `MTF-001` and `PAQS-MVP-001`
+
+Decision record: `docs/decisions/PAQS_MVP_SCOPE_REDUCTION.md`
 
 ## 1. Disposition and status rules
 
 | Disposition | Meaning |
 |---|---|
-| `RETAINED` | Requirement remains in the Phase 0–4 product |
-| `SUPERSEDED_MTF` | Earlier future direction is replaced by `MTF-001` |
+| `RETAINED` | Requirement remains in the current Phase 0–4 architecture/current MVP |
+| `SUPERSEDED_MTF` | Earlier future direction was replaced by `MTF-001` |
+| `SUPERSEDED_PAQS_MVP` | Earlier future direction is replaced by `PAQS-MVP-001` |
+| `OPTIONAL_FUTURE` | Valid extension capability but not current committed MVP work; explicit reactivation required |
 | `REMOVED_MTF-001` | Permanently outside product scope; not deferred |
 | `HISTORICAL_PHASE_1` | Accepted Phase 1 implementation/evidence retained without future authority |
 
 | Status | Meaning |
 |---|---|
 | `IMPLEMENTED` | Accepted implementation evidence exists |
-| `DOCUMENTED` | Authoritative future contract exists but is not implemented |
-| `DECISION_REQUIRED` | A separate Task Contract must approve the named choice |
-| `OUT_OF_SCOPE` | Permanently removed by `MTF-001` |
+| `PARTIAL` | Part of the requirement is accepted/implemented and future work remains |
+| `DOCUMENTED` | Authoritative future contract/direction exists but implementation is not yet approved/completed |
+| `PLANNED_TASK` | Identifier/scope direction is recorded, but an explicit Task Contract is still required |
+| `DECISION_REQUIRED` | A separate explicit decision/Task Contract must approve the named choice |
+| `DORMANT_OPTIONAL` | Not current committed work; may be reactivated later by explicit approval |
+| `OUT_OF_SCOPE` | Permanently removed/forbidden |
 
 Only Phase 0 through Phase 4 are valid target phases.
 
@@ -26,13 +33,15 @@ Only Phase 0 through Phase 4 are valid target phases.
 
 | ID | Requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
-| GOV-001 | Local-first, single-user, modular monolith | RETAINED | 0–4 | DOCUMENTED | Roadmap 2; Master 3–5 |
-| GOV-002 | `MTF-001` supersedes the completed-daily-only future direction without reverting commit `1f724ebe...` | SUPERSEDED_MTF | 0 | DOCUMENTED | Roadmap 1 |
-| GOV-003 | Authoritative sequence is exactly Phase 0–4 | SUPERSEDED_MTF | 0 | DOCUMENTED | Roadmap 7; Master 12 |
-| GOV-004 | Each implementation task requires explicit approval and stop | RETAINED | 0–4 | DOCUMENTED | Roadmap 9; Master 13 |
-| GOV-005 | Phase 0 history and accepted Phase 1 evidence are unchanged | HISTORICAL_PHASE_1 | 0/1 | IMPLEMENTED | Immutable plan/reviews and accepted commit |
-| GOV-006 | Phase 1 PASS status remains unchanged | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Run `33458517601`; `119 passed` |
-| GOV-007 | Phase 2 work begins only through explicit bounded Task Contracts | RETAINED | 2 | IMPLEMENTED | TASK-003 quote-only PoC; TASK-004 backend; Roadmap 1,7 |
+| GOV-001 | Local-first, single-user, modular monolith | RETAINED | 0–4 | DOCUMENTED | Roadmap 2; Master 1–5 |
+| GOV-002 | `MTF-001` supersedes the completed-daily-only future direction without rewriting history | SUPERSEDED_MTF | 0 | DOCUMENTED | Roadmap 1 |
+| GOV-003 | `PAQS-MVP-001` makes the Phase 2 PAQS Decision Terminal the current product-completion line | SUPERSEDED_PAQS_MVP | 2 | DOCUMENTED | Roadmap 7–8; decision record |
+| GOV-004 | Authoritative phase sequence remains exactly Phase 0–4; no Phase 5 | RETAINED | 0–4 | DOCUMENTED | Roadmap 7; Master 12 |
+| GOV-005 | Every implementation task requires explicit approval, Task Contract, independent review and stop | RETAINED | 0–4 | DOCUMENTED | Roadmap 10; Master 13 |
+| GOV-006 | Phase 0 history and accepted Phase 1 evidence remain unchanged | HISTORICAL_PHASE_1 | 0/1 | IMPLEMENTED | Immutable Phase 1 plan/reviews |
+| GOV-007 | Phase 1 PASS status remains unchanged | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Run `33458517601`; `119 passed` |
+| GOV-008 | `TASK-006` is umbrella only; TASK-006A–006E are individually approved bounded tasks | RETAINED | 2 | PLANNED_TASK | Roadmap 7; decision record |
+| GOV-009 | Phase 3/4 remain dormant optional extension slots until explicitly reactivated | SUPERSEDED_PAQS_MVP | 3–4 | DORMANT_OPTIONAL | Roadmap 7–8 |
 
 ## 3. Accepted Phase 1 requirements
 
@@ -43,100 +52,100 @@ Only Phase 0 through Phase 4 are valid target phases.
 | P1-003 | Aware UTC and signed-zero invariants | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Independent regression evidence |
 | P1-004 | Canonical Security, Watchlist, Portfolio, opening accounting | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Accepted API/database evidence |
 | P1-005 | Opening HKD 20,000, 200 units, NAV 100 | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Seed/accounting evidence |
-| P1-006 | Accepted Phase 1 APIs/frontend and inert descriptors | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Accepted OpenAPI/frontend evidence |
-| P1-007 | No later-phase behavior retrofitted into Phase 1 | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Accepted boundary and current diff |
+| P1-006 | Accepted Phase 1 APIs/frontend and inert descriptors | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Accepted frontend/API evidence |
+| P1-007 | No later-phase behavior retrofitted into Phase 1 historical evidence | HISTORICAL_PHASE_1 | 1 | IMPLEMENTED | Accepted boundary |
 
-## 4. Market data and dashboard requirements
+## 4. Market data, supported securities and Dashboard requirements
 
 | ID | Requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
-| MKT-001 | Independent read-only Market Data Provider is allowed | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-004 query port; Roadmap 3; Architecture 4 |
-| MKT-002 | Provider must not require brokerage-account access | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-004 quote-only boundary; Roadmap 2–3; Master 1 |
-| MKT-003 | Futu OpenD quote-only APIs are selected for the bounded provider PoC | RETAINED | 2 | IMPLEMENTED | TASK-003 adapter and smoke runner |
-| MKT-004 | Live OpenD availability, login, entitlements, pricing, delay, and coverage remain truthful environmental evidence | RETAINED | 2 | DECISION_REQUIRED | TASK-003 live PoC result; Roadmap 3 |
-| MKT-005 | Initial tracked set is AVGO, VRT, HK.09698 with US/HK support | RETAINED | 2 | IMPLEMENTED | TASK-004 canonical Security resolution; Roadmap 3 |
-| MKT-006 | Daily OHLCV remains supported with a bounded 1300-session Dashboard history | RETAINED | 2 | IMPLEMENTED | TASK-005B paged daily-bars API/Dashboard; Roadmap 7; Database 4.3 |
-| MKT-007 | Recent 30-calendar-day completed 1-minute OHLCV is supported | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-005B minute-bars API/Dashboard; API 5.4 |
-| MKT-008 | Unfinished minute bars are excluded | RETAINED | 2 | IMPLEMENTED | TASK-003 adapter tests; TASK-004 API; Roadmap 5 |
-| MKT-009 | Latest/intraday price is distinct from final daily close | RETAINED | 2 | IMPLEMENTED | TASK-004 state API/tests; Roadmap 5; Database 1.3 |
-| MKT-010 | Missing/delayed/stale/unavailable/error states are explicit | RETAINED | 2 | IMPLEMENTED | TASK-004 provider results/API tests; Roadmap 4–5 |
-| MKT-011 | No market value is fabricated | RETAINED | all | DOCUMENTED | `AGENTS.md`; Roadmap 5 |
-| MKT-012 | Dashboard minute window is bounded to recent 30 market-local calendar days without persistence | RETAINED | 2 | IMPLEMENTED | TASK-005B adapter/API/Dashboard tests |
+| MKT-001 | Independent read-only Market Data Provider is allowed | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-004 query port; Roadmap 3 |
+| MKT-002 | Provider path requires no brokerage-account access | RETAINED | 2 | IMPLEMENTED | TASK-003/004 quote-only boundary |
+| MKT-003 | Futu OpenD quote-only APIs are selected for current provider path | RETAINED | 2 | IMPLEMENTED | TASK-003 adapter |
+| MKT-004 | Live OpenD availability/login/entitlements/delay/coverage remain truthful environment facts | RETAINED | 2 | DECISION_REQUIRED | TASK-003/005B smoke evidence |
+| MKT-005 | AVGO/VRT/HK.09698 are accepted initial PoC symbols | RETAINED | 2 | IMPLEMENTED | TASK-004/005B |
+| MKT-006 | User-manageable supported US/HK securities replace the three-symbol PoC restriction for future MVP | SUPERSEDED_PAQS_MVP | 2 | PLANNED_TASK | TASK-006A planned scope |
+| MKT-007 | Daily OHLCV supports bounded 1300-session Dashboard history | RETAINED | 2 | IMPLEMENTED | TASK-005B |
+| MKT-008 | Recent 30-calendar-day completed 1-minute OHLCV is supported | RETAINED | 2 | IMPLEMENTED | TASK-005B |
+| MKT-009 | US minute retrieval may use `Session.ALL`; PAQS initial TTF later filters regular session | RETAINED | 2 | PARTIAL | TASK-005B; TASK-006A planned |
+| MKT-010 | Unfinished minute bars are excluded | RETAINED | 2 | IMPLEMENTED | adapter/API tests |
+| MKT-011 | Latest/intraday price is distinct from completed Daily close | RETAINED | 2 | IMPLEMENTED | TASK-004 state/API tests |
+| MKT-012 | Missing/delayed/stale/unavailable/error states are explicit; no market value fabricated | RETAINED | all | IMPLEMENTED | provider result/API contracts plus AGENTS |
+| MKT-013 | TASK-006A prepares provider-neutral trading calendar/session/coverage/adjustment metadata | RETAINED | 2 | PLANNED_TASK | Roadmap TASK-006A |
+| MKT-014 | Initial PAQS timeframe input is W1/D1/30m regular session; H1/H4 are not MVP requirements | SUPERSEDED_PAQS_MVP | 2 | DOCUMENTED | PAQS v0.3.1; Roadmap 5/7 |
 
 | ID | Dashboard requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
-| UI-001 | Selector, latest price, market status, volume, score, ranking, risk state, timestamps | SUPERSEDED_MTF | 2 | PARTIAL | TASK-005 selector/market/volume/timestamps; score/ranking/risk remain unimplemented |
-| UI-002 | Daily and 1-minute candles are separate timeframes | SUPERSEDED_MTF | 2 | IMPLEMENTED | TASK-005 Dashboard tests; API 5.3–5.4 |
-| UI-003 | Timeframe tab/button switches views; no same-coordinate overlay | RETAINED | 2 | IMPLEMENTED | TASK-005 Dashboard tests; Architecture 5 |
-| UI-004 | Active visible session refreshes/recalculates approximately every 60 seconds | SUPERSEDED_MTF | 2 | PARTIAL | TASK-005 market refresh; score recalculation remains unimplemented |
-| UI-005 | Polling requests do not overlap | RETAINED | 2 | IMPLEMENTED | TASK-005 in-flight guard/tests; API 5.5 |
-| UI-006 | Hidden page pauses polling; visible page refreshes immediately | RETAINED | 2 | IMPLEMENTED | TASK-005 visibility handler/tests; API 5.5 |
-| UI-007 | Manual `刷新最新行情` is provided | RETAINED | 2 | IMPLEMENTED | TASK-005 Dashboard/tests |
-| UI-008 | Automatic-refresh countdown is displayed | RETAINED | 2 | IMPLEMENTED | TASK-005 Dashboard/tests |
-| UI-009 | Closing the page requires no background processing | RETAINED | 2 | IMPLEMENTED | TASK-005 page-local timers; Architecture 6 |
-| UI-010 | Ordinary HTTP/REST polling is MVP transport | RETAINED | 2 | IMPLEMENTED | TASK-005 direct fetch; API 5.5 |
+| UI-001 | Selector/latest/market status/Daily/1m/volume/timestamps | RETAINED | 2 | IMPLEMENTED | TASK-005/005B |
+| UI-002 | Daily and 1-minute candles remain separate chart timeframes | RETAINED | 2 | IMPLEMENTED | TASK-005 |
+| UI-003 | Visible-page ~60s refresh, no overlapping requests, hidden pause/resume | RETAINED | 2 | IMPLEMENTED | TASK-005 |
+| UI-004 | Manual refresh and countdown | RETAINED | 2 | IMPLEMENTED | TASK-005 |
+| UI-005 | Dynamic supported US/HK add/remove flow is user-facing rather than backend-only | SUPERSEDED_PAQS_MVP | 2 | PLANNED_TASK | TASK-006A planned scope |
+| UI-006 | PAQS context/setup/advisory/invalidation/target/RR presentation | RETAINED | 2 | PLANNED_TASK | TASK-006E planned scope |
+| UI-007 | No real-order UI/control and no claim user executed advisory | RETAINED | all | DOCUMENTED | Roadmap/Master safety boundary |
 
-## 5. Time and Composite Score requirements
+## 5. PAQS / Score requirements and task map
 
 | ID | Requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
-| TIME-001 | `latest_quote_at` is explicit | RETAINED | 2 | IMPLEMENTED | TASK-004 state API; Roadmap 5; API 2 |
-| TIME-002 | `latest_completed_minute_bar_at` is explicit | RETAINED | 2 | IMPLEMENTED | TASK-004 minute-bars API; Roadmap 5; API 2 |
-| TIME-003 | `latest_completed_daily_session` is explicit | RETAINED | 2 | IMPLEMENTED | TASK-004 daily-bars API; Roadmap 5; API 2 |
-| TIME-004 | `score_calculated_at` is explicit | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 2 |
-| TIME-005 | Provider latency and polling cadence are different facts | RETAINED | 2 | DOCUMENTED | Roadmap 5; API 2 |
-| QNT-001 | Composite architecture is Daily Base + Intraday Minute Adjustment | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 6; Strategy 3 |
-| QNT-002 | Daily component may represent medium-term trend/momentum/volatility/drawdown/risk | RETAINED | 2 | DECISION_REQUIRED | Roadmap 6; Strategy 3.1 |
-| QNT-003 | Minute component may represent current-session strength/risk | SUPERSEDED_MTF | 2 | DECISION_REQUIRED | Roadmap 6; Strategy 3.2 |
-| QNT-004 | Formula, weights, thresholds, bands, normalization, and sizing are unapproved | RETAINED | 2 | DECISION_REQUIRED | Roadmap 6; Strategy 6 |
-| QNT-005 | Strategy remains PROPOSED / RESEARCH_UNVALIDATED | RETAINED | 2–4 | DOCUMENTED | Strategy status |
-| QNT-006 | Earlier completed-daily-only formula proposal is not implementation authority | SUPERSEDED_MTF | 2 | DOCUMENTED | Strategy 1 |
-| QNT-007 | Score/ranking/risk state refresh approximately every 60 seconds while visible | SUPERSEDED_MTF | 2 | DOCUMENTED | Roadmap 5; API 5.5 |
-| QNT-008 | No profitability claim | RETAINED | 2–4 | DOCUMENTED | Strategy 1,7 |
+| PAQS-001 | PAQS state/hard-gate engine is primary causal decision system | SUPERSEDED_PAQS_MVP | 2 | DOCUMENTED | Roadmap 6; Strategy |
+| PAQS-002 | Numerical Quality/Composite Score is derived only and cannot override PAQS hard gates | SUPERSEDED_PAQS_MVP | 2 | DOCUMENTED | Roadmap 6; PAQS v0.3.1 |
+| PAQS-003 | `TASK-006` is umbrella only | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
+| PAQS-004 | TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
+| PAQS-005 | TASK-006B — PAQS Structure Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
+| PAQS-006 | TASK-006C — PAQS Event Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
+| PAQS-007 | TASK-006D — PAQS Setup & Risk Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
+| PAQS-008 | TASK-006E — PAQS Advisory & Decision Dashboard | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
+| PAQS-009 | Manual real-market structure checkpoint is required after 006B before 006C authorization | RETAINED | 2 | DOCUMENTED | Roadmap 7; decision record |
+| PAQS-010 | Entry/Hold/Exit advisory remains conditional decision support without brokerage position knowledge | RETAINED | 2 | DOCUMENTED | Strategy/PAQS v0.3.1 |
+| PAQS-011 | Exact score/quality/ranking formula remains unapproved | RETAINED | 2 | DECISION_REQUIRED | Strategy |
+| PAQS-012 | No profitability/Alpha/probability claim from tests or backtests | RETAINED | 2–4 | DOCUMENTED | Strategy/AGENTS |
 
-## 6. Later research and analytics requirements
+Earlier score-level governance remains recorded for compatibility:
+
+```text
+Composite Quant Score = Daily Base Score + Intraday Minute Adjustment
+```
+
+but `PAQS-MVP-001` makes it a derived presentation/ranking concept if retained, not the causal strategy engine.
+
+## 6. Optional future extensions
 
 | ID | Requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
-| PAP-001 | Lightweight paper state is simulated only | RETAINED | 3 | DOCUMENTED | Roadmap 7; Database 5 |
-| PAP-002 | Paper positions update only from confirmed PaperFill | RETAINED | 3 | DOCUMENTED | `AGENTS.md`; Architecture 8 |
-| PAP-003 | Richer factors, explanation, ranking/risk analytics, signal history, paper performance | RETAINED | 3 | DOCUMENTED | Roadmap 7 |
-| BT-001 | Deterministic backtesting with point-in-time controls | RETAINED | 4 | DOCUMENTED | Roadmap 7; Database 6 |
-| BT-002 | Transaction costs, benchmark, drawdown, volatility, turnover, attribution, exposure | RETAINED | 4 | DOCUMENTED | Roadmap 7 |
-| BT-003 | Daily-bar backtesting is baseline | RETAINED | 4 | DOCUMENTED | Roadmap 7; Master 10 |
-| BT-004 | Current minute display does not require historical minute/tick simulation | RETAINED | 4 | DOCUMENTED | Roadmap 7; API 7 |
-| BT-005 | Phase 4 is the final product phase | SUPERSEDED_MTF | 4 | DOCUMENTED | Roadmap 7 |
+| PAP-001 | Simulated Paper Portfolio / PaperFill bookkeeping | OPTIONAL_FUTURE | 3 | DORMANT_OPTIONAL | Roadmap 7–8 |
+| PAP-002 | Paper NAV/performance/accounting | OPTIONAL_FUTURE | 3 | DORMANT_OPTIONAL | Roadmap 7–8 |
+| PAP-003 | Position sizing / exposure / correlation controls | OPTIONAL_FUTURE | 3 | DORMANT_OPTIONAL | Roadmap 7–8 |
+| RES-001 | Broader factor/research expansion | OPTIONAL_FUTURE | 3 | DORMANT_OPTIONAL | Roadmap 7–8 |
+| BT-001 | Deterministic point-in-time backtesting platform | OPTIONAL_FUTURE | 4 | DORMANT_OPTIONAL | Roadmap 7–8 |
+| BT-002 | Transaction costs / benchmark comparison | OPTIONAL_FUTURE | 4 | DORMANT_OPTIONAL | Roadmap 7–8 |
+| BT-003 | Drawdown/volatility/turnover/attribution/exposure analytics | OPTIONAL_FUTURE | 4 | DORMANT_OPTIONAL | Roadmap 7–8 |
+| BT-004 | Portfolio optimization / broad parameter-analysis/reporting suite | OPTIONAL_FUTURE | 4 | DORMANT_OPTIONAL | Roadmap 7–8 |
+| BT-005 | Phase 4 remains final possible phase; no Phase 5 | RETAINED | 4 | DOCUMENTED | Roadmap 7 |
+
+These optional capabilities are not required to call the current product complete after Phase 2 TASK-006E. They may be reactivated later without changing the permanent read-only/no-broker boundary.
 
 ## 7. Permanently removed capabilities
 
 | ID | Removed capability | Disposition | Status |
 |---|---|---|---|
-| REM-001 | Legacy real completed-trade record and entry/import | REMOVED_MTF-001 | OUT_OF_SCOPE |
-| REM-002 | Legacy external account observations and brokerage synchronization | REMOVED_MTF-001 | OUT_OF_SCOPE |
-| REM-003 | Brokerage-account cash/positions/orders/trades access | REMOVED_MTF-001 | OUT_OF_SCOPE |
+| REM-001 | Legacy real completed-trade record and import | REMOVED_MTF-001 | OUT_OF_SCOPE |
+| REM-002 | External real-account observation/synchronization | REMOVED_MTF-001 | OUT_OF_SCOPE |
+| REM-003 | Brokerage cash/positions/orders/trades access | REMOVED_MTF-001 | OUT_OF_SCOPE |
 | REM-004 | Real-account matching/discrepancy handling | REMOVED_MTF-001 | OUT_OF_SCOPE |
-| REM-005 | Real portfolio tracking and real Current versus Target state | REMOVED_MTF-001 | OUT_OF_SCOPE |
-| REM-006 | Real trade sizing, fees, taxes, or settlement synchronization | REMOVED_MTF-001 | OUT_OF_SCOPE |
-| REM-007 | Futu or other broker-account integration | REMOVED_MTF-001 | OUT_OF_SCOPE |
-| REM-008 | Broker writes, real-order API/UI, Live OMS/EMS | REMOVED_MTF-001 | OUT_OF_SCOPE |
-| REM-009 | Password unlock, buying-power reservation, execution retry/recovery/workers/kill switch | REMOVED_MTF-001 | OUT_OF_SCOPE |
+| REM-005 | Real portfolio tracking / Current-vs-Target from broker state | REMOVED_MTF-001 | OUT_OF_SCOPE |
+| REM-006 | Real trade sizing/fees/taxes/settlement synchronization | REMOVED_MTF-001 | OUT_OF_SCOPE |
+| REM-007 | Broker-account integration | REMOVED_MTF-001 | OUT_OF_SCOPE |
+| REM-008 | Broker writes / real-order API/UI / Live OMS/EMS | REMOVED_MTF-001 | OUT_OF_SCOPE |
+| REM-009 | Password unlock / buying-power reservation / execution workers/retries/kill switch | REMOVED_MTF-001 | OUT_OF_SCOPE |
 | REM-010 | Autonomous or unattended trading | REMOVED_MTF-001 | OUT_OF_SCOPE |
-| REM-011 | Microservices, Kafka, distributed workers, Kubernetes, multi-tenancy, 24/7 execution | REMOVED_MTF-001 | OUT_OF_SCOPE |
-| REM-012 | Any authoritative phase after Phase 4 | REMOVED_MTF-001 | OUT_OF_SCOPE |
-
-Read-only recent minute data and intraday score calculation are expressly not removed; they are
-non-executing Phase 2 research capabilities.
+| REM-011 | Microservices/Kafka/distributed workers/Kubernetes/multi-tenancy/24×7 execution | REMOVED_MTF-001 | OUT_OF_SCOPE |
+| REM-012 | Any authoritative Phase after Phase 4 | REMOVED_MTF-001 | OUT_OF_SCOPE |
 
 ## 8. Current implementation statement
 
 Phase 1 remains accepted with `119 passed` in independent GitHub Actions run `33458517601`.
 
-TASK-003 implements the Futu OpenD quote-only provider PoC. TASK-004 adds a provider-neutral
-read-through application service and the state, completed daily-bars, and completed minute-bars
-APIs, with no production market-data persistence. TASK-005 adds the local read-only
-Dashboard with canonical security switching, separate daily/minute candle and volume views,
-market-local time labels, guarded 60-second polling, manual refresh, countdown, and visibility/race
-handling. TASK-005B adds paged 1300-session Daily history, a rolling 30-calendar-day minute window,
-US `Session.ALL`, incremental cache refresh, and pannable long-history viewports. No persistence,
-Composite Quant Score, ranking/risk calculation, paper behavior, or backtest behavior is
-implemented or claimed.
+TASK-003 implements the Futu quote-only provider PoC. TASK-004 implements provider-neutral read-through market-data queries/APIs. TASK-005 implements the local read-only Market Dashboard. TASK-005A implements the Windows launcher. TASK-005B implements paged Daily history, rolling recent minute history, US `Session.ALL`, incremental cache refresh and pannable long-history behavior.
+
+No PAQS input foundation, structure engine, event engine, setup/risk engine, advisory/decision Dashboard, Quality/Ranking, paper behavior or backtest behavior is implemented by this roadmap documentation change.
