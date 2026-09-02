@@ -12,6 +12,7 @@ from ai_infra_quant.application.market_data_queries import (
     MarketDataQueries,
 )
 from ai_infra_quant.application.paqs_input_queries import PaqsInputQueries
+from ai_infra_quant.application.paqs_structure_queries import PaqsStructureQueries
 from ai_infra_quant.application.portfolio_queries import PortfolioQueries
 from ai_infra_quant.application.security_service import SecurityService
 from ai_infra_quant.application.status_queries import StatusQueries
@@ -41,6 +42,7 @@ class AppContainer:
     market_data_queries: MarketDataQueries
     supported_security_service: SupportedSecurityService
     paqs_input_queries: PaqsInputQueries
+    paqs_structure_queries: PaqsStructureQueries
 
 
 def build_container(
@@ -92,6 +94,10 @@ def build_container(
         provider_name=provider_name,
         provider_factory=provider_factory,
     )
+    paqs_input_queries = PaqsInputQueries(
+        market_data_queries,
+        provider_name=provider_name,
+    )
     return AppContainer(
         settings=settings,
         engine=engine,
@@ -113,10 +119,8 @@ def build_container(
             provider_name=provider_name,
             provider_factory=provider_factory,
         ),
-        paqs_input_queries=PaqsInputQueries(
-            market_data_queries,
-            provider_name=provider_name,
-        ),
+        paqs_input_queries=paqs_input_queries,
+        paqs_structure_queries=PaqsStructureQueries(paqs_input_queries),
     )
 
 

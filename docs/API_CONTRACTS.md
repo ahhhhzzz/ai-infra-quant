@@ -1,6 +1,6 @@
 # API Contracts
 
-Status: **AUTHORITATIVE — dynamic US/HK market data and PAQS input diagnostics**
+Status: **AUTHORITATIVE — dynamic US/HK market data and PAQS structure diagnostics**
 
 Decision: `MTF-001` in `docs/ROADMAP.md`
 
@@ -11,8 +11,8 @@ Base path: `/api/v1`
 ## 0. Scope and historical boundary
 
 Phase 1 routes remain accepted exactly as implemented. This document describes the implemented
-read-only market-data routes, Dashboard client, TASK-006A supported-security workflow and PAQS
-input diagnostics, plus later separately approved directions.
+read-only market-data routes, Dashboard client, TASK-006A supported-security/input workflow, and
+the TASK-006B structure snapshot, plus later separately approved directions.
 
 No API may connect to a brokerage account; read/import real-account cash, positions, orders, or
 trades; match real-account state; or transmit a broker operation.
@@ -63,6 +63,7 @@ Defining a future direction does not expose a route.
 | Accepted health/portfolio/identity/watchlist/status reads | 1 | Available from accepted foundation |
 | TASK-004 market state and daily/minute bars | 2 | Available from TASK-004 |
 | TASK-006A supported-security add and PAQS input diagnostics | 2 | Available from TASK-006A |
+| TASK-006B current PAQS structure snapshot | 2 | Available from TASK-006B |
 | Aggregate dashboard refresh and first approved score/ranking/risk state | 2 | Ordinary 404 |
 | Expanded research and simulated paper tracking | 3 | Ordinary 404 |
 | Backtest and analytics | 4 | Ordinary 404 |
@@ -207,7 +208,28 @@ basis, `historical_replay_safe`, D1/W1/1m/M30 source/completed/partial counts, l
 timestamps, and warnings. It returns no derived OHLCV arrays and no structure, event, setup,
 advisory, target, risk/reward, score, or ranking. It has no public historical `as_of` parameter.
 
-### 5.7 Composite Quant Score
+### 5.7 TASK-006B structure endpoint
+
+```text
+GET /api/v1/strategies/paqs/securities/{security_id}/structure
+```
+
+This read-only route builds a current provider-neutral structure snapshot from the TASK-006A input
+bundle. It accepts only the Security UUID path parameter: there is no historical `as_of`, config
+override, or mutation parameter. The response includes strategy/structure versions, stable
+`config_hash`, canonical parameters, Security/provider/as-of/calculation metadata, input quality
+and warnings, adjustment metadata, and independent W1/D1/M30 structures.
+
+Each timeframe reports its role, latest legitimate completed source reference, bar count, ATR
+readiness/latest ATR, confirmed Micro/Major Pivots with extreme and confirmation references,
+Swing labels, Key Levels, Zones and their accepted touches, valid/active Range geometry, Base
+Regime, explanations, and warnings. Decimal values serialize as strings. Invalid input suppresses
+calculation and returns explicit `UNCERTAIN` structure rather than fabricated numeric values.
+
+The route contains no event, setup, risk/reward, advisory, score, ranking, persistence, account, or
+execution behavior.
+
+### 5.8 Composite Quant Score
 
 The response architecture is:
 

@@ -92,7 +92,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | PAQS-002 | Numerical Quality/Composite Score is derived only and cannot override PAQS hard gates | SUPERSEDED_PAQS_MVP | 2 | DOCUMENTED | Roadmap 6; PAQS v0.3.1 |
 | PAQS-003 | `TASK-006` is umbrella only | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQS-004 | TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation | RETAINED | 2 | IMPLEMENTED | Dynamic add, calendar, W1/M30, diagnostics, guides |
-| PAQS-005 | TASK-006B — PAQS Structure Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
+| PAQS-005 | TASK-006B — PAQS Structure Engine | RETAINED | 2 | PARTIAL | Task-branch Decimal ATR/Pivot/Swing/Level/Zone/Range/Base-Regime engine, structure API and deterministic tests; independent review and live human checkpoint pending |
 | PAQS-006 | TASK-006C — PAQS Event Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQS-007 | TASK-006D — PAQS Setup & Risk Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQS-008 | TASK-006E — PAQS Advisory & Decision Dashboard | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
@@ -151,5 +151,11 @@ expanded-history baseline. TASK-006A implements provider-validated dynamic US/HK
 provider-neutral calendar/session input, completed W1 and regular-session M30 derivation, truthful
 adjustment/coverage metadata, and summary diagnostics.
 
-No PAQS structure engine, event engine, setup/risk engine, advisory/decision Dashboard,
-Quality/Ranking, paper behavior, or backtest behavior is implemented by TASK-006A.
+TASK-006A passed focused remediation and is integrated at
+`7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B now implements the provider-neutral,
+read-through structure subset on its task branch: Decimal ATR, independent Micro/Major Pivots,
+Swing labels, Major-swing levels, Pivot Zones, Range and four-state Base Regime, plus a read-only
+structure endpoint. Independent review and the real-structure human checkpoint remain pending.
+
+No TASK-006C Event behavior, later setup/risk/advisory/Quality/Ranking behavior, paper behavior, or
+backtest behavior is implemented by TASK-006B.

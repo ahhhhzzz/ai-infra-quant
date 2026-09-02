@@ -12,6 +12,10 @@ from ai_infra_quant.backend.api.errors import problem_response
 from ai_infra_quant.backend.dependencies import ContainerDep
 from ai_infra_quant.backend.schemas.common import Page
 from ai_infra_quant.backend.schemas.paqs_input import PaqsInputStatusRead, paqs_input_status_read
+from ai_infra_quant.backend.schemas.paqs_structure import (
+    PaqsStructureSnapshotRead,
+    paqs_structure_snapshot_read,
+)
 from ai_infra_quant.backend.schemas.status import StrategyDefinitionRead
 
 router = APIRouter()
@@ -71,4 +75,43 @@ def get_paqs_input_status(
             code="PAQS_INPUT_SECURITY_NOT_SUPPORTED",
             title="PAQS input Security not supported",
             detail="PAQS input preparation supports enabled US/HK equities only.",
+        )
+
+
+@router.get(
+    "/strategies/paqs/securities/{security_id}/structure",
+    response_model=PaqsStructureSnapshotRead,
+)
+def get_paqs_structure(
+    security_id: UUID,
+    request: Request,
+    container: ContainerDep,
+) -> PaqsStructureSnapshotRead | JSONResponse:
+    try:
+        return paqs_structure_snapshot_read(
+            container.paqs_structure_queries.current_snapshot(str(security_id))
+        )
+    except MarketDataSecurityNotFound:
+        return problem_response(
+            request,
+            status=404,
+            code="SECURITY_NOT_FOUND",
+            title="Security not found",
+            detail="Security was not found.",
+        )
+    except MarketDataSecurityMetadataConflict as exc:
+        return problem_response(
+            request,
+            status=409,
+            code="SECURITY_METADATA_CONFLICT",
+            title="Security metadata conflict",
+            detail=str(exc),
+        )
+    except MarketDataSecurityNotSupported:
+        return problem_response(
+            request,
+            status=422,
+            code="PAQS_STRUCTURE_SECURITY_NOT_SUPPORTED",
+            title="PAQS structure Security not supported",
+            detail="PAQS structure supports enabled US/HK equities only.",
         )

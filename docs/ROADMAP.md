@@ -206,7 +206,12 @@ TASK-004   Provider-neutral Market Data Backend
 TASK-005   Market Data Dashboard
 TASK-005A  Windows one-click launcher
 TASK-005B  Expanded history + US 24H minute semantics
+TASK-006A  Dynamic US/HK Securities & PAQS Input Foundation
 ```
+
+TASK-006A passed focused remediation and was integrated at
+`7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B is the current bounded implementation
+task; its result remains subject to independent review and the mandatory real-structure checkpoint.
 
 Planned PAQS umbrella workstream:
 
@@ -216,7 +221,7 @@ TASK-006   PAQS Decision-Terminal Workstream (umbrella only; not an implementati
 
 Planned bounded tasks, each requiring its own explicit Task Contract and approval:
 
-#### TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation
+#### TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation (completed/integrated)
 
 Planned scope:
 
@@ -230,7 +235,7 @@ Planned scope:
 
 Explicitly excludes PAQS ATR/Pivot/Zone/Range/Regime logic.
 
-#### TASK-006B — PAQS Structure Engine
+#### TASK-006B — PAQS Structure Engine (current bounded task)
 
 Planned scope:
 

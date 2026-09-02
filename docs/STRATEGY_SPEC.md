@@ -256,7 +256,7 @@ Score
 
 ### TASK-006B — PAQS Structure Engine
 
-Planned boundary:
+Approved/implemented task-branch boundary, pending independent review and real-structure checkpoint:
 
 - ATR;
 - confirmed Micro/Major Pivot;
@@ -349,5 +349,13 @@ They remain dormant optional Phase 3/4 extension paths and may be reactivated la
 Phase 2 market-data/Dashboard work has progressed through TASK-003/TASK-004/TASK-005/TASK-005A/TASK-005B.
 
 TASK-006A implements dynamic market-data Security expansion and PAQS W1/D1/M30 calendar/input
-preparation only. No PAQS Structure/Event/Setup/Risk/Advisory engine, numerical Quality/Ranking,
-or optional Phase 3/4 capability is implemented. TASK-006B remains separately gated.
+preparation and is integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`.
+
+TASK-006B implements only deterministic structure interpretation: Decimal ATR, independent
+Micro/Major close-confirmed Pivots, Swing labels, Major-swing and Pivot-cluster geometry, Range,
+and Base Regime limited to `BULL_TREND`, `BEAR_TREND`, `RANGE`, and `UNCERTAIN`. It exposes a
+read-only current structure snapshot with stable configuration/provenance hashes. Independent
+review and the mandatory real-structure human checkpoint remain outstanding.
+
+No TASK-006C Event/Transition/Trigger behavior, Setup/Risk/Advisory behavior, numerical
+Quality/Ranking, broker write, or optional Phase 3/4 capability is implemented by TASK-006B.

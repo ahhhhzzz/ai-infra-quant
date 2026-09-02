@@ -1,9 +1,9 @@
-# PAQS User Guide — TASK-006A
+# PAQS User Guide — through TASK-006B Structure
 
-PAQS is intended to become a read-only way to explain market structure and support investment
-decisions. TASK-006A does not make those interpretations yet. It prepares trustworthy inputs and
-lets the local Dashboard use supported US and Hong Kong equities beyond the original three
-demonstration symbols.
+PAQS is a read-only way to explain market structure and support investment research. TASK-006A
+prepares trustworthy inputs and lets the local Dashboard use supported US and Hong Kong equities.
+TASK-006B now interprets the structure of completed W1, D1, and regular-session 30-minute bars. It
+still does not say BUY, HOLD, SELL, or whether any setup should be traded.
 
 ## Add or remove a stock
 
@@ -11,11 +11,11 @@ In the Dashboard Watchlist, choose `US` or `HK`, enter the symbol, and select **
 For US stocks, enter the ordinary ticker such as `NVDA`. For Hong Kong stocks, `700` and `00700`
 both become the canonical five-digit symbol `HK.00700`.
 
-The application asks the configured read-only market-data provider for an exact matching quote
-before it changes the local database. The add can fail when no provider is configured, OpenD is
-unavailable, the symbol is invalid or unsupported, or the current account lacks quote entitlement.
-On any such failure, no Security or Watchlist item is created. Adding the same valid stock again is
-safe and does not create duplicates.
+The application asks the configured read-only market-data provider for an exact matching quote and
+an explicit equity classification before it changes the local database. The add can fail when no
+provider is configured, OpenD is unavailable, the symbol is invalid, unsupported or not an equity,
+or the current account lacks quote entitlement. On any such failure, no Security or Watchlist item
+is created. Adding the same valid stock again is safe and does not create duplicates.
 
 Use **Remove** under local Watchlist administration to remove a stock. A successful add refreshes
 the selector immediately; the new stock can be selected without reloading the page and uses the
@@ -45,5 +45,43 @@ The current Futu history path uses the provider's current QFQ adjustment. It is 
 `PROVIDER_QFQ_CURRENT` with `historical_replay_safe = false`. That data is useful for current
 research input, but it is not a claim that a strict point-in-time historical backtest is safe.
 
-TASK-006A implements no BUY, HOLD, EXIT, structure, setup, target, risk/reward, ranking, or score
-behavior. All real trading remains manual in the broker's official client.
+## Reading the TASK-006B structure output
+
+The developer structure endpoint shows three independent views: W1 context, D1 setup-timeframe
+structure, and 30-minute trigger-timeframe structure. A lower timeframe cannot rewrite a higher
+one.
+
+ATR measures recent price movement and provides a common distance scale. It is not bullish or
+bearish. ATR is unavailable until 14 completed bars exist; unavailable does not mean zero.
+
+A Pivot records two different bars. The **extreme bar** contains the High or Low. A later
+**confirmation bar** closes far enough away, measured in ATR. A same-bar wick cannot establish the
+order of extreme and reversal, so it cannot confirm itself. Micro Pivots use a smaller reversal
+threshold and describe denser local structure. Major Pivots use a larger threshold and supply the
+structure used for levels, Zones, Ranges, and trend Regime.
+
+Swing labels compare confirmed Pivots of the same kind:
+
+- Highs are `HH` (higher), `LH` (lower), or `EH` (equal within tolerance).
+- Lows are `HL` (higher), `LL` (lower), or `EL` (equal within tolerance).
+
+A Major Pivot creates a one-price Key Level. A Zone is an area built from nearby same-role Major
+Pivots. One independent touch is only a candidate Zone; two or more separated touches confirm it.
+Support and resistance observations are never mixed into one Zone.
+
+A Range requires confirmed support and resistance Zones, alternating reactions on both sides,
+enough completed history, enough closes inside its boundaries, and reasonable ATR-normalized
+width. A Range is active only while the latest completed close remains inside. An outside close
+simply makes it inactive in TASK-006B; no breakout meaning is assigned.
+
+Base Regime has only four meanings:
+
+- `BULL_TREND`: confirmed Major `HH` and `HL` structure remains coherent.
+- `BEAR_TREND`: confirmed Major `LH` and `LL` structure remains coherent.
+- `RANGE`: an active confirmed Range takes precedence.
+- `UNCERTAIN`: history, ATR, Pivots or Swing agreement is insufficient, equal, conflicting, or no
+  longer coherent. This is a legitimate truthful result, not an error and not a neutral trade call.
+
+The structure output is diagnostic research evidence. It contains no setup qualification, target,
+risk/reward, Entry or Holder advisory, score, ranking, account observation, or order function. All
+real trading remains manual in the broker's official client.

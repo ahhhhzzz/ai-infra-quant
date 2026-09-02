@@ -182,6 +182,15 @@ It implements no ATR/Pivot/Zone/Range/Regime behavior.
 
 Owns ATR, Micro/Major Pivot, Swing, Key Level geometry, Pivot Zones, Range and Base Regime. Must expose deterministic/no-lookahead structure debug evidence. Must stop for manual real-market structure review before 006C.
 
+The TASK-006B implementation is an in-memory, provider-neutral pipeline under `core/strategy`.
+It normalizes only completed W1/D1/M30 input bars, calculates Decimal ATR, runs independent Micro
+and Major close-confirmed directional-change engines, labels comparable swings, constructs stable
+Major-swing levels and same-role Pivot Zones, detects eligible Ranges, and assigns only
+`BULL_TREND`, `BEAR_TREND`, `RANGE`, or `UNCERTAIN`. Application composition supplies the current
+006A bundle and an immutable default parameter registry; the core reads no environment or provider
+SDK. `GET /api/v1/strategies/paqs/securities/{security_id}/structure` is read-only and recalculates
+the snapshot without persistence.
+
 ### TASK-006C — PAQS Event Engine
 
 Owns Break Attempt/Breakout/Breakdown, Failed Breakout/Breakdown, Retest, role flip, Transition, Trigger and Follow-through. No Entry/Hold/Exit advisory.
@@ -242,7 +251,7 @@ The current product-completion line is Phase 2 after TASK-006E. No later phase e
 
 These remain open and do not authorize implementation:
 
-- exact TASK-006A supported-security validation/user flow and PAQS input contract until its Task Contract is approved;
+- TASK-006A is completed/integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`;
 - exact PAQS structure/event/setup parameters beyond approved research locks;
 - exact Quality/Composite Score formula and ranking behavior;
 - whether lightweight advisory history is included in TASK-006E;
