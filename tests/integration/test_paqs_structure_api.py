@@ -29,8 +29,11 @@ class SyntheticInputSource:
     def __init__(self) -> None:
         self.quality = SnapshotQualityStatus.PARTIAL
         self.daily_count = 60
+        self.as_of_timestamp = NOW
+        self.events: list[str] = []
 
     def current_bundle(self, security_id: str) -> PaqsInputBundle:
+        self.events.append("bundle")
         bars = tuple(
             DailyBar(
                 security="US.AVGO",
@@ -52,7 +55,7 @@ class SyntheticInputSource:
             symbol="AVGO",
             market_timezone="America/New_York",
             provider="synthetic_test_provider",
-            as_of_timestamp=NOW,
+            as_of_timestamp=self.as_of_timestamp,
             completed_w1_bars=(),
             completed_d1_bars=bars,
             completed_30m_bars=(),
@@ -186,6 +189,35 @@ def test_structure_endpoint_has_no_public_replay_or_config_parameters(
     assert [(item["name"], item["in"]) for item in operation["parameters"]] == [
         ("security_id", "path")
     ]
+
+
+@pytest.mark.parametrize(
+    ("bundle_as_of", "query_clock", "expected"),
+    [
+        (NOW + timedelta(seconds=2), NOW, NOW + timedelta(seconds=2)),
+        (NOW, NOW + timedelta(seconds=2), NOW + timedelta(seconds=2)),
+    ],
+)
+def test_structure_query_retrieves_once_before_selecting_ordered_calculation_time(
+    structure_source: SyntheticInputSource,
+    bundle_as_of: datetime,
+    query_clock: datetime,
+    expected: datetime,
+) -> None:
+    structure_source.as_of_timestamp = bundle_as_of
+
+    def clock() -> datetime:
+        structure_source.events.append("clock")
+        return query_clock
+
+    snapshot = PaqsStructureQueries(structure_source, now=clock).current_snapshot(
+        "00000000-0000-4000-8000-000000000001"
+    )
+
+    assert structure_source.events == ["bundle", "clock"]
+    assert snapshot.as_of_timestamp == bundle_as_of
+    assert snapshot.calculated_at == expected
+    assert snapshot.calculated_at >= snapshot.as_of_timestamp
 
 
 def test_unknown_security_remains_a_structured_not_found(client: TestClient) -> None:

@@ -359,8 +359,12 @@ class PaqsStructureSnapshot:
     timeframes: tuple[TimeframeStructure, ...]
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "as_of_timestamp", require_utc(self.as_of_timestamp))
-        object.__setattr__(self, "calculated_at", require_utc(self.calculated_at))
+        as_of_timestamp = require_utc(self.as_of_timestamp)
+        calculated_at = require_utc(self.calculated_at)
+        if calculated_at < as_of_timestamp:
+            raise ValueError("calculated_at cannot precede as_of_timestamp")
+        object.__setattr__(self, "as_of_timestamp", as_of_timestamp)
+        object.__setattr__(self, "calculated_at", calculated_at)
 
 
 def normalize_structure_bars(
@@ -371,7 +375,7 @@ def normalize_structure_bars(
         (
             bar
             for bar in bundle.completed_w1_bars
-            if bar.is_completed and bar.coverage is not DerivedCoverage.PARTIAL
+            if bar.is_completed and bar.coverage is DerivedCoverage.COMPLETE
         ),
         key=lambda item: item.interval_start,
     )

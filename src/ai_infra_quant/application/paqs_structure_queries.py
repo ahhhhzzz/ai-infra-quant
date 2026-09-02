@@ -32,9 +32,10 @@ class PaqsStructureQueries:
         self._now = now or utc_now
 
     def current_snapshot(self, security_id: str) -> PaqsStructureSnapshot:
-        calculated_at = self._now()
+        bundle = self._input_queries.current_bundle(security_id)
+        calculated_at = max(self._now(), bundle.as_of_timestamp)
         return build_structure_snapshot(
-            self._input_queries.current_bundle(security_id),
+            bundle,
             config=self._config,
             calculated_at=calculated_at,
         )

@@ -173,6 +173,7 @@ def _regime_inputs(
 def _bundle(
     *,
     daily_count: int = 0,
+    w1: tuple[DerivedBar, ...] = (),
     m30: tuple[DerivedBar, ...] = (),
     quality: SnapshotQualityStatus = SnapshotQualityStatus.PARTIAL,
 ) -> PaqsInputBundle:
@@ -198,7 +199,7 @@ def _bundle(
         market_timezone="America/New_York",
         provider="synthetic_test_provider",
         as_of_timestamp=NOW,
-        completed_w1_bars=(),
+        completed_w1_bars=w1,
         completed_d1_bars=daily,
         completed_30m_bars=m30,
         calendar=CalendarMetadata(
@@ -216,8 +217,8 @@ def _bundle(
         warnings=("SYNTHETIC_FIXTURE",),
         source_coverage=SourceCoverage(
             d1_source_count=daily_count,
-            w1_completed_count=0,
-            w1_partial_count=0,
+            w1_completed_count=sum(1 for bar in w1 if bar.is_completed),
+            w1_partial_count=sum(1 for bar in w1 if not bar.is_completed),
             minute_source_count=0,
             m30_completed_count=sum(1 for bar in m30 if bar.is_completed),
             m30_partial_count=sum(1 for bar in m30 if not bar.is_completed),
@@ -841,6 +842,62 @@ def test_s15_m30_normalization_consumes_only_completed_complete_006a_bars() -> N
     assert bars[0].reference.index == 0
     assert bars[0].reference.interval_start == complete.interval_start
     assert bars[0].source_coverage == "COMPLETE"
+
+
+def test_w1_normalization_requires_complete_coverage_and_exclusions_are_invariant() -> None:
+    start = datetime(2026, 1, 5, tzinfo=UTC)
+
+    def weekly(index: int, coverage: DerivedCoverage, close: str = "101") -> DerivedBar:
+        close_value = Decimal(close)
+        expected = None if coverage is DerivedCoverage.UNKNOWN else 5
+        return DerivedBar(
+            security="US.SYNTHETIC",
+            timeframe=DerivedTimeframe.W1,
+            interval_start=start + timedelta(weeks=index),
+            interval_end=start + timedelta(weeks=index + 1),
+            open=close_value,
+            high=close_value + Decimal("1"),
+            low=close_value - Decimal("1"),
+            close=close_value,
+            volume=Decimal("1000"),
+            market_timezone="America/New_York",
+            session_type=None,
+            source_bar_count=5,
+            expected_source_bar_count=expected,
+            coverage=coverage,
+            is_completed=True,
+        )
+
+    complete = tuple(weekly(index, DerivedCoverage.COMPLETE) for index in range(14))
+    excluded = (
+        weekly(14, DerivedCoverage.UNKNOWN, "500"),
+        weekly(15, DerivedCoverage.PARTIAL, "2"),
+    )
+    baseline_bundle = _bundle(w1=complete)
+    augmented_bundle = _bundle(w1=(*complete, *excluded))
+    insufficient_bundle = _bundle(w1=(*complete[:12], *excluded))
+
+    normalized = normalize_structure_bars(augmented_bundle)[StructureTimeframe.W1]
+    baseline = build_structure_snapshot(baseline_bundle, calculated_at=NOW).timeframes[0]
+    augmented = build_structure_snapshot(augmented_bundle, calculated_at=NOW).timeframes[0]
+    insufficient = build_structure_snapshot(insufficient_bundle, calculated_at=NOW).timeframes[0]
+
+    assert len(normalized) == 14
+    assert all(bar.source_coverage == DerivedCoverage.COMPLETE.value for bar in normalized)
+    assert baseline.bar_count == augmented.bar_count == 14
+    assert baseline.atr_ready is augmented.atr_ready is True
+    assert baseline == augmented
+    assert insufficient.bar_count == 12
+    assert insufficient.atr_ready is False
+    assert insufficient.latest_atr is None
+
+
+def test_structure_snapshot_rejects_impossible_calculation_provenance() -> None:
+    with pytest.raises(ValueError, match="cannot precede"):
+        build_structure_snapshot(
+            _bundle(),
+            calculated_at=NOW - timedelta(microseconds=1),
+        )
 
 
 def test_structure_snapshot_is_deterministic_except_explicit_calculation_time() -> None:
