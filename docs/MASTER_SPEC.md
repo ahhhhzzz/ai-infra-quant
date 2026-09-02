@@ -76,8 +76,8 @@ Ordinary HTTP/REST polling remains sufficient for the local MVP. WebSocket/strea
 - bounded Daily history and recent completed 1-minute OHLCV;
 - latest price and market status;
 - separate Daily/minute charts and volume;
-- dynamic supported US/HK watchlist planned under TASK-006A;
-- PAQS input/session/calendar foundation;
+- dynamic supported US/HK watchlist implemented under TASK-006A;
+- PAQS input/session/calendar foundation implemented under TASK-006A;
 - PAQS structure, events, setups, invalidation, targets and RR through bounded TASK-006 work;
 - conditional Entry/Holder advisory;
 - lightweight explanation/reason codes;
@@ -171,7 +171,10 @@ Only the composition root selects a provider. Core modules do not read environme
 
 The existing provider boundary supports equivalents of `get_latest_quote()`, `get_daily_bars()`, `get_minute_bars()` and `get_market_status()` through TASK-004/TASK-005B.
 
-TASK-006A is planned to extend the provider-neutral boundary only as needed for supported dynamic US/HK securities and trading-calendar/session metadata. This does not authorize account access.
+TASK-006A extends the provider-neutral boundary for supported dynamic US/HK equities and
+trading-calendar/session metadata. Provider quote validation occurs before atomic local
+Security/Watchlist mutation and never verifies brokerage tradability. This does not authorize
+account access.
 
 Current Dashboard behavior retains:
 
@@ -295,6 +298,9 @@ TASK-006E — PAQS Advisory & Decision Dashboard
 ```
 
 Each requires its own explicit user-approved Task Contract. The current product may be considered functionally complete when TASK-006E passes independent review/integration. Phase 3/4 remain dormant until explicitly reactivated.
+
+TASK-006A is implemented on its bounded task branch; TASK-006B–006E remain separately unapproved
+implementation work until their own contracts are approved.
 
 ## 13. Quality and change control
 

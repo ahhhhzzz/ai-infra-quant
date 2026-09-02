@@ -735,11 +735,12 @@ const renderAdminWatchlist = () => {
   element("#admin-watchlist-status").textContent = `${rows.length} identities`;
 };
 
-const loadWatchlist = async () => {
+const loadWatchlist = async (preferredSecurityId = null) => {
   const data = await api(`${API_BASE}/watchlist`);
   watchlistSecurities = data.items.map(({ security }) => security);
   const currentStillExists = watchlistSecurities.find((item) => item.id === selectedSecurity?.id);
-  const defaultSecurity = watchlistSecurities.find((item) => item.display_symbol === "US.AVGO")
+  const defaultSecurity = watchlistSecurities.find((item) => item.id === preferredSecurityId)
+    || watchlistSecurities.find((item) => item.display_symbol === "US.AVGO")
     || watchlistSecurities[0]
     || null;
   renderAdminWatchlist();
@@ -811,26 +812,27 @@ document.addEventListener("visibilitychange", () => {
   refreshSelectedSecurity("visibility-restored");
 });
 
-element("#security-form").addEventListener("submit", async (event) => {
+element("#supported-security-form").addEventListener("submit", async (event) => {
   event.preventDefault();
+  const submit = event.target.querySelector('button[type="submit"]');
   const form = new FormData(event.target);
   const payload = Object.fromEntries(form.entries());
-  if (!payload.display_name) delete payload.display_name;
-  const result = element("#form-result");
+  const result = element("#supported-security-result");
+  submit.disabled = true;
+  result.textContent = `Validating ${payload.market}.${payload.symbol} with the read-only provider…`;
   try {
-    const security = await api(`${API_BASE}/securities`, {
+    const added = await api(`${API_BASE}/watchlist/supported-securities`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    await api(`${API_BASE}/watchlist`, {
-      method: "POST",
-      body: JSON.stringify({ security_id: security.id }),
-    });
-    result.textContent = `${security.display_symbol} created as USER_SUPPLIED_UNVERIFIED and added to the watchlist.`;
+    const security = added.item.security;
+    result.textContent = `${security.display_symbol} validated and available for market data. Local identity remains unverified for tradability.`;
     event.target.reset();
-    await loadWatchlist();
+    await loadWatchlist(security.id);
   } catch (error) {
     result.textContent = safeErrorMessage(error);
+  } finally {
+    submit.disabled = false;
   }
 });
 

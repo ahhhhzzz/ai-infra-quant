@@ -7,6 +7,8 @@ EXPECTED_PATHS = {
     "/api/v1/performance",
     "/api/v1/watchlist",
     "/api/v1/watchlist/{security_id}",
+    "/api/v1/watchlist/supported-securities",
+    "/api/v1/strategies/paqs/securities/{security_id}/input-status",
     "/api/v1/securities",
     "/api/v1/securities/{security_id}",
     "/api/v1/strategies",

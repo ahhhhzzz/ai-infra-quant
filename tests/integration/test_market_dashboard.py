@@ -34,6 +34,8 @@ def test_homepage_renders_market_first_read_only_dashboard(client: TestClient) -
         'id="market-chart"',
         'id="refresh-market"',
         'id="refresh-countdown"',
+        'id="supported-security-form"',
+        "Add US/HK stock",
         "READ ONLY · DECISION SUPPORT",
     ):
         assert required in page
@@ -56,13 +58,28 @@ def test_dashboard_uses_canonical_watchlist_security_ids(client: TestClient) -> 
     assert 'display_symbol === "US.AVGO"' in source
 
 
+def test_dashboard_adds_supported_equity_with_provider_validation() -> None:
+    page = _source(TEMPLATE)
+    source = _source(APP_JS)
+    assert 'name="market"' in page
+    assert '<option value="US">US</option>' in page
+    assert '<option value="HK">HK</option>' in page
+    assert 'name="currency"' not in page
+    assert 'name="instrument_type"' not in page
+    assert "/watchlist/supported-securities" in source
+    assert "submit.disabled = true" in source
+    assert "await loadWatchlist(security.id)" in source
+    assert "provider" in source.lower()
+
+
 def test_lightweight_charts_5_2_1_is_vendored_and_attributed(client: TestClient) -> None:
     asset = client.get("/static/vendor/lightweight-charts.standalone.production.js")
     license_response = client.get("/static/vendor/LIGHTWEIGHT_CHARTS_LICENSE.txt")
     notice_response = client.get("/static/vendor/LIGHTWEIGHT_CHARTS_NOTICE.txt")
 
     assert asset.status_code == license_response.status_code == notice_response.status_code == 200
-    assert hashlib.sha256(asset.content).hexdigest() == CHART_SHA256
+    normalized_asset = asset.content.replace(b"\r\n", b"\n")
+    assert hashlib.sha256(normalized_asset).hexdigest() == CHART_SHA256
     assert "Apache License" in license_response.text
     assert "TradingView Lightweight Charts" in notice_response.text
     page = client.get("/").text

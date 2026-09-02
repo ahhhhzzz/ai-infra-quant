@@ -14,6 +14,7 @@ from ai_infra_quant.core.domain.market_data import (
     MarketDataSecurity,
     MinuteBar,
     QuoteSnapshot,
+    TradingDayType,
 )
 from ai_infra_quant.integrations.futu_quote import adapter as adapter_module
 from ai_infra_quant.integrations.futu_quote.adapter import (
@@ -74,6 +75,14 @@ class FakeQuoteContext:
             ),
             None,
         )
+        self.calendar_result: tuple[object, object] = (
+            0,
+            [
+                {"time": "2026-08-31", "trade_date_type": "WHOLE"},
+                {"time": "2026-09-01", "trade_date_type": "MORNING"},
+            ],
+        )
+        self.calendar_calls: list[dict[str, object]] = []
 
     def get_market_snapshot(self, code_list: list[str]) -> tuple[object, object]:
         assert code_list == [self.expected_code]
@@ -113,6 +122,10 @@ class FakeQuoteContext:
             return page
         return self.daily_result if ktype == "K_DAY" else self.minute_result
 
+    def request_trading_days(self, market: object, start: str, end: str) -> tuple[object, object]:
+        self.calendar_calls.append({"market": market, "start": start, "end": end})
+        return self.calendar_result
+
     def close(self) -> None:
         self.closed = True
 
@@ -141,6 +154,8 @@ def _adapter(
         k_1m="K_1M",
         au_qfq="QFQ",
         session_all="ALL",
+        trade_date_market_us="US_CALENDAR",
+        trade_date_market_hk="HK_CALENDAR",
         sdk_version="test-sdk",
     )
     return FutuQuoteAdapter("127.0.0.1", 11111, bindings_loader=lambda: bindings, now=now)
@@ -164,7 +179,7 @@ def _configure_daily_result(
     )
 
 
-def test_explicit_canonical_symbol_mapping() -> None:
+def test_dynamic_canonical_symbol_mapping_preserves_original_symbols() -> None:
     assert [security.display_symbol for security in POC_SECURITIES] == [
         "US.AVGO",
         "US.VRT",
@@ -176,8 +191,8 @@ def test_explicit_canonical_symbol_mapping() -> None:
         "HK.09698",
     ]
     unsupported = MarketDataSecurity("US", "NVDA", "USD", "America/New_York")
-    with pytest.raises(ValueError, match="unsupported"):
-        futu_code_for(unsupported)
+    assert futu_code_for(unsupported) == "US.NVDA"
+    assert futu_code_for(MarketDataSecurity("HK", "700", "HKD", "Asia/Hong_Kong")) == "HK.00700"
 
 
 def test_canonical_results_do_not_expose_sdk_objects_and_use_decimal() -> None:
@@ -384,6 +399,7 @@ def test_lazy_sdk_bindings_include_official_session_all(
         KLType=SimpleNamespace(K_DAY="K_DAY", K_1M="K_1M"),
         AuType=SimpleNamespace(QFQ="QFQ"),
         Session=SimpleNamespace(ALL="ALL"),
+        TradeDateMarket=SimpleNamespace(US="US_CALENDAR", HK="HK_CALENDAR"),
         __version__="test-sdk",
     )
     monkeypatch.setattr(adapter_module, "import_module", lambda _name: sdk)
@@ -391,6 +407,41 @@ def test_lazy_sdk_bindings_include_official_session_all(
     bindings = load_futu_sdk()
 
     assert bindings.session_all == "ALL"
+    assert bindings.trade_date_market_us == "US_CALENDAR"
+    assert bindings.trade_date_market_hk == "HK_CALENDAR"
+
+
+def test_trading_calendar_maps_known_and_unknown_provider_rows() -> None:
+    context = FakeQuoteContext()
+    context.calendar_result = (
+        0,
+        [
+            {"time": "2026-08-31", "trade_date_type": "WHOLE"},
+            {"time": "2026-09-01", "trade_date_type": "SURPRISE"},
+        ],
+    )
+    with _adapter(context) as adapter:
+        result = adapter.get_trading_days("US", date(2026, 8, 31), date(2026, 9, 1))
+
+    assert result.status is DataAvailabilityStatus.AVAILABLE
+    assert result.data is not None
+    assert result.data[0].day_type is TradingDayType.FULL
+    assert result.data[0].market_timezone == "America/New_York"
+    assert result.data[0].session_segments[0].start.isoformat() == "09:30:00"
+    assert result.data[1].day_type is TradingDayType.UNKNOWN
+    assert result.data[1].session_segments == ()
+    assert context.calendar_calls == [
+        {"market": "US_CALENDAR", "start": "2026-08-31", "end": "2026-09-01"}
+    ]
+
+
+def test_trading_calendar_provider_error_is_explicit() -> None:
+    context = FakeQuoteContext()
+    context.calendar_result = (1, "No permission for trading calendar")
+    with _adapter(context) as adapter:
+        result = adapter.get_trading_days("HK", date(2026, 8, 31), date(2026, 9, 1))
+    assert result.status is DataAvailabilityStatus.NOT_ENTITLED
+    assert result.data is None
 
 
 def test_us_minute_history_uses_session_all_and_hk_omits_it() -> None:

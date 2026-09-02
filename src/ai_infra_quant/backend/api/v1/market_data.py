@@ -4,6 +4,7 @@ from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
 
 from ai_infra_quant.application.market_data_queries import (
+    MarketDataSecurityMetadataConflict,
     MarketDataSecurityNotFound,
     MarketDataSecurityNotSupported,
 )
@@ -30,6 +31,14 @@ def _security_problem(request: Request, exc: Exception) -> JSONResponse:
             title="Security not found",
             detail="Security was not found.",
         )
+    if isinstance(exc, MarketDataSecurityMetadataConflict):
+        return problem_response(
+            request,
+            status=409,
+            code="SECURITY_METADATA_CONFLICT",
+            title="Security metadata conflict",
+            detail=str(exc),
+        )
     return problem_response(
         request,
         status=422,
@@ -47,7 +56,11 @@ def get_market_state(
 ) -> MarketStateRead | JSONResponse:
     try:
         return market_state_read(container.market_data_queries.state(str(security_id)))
-    except (MarketDataSecurityNotFound, MarketDataSecurityNotSupported) as exc:
+    except (
+        MarketDataSecurityNotFound,
+        MarketDataSecurityNotSupported,
+        MarketDataSecurityMetadataConflict,
+    ) as exc:
         return _security_problem(request, exc)
 
 
@@ -60,7 +73,11 @@ def get_daily_bars(
 ) -> DailyBarsRead | JSONResponse:
     try:
         return daily_bars_read(container.market_data_queries.daily_bars(str(security_id), limit))
-    except (MarketDataSecurityNotFound, MarketDataSecurityNotSupported) as exc:
+    except (
+        MarketDataSecurityNotFound,
+        MarketDataSecurityNotSupported,
+        MarketDataSecurityMetadataConflict,
+    ) as exc:
         return _security_problem(request, exc)
 
 
@@ -75,5 +92,9 @@ def get_minute_bars(
         return minute_bars_read(
             container.market_data_queries.minute_bars(str(security_id), lookback_days)
         )
-    except (MarketDataSecurityNotFound, MarketDataSecurityNotSupported) as exc:
+    except (
+        MarketDataSecurityNotFound,
+        MarketDataSecurityNotSupported,
+        MarketDataSecurityMetadataConflict,
+    ) as exc:
         return _security_problem(request, exc)

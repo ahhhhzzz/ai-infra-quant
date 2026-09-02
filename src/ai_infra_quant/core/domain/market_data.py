@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, time
 from decimal import Decimal
 from enum import StrEnum
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -27,6 +27,56 @@ class CanonicalMarketState(StrEnum):
     AFTER_HOURS = "AFTER_HOURS"
     BREAK = "BREAK"
     UNKNOWN = "UNKNOWN"
+
+
+class TradingDayType(StrEnum):
+    FULL = "FULL"
+    MORNING_ONLY = "MORNING_ONLY"
+    AFTERNOON_ONLY = "AFTERNOON_ONLY"
+    UNKNOWN = "UNKNOWN"
+
+
+@dataclass(frozen=True, slots=True)
+class TradingSessionSegment:
+    start: time
+    end: time
+
+    def __post_init__(self) -> None:
+        if self.start.tzinfo is not None or self.end.tzinfo is not None:
+            raise ValueError("trading-session wall times must be timezone-naive")
+        if self.end <= self.start:
+            raise ValueError("trading-session segment end must follow its start")
+
+
+@dataclass(frozen=True, slots=True)
+class TradingDay:
+    market: str
+    market_date: date
+    market_timezone: str
+    day_type: TradingDayType
+    provider_day_type: str
+    session_segments: tuple[TradingSessionSegment, ...]
+    provider: str
+    retrieved_at: datetime
+
+    def __post_init__(self) -> None:
+        market = self.market.strip().upper()
+        if market not in {"US", "HK"}:
+            raise ValueError("trading-day market must be US or HK")
+        object.__setattr__(self, "market", market)
+        try:
+            timezone = ZoneInfo(self.market_timezone).key
+        except ZoneInfoNotFoundError as exc:
+            raise ValueError("market_timezone must be a valid IANA timezone") from exc
+        object.__setattr__(self, "market_timezone", timezone)
+        object.__setattr__(self, "retrieved_at", require_utc(self.retrieved_at))
+        if any(
+            current.end > following.start
+            for current, following in zip(
+                self.session_segments, self.session_segments[1:], strict=False
+            )
+        ):
+            raise ValueError("trading-session segments must not overlap")
 
 
 @dataclass(frozen=True, slots=True)

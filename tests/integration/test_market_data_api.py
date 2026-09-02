@@ -25,9 +25,9 @@ from ai_infra_quant.core.domain.market_data import (
     ProviderResult,
     ProviderStatus,
     QuoteSnapshot,
+    TradingDay,
 )
 from ai_infra_quant.database.repositories.unit_of_work import SQLAlchemyUnitOfWork
-from ai_infra_quant.integrations.futu_quote.symbols import POC_SECURITIES
 
 NOW = datetime(2026, 9, 1, 14, 35, 30, tzinfo=UTC)
 PROVIDER = "test_quote_provider"
@@ -128,6 +128,16 @@ class FakeMarketDataProvider:
             data=bars,
         )
 
+    def get_trading_days(
+        self, market: str, start_date: date, end_date: date
+    ) -> ProviderResult[tuple[TradingDay, ...]]:
+        return ProviderResult(
+            status=DataAvailabilityStatus.UNAVAILABLE,
+            provider=PROVIDER,
+            retrieved_at=NOW,
+            reason="calendar not configured in market-data API fixture",
+        )
+
     def get_recent_minute_bars(
         self, security: MarketDataSecurity, lookback_days: int
     ) -> ProviderResult[tuple[MinuteBar, ...]]:
@@ -179,7 +189,6 @@ def market_app(
         uow_factory,
         provider_name=PROVIDER,
         provider_factory=provider_factory,
-        supported_securities=POC_SECURITIES,
         now=lambda: NOW,
     )
     return application
@@ -312,14 +321,27 @@ def test_security_not_found_unsupported_and_limit_validation_are_stable(
         "/api/v1/securities",
         json={
             "market": "US",
-            "symbol": "NVDA",
+            "symbol": "SPY",
             "currency": "USD",
-            "instrument_type": "EQUITY",
+            "instrument_type": "ETF",
         },
     ).json()["id"]
     unsupported = market_client.get(f"/api/v1/market-data/securities/{unsupported_id}/state")
     assert unsupported.status_code == 422
     assert unsupported.json()["code"] == "MARKET_DATA_SECURITY_NOT_SUPPORTED"
+
+    dynamic_id = market_client.post(
+        "/api/v1/securities",
+        json={
+            "market": "US",
+            "symbol": "NVDA",
+            "currency": "USD",
+            "instrument_type": "EQUITY",
+        },
+    ).json()["id"]
+    dynamic = market_client.get(f"/api/v1/market-data/securities/{dynamic_id}/state")
+    assert dynamic.status_code == 200
+    assert dynamic.json()["symbol"] == "NVDA"
 
     security_id = _security_ids(market_client)["US.AVGO"]
     full_daily = market_client.get(

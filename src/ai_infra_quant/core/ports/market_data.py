@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from types import TracebackType
 from typing import Protocol, Self
 
@@ -14,6 +14,7 @@ from ai_infra_quant.core.domain.market_data import (
     ProviderResult,
     ProviderStatus,
     QuoteSnapshot,
+    TradingDay,
 )
 from ai_infra_quant.core.domain.providers import (
     ConnectionResult,
@@ -93,3 +94,7 @@ class ReadOnlyMarketDataProvider(Protocol):
     def get_recent_minute_bars(
         self, security: MarketDataSecurity, lookback_days: int
     ) -> ProviderResult[tuple[MinuteBar, ...]]: ...
+
+    def get_trading_days(
+        self, market: str, start_date: date, end_date: date
+    ) -> ProviderResult[tuple[TradingDay, ...]]: ...

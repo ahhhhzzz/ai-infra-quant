@@ -1,4 +1,4 @@
-"""Explicit provider-symbol mapping for the approved PoC securities."""
+"""Canonical Futu symbols for the supported US/HK equity market-data scope."""
 
 from ai_infra_quant.core.domain.market_data import MarketDataSecurity
 
@@ -8,12 +8,15 @@ POC_SECURITIES = (
     MarketDataSecurity("HK", "09698", "HKD", "Asia/Hong_Kong"),
 )
 
-_FUTU_CODES = {security.display_symbol: security.display_symbol for security in POC_SECURITIES}
-
 
 def futu_code_for(security: MarketDataSecurity) -> str:
-    """Return the explicitly approved Futu code for a canonical security."""
-    try:
-        return _FUTU_CODES[security.display_symbol]
-    except KeyError as exc:
-        raise ValueError(f"unsupported Futu PoC security: {security.display_symbol}") from exc
+    """Return the provider code without assuming that a quote is available."""
+    expected = {
+        "US": ("USD", "America/New_York"),
+        "HK": ("HKD", "Asia/Hong_Kong"),
+    }.get(security.market)
+    if expected is None:
+        raise ValueError(f"unsupported Futu equity market: {security.market}")
+    if (security.currency, security.market_timezone) != expected:
+        raise ValueError(f"incompatible Futu security metadata: {security.display_symbol}")
+    return security.display_symbol

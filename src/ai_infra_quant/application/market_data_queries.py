@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from ai_infra_quant.application.unit_of_work import UnitOfWorkFactory
 from ai_infra_quant.core.domain.common import utc_now
-from ai_infra_quant.core.domain.enums import DataAvailabilityStatus
+from ai_infra_quant.core.domain.enums import DataAvailabilityStatus, InstrumentType
 from ai_infra_quant.core.domain.market_data import (
     DailyBar,
     MarketDataSecurity,
@@ -15,6 +15,7 @@ from ai_infra_quant.core.domain.market_data import (
     MinuteBar,
     ProviderResult,
     QuoteSnapshot,
+    TradingDay,
 )
 from ai_infra_quant.core.domain.security import Security
 from ai_infra_quant.core.ports.market_data import ReadOnlyMarketDataProvider
@@ -27,6 +28,10 @@ class MarketDataSecurityNotFound(LookupError):
 
 
 class MarketDataSecurityNotSupported(ValueError):
+    pass
+
+
+class MarketDataSecurityMetadataConflict(ValueError):
     pass
 
 
@@ -56,6 +61,15 @@ class MinuteBarsView:
     result: ProviderResult[tuple[MinuteBar, ...]]
 
 
+@dataclass(frozen=True, slots=True)
+class TradingDaysView:
+    security: Security
+    market_timezone: str
+    start_date: date
+    end_date: date
+    result: ProviderResult[tuple[TradingDay, ...]]
+
+
 class MarketDataQueries:
     def __init__(
         self,
@@ -63,15 +77,11 @@ class MarketDataQueries:
         *,
         provider_name: str,
         provider_factory: MarketDataProviderFactory | None,
-        supported_securities: tuple[MarketDataSecurity, ...],
         now: Callable[[], datetime] = utc_now,
     ) -> None:
         self._uow_factory = uow_factory
         self._provider_name = provider_name
         self._provider_factory = provider_factory
-        self._supported_securities = {
-            security.display_symbol: security for security in supported_securities
-        }
         self._now = now
 
     def state(self, security_id: str) -> MarketStateView:
@@ -132,15 +142,28 @@ class MarketDataQueries:
             result=result,
         )
 
+    def trading_days(self, security_id: str, start_date: date, end_date: date) -> TradingDaysView:
+        security, market_security = self._resolve_security(security_id)
+        result = self._single_capability(
+            lambda provider: provider.get_trading_days(market_security.market, start_date, end_date)
+        )
+        return TradingDaysView(
+            security=security,
+            market_timezone=market_security.market_timezone,
+            start_date=start_date,
+            end_date=end_date,
+            result=result,
+        )
+
+    def resolve_research_security(self, security_id: str) -> tuple[Security, MarketDataSecurity]:
+        return self._resolve_security(security_id)
+
     def _resolve_security(self, security_id: str) -> tuple[Security, MarketDataSecurity]:
         with self._uow_factory() as uow:
             security = uow.securities.get(security_id)
         if security is None:
             raise MarketDataSecurityNotFound
-        market_security = self._supported_securities.get(security.display_symbol)
-        if market_security is None:
-            raise MarketDataSecurityNotSupported
-        return security, market_security
+        return security, market_data_security_for_equity(security)
 
     def _single_capability[ResultT](
         self,
@@ -186,3 +209,40 @@ def _failure[ResultT](
 def _safe_reason(error: object) -> str:
     text = str(error).strip()
     return text[:500] if text else type(error).__name__
+
+
+def market_data_security_for_equity(
+    security: Security,
+) -> MarketDataSecurity:
+    if not security.enabled or security.instrument_type is not InstrumentType.EQUITY:
+        raise MarketDataSecurityNotSupported
+    contract = {
+        "US": ("USD", "America/New_York"),
+        "HK": ("HKD", "Asia/Hong_Kong"),
+    }.get(security.market)
+    if contract is None:
+        raise MarketDataSecurityNotSupported
+    currency, market_timezone = contract
+    if security.currency != currency:
+        raise MarketDataSecurityMetadataConflict(
+            f"stored currency {security.currency} conflicts with "
+            f"{security.market} contract {currency}"
+        )
+    if security.market_timezone is not None and security.market_timezone != market_timezone:
+        raise MarketDataSecurityMetadataConflict(
+            "stored market timezone conflicts with the canonical market-data contract"
+        )
+    return MarketDataSecurity(
+        market=security.market,
+        symbol=security.symbol,
+        currency=currency,
+        market_timezone=market_timezone,
+    )
+
+
+def paqs_research_eligible(security: Security) -> bool:
+    try:
+        market_data_security_for_equity(security)
+    except (MarketDataSecurityNotSupported, MarketDataSecurityMetadataConflict):
+        return False
+    return True

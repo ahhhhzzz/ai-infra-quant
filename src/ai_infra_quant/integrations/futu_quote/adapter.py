@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal, InvalidOperation
 from importlib import import_module
 from types import TracebackType
@@ -21,6 +21,9 @@ from ai_infra_quant.core.domain.market_data import (
     ProviderResult,
     ProviderStatus,
     QuoteSnapshot,
+    TradingDay,
+    TradingDayType,
+    TradingSessionSegment,
 )
 from ai_infra_quant.integrations.futu_quote.symbols import futu_code_for
 
@@ -50,6 +53,10 @@ class FutuQuoteContext(Protocol):
         session: object = ...,
     ) -> tuple[object, object, object]: ...
 
+    def request_trading_days(
+        self, market: object, start: str, end: str
+    ) -> tuple[object, object]: ...
+
     def close(self) -> None: ...
 
 
@@ -61,6 +68,8 @@ class FutuSdkBindings:
     k_1m: object
     au_qfq: object
     session_all: object
+    trade_date_market_us: object
+    trade_date_market_hk: object
     sdk_version: str | None
 
 
@@ -78,6 +87,8 @@ def load_futu_sdk() -> FutuSdkBindings:
             k_1m=sdk.KLType.K_1M,
             au_qfq=sdk.AuType.QFQ,
             session_all=sdk.Session.ALL,
+            trade_date_market_us=sdk.TradeDateMarket.US,
+            trade_date_market_hk=sdk.TradeDateMarket.HK,
             sdk_version=cast(str | None, getattr(sdk, "__version__", None)),
         )
     except AttributeError as exc:
@@ -309,6 +320,61 @@ class FutuQuoteAdapter:
             data=bars,
         )
 
+    def get_trading_days(
+        self, market: str, start_date: date, end_date: date
+    ) -> ProviderResult[tuple[TradingDay, ...]]:
+        normalized_market = market.strip().upper()
+        if normalized_market not in {"US", "HK"}:
+            raise ValueError("trading calendar supports only US and HK")
+        if end_date < start_date:
+            raise ValueError("trading calendar end date must not precede start date")
+        retrieved_at = self._retrieved_at()
+        bindings = self._require_bindings()
+        provider_market = (
+            bindings.trade_date_market_us
+            if normalized_market == "US"
+            else bindings.trade_date_market_hk
+        )
+        try:
+            ret, payload = self._require_context().request_trading_days(
+                market=provider_market,
+                start=start_date.isoformat(),
+                end=end_date.isoformat(),
+            )
+        except Exception as exc:
+            return _provider_failure(retrieved_at, exc)
+        if ret != bindings.ret_ok:
+            return _provider_failure(retrieved_at, payload)
+        rows = _rows(payload, retrieved_at)
+        if isinstance(rows, ProviderResult):
+            return cast(ProviderResult[tuple[TradingDay, ...]], rows)
+        try:
+            days_by_date: dict[date, TradingDay] = {}
+            for row in rows:
+                market_date = date.fromisoformat(str(row["time"]).strip())
+                raw_type = _provider_enum_text(row["trade_date_type"])
+                day_type, segments = _calendar_semantics(normalized_market, raw_type)
+                days_by_date[market_date] = TradingDay(
+                    market=normalized_market,
+                    market_date=market_date,
+                    market_timezone=(
+                        "America/New_York" if normalized_market == "US" else "Asia/Hong_Kong"
+                    ),
+                    day_type=day_type,
+                    provider_day_type=raw_type,
+                    session_segments=segments,
+                    provider="futu_opend_quote",
+                    retrieved_at=retrieved_at,
+                )
+            days = tuple(days_by_date[key] for key in sorted(days_by_date))
+        except (KeyError, TypeError, ValueError) as exc:
+            return _failure(DataAvailabilityStatus.INVALID, retrieved_at, _safe_reason(exc))
+        return ProviderResult(
+            status=DataAvailabilityStatus.AVAILABLE,
+            retrieved_at=retrieved_at,
+            data=days,
+        )
+
     def _call(self, method_name: str, code_list: list[str]) -> object | ProviderResult[Any]:
         retrieved_at = self._retrieved_at()
         try:
@@ -510,6 +576,39 @@ def _market_state(raw_state: str) -> CanonicalMarketState:
         "CLOSED": CanonicalMarketState.CLOSED,
     }
     return exact.get(normalized, CanonicalMarketState.UNKNOWN)
+
+
+def _provider_enum_text(value: object) -> str:
+    name = getattr(value, "name", None)
+    raw = str(name if isinstance(name, str) else value).strip().upper()
+    if "." in raw:
+        raw = raw.rsplit(".", 1)[-1]
+    if not raw:
+        raise ValueError("provider trading-day type is empty")
+    return raw
+
+
+def _calendar_semantics(
+    market: str, provider_day_type: str
+) -> tuple[TradingDayType, tuple[TradingSessionSegment, ...]]:
+    morning = TradingSessionSegment(time(9, 30), time(12, 0))
+    hk_afternoon = TradingSessionSegment(time(13, 0), time(16, 0))
+    if provider_day_type == "WHOLE":
+        if market == "US":
+            return TradingDayType.FULL, (TradingSessionSegment(time(9, 30), time(16, 0)),)
+        return TradingDayType.FULL, (morning, hk_afternoon)
+    if provider_day_type == "MORNING":
+        if market == "US":
+            return (
+                TradingDayType.MORNING_ONLY,
+                (TradingSessionSegment(time(9, 30), time(13, 0)),),
+            )
+        return TradingDayType.MORNING_ONLY, (morning,)
+    if provider_day_type == "AFTERNOON":
+        if market == "HK":
+            return TradingDayType.AFTERNOON_ONLY, (hk_afternoon,)
+        return TradingDayType.AFTERNOON_ONLY, ()
+    return TradingDayType.UNKNOWN, ()
 
 
 def _regular_session_is_closed(

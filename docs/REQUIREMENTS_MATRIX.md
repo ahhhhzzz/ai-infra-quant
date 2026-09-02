@@ -64,14 +64,14 @@ Only Phase 0 through Phase 4 are valid target phases.
 | MKT-003 | Futu OpenD quote-only APIs are selected for current provider path | RETAINED | 2 | IMPLEMENTED | TASK-003 adapter |
 | MKT-004 | Live OpenD availability/login/entitlements/delay/coverage remain truthful environment facts | RETAINED | 2 | DECISION_REQUIRED | TASK-003/005B smoke evidence |
 | MKT-005 | AVGO/VRT/HK.09698 are accepted initial PoC symbols | RETAINED | 2 | IMPLEMENTED | TASK-004/005B |
-| MKT-006 | User-manageable supported US/HK securities replace the three-symbol PoC restriction for future MVP | SUPERSEDED_PAQS_MVP | 2 | PLANNED_TASK | TASK-006A planned scope |
+| MKT-006 | User-manageable supported US/HK equities replace the three-symbol PoC restriction | SUPERSEDED_PAQS_MVP | 2 | IMPLEMENTED | TASK-006A supported-security API/UI/tests |
 | MKT-007 | Daily OHLCV supports bounded 1300-session Dashboard history | RETAINED | 2 | IMPLEMENTED | TASK-005B |
 | MKT-008 | Recent 30-calendar-day completed 1-minute OHLCV is supported | RETAINED | 2 | IMPLEMENTED | TASK-005B |
-| MKT-009 | US minute retrieval may use `Session.ALL`; PAQS initial TTF later filters regular session | RETAINED | 2 | PARTIAL | TASK-005B; TASK-006A planned |
+| MKT-009 | US minute retrieval uses `Session.ALL`; PAQS initial M30 filters regular session | RETAINED | 2 | IMPLEMENTED | TASK-005B; TASK-006A M30 tests |
 | MKT-010 | Unfinished minute bars are excluded | RETAINED | 2 | IMPLEMENTED | adapter/API tests |
 | MKT-011 | Latest/intraday price is distinct from completed Daily close | RETAINED | 2 | IMPLEMENTED | TASK-004 state/API tests |
 | MKT-012 | Missing/delayed/stale/unavailable/error states are explicit; no market value fabricated | RETAINED | all | IMPLEMENTED | provider result/API contracts plus AGENTS |
-| MKT-013 | TASK-006A prepares provider-neutral trading calendar/session/coverage/adjustment metadata | RETAINED | 2 | PLANNED_TASK | Roadmap TASK-006A |
+| MKT-013 | TASK-006A prepares provider-neutral trading calendar/session/coverage/adjustment metadata | RETAINED | 2 | IMPLEMENTED | Calendar port, PAQS bundle/diagnostic tests |
 | MKT-014 | Initial PAQS timeframe input is W1/D1/30m regular session; H1/H4 are not MVP requirements | SUPERSEDED_PAQS_MVP | 2 | DOCUMENTED | PAQS v0.3.1; Roadmap 5/7 |
 
 | ID | Dashboard requirement | Disposition | Phase | Status | Evidence |
@@ -80,7 +80,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | UI-002 | Daily and 1-minute candles remain separate chart timeframes | RETAINED | 2 | IMPLEMENTED | TASK-005 |
 | UI-003 | Visible-page ~60s refresh, no overlapping requests, hidden pause/resume | RETAINED | 2 | IMPLEMENTED | TASK-005 |
 | UI-004 | Manual refresh and countdown | RETAINED | 2 | IMPLEMENTED | TASK-005 |
-| UI-005 | Dynamic supported US/HK add/remove flow is user-facing rather than backend-only | SUPERSEDED_PAQS_MVP | 2 | PLANNED_TASK | TASK-006A planned scope |
+| UI-005 | Dynamic supported US/HK add/remove flow is user-facing rather than backend-only | SUPERSEDED_PAQS_MVP | 2 | IMPLEMENTED | TASK-006A Dashboard form and integration tests |
 | UI-006 | PAQS context/setup/advisory/invalidation/target/RR presentation | RETAINED | 2 | PLANNED_TASK | TASK-006E planned scope |
 | UI-007 | No real-order UI/control and no claim user executed advisory | RETAINED | all | DOCUMENTED | Roadmap/Master safety boundary |
 
@@ -91,7 +91,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | PAQS-001 | PAQS state/hard-gate engine is primary causal decision system | SUPERSEDED_PAQS_MVP | 2 | DOCUMENTED | Roadmap 6; Strategy |
 | PAQS-002 | Numerical Quality/Composite Score is derived only and cannot override PAQS hard gates | SUPERSEDED_PAQS_MVP | 2 | DOCUMENTED | Roadmap 6; PAQS v0.3.1 |
 | PAQS-003 | `TASK-006` is umbrella only | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
-| PAQS-004 | TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
+| PAQS-004 | TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation | RETAINED | 2 | IMPLEMENTED | Dynamic add, calendar, W1/M30, diagnostics, guides |
 | PAQS-005 | TASK-006B — PAQS Structure Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQS-006 | TASK-006C — PAQS Event Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQS-007 | TASK-006D — PAQS Setup & Risk Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
@@ -146,6 +146,10 @@ These optional capabilities are not required to call the current product complet
 
 Phase 1 remains accepted with `119 passed` in independent GitHub Actions run `33458517601`.
 
-TASK-003 implements the Futu quote-only provider PoC. TASK-004 implements provider-neutral read-through market-data queries/APIs. TASK-005 implements the local read-only Market Dashboard. TASK-005A implements the Windows launcher. TASK-005B implements paged Daily history, rolling recent minute history, US `Session.ALL`, incremental cache refresh and pannable long-history behavior.
+TASK-003 through TASK-005B implement the accepted provider, market-data, Dashboard, launcher, and
+expanded-history baseline. TASK-006A implements provider-validated dynamic US/HK equities,
+provider-neutral calendar/session input, completed W1 and regular-session M30 derivation, truthful
+adjustment/coverage metadata, and summary diagnostics.
 
-No PAQS input foundation, structure engine, event engine, setup/risk engine, advisory/decision Dashboard, Quality/Ranking, paper behavior or backtest behavior is implemented by this roadmap documentation change.
+No PAQS structure engine, event engine, setup/risk engine, advisory/decision Dashboard,
+Quality/Ranking, paper behavior, or backtest behavior is implemented by TASK-006A.

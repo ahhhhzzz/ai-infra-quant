@@ -3,11 +3,15 @@ from uuid import UUID
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 
+from ai_infra_quant.application.supported_security_service import SupportedSecurityAddError
 from ai_infra_quant.application.watchlist_service import WatchlistItemView
 from ai_infra_quant.backend.api.errors import problem_response
 from ai_infra_quant.backend.dependencies import ContainerDep
 from ai_infra_quant.backend.schemas.security import security_summary_from_domain
 from ai_infra_quant.backend.schemas.watchlist import (
+    ProviderValidationRead,
+    SupportedSecurityAddRequest,
+    SupportedSecurityAddResponse,
     WatchlistAddRequestV1,
     WatchlistAddResponse,
     WatchlistItemRead,
@@ -64,6 +68,57 @@ def add_watchlist_item(
         )
     response.status_code = 201 if result.created else 200
     return WatchlistAddResponse(created=result.created, item=_item_schema(result.item))
+
+
+@router.post("/watchlist/supported-securities", response_model=SupportedSecurityAddResponse)
+def add_supported_security(
+    payload: SupportedSecurityAddRequest,
+    request: Request,
+    response: Response,
+    container: ContainerDep,
+) -> SupportedSecurityAddResponse | JSONResponse:
+    try:
+        result = container.supported_security_service.add(
+            market=payload.market,
+            symbol=payload.symbol,
+        )
+    except SupportedSecurityAddError as exc:
+        status = {
+            "MARKET_DATA_NOT_ENTITLED": 403,
+            "MARKET_DATA_PROVIDER_NOT_CONFIGURED": 503,
+            "MARKET_DATA_PROVIDER_UNAVAILABLE": 503,
+            "MARKET_DATA_PROVIDER_ERROR": 502,
+            "SYMBOL_VALIDATION_FAILED": 422,
+            "SECURITY_METADATA_CONFLICT": 409,
+            "SUPPORTED_SECURITY_PERSISTENCE_ERROR": 409,
+        }.get(exc.code, 500)
+        extra: dict[str, object] = {}
+        if exc.provider_status is not None:
+            extra["provider_validation_status"] = exc.provider_status.value
+        if exc.provider is not None:
+            extra["provider"] = exc.provider
+        if exc.retrieved_at is not None:
+            extra["retrieved_at"] = exc.retrieved_at.isoformat().replace("+00:00", "Z")
+        return problem_response(
+            request,
+            status=status,
+            code=exc.code,
+            title="Supported security could not be added",
+            detail=exc.detail,
+            extra=extra,
+        )
+    response.status_code = 201 if result.created_security or result.created_watchlist_item else 200
+    validation = result.provider_validation
+    return SupportedSecurityAddResponse(
+        created_security=result.created_security,
+        created_watchlist_item=result.created_watchlist_item,
+        item=_item_schema(result.item),
+        provider_validation=ProviderValidationRead(
+            status=validation.status,
+            provider=validation.provider,
+            retrieved_at=validation.retrieved_at.isoformat().replace("+00:00", "Z"),
+        ),
+    )
 
 
 @router.delete("/watchlist/{security_id}", status_code=204)

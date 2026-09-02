@@ -30,6 +30,19 @@
             </div>
             <span id="market-watchlist-status" class="small-status">Loading</span>
           </div>
+          <form id="supported-security-form" class="supported-security-form">
+            <label>Market
+              <select name="market" aria-label="Stock market">
+                <option value="US">US</option>
+                <option value="HK">HK</option>
+              </select>
+            </label>
+            <label>Symbol
+              <input name="symbol" required maxlength="32" placeholder="NVDA or 700">
+            </label>
+            <button type="submit">Add US/HK stock</button>
+          </form>
+          <p id="supported-security-result" class="add-security-result" role="status"></p>
           <div id="security-selector" class="security-selector" role="listbox"
                aria-label="Select security"></div>
         </aside>
@@ -142,19 +155,6 @@
             </article>
           </section>
 
-          <section class="panel identity-form-panel">
-            <p class="eyebrow">LOCAL IDENTITY ADMINISTRATION</p>
-            <h2>Create an unverified security</h2>
-            <form id="security-form">
-              <label>Market<input name="market" required maxlength="32" placeholder="US"></label>
-              <label>Symbol<input name="symbol" required maxlength="32" placeholder="EXAMPLE"></label>
-              <label>Currency<input name="currency" required maxlength="3" placeholder="USD"></label>
-              <label>Type<select name="instrument_type"><option>EQUITY</option><option>ETF</option><option>UNKNOWN</option></select></label>
-              <label>Name<input name="display_name" maxlength="120" placeholder="Optional local label"></label>
-              <button type="submit">Create unverified identity</button>
-            </form>
-            <p id="form-result" class="note" role="status"></p>
-          </section>
         </div>
       </details>
     </main>

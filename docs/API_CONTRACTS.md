@@ -1,6 +1,6 @@
 # API Contracts
 
-Status: **AUTHORITATIVE — daily + 1-minute read-only API direction**
+Status: **AUTHORITATIVE — dynamic US/HK market data and PAQS input diagnostics**
 
 Decision: `MTF-001` in `docs/ROADMAP.md`
 
@@ -10,10 +10,9 @@ Base path: `/api/v1`
 
 ## 0. Scope and historical boundary
 
-Phase 1 routes remain accepted exactly as implemented. This document describes implemented
-TASK-004 read-only market-data routes, the TASK-005 Dashboard client, and future research,
-simulated paper, and analytics directions. TASK-003 established the provider integration PoC;
-TASK-004 registers only the three approved market-data route groups, and TASK-005 adds no route.
+Phase 1 routes remain accepted exactly as implemented. This document describes the implemented
+read-only market-data routes, Dashboard client, TASK-006A supported-security workflow and PAQS
+input diagnostics, plus later separately approved directions.
 
 No API may connect to a brokerage account; read/import real-account cash, positions, orders, or
 trades; match real-account state; or transmit a broker operation.
@@ -63,6 +62,7 @@ Defining a future direction does not expose a route.
 |---|---:|---|
 | Accepted health/portfolio/identity/watchlist/status reads | 1 | Available from accepted foundation |
 | TASK-004 market state and daily/minute bars | 2 | Available from TASK-004 |
+| TASK-006A supported-security add and PAQS input diagnostics | 2 | Available from TASK-006A |
 | Aggregate dashboard refresh and first approved score/ranking/risk state | 2 | Ordinary 404 |
 | Expanded research and simulated paper tracking | 3 | Ordinary 404 |
 | Backtest and analytics | 4 | Ordinary 404 |
@@ -105,10 +105,12 @@ GET /api/v1/market-data/securities/{security_id}/daily-bars
 GET /api/v1/market-data/securities/{security_id}/minute-bars
 ```
 
-They resolve the existing canonical Security UUID and support only `US.AVGO`, `US.VRT`, and
-`HK.09698`. A missing Security returns `404 SECURITY_NOT_FOUND`; an existing Security without an
-approved mapping returns `422 MARKET_DATA_SECURITY_NOT_SUPPORTED`. Expected provider failures
-remain structured HTTP 200 responses. All responses use `Cache-Control: no-store`.
+They resolve the stored canonical Security UUID dynamically for enabled US/HK equities whose
+currency matches the market contract. `US.AVGO`, `US.VRT`, and `HK.09698` remain initial data but
+are not a whitelist. A missing Security returns `404 SECURITY_NOT_FOUND`; an unsupported type or
+disabled Security returns `422 MARKET_DATA_SECURITY_NOT_SUPPORTED`; incompatible stored metadata
+returns `409 SECURITY_METADATA_CONFLICT`. Expected provider failures remain structured HTTP 200
+responses. All responses use `Cache-Control: no-store`.
 
 ### 5.1 Independent Market Data Provider status
 
@@ -178,7 +180,34 @@ pauses while hidden, refreshes immediately when visible again, and supports manu
 
 MVP uses ordinary HTTP/REST polling. No WebSocket contract is required.
 
-### 5.6 Composite Quant Score
+### 5.6 TASK-006A supported-security and PAQS input endpoints
+
+```text
+POST /api/v1/watchlist/supported-securities
+GET  /api/v1/strategies/paqs/securities/{security_id}/input-status
+```
+
+The add request contains only `market` (`US` or `HK`) and `symbol`. US/HK normalization is
+canonical; currency/timezone/EQUITY are inferred. The application validates an exact matching
+read-only quote before database mutation, then atomically creates/reuses a `USER_SUPPLIED`
+Security and adds/reactivates the default Watchlist membership. The response includes
+`created_security`, `created_watchlist_item`, the Watchlist item/Security summary, and provider
+validation status/provenance. Duplicate success returns 200; a created/reactivated result returns
+201.
+
+Stable failures distinguish `INVALID_MARKET`/`INVALID_SYMBOL`,
+`MARKET_DATA_PROVIDER_NOT_CONFIGURED`, `MARKET_DATA_PROVIDER_UNAVAILABLE`,
+`MARKET_DATA_PROVIDER_ERROR`, `MARKET_DATA_NOT_ENTITLED`, `SYMBOL_VALIDATION_FAILED`,
+`SECURITY_METADATA_CONFLICT`, and `SUPPORTED_SECURITY_PERSISTENCE_ERROR`. Validation failure never
+mutates Security or Watchlist state.
+
+The input-status route returns current summary metadata only: Security identity, as-of time,
+timezone/provider, COMPLETE/PARTIAL/INVALID quality, calendar status/counts, truthful adjustment
+basis, `historical_replay_safe`, D1/W1/1m/M30 source/completed/partial counts, latest completed
+timestamps, and warnings. It returns no derived OHLCV arrays and no structure, event, setup,
+advisory, target, risk/reward, score, or ranking. It has no public historical `as_of` parameter.
+
+### 5.7 Composite Quant Score
 
 The response architecture is:
 
@@ -254,7 +283,7 @@ Provider-read retry is bounded and read-only. No uncertainty can create an exter
 
 Phase-relevant tests must prove:
 
-- Phase 1 OpenAPI remains its accepted allowlist;
+- the OpenAPI allowlist expands only through approved task routes;
 - future routes are absent before approval;
 - Decimal strings, UTC, explicit missing states, and stable errors;
 - daily and minute series remain separate;

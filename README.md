@@ -2,18 +2,19 @@
 
 AI Infra Quant is a local-first, single-user, read-only quantitative research and investment
 decision-support tool. Its authoritative future direction is defined in `docs/ROADMAP.md`: daily
-plus recent completed 1-minute market data, a broker-style dashboard, approximately
-60-second refresh/recalculation, and a dual-timeframe Composite Quant Score. Daily and 1-minute
-charts are separate views.
+plus recent completed 1-minute market data, a market Dashboard, dynamic supported US/HK equities,
+and an incremental PAQS decision-terminal workstream. Daily and 1-minute charts remain separate.
 
 TASK-003 established a bounded Futu OpenD proof of concept using quote-market-data APIs only.
 TASK-004 exposes that provider through three provider-neutral, read-through FastAPI endpoints for
 market state, completed daily bars, and completed 1-minute bars. TASK-005 adds the local,
 market-first Dashboard on top of those endpoints. TASK-005B expands its bounded chart history to
 approximately five trading years of Daily K and 30 market-local calendar days of minute K. It does
-not connect to brokerage-account
-state. The application never reads real-account facts, imports or reconciles real trades, or sends
-a broker command. The user performs every real trade manually in the broker's official client.
+not connect to brokerage-account state. TASK-006A adds provider-validated US/HK equity addition,
+trading-calendar mapping, and provider-agnostic completed W1/D1/regular-session M30 input
+preparation. It adds no PAQS structure or advisory logic. The application never reads real-account
+facts, imports or reconciles real trades, or sends a broker command. The user performs every real
+trade manually in the broker's official client.
 
 The accepted Phase 1 implementation is the local FastAPI/SQLite foundation. It exposes opening
 portfolio facts, identity/watchlist administration, and truthful provider capability descriptors;
@@ -34,7 +35,10 @@ python -m venv .venv
 Open `http://127.0.0.1:8000`. With the safe default `MARKET_DATA_PROVIDER=none`, external provider
 calls remain disabled; the paper broker is only a non-operational historical descriptor.
 
-The homepage uses the canonical Watchlist to select AVGO, VRT, or HK.09698 and shows latest price,
+The homepage uses the canonical Watchlist to select the original AVGO, VRT, or HK.09698 entries or
+another provider-validated US/HK equity. Enter only market and symbol under **Add US/HK stock**;
+validation happens before any local mutation. A successful add immediately refreshes and selects
+the security. The Dashboard shows latest price,
 market state, separate completed daily and recent 1-minute candlestick/volume views, provider
 timestamps/status, manual refresh, and a non-overlapping 60-second visible-page refresh cycle. A
 full Security load requests up to 1300 completed Daily bars and 30 calendar days of minute bars;
@@ -83,6 +87,18 @@ GET /api/v1/market-data/securities/{security_id}/daily-bars?limit=1300
 GET /api/v1/market-data/securities/{security_id}/minute-bars?lookback_days=30
 ```
 
+TASK-006A adds:
+
+```text
+POST /api/v1/watchlist/supported-securities
+GET  /api/v1/strategies/paqs/securities/{security_id}/input-status
+```
+
+The second route reports input counts, timestamps, calendar/adjustment metadata, quality, and
+warnings only. It contains no structure, setup, advisory, target, risk/reward, or score. See the
+[PAQS user guide](docs/user/PAQS_USER_GUIDE.md) and
+[PAQS engineering guide](docs/engineering/PAQS_ENGINEERING_GUIDE.md).
+
 Alembic selects its database URL in this order: an explicit
 `-x database_url=...` override, `DATABASE_URL` from application settings or `.env`, then the
 application's default SQLite URL. PostgreSQL overrides are for migration verification only;
@@ -121,7 +137,7 @@ ORM metadata. A local development database created by the earlier metadata-drive
 recreated before running this remediated revision. The application never deletes a database.
 
 Phase 1 remains intentionally limited and has passed independent review. TASK-004 adds the first
-Phase 2 market-data backend, TASK-005 adds its read-only Dashboard client, and TASK-005B adds only
-bounded paged chart history and incremental refresh. No market-data persistence, PaperBroker,
-paper fill/order, strategy calculation, Composite Quant Score, backtest, market-data persistence,
-or real-order route was added.
+Phase 2 market-data backend, TASK-005 adds its read-only Dashboard client, TASK-005B adds bounded
+paged chart history/incremental refresh, and TASK-006A adds only the dynamic-security and PAQS input
+foundation. No derived-input persistence, PAQS structure/advisory, PaperBroker, paper fill/order,
+backtest, brokerage-account access, or real-order route was added.

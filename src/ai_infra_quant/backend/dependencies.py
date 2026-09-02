@@ -11,9 +11,11 @@ from ai_infra_quant.application.market_data_queries import (
     MarketDataProviderFactory,
     MarketDataQueries,
 )
+from ai_infra_quant.application.paqs_input_queries import PaqsInputQueries
 from ai_infra_quant.application.portfolio_queries import PortfolioQueries
 from ai_infra_quant.application.security_service import SecurityService
 from ai_infra_quant.application.status_queries import StatusQueries
+from ai_infra_quant.application.supported_security_service import SupportedSecurityService
 from ai_infra_quant.application.watchlist_service import WatchlistService
 from ai_infra_quant.config import Settings
 from ai_infra_quant.core.domain.enums import CapabilityStatus, DataAvailabilityStatus
@@ -22,7 +24,6 @@ from ai_infra_quant.core.domain.strategy import StrategyDefinition
 from ai_infra_quant.core.strategy.registry import StrategyRegistry
 from ai_infra_quant.database.repositories.unit_of_work import SQLAlchemyUnitOfWork
 from ai_infra_quant.integrations.futu_quote.adapter import FutuQuoteAdapter
-from ai_infra_quant.integrations.futu_quote.symbols import POC_SECURITIES
 from ai_infra_quant.integrations.registry import Registries
 
 
@@ -38,6 +39,8 @@ class AppContainer:
     watchlist_service: WatchlistService
     status_queries: StatusQueries
     market_data_queries: MarketDataQueries
+    supported_security_service: SupportedSecurityService
+    paqs_input_queries: PaqsInputQueries
 
 
 def build_container(
@@ -84,6 +87,11 @@ def build_container(
 
         provider_factory = create_futu_provider
 
+    market_data_queries = MarketDataQueries(
+        uow_factory,
+        provider_name=provider_name,
+        provider_factory=provider_factory,
+    )
     return AppContainer(
         settings=settings,
         engine=engine,
@@ -99,11 +107,15 @@ def build_container(
             registries.fundamental_data,
             registries.event_data,
         ),
-        market_data_queries=MarketDataQueries(
+        market_data_queries=market_data_queries,
+        supported_security_service=SupportedSecurityService(
             uow_factory,
             provider_name=provider_name,
             provider_factory=provider_factory,
-            supported_securities=POC_SECURITIES,
+        ),
+        paqs_input_queries=PaqsInputQueries(
+            market_data_queries,
+            provider_name=provider_name,
         ),
     )
 

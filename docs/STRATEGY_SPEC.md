@@ -174,7 +174,9 @@ STF = completed D1
 TTF = completed 30m REGULAR-session bars
 ```
 
-TASK-006A is planned to implement only the provider-agnostic input foundation required to construct/validate those timeframes and supported dynamic US/HK securities. It does not implement ATR/Pivot/structure semantics.
+TASK-006A implements only the provider-agnostic input foundation required to construct/validate
+those timeframes and supported dynamic US/HK equities. It does not implement ATR/Pivot/structure
+semantics.
 
 US extended-session minute data remains valid market data but is not part of the initial structural 30m TTF engine. H1/H4 are not current MVP requirements.
 
@@ -346,6 +348,6 @@ They remain dormant optional Phase 3/4 extension paths and may be reactivated la
 
 Phase 2 market-data/Dashboard work has progressed through TASK-003/TASK-004/TASK-005/TASK-005A/TASK-005B.
 
-No TASK-006A input foundation, dynamic market-data security expansion, PAQS Structure/Event/Setup/Risk/Advisory engine, numerical Quality/Ranking or optional Phase 3/4 capability is implemented by this roadmap documentation change.
-
-The next implementation task is TASK-006A only after its explicit Task Contract is approved.
+TASK-006A implements dynamic market-data Security expansion and PAQS W1/D1/M30 calendar/input
+preparation only. No PAQS Structure/Event/Setup/Risk/Advisory engine, numerical Quality/Ranking,
+or optional Phase 3/4 capability is implemented. TASK-006B remains separately gated.

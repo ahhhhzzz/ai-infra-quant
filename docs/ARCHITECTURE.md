@@ -77,14 +77,16 @@ get_market_status()
 
 TASK-003 approved a minimal Futu OpenD quote-only adapter. TASK-004 composed it behind provider-neutral application/core boundaries. TASK-005/TASK-005B consume those responses through the local Dashboard.
 
-TASK-006A is planned to extend the read-only provider-neutral boundary only as necessary for:
+TASK-006A extends the read-only provider-neutral boundary only as necessary for:
 
 - dynamic supported US/HK security validation/mapping;
 - trading-calendar/session metadata required for deterministic PAQS input preparation.
 
 This extension must not expose account identity, cash, positions, orders, trades, account matching or command capabilities.
 
-The current three-symbol `POC_SECURITIES` restriction is historical Phase 2 PoC scaffolding, not the target architecture for TASK-006A.
+The three-symbol `POC_SECURITIES` tuple remains PoC/seed input only. Market-data query eligibility
+and Futu provider-symbol mapping are derived dynamically from a stored enabled US/HK equity and
+the canonical market currency/timezone contract.
 
 Provider-native SDK/tabular objects remain inside `integrations/`.
 
@@ -114,6 +116,12 @@ completed 1m
 ```
 
 H1/H4 are not current MVP requirements.
+
+TASK-006A implements this input flow in memory. Futu trading-calendar rows are mapped to canonical
+day/session objects inside the integration adapter. W1 finalization follows calendar evidence,
+later-week evidence, or elapsed market-local ISO week without future-bar injection. M30 requires
+all expected completed minutes in each calendar-provided regular-session bucket. Derived inputs,
+calendar rows, and bundles are not persisted.
 
 PAQS input must carry coverage/session/calendar/adjustment metadata. Current provider QFQ behavior must not be silently represented as strict historical point-in-time-safe replay.
 
@@ -167,7 +175,8 @@ A numerical Quality/Composite Score is a derived presentation/ranking layer if r
 
 ### TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation
 
-Owns supported-security/watchlist flow and provider-agnostic W1/D1/30m input preparation. It must not implement ATR/Pivot/Zone/Range/Regime.
+Implemented supported-security/watchlist flow and provider-agnostic W1/D1/30m input preparation.
+It implements no ATR/Pivot/Zone/Range/Regime behavior.
 
 ### TASK-006B — PAQS Structure Engine
 
