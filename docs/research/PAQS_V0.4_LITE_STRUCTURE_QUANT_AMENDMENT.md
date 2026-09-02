@@ -1,6 +1,6 @@
 # PAQS v0.4 Lite — Structure Simplification & Quant Confirmation Amendment
 
-Status: **RESEARCH DEFINITION AMENDMENT — USER-APPROVED DIRECTION; IMPLEMENTATION CONTRACT STILL REQUIRED**
+Status: **RESEARCH DEFINITION AMENDMENT — OVERALL LITE DIRECTION ACKNOWLEDGED; CONCRETE SEMANTICS NOT YET APPROVED; IMPLEMENTATION NOT AUTHORIZED**
 
 Repository: `ahhhhzzz/ai-infra-quant`
 
@@ -14,6 +14,13 @@ Validation evidence:
 
 - branch `validation/006b-real-market-structure-checkpoint`
 - HEAD `b23d1c196eda957ab04dc0f79c477e2ee1a6e471`
+
+Approval-state clarification:
+
+- the project owner accepts the **overall PAQS v0.4 Lite simplification direction**;
+- the numeric values currently listed for W1/D1/M30 horizons, Zone age/cap, Pivot lambdas and anti-FOMO threshold are accepted only as **non-return-optimized research defaults for validation**;
+- those values and the detailed semantics in this document are **not yet approved as implementation semantics**;
+- no 006B-Lite implementation Task Contract may be created until the project owner explicitly approves the revised amendment after review.
 
 This amendment defines the simplified research target that should replace the over-complex current Structure semantics before TASK-006C. It does **not** authorize product-code changes by itself.
 
@@ -32,7 +39,7 @@ Market Data
   -> M30 Trigger Structure
   -> Breakout / Failed Breakout / Retest / Follow-through
   -> Setup
-  -> Quant Confirmation / Veto
+  -> Setup-Specific Quant Confirmation / Veto / Downgrade
   -> Invalidation
   -> Target
   -> RR
@@ -360,7 +367,7 @@ A current Range requires:
 
 ### 8.1 Critical recency change
 
-Every reaction/touch used to prove the current Range must occur inside the same last-40-D1-bar Range evaluation window.
+Every reaction/touch used to prove the current Range must occur inside the same last-40-D1-bar Range evaluation window when the default `range_lookback_bars = 40` is being evaluated.
 
 Old Zone history may not be combined with recent closes to manufacture a current Range.
 
@@ -372,6 +379,26 @@ Validation must distinguish:
 2. exact versioned Range-ID continuity.
 
 A Zone version/touch update changing an ID must not automatically be reported as a new semantic box if the current geometry and `RANGE` state remain materially continuous.
+
+### 8.3 Range-lookback robustness requirement
+
+The default `range_lookback_bars = 40` is not approved merely because it was inherited from v0.3.1.
+
+Robustness validation must compare, on the same declared security universe and the same cutoffs:
+
+```text
+range_lookback_bars = 30 / 40 / 60
+```
+
+For each variant report at minimum:
+
+- active-Range fraction;
+- semantic RANGE continuity;
+- Base-Regime changes attributable to the Range decision;
+- Range geometry changes;
+- securities/cutoffs with material disagreement among 30/40/60.
+
+This is a structural sensitivity check only. The project must not select 30, 40 or 60 because one produces better historical returns.
 
 ---
 
@@ -424,7 +451,7 @@ The Lite MVP adds a small deterministic quantitative evidence layer.
 
 Hard governance rule:
 
-> **PAQS is primary. Quantitative factors may confirm, veto or downgrade an existing PAQS Setup, but may never create a Setup.**
+> **PAQS is primary. Quantitative factors may confirm, veto or downgrade an existing PAQS Setup only under a policy explicitly bound to that Setup family; they may never create a Setup.**
 
 Therefore:
 
@@ -432,9 +459,17 @@ Therefore:
 NO_SETUP + strong quant factors != Setup
 ```
 
+There is no global rule of the form:
+
+```text
+Trend CONFLICT + Momentum CONFLICT -> veto every Long Setup
+```
+
+because continuation and reversal Setup families have different economic/price-action premises.
+
 No weighted composite score, probability, ML classifier or return-trained optimizer is introduced.
 
-### 10.1 Trend confirmation
+### 10.1 Trend evidence
 
 D1 deterministic trend evidence:
 
@@ -453,7 +488,9 @@ NEUTRAL  otherwise
 
 EMA uses completed D1 observations only.
 
-### 10.2 Momentum confirmation
+`CONFIRM` / `CONFLICT` describe evidence. They do not carry a universal decision action until interpreted by the candidate's Setup-specific policy.
+
+### 10.2 Momentum evidence
 
 D1 momentum:
 
@@ -470,7 +507,7 @@ CONFLICT if ROC20 < 0 and ROC60 < 0
 NEUTRAL  otherwise
 ```
 
-Momentum is confirmation evidence, not a standalone Buy signal.
+Momentum is confirmation evidence, not a standalone Buy signal and not a universal veto.
 
 ### 10.3 Extension / anti-FOMO filter
 
@@ -504,28 +541,85 @@ rather than chasing the move.
 
 The threshold is a research default, not a return-optimized value.
 
-### 10.4 Quant interaction with PAQS
+### 10.4 Setup-specific Quant interaction policy
 
-Initial deterministic policy:
+Quant evidence must first be routed by explicit `setup_family` semantics. The exact implementation enum/binding belongs to TASK-006D, but the research policy is:
+
+#### A. Trend Pullback Long — continuation family
+
+The thesis assumes an existing bullish structural trend is continuing after a pullback.
+
+Initial policy:
+
+```text
+Trend CONFIRM + Momentum CONFIRM
+    -> positive confirmation only
+
+one of Trend/Momentum = CONFLICT
+    -> downgrade/caution; do not automatically veto
+
+Trend CONFLICT + Momentum CONFLICT
+    -> setup-specific quantitative veto is permitted
+    -> candidate cannot become LONG_READY unless a later approved rule explicitly resolves the conflict
+```
+
+This family may use trend/momentum disagreement as a stronger filter because persistent downside evidence directly conflicts with the continuation premise.
+
+#### B. Range Failed Breakdown Reversal Long — reversal family
+
+A valid PAQS reversal may occur **before** EMA20/EMA50 and ROC20/ROC60 have turned positive.
+
+Therefore:
+
+```text
+Trend CONFLICT and/or Momentum CONFLICT
+    -> context/caution only
+    -> must NOT by themselves veto a valid Failed Breakdown Reversal Setup
+```
+
+PAQS failed-break/reclaim/retest/follow-through evidence, Invalidation and RR remain primary.
+
+Quant evidence moving from CONFLICT -> NEUTRAL -> CONFIRM may strengthen the explanation, but delayed indicator confirmation must not erase an otherwise valid early reversal opportunity.
+
+#### C. Right-Side Breakout Long — breakout / transition family
+
+A right-side breakout can emerge while longer D1 EMA/ROC evidence is still mixed, especially when leaving a Range or rebuilding after a prior decline.
+
+Initial policy:
+
+```text
+Trend/Momentum both CONFIRM
+    -> positive confirmation only
+
+mixed or conflicting Trend/Momentum
+    -> downgrade to WATCH_LONG / WAIT_RETEST style caution where otherwise appropriate
+    -> do not automatically veto solely because EMA/ROC remain negative
+```
+
+The decisive validity evidence remains the PAQS breakout source, confirmation, follow-through/retest, Invalidation and RR gates.
+
+#### D. Right-Side Reversal-style Long — if retained as a later explicit Setup family
+
+For any explicitly approved right-side reversal Setup, negative EMA/ROC may be expected during the early turn.
+
+Therefore Trend/ROC conflict must not be an automatic veto. Exact policy must be frozen with the Setup definition before implementation.
+
+### 10.5 Global Quant constraints that remain setup-agnostic
+
+The following remain universal:
 
 ```text
 PAQS Setup absent
     -> quant layer cannot run the decision into LONG_READY
 
 PAQS Setup valid + EXTENDED
-    -> cannot be LONG_READY at current price
+    -> cannot be LONG_READY at the current price under the initial anti-FOMO rule
 
-PAQS Setup valid + Trend CONFLICT + Momentum CONFLICT
-    -> quantitative veto -> NO_TRADE / filtered candidate with explanation
-
-PAQS Setup valid + mixed CONFIRM/NEUTRAL evidence
-    -> preserve PAQS candidate; continue to Invalidation / Target / RR gates
-
-PAQS Setup valid + Trend CONFIRM + Momentum CONFIRM
-    -> positive confirmation only; still cannot bypass PAQS, RR or next-open gates
+Quant CONFIRM
+    -> cannot bypass PAQS validity, Invalidation, Target, RR or next-open revalidation
 ```
 
-Quant evidence is always exposed in explanations.
+Quant evidence and the Setup-specific policy path must always be exposed in explanations.
 
 ---
 
@@ -646,10 +740,12 @@ At minimum report:
 
 - origin invariance;
 - no-lookahead violations;
+- rolling-horizon boundary-exit stability;
 - current Pivot count and latest Pivot age;
 - active Zone count;
 - expired Zone count;
 - Range fraction;
+- Range-lookback 30/40/60 sensitivity;
 - semantic Range continuity;
 - Regime fractions;
 - Regime changes per 100 cutoffs;
@@ -699,6 +795,47 @@ Regime churn remains a diagnostic rather than a P&L optimization target.
 
 Any D1 security showing more than 20 Base-Regime state changes per 100 evaluated cutoffs should trigger focused semantic review before acceptance; this threshold is an outlier-review trigger, not an optimization target.
 
+### 13.8 Rolling-horizon boundary-exit stability
+
+Solving unbounded old-history path-lock must not create a new pathology in which the current Structure jumps abruptly whenever one old bar falls off the left edge of the bounded window.
+
+For every sequential cutoff after the full declared horizon becomes available, validation must explicitly record structure changes coincident with:
+
+```text
+oldest evaluation-window bar exits on the left
+new completed bar enters on the right
+```
+
+At minimum distinguish:
+
+1. **right-edge information change** — a new completed bar legitimately confirms a Pivot, changes a current Zone reaction, changes Range evidence or changes Regime;
+2. **left-boundary eligibility change** — an old bar/anchor/Pivot/touch merely expires from the rolling horizon;
+3. **combined change** — both occur at the same cutoff.
+
+Flag a `BOUNDARY_EXIT_STABILITY_CONCERN` for focused review when a material current-structure discontinuity occurs and the evidence indicates that the only structural cause is left-boundary expiry, especially when the exiting item was not an active current Pivot, current Zone touch or current Range reaction.
+
+Material discontinuities to report include:
+
+- latest active Pivot identity jumping to a materially different old swing;
+- several current Zones appearing/disappearing at once;
+- Range appearing/disappearing without new right-edge reaction evidence;
+- `BULL_TREND <-> BEAR_TREND` flips caused solely by left-boundary exit;
+- repeated churn concentrated at rolling-window boundaries.
+
+This is initially a diagnostic/review gate rather than an arbitrary zero-change assertion: legitimate expiry of an actually active structural fact is allowed to change current Structure. Validation must expose the cause rather than hide the discontinuity with ad-hoc smoothing.
+
+### 13.9 Range-lookback robustness acceptance
+
+Run the D1 Range engine at the same cutoffs with:
+
+```text
+30 / 40 / 60 bars
+```
+
+Report disagreement rates and representative cases. If small lookback changes produce widespread contradictory `RANGE` vs directional Regime classifications, the default remains research-unsettled and requires semantic review.
+
+No lookback value may be chosen by P&L ranking.
+
 ---
 
 ## 14. Parameter governance
@@ -714,6 +851,7 @@ W1/D1 pivot lambda: 1.7 / 1.8 / 1.9
 M30 pivot lambda: 0.9 / 1.0 / 1.1
 D1 zone epsilon: 0.45 / 0.50 / 0.55
 zone max age: 100 / 126 / 160
+D1 range lookback: 30 / 40 / 60
 extension ATR: 1.5 / 2.0 / 2.5
 ```
 
@@ -739,7 +877,9 @@ External data answers questions such as:
 
 - does the same bounded definition behave reasonably across many securities?;
 - is origin sensitivity eliminated?;
+- are rolling-window boundary exits operationally stable?;
 - are active Zones bounded and recent?;
+- is Range classification reasonably robust across 30/40/60 lookbacks?;
 - does Regime churn remain pathological?;
 - are small parameter perturbations structurally tolerable?;
 
@@ -756,10 +896,10 @@ TASK-006B deterministic implementation
     PASS / integrated at 96747041...
 
 PAQS v0.4 Lite research amendment
-    current step
+    revised research step; awaiting explicit semantic approval
 
 Focused 006B-Lite remediation contract
-    NOT YET AUTHORIZED
+    NOT AUTHORIZED
 
 006B-Lite implementation + independent review
 
@@ -771,7 +911,7 @@ TASK-006B1 Local Market Data Store & Replay Foundation
 
 TASK-006C Event Engine
 
-TASK-006D Setup / Risk + minimal Quant Confirmation Layer
+TASK-006D Setup / Risk + minimal Setup-Specific Quant Confirmation Layer
 
 TASK-006E Advisory / Dashboard
 ```
@@ -803,8 +943,25 @@ This amendment does not authorize:
 
 ## 18. Required approval before implementation
 
-Before any production-code remediation begins, the project owner must explicitly approve this v0.4 Lite amendment or request changes to its concrete semantics.
+Current approval state:
 
-Only after approval should a focused implementation Task Contract be created from the accepted authoritative base.
+```text
+overall PAQS v0.4 Lite simplification direction
+    -> ACKNOWLEDGED / SUPPORTED
+
+listed numeric values
+    -> acceptable as non-return-optimized RESEARCH DEFAULTS
+    -> NOT production semantics approval
+
+revised concrete semantics in this document
+    -> AWAITING explicit project-owner approval
+
+006B-Lite implementation Task Contract
+    -> NOT AUTHORIZED
+```
+
+Before any production-code remediation begins, the project owner must explicitly approve the revised v0.4 Lite amendment after reviewing these concrete semantics.
+
+Only after that explicit approval should a focused implementation Task Contract be created from the accepted authoritative base.
 
 **End — PAQS v0.4 Lite Structure Simplification & Quant Confirmation Amendment**
