@@ -1,19 +1,23 @@
-# Read-Only Multi-Timeframe Product Roadmap
+# Read-Only PAQS Decision-Terminal Product Roadmap
 
-Status: **AUTHORITATIVE — daily + 1-minute read-only future scope**
+Status: **AUTHORITATIVE — local read-only PAQS MVP and optional extension scope**
 
-Decision: `MTF-001`, approved 2026-09-01
+Decisions:
+
+- `MTF-001`, approved 2026-09-01 — daily + completed 1-minute read-only market-data direction;
+- `PAQS-MVP-001`, approved 2026-09-02 — focused PAQS decision-terminal MVP, TASK-006 workstream split, optional Phase 3/4 extensions.
+
+Decision record: `docs/decisions/PAQS_MVP_SCOPE_REDUCTION.md`
 
 Product: **Personal Quantitative Research and Decision-Support Tool**
 
 ## 1. Authority, supersession, and history
 
-This Roadmap governs future product scope after the accepted Phase 1 baseline. Decision `MTF-001`
-supersedes the future-scope direction recorded by `EOD-001` at commit
-`1f724ebe6cf5e5ffe7562cb578ae464ff44f613c`; that commit remains intact as traceable history and is
-not reverted.
+This Roadmap governs future product scope after the accepted Phase 1 baseline.
 
-Historical facts are unchanged:
+`MTF-001` superseded the earlier completed-daily-only future direction without rewriting history. `PAQS-MVP-001` now supersedes the earlier assumption that the current product must continue through a broad paper-tracking and full-backtesting platform before it can be considered complete.
+
+Historical facts remain unchanged:
 
 - Phase 0 was completed historically;
 - Phase 1 was implemented and independently accepted;
@@ -21,60 +25,58 @@ Historical facts are unchanged:
 - Phase 1 status remains PASS;
 - both Phase 1 review files remain immutable evidence;
 - TASK-003 completed the bounded Phase 2 Futu quote-only market-data PoC;
-- TASK-004 adds only the provider-neutral read-through market-data backend;
-- TASK-005 adds only the market-data Dashboard client.
+- TASK-004 implemented the provider-neutral read-through market-data backend;
+- TASK-005 implemented the market-data Dashboard;
+- TASK-005A implemented the Windows one-click launcher;
+- TASK-005B implemented bounded long Daily history, recent minute history, US `Session.ALL`, incremental browser refresh, and chart-time semantics.
 
-Earlier Phase 1 broker/provider abstractions are historical artifacts, not authority to implement
-broker-account or broker-write behavior.
+Earlier Phase 1 broker/provider abstractions are historical artifacts, not authority to implement brokerage-account or broker-write behavior.
 
-## 2. Product operating model
+## 2. Current product objective
 
-The product is local-first, single-user, and read-only with respect to external financial systems.
-It supports daily market data and a bounded recent window of completed 1-minute bars. During
-an active visible dashboard session it refreshes or recalculates approximately every 60 seconds.
+The committed MVP is a local-first, single-user, read-only personal investment decision terminal.
 
-The application may obtain market information from an independent read-only Market Data Provider,
-display quotes and separate daily/minute charts, calculate indicators and Composite Quant Scores,
-rank tracked securities, show reference/risk states, maintain later-approved simulated research
-state, and run backtests.
-
-It never connects to a brokerage account and never reads broker cash, positions, completed orders,
-or trades. It does not import or match real trades and does not need to know whether the user
-acted on a recommendation.
-
-> 用户在券商官方客户端手工完成所有真实交易。
-
-## 3. Market Data Provider boundary
-
-Market-data access and brokerage-account access are distinct concepts. A future integration may
-use an independent read-only Market Data Provider that supplies market information without access
-to the user's brokerage account. Equivalent operations may include:
+The product should let the user:
 
 ```text
-get_latest_quote()
-get_daily_bars()
-get_minute_bars()
-get_market_status()
+add supported US/HK securities
+        ↓
+view truthful read-only market data
+        ↓
+understand PAQS market structure
+        ↓
+see PAQS events/setups
+        ↓
+see structural invalidation/target/RR
+        ↓
+receive conditional Entry / Holder advisory
+        ↓
+compare opportunities with lightweight Quality/Ranking
 ```
 
-These names are illustrative only. `MTF-001` did not itself select a provider. The separately
-approved TASK-003 selects Futu OpenD quote-market-data APIs for a bounded PoC covering the three
-initial securities; OpenD availability, login, quote entitlements, and observed delay remain
-environmental live-verification facts.
+All real trading is performed manually by the user in the broker's official client.
 
-TASK-004 exposes that accepted quote-only adapter through provider-neutral FastAPI queries for
-current market state, completed daily bars, and completed 1-minute bars. TASK-005 adds the local
-read-only Dashboard over those routes, including page-local guarded polling. TASK-005B expands the
-same routes to bounded paged history: about five trading years of Daily K and 30 market-local
-calendar days of minute K, with Futu `Session.ALL` for US minute history and normal HK sessions. The
-default provider mode remains offline (`none`); `futu` is explicit configuration. No market-data
-persistence, backend background polling, aggregate Dashboard route, or score behavior is
-introduced.
+The application never needs to know whether a recommendation was acted upon and never connects to a brokerage account.
 
-Provider-specific code remains under `integrations/`; Strategy, Dashboard, Portfolio, Risk,
-Performance, and Backtest consume provider-agnostic canonical data.
+## 3. Market-data and supported-security direction
 
-Initial tracked securities are:
+Market-data access and brokerage-account access remain separate concepts.
+
+The approved provider path is independent read-only market data. Current implementation uses Futu OpenD quote-only APIs behind a provider-neutral application/core boundary.
+
+Existing Phase 2 capabilities include:
+
+- latest quote and market state;
+- completed Daily OHLCV;
+- recent completed 1-minute OHLCV;
+- approximately 1300 Daily sessions for Dashboard full load;
+- recent 30 market-local calendar days of minute history;
+- Futu `Session.ALL` for US minute history;
+- normal HK provider sessions;
+- explicit missing/unavailable/error semantics;
+- no production market-data persistence.
+
+The initial PoC symbols were:
 
 ```text
 US.AVGO
@@ -82,174 +84,310 @@ US.VRT
 HK.09698
 ```
 
-The data boundary must support both United States and Hong Kong market requirements.
+`PAQS-MVP-001` requires the current MVP to progress from this hard-coded PoC set to a user-manageable supported US/HK watchlist under TASK-006A. Dynamic security support does not authorize arbitrary global markets.
 
-## 4. Dashboard and chart contract
+Provider-specific code remains under `integrations/`; PAQS/Strategy, Dashboard, Risk, optional future Performance/Backtest, and core domain logic consume provider-agnostic canonical data.
 
-The first usable product prioritizes a broker-style read-only dashboard with:
+## 4. Dashboard and refresh contract
+
+The existing market Dashboard remains retained:
 
 - security selector;
 - latest price and market status;
-- daily candlestick chart;
-- recent 30-calendar-day completed 1-minute candlestick chart;
+- separate Daily and 1-minute charts;
 - volume;
-- Composite Quant Score;
-- tracked-security ranking;
-- reference/risk state;
-- market-data timestamps;
-- explicit missing, delayed, stale, unavailable, and error states.
+- market-data timestamps and status;
+- manual refresh;
+- approximately 60-second visible-page refresh;
+- automatic-refresh countdown;
+- no overlapping requests;
+- pause while hidden and immediate refresh on visibility return;
+- pannable long Daily/minute chart history;
+- local vendored chart dependency;
+- Windows one-click launch path.
 
-Daily and 1-minute candles are separate timeframes and must never be overlaid in the same coordinate
-system. A timeframe tab or button switches between them.
-
-TASK-005B supersedes the first current-day-only minute display with a bounded rolling 30
-market-local calendar-day window. Unbounded historical minute replay, tick history, order-book
-history, market-microstructure storage, and minute persistence are not MVP requirements.
-
-## 5. Refresh and time semantics
-
-While the dashboard is visible and active, the page market state, latest price, incremental
-completed 1-minute bars, Composite Quant Score, tracked-security ranking, and reference/risk state
-refresh or recalculate approximately every 60 seconds.
-
-MVP transport is ordinary HTTP/REST polling. The frontend must:
-
-- avoid overlapping polling requests;
-- pause automatic polling while the page is hidden;
-- refresh immediately when the page becomes visible again;
-- provide a manual `刷新最新行情` control;
-- display an automatic-refresh countdown.
+Future PAQS Dashboard work is additive. It must not reintroduce trading controls or imply a real brokerage position.
 
 Closing the page requires no background processing.
 
-Quotes, bars, and scores distinguish at minimum:
+## 5. Time, data-quality, and PAQS input direction
+
+Quotes, bars and later PAQS outputs distinguish their own timestamps. At minimum existing market data already distinguishes:
 
 ```text
 latest_quote_at
 latest_completed_minute_bar_at
 latest_completed_daily_session
-score_calculated_at
 ```
 
-An unfinished 1-minute bar must never be presented as completed. An intraday/latest price must
-never be called the final daily close. Polling cadence and provider latency are separate facts; for
-example, a 60-second polling frequency and a 15-minute source delay must be reported independently.
-No market value is fabricated.
+Future PAQS outputs require `as_of_timestamp`, component confirmation timestamps, coverage and calculation time.
 
-## 6. Composite Quant Score architecture
+Rules remain fixed:
 
-The approved high-level architecture is:
+- unfinished minute bars are never treated as completed;
+- latest/intraday price is never called a final daily close;
+- polling cadence and provider latency are separate facts;
+- no market value is fabricated;
+- financial values use Decimal;
+- aware UTC is used for instants and IANA market timezones for session/calendar semantics.
+
+The initial PAQS multi-timeframe research direction is:
+
+```text
+HTF = completed W1
+STF = completed D1
+TTF = completed 30m REGULAR-session bars
+```
+
+W1 is derived from completed D1; 30m is derived from completed 1-minute data with market-aware US/HK session rules. H1/H4 are not current MVP requirements.
+
+Strict historical real-market PAQS backtesting is not part of the current MVP. Point-in-time corporate-action safety must not be falsely claimed from provider QFQ data alone.
+
+## 6. PAQS and numerical Score relationship
+
+The approved high-level score decomposition from `MTF-001` remains historical/current score-level governance:
 
 ```text
 Composite Quant Score
-    =
+=
 Daily Base Score
-    +
++
 Intraday Minute Adjustment
 ```
 
-The Daily Base Score represents medium-term structure and may later include trend, absolute and
-relative momentum, volatility, drawdown, and medium-term risk. The Intraday Minute Adjustment
-represents current-session strength/risk and may later use 5/15/30-minute momentum, price versus
-session open or previous close, short moving averages, VWAP, minute volume, and intraday volatility.
+`PAQS-MVP-001` clarifies that this numerical score is **not** the causal strategy engine.
 
-This decision approves architecture only. Exact formulae, weights, thresholds, bands,
-normalization, sizing, and profitability claims remain unapproved. `docs/STRATEGY_SPEC.md` remains
-`PROPOSED / RESEARCH_UNVALIDATED`; its earlier completed-daily-only formula is not implementation authority. A
-later explicit strategy Task Contract must approve a concrete model before implementation.
+The primary decision path is:
 
-## 7. Authoritative phase model
+```text
+canonical completed market data
+        ↓
+PAQS structure / events / setups
+        ↓
+structural hard gates + risk/reward
+        ↓
+Entry / Holder advisory
+        ↓
+optional derived Quality / Composite Score and ranking
+```
 
-The authoritative phase sequence is exactly Phase 0 through Phase 4.
+A future numerical score may summarize or rank already-defined structural states. It may never:
+
+- fabricate an Event or Setup;
+- bypass structural invalidation;
+- bypass RR;
+- convert missing data into zero;
+- convert `NO_TRADE` into `LONG_READY`;
+- claim probability without a separately validated/calibrated model.
+
+Exact Quality/Composite formulae remain separately unapproved.
+
+## 7. Authoritative phase model and current product-completion line
+
+The authoritative phase sequence remains exactly Phase 0 through Phase 4. No Phase 5 exists.
 
 ### Phase 0 — Product Definition & Architecture
 
-Historical completion is preserved. Later product-scope decisions may supersede its planning
-without rewriting historical evidence.
+Historically completed. Later scope decisions do not rewrite historical evidence.
 
 ### Phase 1 — Foundation
 
-Completed and independently accepted. Preserve FastAPI, SQLite, SQLAlchemy, Alembic, deterministic
-migrations, Decimal/UTC invariants, Security identity, Watchlist, Portfolio, opening accounting
-foundation, accepted APIs/frontend, tests, and reviews.
+Completed and independently accepted. Preserve accepted FastAPI/SQLite/SQLAlchemy/Alembic foundation, deterministic migration 0001, Decimal/UTC invariants, Security identity, Watchlist, opening accounting facts, accepted APIs/frontend, tests and review evidence.
 
-### Phase 2 — Market Data, Dashboard & First Composite Score MVP
+### Phase 2 — Market Data, Dashboard & PAQS Decision Terminal MVP
 
-Highest priority is a visible, usable product. Planned scope includes:
+Phase 2 is the active and committed product phase.
 
-- independent Market Data Provider integration;
-- AVGO, VRT, and HK.09698;
-- latest price and market status;
-- approximately 1300 completed Daily OHLCV sessions and recent 30-calendar-day minute OHLCV;
-- separate daily/1-minute chart switching;
-- approximately 60-second polling and recalculation;
-- manual refresh and automatic-refresh countdown;
-- hidden-page polling pause and immediate visible-page refresh;
-- freshness, latency, missing-data, and error handling;
-- the first separately approved dual-timeframe Composite Score implementation;
-- score display, ranking, and reference/risk state.
-
-The exact Composite Score formula requires a separate Task Contract and explicit approval. Complex
-accounting must not block the visible deliverables. TASK-004 implements the market-data backend;
-TASK-005 implements the read-only Dashboard; TASK-005B adds bounded historical paging, US 24H
-minute semantics, incremental browser-cache refresh, and pannable long-history viewports.
-Composite Score, ranking, and reference/risk calculation remain unimplemented.
-
-### Phase 3 — Quant Research Expansion & Lightweight Paper Tracking
-
-Planned scope may include richer factor research, strategy explanation, additional ranking/risk
-analytics, signal history, a lightweight simulated/paper portfolio, PaperFill-based research
-bookkeeping, and paper performance analysis. Paper state is simulated only. No real account,
-position, trade, or brokerage synchronization is permitted.
-
-### Phase 4 — Backtesting & Analytics
-
-This is the final product phase. Planned scope includes deterministic backtesting, point-in-time
-controls, transaction-cost assumptions, benchmark comparison, drawdown, volatility, turnover,
-attribution, exposure, diagnostics, strategy comparison, parameter analysis, and reproducible
-research reports.
-
-Daily-bar backtesting is the baseline. Current-session minute data does not automatically require
-historical minute replay or tick-level simulation. The Roadmap ends at Phase 4; no later phase
-exists.
-
-## 8. Permanently removed product scope
-
-The following capabilities are removed rather than deferred and must not be moved into any phase:
+Completed increments:
 
 ```text
-legacy real completed-trade record type
-real completed-trade entry or CSV/file import
-legacy external account-observation type
-broker account synchronization
-Futu or other broker-account integration
-Broker Adapter for account observations
-real brokerage cash or positions
-real portfolio tracking
-real trade matching or discrepancy handling
-real Current versus Target portfolio
-trade sizing based on real brokerage holdings
-real broker fees, taxes, or settlement synchronization
+TASK-003   Futu quote-only Market Data PoC
+TASK-004   Provider-neutral Market Data Backend
+TASK-005   Market Data Dashboard
+TASK-005A  Windows one-click launcher
+TASK-005B  Expanded history + US 24H minute semantics
 ```
 
-Broker-write and autonomous-execution capabilities remain permanently forbidden, including
-`place_order`, `cancel_order`, `modify_order`, broker write, real-order API/UI, Live OMS/EMS,
-trading-password unlock, buying-power reservation, execution retry/recovery/workers/kill switches,
-and autonomous or unattended trading.
+Planned PAQS umbrella workstream:
 
-Unnecessary infrastructure remains excluded: microservices, Kafka, distributed workers,
-Kubernetes, multi-tenancy, 24/7 execution infrastructure, tick persistence, institutional OMS,
-and large generic provider plugin frameworks.
+```text
+TASK-006   PAQS Decision-Terminal Workstream (umbrella only; not an implementation task)
+```
 
-Read-only 1-minute market data and intraday score recalculation are analysis capabilities, not
-execution capabilities.
+Planned bounded tasks, each requiring its own explicit Task Contract and approval:
 
-## 9. Governance and stop conditions
+#### TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation
 
-- Phase 1 remains accepted and unchanged; TASK-003, TASK-004, and TASK-005 are bounded Phase 2 increments.
-- Each implementation phase requires explicit approval and a phase-specific plan or Task Contract.
-- No provider, formula, or retention policy is selected unless separately approved; TASK-003
-  selected only the Futu quote-only provider, TASK-004 approved only its read-through backend, and
-  TASK-005 approved only the Dashboard client.
-- Documentation and requirements must preserve explicit data freshness and non-fabrication rules.
-- Every task reports evidence and stops before the next task or phase.
+Planned scope:
+
+- dynamic supported US/HK security/watchlist workflow replacing the three-symbol PoC restriction;
+- provider support validation without account access;
+- provider-agnostic trading-calendar/session contract;
+- completed W1 derivation from D1;
+- regular-session completed 30m derivation from 1m;
+- coverage/data-quality/adjustment-basis metadata;
+- PAQS user/engineering documentation foundations.
+
+Explicitly excludes PAQS ATR/Pivot/Zone/Range/Regime logic.
+
+#### TASK-006B — PAQS Structure Engine
+
+Planned scope:
+
+- ATR;
+- Micro/Major confirmed directional-change Pivot;
+- Swing labels;
+- Key Level geometry;
+- Pivot Zones;
+- Range detection;
+- Base Regime;
+- deterministic/no-lookahead structure fixtures and debug output.
+
+Mandatory stop/checkpoint: review real read-only structures before TASK-006C approval.
+
+#### TASK-006C — PAQS Event Engine
+
+Planned scope:
+
+- Break Attempt / Breakout / Breakdown;
+- Failed Breakout / Failed Breakdown;
+- Retest lifecycle;
+- Key Level role flip;
+- Regime Transition;
+- Trigger;
+- Follow-through.
+
+No user Entry/Hold/Exit advisory is authorized by this task.
+
+#### TASK-006D — PAQS Setup & Risk Engine
+
+Planned scope:
+
+- core setup families;
+- Setup expiry;
+- setup-specific structural invalidation;
+- structural Target T1/T2 selection;
+- no-target-shopping invariant;
+- RR hard gate;
+- next-open entry revalidation;
+- explicitly approved Entry Advisory states.
+
+#### TASK-006E — PAQS Advisory & Decision Dashboard
+
+Planned scope:
+
+- conditional Holder Advisory;
+- explanations/reason codes;
+- PAQS Dashboard integration;
+- lightweight Quality/Ranking after hard gates if separately approved;
+- lightweight immutable signal/advisory history if separately approved;
+- complete user-facing decision-terminal workflow.
+
+The current committed product may be considered functionally complete after TASK-006E passes independent review and integration.
+
+### Phase 3 — Dormant Optional Research / Paper Extensions
+
+Phase 3 remains a valid extension slot but is **not part of the current committed MVP sequence**.
+
+Possible future work may be reactivated only by explicit user approval, such as:
+
+- richer research extensions;
+- simulated Paper Portfolio;
+- PaperFill bookkeeping;
+- paper NAV/performance;
+- position sizing;
+- portfolio exposure/correlation controls.
+
+No placeholder Phase 3 implementation is required now.
+
+### Phase 4 — Dormant Optional Validation / Backtest / Analytics Extensions
+
+Phase 4 remains the final possible product phase but is **not required for current product completion**.
+
+Possible future work may be reactivated only by explicit user approval, such as:
+
+- deterministic point-in-time backtesting using legitimate data;
+- transaction-cost assumptions;
+- benchmark comparison;
+- drawdown/volatility/turnover;
+- attribution/exposure;
+- strategy comparison/parameter analysis;
+- reproducible research reports.
+
+Current recent-minute capability does not imply historical minute replay, tick simulation, or market-microstructure storage.
+
+## 8. Current MVP scope disposition
+
+### KEEP
+
+```text
+local single-user app
+read-only market data
+Dashboard
+Windows launcher
+dynamic supported US/HK watchlist
+PAQS structure/events/setups/risk-reward/advisory
+lightweight explanations
+lightweight Quality/Ranking if approved
+lightweight signal/advisory history if approved
+user + engineering documentation
+```
+
+### SIMPLIFY
+
+```text
+Composite Score -> derived quality/ranking layer, not causal strategy
+ranking -> lightweight decision prioritization, not portfolio optimizer
+validation -> proportional PAQS/golden-fixture validation, not institutional platform
+```
+
+### OPTIONAL FUTURE EXTENSIONS
+
+```text
+Paper Portfolio
+Paper Accounting / PaperFill bookkeeping
+Position sizing
+Portfolio optimization
+Full backtesting platform
+Performance attribution/exposure analytics
+Large research-report / parameter-analysis suite
+```
+
+These are not current committed work but may be attached later through Phase 3/4 without rewriting PAQS core boundaries.
+
+## 9. Permanently removed / forbidden product scope
+
+The following remain permanently outside the product rather than merely deferred:
+
+```text
+real completed-trade entry/import
+real external account observation
+broker account synchronization
+brokerage cash/positions/orders/trades
+real-account matching/discrepancy handling
+real portfolio tracking
+trade sizing from real brokerage holdings
+real broker fees/taxes/settlement synchronization
+broker-write adapters
+place_order / cancel_order / modify_order
+real-order API/UI
+Live OMS/EMS
+trade-password unlock
+execution workers/retries/recovery/kill switches
+autonomous/unattended trading
+```
+
+Unnecessary infrastructure remains excluded: microservices, Kafka, distributed workers, Kubernetes, multi-tenancy, 24/7 execution infrastructure, tick persistence, institutional OMS, and large generic provider frameworks.
+
+## 10. Governance and stop conditions
+
+- Phase 1 remains accepted and immutable as historical evidence.
+- `TASK-006` is an umbrella identifier only; Codex must never be told to “implement TASK-006” as one task.
+- TASK-006A through TASK-006E are planned identifiers, not implementation authority.
+- Each implementation task requires an explicit user-approved Task Contract stored on its own task branch.
+- Codex receives only a short prompt pointing to repository, task branch and Task Contract path.
+- Codex stops after its approved task and pushes only that task branch.
+- Independent GitHub review is required before remediation/integration.
+- One task passing does not approve the next task.
+- Documentation and requirements must preserve data freshness, no-lookahead, non-fabrication and read-only safety rules.
+- Optional Phase 3/4 work stays dormant until explicitly reactivated.
