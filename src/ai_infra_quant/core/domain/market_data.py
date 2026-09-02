@@ -110,9 +110,12 @@ class QuoteSnapshot:
     latest_quote_at: datetime
     retrieved_at: datetime
     price_kind: PriceKind = PriceKind.LATEST
+    is_equity: bool | None = None
 
     def __post_init__(self) -> None:
         _require_positive_decimal(self.price, "price")
+        if self.is_equity is not None and not isinstance(self.is_equity, bool):
+            raise ValueError("is_equity must be an explicit bool or None")
         object.__setattr__(self, "latest_quote_at", require_utc(self.latest_quote_at))
         object.__setattr__(self, "retrieved_at", require_utc(self.retrieved_at))
 

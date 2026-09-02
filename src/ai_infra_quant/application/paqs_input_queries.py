@@ -44,7 +44,11 @@ class PaqsInputQueries:
         minute = minute_view.result.data or ()
         earliest_local_date = initial_as_of.astimezone(timezone).date() - timedelta(days=35)
         if daily:
-            earliest_local_date = min(earliest_local_date, min(bar.session_date for bar in daily))
+            earliest_daily_date = min(bar.session_date for bar in daily)
+            earliest_daily_week_start = earliest_daily_date - timedelta(
+                days=earliest_daily_date.isoweekday() - 1
+            )
+            earliest_local_date = min(earliest_local_date, earliest_daily_week_start)
         if minute:
             earliest_local_date = min(
                 earliest_local_date,

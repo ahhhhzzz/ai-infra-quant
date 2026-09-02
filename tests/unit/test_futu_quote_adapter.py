@@ -52,6 +52,7 @@ class FakeQuoteContext:
                         "code": "US.AVGO",
                         "update_time": "2026-09-01 10:35:12",
                         "last_price": 351.125,
+                        "equity_valid": True,
                     }
                 ]
             ),
@@ -205,6 +206,7 @@ def test_canonical_results_do_not_expose_sdk_objects_and_use_decimal() -> None:
     assert isinstance(quote_result.data, QuoteSnapshot)
     assert quote_result.data.price == Decimal("351.125")
     assert isinstance(quote_result.data.price, Decimal)
+    assert quote_result.data.is_equity is True
     assert quote_result.data.latest_quote_at == datetime(2026, 9, 1, 14, 35, 12, tzinfo=UTC)
     assert isinstance(daily_result.data, tuple)
     assert isinstance(daily_result.data[0], DailyBar)
@@ -356,6 +358,80 @@ def test_partial_empty_error_and_invalid_responses_are_explicit(
     assert result.data is None
     assert result.reason is not None
     assert reason_fragment.lower() in result.reason.lower()
+
+
+def test_futu_equity_classification_is_mapped_without_price_inference() -> None:
+    context = FakeQuoteContext()
+    context.snapshot_result = (
+        0,
+        FakeTable(
+            [
+                {
+                    "code": "US.AVGO",
+                    "update_time": "2026-09-01 10:35:12",
+                    "last_price": "351.125",
+                    "equity_valid": False,
+                }
+            ]
+        ),
+    )
+
+    with _adapter(context) as adapter:
+        result = adapter.get_latest_quote(US_AVGO)
+
+    assert result.status is DataAvailabilityStatus.AVAILABLE
+    assert result.data is not None
+    assert result.data.price == Decimal("351.125")
+    assert result.data.is_equity is False
+
+
+@pytest.mark.parametrize("equity_valid", [None, "UNKNOWN", 1])
+def test_futu_invalid_equity_classification_maps_to_unknown(equity_valid: object) -> None:
+    context = FakeQuoteContext()
+    context.snapshot_result = (
+        0,
+        FakeTable(
+            [
+                {
+                    "code": "US.AVGO",
+                    "update_time": "2026-09-01 10:35:12",
+                    "last_price": "351.125",
+                    "equity_valid": equity_valid,
+                }
+            ]
+        ),
+    )
+
+    with _adapter(context) as adapter:
+        result = adapter.get_latest_quote(US_AVGO)
+
+    assert result.status is DataAvailabilityStatus.AVAILABLE
+    assert result.data is not None
+    assert result.data.price == Decimal("351.125")
+    assert result.data.is_equity is None
+
+
+def test_futu_missing_equity_classification_maps_to_unknown() -> None:
+    context = FakeQuoteContext()
+    context.snapshot_result = (
+        0,
+        FakeTable(
+            [
+                {
+                    "code": "US.AVGO",
+                    "update_time": "2026-09-01 10:35:12",
+                    "last_price": "351.125",
+                }
+            ]
+        ),
+    )
+
+    with _adapter(context) as adapter:
+        result = adapter.get_latest_quote(US_AVGO)
+
+    assert result.status is DataAvailabilityStatus.AVAILABLE
+    assert result.data is not None
+    assert result.data.is_equity is None
 
 
 def test_quote_context_closes_when_body_raises() -> None:

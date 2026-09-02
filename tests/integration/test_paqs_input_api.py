@@ -36,6 +36,11 @@ NOW = datetime(2026, 7, 10, 22, tzinfo=UTC)
 
 
 class PaqsFakeProvider:
+    def __init__(self) -> None:
+        self.daily_dates = tuple(date(2026, 7, 6) + timedelta(days=offset) for offset in range(5))
+        self.calendar_dates = self.daily_dates
+        self.calendar_calls: list[tuple[date, date]] = []
+
     def __enter__(self) -> PaqsFakeProvider:
         return self
 
@@ -64,8 +69,8 @@ class PaqsFakeProvider:
         bars = tuple(
             DailyBar(
                 security=security.display_symbol,
-                session_date=date(2026, 7, 6) + timedelta(days=offset),
-                provider_time=datetime(2026, 7, 6 + offset, tzinfo=UTC),
+                session_date=session_date,
+                provider_time=datetime.combine(session_date, time.min, tzinfo=UTC),
                 open=Decimal("100") + offset,
                 high=Decimal("102") + offset,
                 low=Decimal("99") + offset,
@@ -74,7 +79,7 @@ class PaqsFakeProvider:
                 is_completed=True,
                 retrieved_at=NOW,
             )
-            for offset in range(5)
+            for offset, session_date in enumerate(self.daily_dates)
         )
         return ProviderResult(
             status=DataAvailabilityStatus.AVAILABLE,
@@ -114,10 +119,11 @@ class PaqsFakeProvider:
     def get_trading_days(
         self, market: str, start_date: date, end_date: date
     ) -> ProviderResult[tuple[TradingDay, ...]]:
+        self.calendar_calls.append((start_date, end_date))
         days = tuple(
             TradingDay(
                 market=market,
-                market_date=date(2026, 7, 6) + timedelta(days=offset),
+                market_date=market_date,
                 market_timezone="America/New_York",
                 day_type=TradingDayType.FULL,
                 provider_day_type="WHOLE",
@@ -125,7 +131,7 @@ class PaqsFakeProvider:
                 provider=PROVIDER_FUTU_QUOTE,
                 retrieved_at=NOW,
             )
-            for offset in range(5)
+            for market_date in self.calendar_dates
         )
         return ProviderResult(
             status=DataAvailabilityStatus.AVAILABLE,
@@ -136,21 +142,26 @@ class PaqsFakeProvider:
 
 
 @pytest.fixture
+def paqs_provider() -> PaqsFakeProvider:
+    return PaqsFakeProvider()
+
+
+@pytest.fixture
 def paqs_app(
     settings: Settings,
     migrated_engine: Engine,
     session_factory: sessionmaker[Session],
+    paqs_provider: PaqsFakeProvider,
 ) -> FastAPI:
     application = create_app(settings, migrated_engine)
 
     def uow_factory() -> SQLAlchemyUnitOfWork:
         return SQLAlchemyUnitOfWork(session_factory)
 
-    provider = PaqsFakeProvider()
     queries = MarketDataQueries(
         uow_factory,
         provider_name=PROVIDER_FUTU_QUOTE,
-        provider_factory=lambda: provider,
+        provider_factory=lambda: paqs_provider,
         now=lambda: NOW,
     )
     application.state.container.market_data_queries = queries
@@ -217,6 +228,27 @@ def test_paqs_research_eligibility_does_not_require_tradability_verification(
     assert security["tradability_status"] == "UNVERIFIED"
     response = paqs_client.get(f"/api/v1/strategies/paqs/securities/{security_id}/input-status")
     assert response.status_code == 200
+
+
+def test_input_path_requests_full_earliest_iso_week_and_excludes_truncation(
+    paqs_client: TestClient,
+    paqs_provider: PaqsFakeProvider,
+) -> None:
+    first_week = tuple(date(2026, 5, 4) + timedelta(days=offset) for offset in range(5))
+    second_week = tuple(date(2026, 5, 11) + timedelta(days=offset) for offset in range(5))
+    paqs_provider.daily_dates = (*first_week[2:], *second_week)
+    paqs_provider.calendar_dates = (*first_week, *second_week)
+
+    response = paqs_client.get(
+        f"/api/v1/strategies/paqs/securities/{_avgo_id(paqs_client)}/input-status"
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert paqs_provider.calendar_calls[-1][0] == first_week[0]
+    assert body["d1_source_count"] == 8
+    assert body["completed_w1_count"] == 1
+    assert body["partial_w1_count"] == 1
 
 
 def test_provider_none_input_status_is_truthfully_unavailable(client: TestClient) -> None:

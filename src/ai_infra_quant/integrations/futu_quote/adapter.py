@@ -169,6 +169,7 @@ class FutuQuoteAdapter:
                 currency=security.currency,
                 latest_quote_at=quote_time,
                 retrieved_at=retrieved_at,
+                is_equity=_provider_optional_bool(row.get("equity_valid")),
             )
         except (KeyError, TypeError, ValueError) as exc:
             return _failure(DataAvailabilityStatus.INVALID, retrieved_at, _safe_reason(exc))
@@ -509,6 +510,17 @@ def _decimal(value: object, field_name: str) -> Decimal:
     if not result.is_finite():
         raise ValueError(f"{field_name} is invalid")
     return result
+
+
+def _provider_optional_bool(value: object) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    normalized = str(value).strip().upper()
+    if normalized == "TRUE":
+        return True
+    if normalized == "FALSE":
+        return False
+    return None
 
 
 def _ohlcv(row: Mapping[str, object]) -> tuple[Decimal, Decimal, Decimal, Decimal, Decimal]:

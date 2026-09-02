@@ -39,6 +39,7 @@ class SupportedFakeProvider:
         self.quote_status = DataAvailabilityStatus.AVAILABLE
         self.quote_reason: str | None = None
         self.quote_security_override: str | None = None
+        self.quote_is_equity: bool | None = True
         self.raise_quote: Exception | None = None
         self.on_quote: Callable[[MarketDataSecurity], None] | None = None
         self.seen: list[str] = []
@@ -76,6 +77,7 @@ class SupportedFakeProvider:
                 currency=security.currency,
                 latest_quote_at=NOW,
                 retrieved_at=NOW,
+                is_equity=self.quote_is_equity,
             )
         return ProviderResult(
             status=self.quote_status,
@@ -283,6 +285,52 @@ def test_provider_validation_and_exact_symbol_precede_mutation(
     )
     assert response.status_code == 422
     assert response.json()["code"] == "SYMBOL_VALIDATION_FAILED"
+    assert _counts(session_factory) == before
+
+
+@pytest.mark.parametrize(
+    ("market", "symbol"),
+    [("US", "SPY"), ("HK", "03033")],
+)
+def test_provider_non_equity_classification_never_mutates_local_state(
+    supported_client: TestClient,
+    session_factory: sessionmaker[Session],
+    supported_provider: SupportedFakeProvider,
+    market: str,
+    symbol: str,
+) -> None:
+    before = _counts(session_factory)
+    supported_provider.quote_is_equity = False
+
+    response = supported_client.post(
+        "/api/v1/watchlist/supported-securities",
+        json={"market": market, "symbol": symbol},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["code"] == "SYMBOL_VALIDATION_FAILED"
+    assert response.json()["provider_validation_status"] == "INVALID"
+    assert "non-equity" in response.json()["detail"]
+    assert _counts(session_factory) == before
+
+
+def test_missing_equity_classification_never_mutates_local_state(
+    supported_client: TestClient,
+    session_factory: sessionmaker[Session],
+    supported_provider: SupportedFakeProvider,
+) -> None:
+    before = _counts(session_factory)
+    supported_provider.quote_is_equity = None
+
+    response = supported_client.post(
+        "/api/v1/watchlist/supported-securities",
+        json={"market": "US", "symbol": "NVDA"},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["code"] == "SYMBOL_VALIDATION_FAILED"
+    assert response.json()["provider_validation_status"] == "INVALID"
+    assert "explicit, valid equity classification" in response.json()["detail"]
     assert _counts(session_factory) == before
 
 

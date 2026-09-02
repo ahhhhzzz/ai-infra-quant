@@ -173,6 +173,30 @@ def test_holiday_shortened_week_finalizes_without_friday() -> None:
     assert bars[0].expected_source_bar_count == 4
 
 
+def test_left_truncated_first_week_is_partial_and_next_full_week_completes() -> None:
+    first_week = tuple(date(2026, 5, 4) + timedelta(days=offset) for offset in range(5))
+    second_week = tuple(date(2026, 5, 11) + timedelta(days=offset) for offset in range(5))
+    daily = tuple(_daily(value, "100") for value in (*first_week[2:], *second_week))
+    calendar = tuple(_trading_day(value) for value in (*first_week, *second_week))
+
+    bars = derive_weekly_bars(
+        security="US.TEST",
+        market_timezone="America/New_York",
+        daily_bars=daily,
+        trading_days=calendar,
+        as_of=datetime(2026, 5, 16, tzinfo=UTC),
+    )
+
+    assert len(bars) == 2
+    assert bars[0].source_bar_count == 3
+    assert bars[0].expected_source_bar_count == 5
+    assert bars[0].coverage is DerivedCoverage.PARTIAL
+    assert bars[0].is_completed is False
+    assert bars[1].source_bar_count == bars[1].expected_source_bar_count == 5
+    assert bars[1].coverage is DerivedCoverage.COMPLETE
+    assert bars[1].is_completed is True
+
+
 def test_us_m30_uses_regular_boundaries_and_excludes_extended_session() -> None:
     market_date = date(2026, 7, 6)
     source = (

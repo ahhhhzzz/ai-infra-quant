@@ -167,6 +167,19 @@ def _require_valid_quote(
             provider=result.provider,
             retrieved_at=result.retrieved_at,
         )
+    if result.data.is_equity is not True:
+        detail = (
+            "Provider explicitly classified the requested security as non-equity."
+            if result.data.is_equity is False
+            else "Provider did not supply an explicit, valid equity classification."
+        )
+        raise SupportedSecurityAddError(
+            code="SYMBOL_VALIDATION_FAILED",
+            detail=detail,
+            provider_status=DataAvailabilityStatus.INVALID,
+            provider=result.provider,
+            retrieved_at=result.retrieved_at,
+        )
 
 
 def _require_compatible_security(security: Security, expected_currency: str) -> None:
