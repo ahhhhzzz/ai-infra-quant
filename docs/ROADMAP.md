@@ -1,21 +1,25 @@
-# Read-Only PAQS Decision-Terminal Product Roadmap
+# Read-Only PAQS Dual-Branch Decision-Terminal Product Roadmap
 
-Status: **AUTHORITATIVE — local read-only PAQS MVP and optional extension scope**
+Status: **AUTHORITATIVE — local read-only PAQS-E prioritized MVP, parallel PAQS-Q reference branch, and optional Phase 3/4 extensions**
 
 Decisions:
 
 - `MTF-001`, approved 2026-09-01 — daily + completed 1-minute read-only market-data direction;
-- `PAQS-MVP-001`, approved 2026-09-02 — focused PAQS decision-terminal MVP, TASK-006 workstream split, optional Phase 3/4 extensions.
+- `PAQS-MVP-001`, approved 2026-09-02 — focused PAQS decision-terminal MVP, bounded PAQS workstreams, optional Phase 3/4 extensions;
+- `PAQS-DUAL-001`, approved 2026-09-03 — dual PAQS-E / PAQS-Q architecture, Snapshot-on-Demand execution, PAQS-E implementation priority.
 
-Decision record: `docs/decisions/PAQS_MVP_SCOPE_REDUCTION.md`
+Decision records:
 
-Product: **Personal Quantitative Research and Decision-Support Tool**
+- `docs/decisions/PAQS_MVP_SCOPE_REDUCTION.md`
+- `docs/decisions/PAQS_DUAL_BRANCH_ARCHITECTURE.md`
+
+Product: **Personal Quantitative Research and AI-Assisted Decision-Support Tool**
 
 ## 1. Authority, supersession, and history
 
 This Roadmap governs future product scope after the accepted Phase 1 baseline.
 
-`MTF-001` superseded the earlier completed-daily-only future direction without rewriting history. `PAQS-MVP-001` now supersedes the earlier assumption that the current product must continue through a broad paper-tracking and full-backtesting platform before it can be considered complete.
+`MTF-001` superseded the earlier completed-daily-only future direction without rewriting history. `PAQS-MVP-001` superseded the earlier assumption that the current product must continue through a broad paper-tracking and full-backtesting platform before it can be considered complete. `PAQS-DUAL-001` now supersedes the future assumption that one single deterministic PAQS engine must own all Structure/Event/Setup/Advisory behavior.
 
 Historical facts remain unchanged:
 
@@ -28,13 +32,38 @@ Historical facts remain unchanged:
 - TASK-004 implemented the provider-neutral read-through market-data backend;
 - TASK-005 implemented the market-data Dashboard;
 - TASK-005A implemented the Windows one-click launcher;
-- TASK-005B implemented bounded long Daily history, recent minute history, US `Session.ALL`, incremental browser refresh, and chart-time semantics.
+- TASK-005B implemented bounded long Daily history, recent minute history, US `Session.ALL`, incremental browser refresh, and chart-time semantics;
+- TASK-006A implemented the dynamic US/HK PAQS input foundation and passed focused remediation;
+- TASK-006B implemented and independently passed its deterministic Structure Engine contract, was integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`, and subsequently produced `STRUCTURE_CONCERNS_FOUND` in the mandatory real-market semantic checkpoint.
+
+The correct historical TASK-006B status is therefore:
+
+```text
+TASK-006B deterministic implementation: PASS / integrated
+TASK-006B real-market semantic checkpoint: STRUCTURE_CONCERNS_FOUND
+```
+
+The checkpoint does not erase accepted deterministic implementation evidence and does not constitute semantic acceptance of the old single-engine structure model.
 
 Earlier Phase 1 broker/provider abstractions are historical artifacts, not authority to implement brokerage-account or broker-write behavior.
 
 ## 2. Current product objective
 
-The committed MVP is a local-first, single-user, read-only personal investment decision terminal.
+The committed product remains a local-first, single-user, read-only personal investment decision terminal.
+
+Under `PAQS-DUAL-001`, PAQS is a family with two parallel strategy branches:
+
+```text
+                         PAQS
+                          |
+              +-----------+-----------+
+              |                       |
+           PAQS-E                   PAQS-Q
+   Expert Reasoning Engine    Quant Decision Engine
+        LLM-native            deterministic/reference
+```
+
+Current implementation priority is **PAQS-E**. PAQS-Q remains a valuable deterministic reference/scanner branch whose exact methods may evolve later under separate research and Task Contract governance.
 
 The product should let the user:
 
@@ -43,20 +72,22 @@ add supported US/HK securities
         ↓
 view truthful read-only market data
         ↓
-understand PAQS market structure
+explicitly request Analyze
         ↓
-see PAQS events/setups
+freeze one immutable current Market Snapshot
         ↓
-see structural invalidation/target/RR
+PAQS-E expert analysis and/or PAQS-Q machine analysis
         ↓
-receive conditional Entry / Holder advisory
+see context / key levels / setup / invalidation / target / RR / advisory
         ↓
-compare opportunities with lightweight Quality/Ranking
+compare branches where both are available
+        ↓
+human makes the capital decision manually outside the app
 ```
 
 All real trading is performed manually by the user in the broker's official client.
 
-The application never needs to know whether a recommendation was acted upon and never connects to a brokerage account.
+The application never needs brokerage-account knowledge to produce either branch's decision support.
 
 ## 3. Market-data and supported-security direction
 
@@ -84,9 +115,9 @@ US.VRT
 HK.09698
 ```
 
-`PAQS-MVP-001` requires the current MVP to progress from this hard-coded PoC set to a user-manageable supported US/HK watchlist under TASK-006A. Dynamic security support does not authorize arbitrary global markets.
+TASK-006A replaced the hard-coded PoC restriction with a provider-validated user-manageable supported US/HK watchlist. Dynamic security support does not authorize arbitrary global markets.
 
-Provider-specific code remains under `integrations/`; PAQS/Strategy, Dashboard, Risk, optional future Performance/Backtest, and core domain logic consume provider-agnostic canonical data.
+Provider-specific market-data code remains under `integrations/`; PAQS-E, PAQS-Q, Dashboard, Risk, optional future Performance/Backtest, and core domain logic consume provider-agnostic canonical facts.
 
 ## 4. Dashboard and refresh contract
 
@@ -106,13 +137,26 @@ The existing market Dashboard remains retained:
 - local vendored chart dependency;
 - Windows one-click launch path.
 
+Market-data display refresh and strategy analysis are separate processes.
+
+The MVP strategy runtime is **Snapshot-on-Demand**, not continuous/background signal generation:
+
+```text
+user requests Analyze
+    -> freeze one snapshot
+    -> return one result
+    -> run ends
+```
+
+A new quote or newly completed bar does not mutate an existing PAQS-E/PAQS-Q decision. The user must explicitly request Analyze again to obtain a new judgment.
+
 Future PAQS Dashboard work is additive. It must not reintroduce trading controls or imply a real brokerage position.
 
-Closing the page requires no background processing.
+Closing the page requires no background strategy processing.
 
-## 5. Time, data-quality, and PAQS input direction
+## 5. Time, data-quality, Snapshot and PAQS input direction
 
-Quotes, bars and later PAQS outputs distinguish their own timestamps. At minimum existing market data already distinguishes:
+Quotes, bars, snapshots and later PAQS outputs distinguish their own timestamps. At minimum existing market data already distinguishes:
 
 ```text
 latest_quote_at
@@ -120,7 +164,7 @@ latest_completed_minute_bar_at
 latest_completed_daily_session
 ```
 
-Future PAQS outputs require `as_of_timestamp`, component confirmation timestamps, coverage and calculation time.
+Future immutable analysis snapshots and decisions require `as_of_timestamp`, provenance, coverage, calculation/creation time and stable identity/hash where applicable.
 
 Rules remain fixed:
 
@@ -128,10 +172,11 @@ Rules remain fixed:
 - latest/intraday price is never called a final daily close;
 - polling cadence and provider latency are separate facts;
 - no market value is fabricated;
-- financial values use Decimal;
-- aware UTC is used for instants and IANA market timezones for session/calendar semantics.
+- financial values use Decimal where deterministic financial arithmetic applies;
+- aware UTC is used for instants and IANA market timezones for session/calendar semantics;
+- strict no-lookahead / As-Of discipline applies to both PAQS branches.
 
-The initial PAQS multi-timeframe research direction is:
+Current shared structural evidence roles are:
 
 ```text
 HTF = completed W1
@@ -141,11 +186,75 @@ TTF = completed 30m REGULAR-session bars
 
 W1 is derived from completed D1; 30m is derived from completed 1-minute data with market-aware US/HK session rules. H1/H4 are not current MVP requirements.
 
-Strict historical real-market PAQS backtesting is not part of the current MVP. Point-in-time corporate-action safety must not be falsely claimed from provider QFQ data alone.
+The latest quote may later be included in a Snapshot only as explicitly reference-only current-price context, for example entry-location/chase context. It may not confirm completed-bar Pivot, Breakout, Trigger, Follow-through, Setup or other structural evidence.
 
-## 6. PAQS and numerical Score relationship
+Strict arbitrary historical point-in-time replay is not yet an implemented current capability. Provider `PROVIDER_QFQ_CURRENT` data must not be falsely described as strict point-in-time corporate-action-safe history.
 
-The approved high-level score decomposition from `MTF-001` remains historical/current score-level governance:
+## 6. PAQS-E, PAQS-Q and numerical Score relationship
+
+### PAQS-E — prioritized Expert Reasoning branch
+
+PAQS-E is the LLM-native Naked Price Action Expert Reasoning Engine.
+
+Preferred semantic authority hierarchy:
+
+```text
+docs/research/PAQS_E_NAKED_PRICE_ACTION_DOCTRINE.md
+    -> primary semantic strategy doctrine
+
+PAQS v0.3.x research/formalization
+    -> historical guardrail / audit / terminology / anti-cheating reference
+
+PAQS-Q v0.4 Lite research
+    -> separate deterministic machine-branch research foundation
+```
+
+PAQS-E should reason semantically over:
+
+```text
+context
+structure
+location
+event
+setup
+trigger
+follow-through
+invalidation
+target
+RR / entry quality
+advisory
+```
+
+It must retain hard discipline such as strict As-Of, no hindsight, Event != Setup != Advisory, Trigger != Follow-through, Entry != Holder, no target shopping, no retroactive invalidation widening, and permission to output `NO_TRADE` / `WATCH` / `WAIT_RETEST` / `UNCERTAIN`.
+
+PAQS-Q exact thresholds must not silently become PAQS-E strategy rules.
+
+Initial PAQS-E provider architecture is model-provider-agnostic. OpenAI is the first planned adapter only. The first MVP does not require multi-model voting or ensemble behavior.
+
+Ordinary PAQS-E Analyze calls are stateless/fresh by default. The model receives only product-controlled snapshot facts plus approved doctrine/prompt/output contract. No web/browser/search tools, hidden conversational memory, previous PAQS-E decision, broker data, or future bars are supplied in the initial MVP.
+
+### PAQS-Q — deterministic Quant Decision branch
+
+PAQS-Q is the deterministic machine/reference/scanner branch.
+
+Its priorities include:
+
+```text
+engineering stability
+reproducibility
+no-lookahead
+bounded machine structure
+replayability
+auditability
+robustness diagnostics
+future large-universe scanning
+```
+
+PAQS-Q strategy methods may evolve later without redefining PAQS-E.
+
+### Numerical score
+
+The approved historical score decomposition from `MTF-001` remains recorded for compatibility:
 
 ```text
 Composite Quant Score
@@ -155,34 +264,21 @@ Daily Base Score
 Intraday Minute Adjustment
 ```
 
-`PAQS-MVP-001` clarifies that this numerical score is **not** the causal strategy engine.
+No numerical score is the universal causal authority over both PAQS branches.
 
-The primary decision path is:
-
-```text
-canonical completed market data
-        ↓
-PAQS structure / events / setups
-        ↓
-structural hard gates + risk/reward
-        ↓
-Entry / Holder advisory
-        ↓
-optional derived Quality / Composite Score and ranking
-```
-
-A future numerical score may summarize or rank already-defined structural states. It may never:
+A future score/ranking layer may summarize deterministic PAQS-Q states or help prioritize already-defined candidates. It may never:
 
 - fabricate an Event or Setup;
 - bypass structural invalidation;
 - bypass RR;
 - convert missing data into zero;
 - convert `NO_TRADE` into `LONG_READY`;
+- hide PAQS-E / PAQS-Q disagreement behind an average;
 - claim probability without a separately validated/calibrated model.
 
 Exact Quality/Composite formulae remain separately unapproved.
 
-## 7. Authoritative phase model and current product-completion line
+## 7. Authoritative phase model and current Phase 2 workstreams
 
 The authoritative phase sequence remains exactly Phase 0 through Phase 4. No Phase 5 exists.
 
@@ -194,9 +290,9 @@ Historically completed. Later scope decisions do not rewrite historical evidence
 
 Completed and independently accepted. Preserve accepted FastAPI/SQLite/SQLAlchemy/Alembic foundation, deterministic migration 0001, Decimal/UTC invariants, Security identity, Watchlist, opening accounting facts, accepted APIs/frontend, tests and review evidence.
 
-### Phase 2 — Market Data, Dashboard & PAQS Decision Terminal MVP
+### Phase 2 — Market Data, Dashboard & Dual-Branch PAQS Decision Terminal
 
-Phase 2 is the active and committed product phase.
+Phase 2 remains the active and committed product phase.
 
 Completed increments:
 
@@ -207,88 +303,163 @@ TASK-005   Market Data Dashboard
 TASK-005A  Windows one-click launcher
 TASK-005B  Expanded history + US 24H minute semantics
 TASK-006A  Dynamic US/HK Securities & PAQS Input Foundation
+TASK-006B  Historical deterministic PAQS Structure Engine implementation
 ```
 
-TASK-006A passed focused remediation and was integrated at
-`7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B is the current bounded implementation
-task; its result remains subject to independent review and the mandatory real-structure checkpoint.
+Accepted/integrated evidence:
 
-Planned PAQS umbrella workstream:
+- TASK-006A remediation integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`;
+- TASK-006B deterministic implementation integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`;
+- TASK-006B real-market validation status: `STRUCTURE_CONCERNS_FOUND`.
+
+### Shared PAQS foundation tasks
+
+#### TASK-006B2 — Snapshot-on-Demand Current Market Snapshot Contract — NEXT PLANNED IMPLEMENTATION
+
+Purpose direction:
+
+- create one immutable current analysis snapshot from existing accepted current/read-through facts;
+- strict `as_of_timestamp` boundary;
+- canonical completed W1/D1/M30 payloads;
+- latest quote as optional explicitly reference-only field;
+- session/calendar/coverage/quality/adjustment/provider provenance;
+- approved objective numerical facts;
+- canonical serialization and `snapshot_hash`;
+- no PAQS-E or PAQS-Q strategy judgment;
+- no LLM call;
+- no market-data persistence requirement.
+
+This identifier/scope direction is recorded only. A separate explicit Task Contract and user approval are required before implementation.
+
+#### TASK-006B1 — Local Market Data Store & Replay Foundation — PLANNED / DEFERRED BEHIND INITIAL PAQS-E CURRENT MVP
+
+Retained shared scope direction:
 
 ```text
-TASK-006   PAQS Decision-Terminal Workstream (umbrella only; not an implementation task)
+canonical completed D1 persistence
+canonical completed 1m persistence
+provenance / retrieved_at / adjustment / quality
+incremental ingest / dedupe
+observation/version semantics
+local deterministic replay
+lower repeated OpenD historical consumption
 ```
 
-Planned bounded tasks, each requiring its own explicit Task Contract and approval:
+TASK-006B1 becomes required before the product claims strict arbitrary historical As-Of replay/evaluation. It must not implement strategy logic.
 
-#### TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation (completed/integrated)
+### PAQS-E prioritized workstream
+
+```text
+TASK-007 — PAQS-E Expert Reasoning Workstream
+```
+
+`TASK-007` is umbrella only and must never itself become one implementation Task Contract.
+
+#### TASK-007A — PAQS-E Doctrine Runtime, Structured Output & OpenAI Provider Port
+
+Planned scope direction:
+
+- versioned runtime package extracted from the approved PAQS-E doctrine;
+- compact doctrine, canonical reasoning questions and hard guardrails;
+- PAQS-E request domain bound to snapshot identity;
+- strict structured output schema;
+- provider-neutral `PaqsEReasoningProvider` port;
+- first adapter: OpenAI only;
+- configurable server-side model identifier;
+- API secret kept server-side and never committed/exposed to frontend;
+- no web/browser/tool calls supplied to the model in the first MVP;
+- stateless/fresh analysis request semantics;
+- deterministic schema/fact/RR post-validation;
+- no continuous/background analysis;
+- no broker behavior.
+
+#### TASK-007B — On-Demand PAQS-E Analysis Service & Immutable Decision Ledger
+
+Planned scope direction:
+
+- explicit user-triggered Analyze service/API;
+- one request uses one immutable snapshot;
+- one PAQS-E result per request;
+- immutable decision persistence/revision semantics;
+- snapshot/doctrine/prompt/provider/model metadata;
+- truthful provider-unavailable behavior;
+- no automatic re-analysis on market-data refresh.
+
+#### TASK-007C — PAQS-E User Dashboard
+
+Planned scope direction:
+
+- user-visible `Analyze with PAQS-E` action;
+- snapshot/as-of metadata;
+- one-line thesis;
+- HTF/STF/TTF context;
+- 1–4 key decision levels;
+- location;
+- event/setup/stage;
+- trigger/follow-through;
+- entry advisory and holder advisory;
+- invalidation;
+- T1/T2 and deterministic RR;
+- chase/poor-entry warning;
+- uncertainty/conflicting evidence;
+- alternative interpretation;
+- next evidence needed;
+- prior immutable decisions displayed separately when explicitly requested;
+- no real-order controls.
+
+After TASK-007C passes independent review/integration, the product has a usable **current Snapshot-on-Demand PAQS-E MVP**. Historical As-Of evaluation remains a later validation capability and does not need to block current-analysis usability.
+
+#### TASK-007D — Dual-Branch Comparison / Disagreement Dashboard
+
+Deferred until PAQS-Q produces usable advisory/reference output.
 
 Planned scope:
 
-- dynamic supported US/HK security/watchlist workflow replacing the three-symbol PoC restriction;
-- provider support validation without account access;
-- provider-agnostic trading-calendar/session contract;
-- completed W1 derivation from D1;
-- regular-session completed 30m derivation from 1m;
-- coverage/data-quality/adjustment-basis metadata;
-- PAQS user/engineering documentation foundations.
+- same snapshot identity for Q/E comparison;
+- outputs remain separate;
+- alignment/disagreement surfaced explicitly;
+- no synthetic averaging into one decision score.
 
-Explicitly excludes PAQS ATR/Pivot/Zone/Range/Regime logic.
+### PAQS-Q deterministic/reference workstream
 
-#### TASK-006B — PAQS Structure Engine (current bounded task)
+The previously planned future single-engine `TASK-006C`, `TASK-006D`, and `TASK-006E` wording is superseded for future implementation by:
 
-Planned scope:
+```text
+TASK-006B-Q — PAQS-Q Structure Stabilization
+TASK-006C-Q — PAQS-Q Event Engine
+TASK-006D-Q — PAQS-Q Setup, Risk & Setup-Specific Quant Confirmation
+TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation
+```
 
-- ATR;
-- Micro/Major confirmed directional-change Pivot;
-- Swing labels;
-- Key Level geometry;
-- Pivot Zones;
-- Range detection;
-- Base Regime;
-- deterministic/no-lookahead structure fixtures and debug output.
+PAQS-Q concrete semantics still require explicit approval before implementation. PAQS-Q work must not block an otherwise safe PAQS-E MVP and must not redefine PAQS-E strategy authority.
 
-Mandatory stop/checkpoint: review real read-only structures before TASK-006C approval.
+### Recommended current implementation order
 
-#### TASK-006C — PAQS Event Engine
+```text
+PAQS-DUAL-001 docs migration
+        ↓
+TASK-006B2
+Snapshot-on-Demand Current Market Snapshot
+        ↓
+TASK-007A
+Doctrine Runtime + Structured Output + OpenAI Provider Port
+        ↓
+TASK-007B
+On-Demand Analysis + Immutable Decision Ledger
+        ↓
+TASK-007C
+PAQS-E Dashboard / Analyze workflow
+        ↓
+usable current-analysis PAQS-E MVP
+        ↓
+TASK-006B1
+Local Market Data Store + Replay Foundation
+        ↓
+PAQS-E strict historical As-Of / Gold-Set evaluation expansion
 
-Planned scope:
-
-- Break Attempt / Breakout / Breakdown;
-- Failed Breakout / Failed Breakdown;
-- Retest lifecycle;
-- Key Level role flip;
-- Regime Transition;
-- Trigger;
-- Follow-through.
-
-No user Entry/Hold/Exit advisory is authorized by this task.
-
-#### TASK-006D — PAQS Setup & Risk Engine
-
-Planned scope:
-
-- core setup families;
-- Setup expiry;
-- setup-specific structural invalidation;
-- structural Target T1/T2 selection;
-- no-target-shopping invariant;
-- RR hard gate;
-- next-open entry revalidation;
-- explicitly approved Entry Advisory states.
-
-#### TASK-006E — PAQS Advisory & Decision Dashboard
-
-Planned scope:
-
-- conditional Holder Advisory;
-- explanations/reason codes;
-- PAQS Dashboard integration;
-- lightweight Quality/Ranking after hard gates if separately approved;
-- lightweight immutable signal/advisory history if separately approved;
-- complete user-facing decision-terminal workflow.
-
-The current committed product may be considered functionally complete after TASK-006E passes independent review and integration.
+PAQS-Q tasks proceed separately as reference/scanner engineering.
+TASK-007D follows only after PAQS-Q is usable.
+```
 
 ### Phase 3 — Dormant Optional Research / Paper Extensions
 
@@ -307,7 +478,7 @@ No placeholder Phase 3 implementation is required now.
 
 ### Phase 4 — Dormant Optional Validation / Backtest / Analytics Extensions
 
-Phase 4 remains the final possible product phase but is **not required for current product completion**.
+Phase 4 remains the final possible product phase but is **not required for current product usability**.
 
 Possible future work may be reactivated only by explicit user approval, such as:
 
@@ -323,7 +494,7 @@ Current recent-minute capability does not imply historical minute replay, tick s
 
 ## 8. Current MVP scope disposition
 
-### KEEP
+### KEEP / PRIORITIZE
 
 ```text
 local single-user app
@@ -331,19 +502,28 @@ read-only market data
 Dashboard
 Windows launcher
 dynamic supported US/HK watchlist
-PAQS structure/events/setups/risk-reward/advisory
-lightweight explanations
-lightweight Quality/Ranking if approved
-lightweight signal/advisory history if approved
-user + engineering documentation
+Snapshot-on-Demand analysis
+PAQS-E Naked Price Action expert analysis
+structured invalidation / target / RR / advisory
+immutable PAQS-E decision revisions
+human-readable explanations and uncertainty
+```
+
+### KEEP AS PARALLEL REFERENCE WORK
+
+```text
+PAQS-Q deterministic structure/events/setups/risk/advisory
+future scanner / machine baseline
+quantitative evidence
+large-universe deterministic screening later
 ```
 
 ### SIMPLIFY
 
 ```text
-Composite Score -> derived quality/ranking layer, not causal strategy
+Composite Score -> derived/reference layer, not universal causal strategy
 ranking -> lightweight decision prioritization, not portfolio optimizer
-validation -> proportional PAQS/golden-fixture validation, not institutional platform
+validation -> proportional strategy-specific validation rather than one institutional platform
 ```
 
 ### OPTIONAL FUTURE EXTENSIONS
@@ -356,9 +536,10 @@ Portfolio optimization
 Full backtesting platform
 Performance attribution/exposure analytics
 Large research-report / parameter-analysis suite
+multi-model comparison beyond simple provider abstraction
 ```
 
-These are not current committed work but may be attached later through Phase 3/4 without rewriting PAQS core boundaries.
+These are not current committed work but may be attached later through Phase 3/4 or bounded Phase 2 extensions without changing the permanent read-only/no-broker boundary.
 
 ## 9. Permanently removed / forbidden product scope
 
@@ -387,12 +568,17 @@ Unnecessary infrastructure remains excluded: microservices, Kafka, distributed w
 ## 10. Governance and stop conditions
 
 - Phase 1 remains accepted and immutable as historical evidence.
-- `TASK-006` is an umbrella identifier only; Codex must never be told to “implement TASK-006” as one task.
-- TASK-006A through TASK-006E are planned identifiers, not implementation authority.
+- `PAQS-DUAL-001` changes future product/task direction without rewriting accepted history.
+- `TASK-006` remains an umbrella identifier for historical/planned Q-side bounded work; Codex must never be told to implement it as one task.
+- `TASK-007` is the PAQS-E umbrella identifier only; Codex must never be told to implement TASK-007 as one task.
+- TASK identifiers recorded in this Roadmap are scope direction, not implementation authority.
 - Each implementation task requires an explicit user-approved Task Contract stored on its own task branch.
-- Codex receives only a short prompt pointing to repository, task branch and Task Contract path.
+- Codex receives only a short prompt pointing to repository, task branch, exact authoritative base SHA and Task Contract path.
 - Codex stops after its approved task and pushes only that task branch.
 - Independent GitHub review is required before remediation/integration.
 - One task passing does not approve the next task.
-- Documentation and requirements must preserve data freshness, no-lookahead, non-fabrication and read-only safety rules.
+- Research memos/doctrines/amendments do not automatically authorize code changes; each Task Contract must state which research semantics it adopts.
+- Documentation and requirements must preserve data freshness, strict As-Of/no-lookahead, non-fabrication and read-only safety rules.
+- OpenAI API integration is not authorized merely by this Roadmap; it requires the separate TASK-007A Task Contract.
+- API keys/secrets must never be committed to GitHub or exposed to the frontend.
 - Optional Phase 3/4 work stays dormant until explicitly reactivated.
