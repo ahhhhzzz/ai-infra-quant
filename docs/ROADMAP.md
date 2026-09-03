@@ -34,7 +34,8 @@ Historical facts remain unchanged:
 - TASK-005A implemented the Windows one-click launcher;
 - TASK-005B implemented bounded long Daily history, recent minute history, US `Session.ALL`, incremental browser refresh, and chart-time semantics;
 - TASK-006A implemented the dynamic US/HK PAQS input foundation and passed focused remediation;
-- TASK-006B implemented and independently passed its deterministic Structure Engine contract, was integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`, and subsequently produced `STRUCTURE_CONCERNS_FOUND` in the mandatory real-market semantic checkpoint.
+- TASK-006B implemented and independently passed its deterministic Structure Engine contract, was integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`, and subsequently produced `STRUCTURE_CONCERNS_FOUND` in the mandatory real-market semantic checkpoint;
+- TASK-006B2 implemented the immutable Snapshot-on-Demand factual market snapshot, passed remediation and final independent review, and is accepted/integrated at `5f996aebb012cc0884d912f6f3eb71c32e9fd627`.
 
 The correct historical TASK-006B status is therefore:
 
@@ -164,7 +165,7 @@ latest_completed_minute_bar_at
 latest_completed_daily_session
 ```
 
-Future immutable analysis snapshots and decisions require `as_of_timestamp`, provenance, coverage, calculation/creation time and stable identity/hash where applicable.
+Immutable TASK-006B2 analysis snapshots provide `as_of_timestamp`, provenance, coverage, calculation/creation time and stable `snapshot_hash` identity. Future PAQS decisions bind to that exact snapshot identity.
 
 Rules remain fixed:
 
@@ -186,7 +187,7 @@ TTF = completed 30m REGULAR-session bars
 
 W1 is derived from completed D1; 30m is derived from completed 1-minute data with market-aware US/HK session rules. H1/H4 are not current MVP requirements.
 
-The latest quote may later be included in a Snapshot only as explicitly reference-only current-price context, for example entry-location/chase context. It may not confirm completed-bar Pivot, Breakout, Trigger, Follow-through, Setup or other structural evidence.
+TASK-006B2 includes the latest quote only as explicitly reference-only current-price context. It may not confirm completed-bar Pivot, Breakout, Trigger, Follow-through, Setup or other structural evidence. The snapshot also preserves quote provider-delay, market-state, calendar, adjustment, quality and per-timeframe evidence provenance without applying PAQS-E strategy policy.
 
 Strict arbitrary historical point-in-time replay is not yet an implemented current capability. Provider `PROVIDER_QFQ_CURRENT` data must not be falsely described as strict point-in-time corporate-action-safe history.
 
@@ -196,18 +197,23 @@ Strict arbitrary historical point-in-time replay is not yet an implemented curre
 
 PAQS-E is the LLM-native Naked Price Action Expert Reasoning Engine.
 
-Preferred semantic authority hierarchy:
+Preferred semantic authority hierarchy for future bounded PAQS-E Task Contracts is:
 
 ```text
-docs/research/PAQS_E_NAKED_PRICE_ACTION_DOCTRINE.md
-    -> primary semantic strategy doctrine
+docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md
+    -> primary PAQS-E runtime semantic strategy authority candidate
+
+PAQS_E_NAKED_PRICE_ACTION_DOCTRINE.md
+    -> conceptual/doctrine foundation
 
 PAQS v0.3.x research/formalization
-    -> historical guardrail / audit / terminology / anti-cheating reference
+    -> historical guardrail / formalization / audit / terminology reference
 
-PAQS-Q v0.4 Lite research
-    -> separate deterministic machine-branch research foundation
+PAQS-Q research
+    -> separate deterministic/reference branch authority only when separately adopted
 ```
+
+The word `candidate` is deliberate: the accepted research Master Spec does not directly authorize code. TASK-007A must explicitly adopt an exact Master Spec version/hash in its own approved Task Contract.
 
 PAQS-E should reason semantically over:
 
@@ -304,32 +310,37 @@ TASK-005A  Windows one-click launcher
 TASK-005B  Expanded history + US 24H minute semantics
 TASK-006A  Dynamic US/HK Securities & PAQS Input Foundation
 TASK-006B  Historical deterministic PAQS Structure Engine implementation
+TASK-006B2 Snapshot-on-Demand Current Market Snapshot
 ```
 
 Accepted/integrated evidence:
 
 - TASK-006A remediation integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`;
 - TASK-006B deterministic implementation integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`;
-- TASK-006B real-market validation status: `STRUCTURE_CONCERNS_FOUND`.
+- TASK-006B real-market validation status: `STRUCTURE_CONCERNS_FOUND`;
+- TASK-006B2 final independent PASS and integration at `5f996aebb012cc0884d912f6f3eb71c32e9fd627`; evidence: `docs/reviews/TASK_006B2_INDEPENDENT_REVIEW.md`.
 
 ### Shared PAQS foundation tasks
 
-#### TASK-006B2 — Snapshot-on-Demand Current Market Snapshot Contract — NEXT PLANNED IMPLEMENTATION
+#### TASK-006B2 — Snapshot-on-Demand Current Market Snapshot — COMPLETED / INTEGRATED
 
-Purpose direction:
+Accepted scope:
 
-- create one immutable current analysis snapshot from existing accepted current/read-through facts;
-- strict `as_of_timestamp` boundary;
-- canonical completed W1/D1/M30 payloads;
-- latest quote as optional explicitly reference-only field;
+- one immutable current analysis snapshot from existing accepted current/read-through facts;
+- strict factual `as_of_timestamp` boundary;
+- canonical completed W1/D1/M30 payloads with caps 156/500/200;
+- latest quote and market state as explicitly `reference_only` facts;
 - session/calendar/coverage/quality/adjustment/provider provenance;
-- approved objective numerical facts;
-- canonical serialization and `snapshot_hash`;
+- machine-readable W1/D1/M30 evidence status and quote provider-delay provenance;
+- canonical serialization and SHA-256 `snapshot_hash`;
+- W1 nominal future interval geometry preserved and hashed without advancing Snapshot As-Of;
 - no PAQS-E or PAQS-Q strategy judgment;
 - no LLM call;
 - no market-data persistence requirement.
 
-This identifier/scope direction is recorded only. A separate explicit Task Contract and user approval are required before implementation.
+Final accepted/integrated SHA: `5f996aebb012cc0884d912f6f3eb71c32e9fd627`.
+
+Independent final review verdict: `PASS`.
 
 #### TASK-006B1 — Local Market Data Store & Replay Foundation — PLANNED / DEFERRED BEHIND INITIAL PAQS-E CURRENT MVP
 
@@ -355,18 +366,18 @@ TASK-007 — PAQS-E Expert Reasoning Workstream
 
 `TASK-007` is umbrella only and must never itself become one implementation Task Contract.
 
-#### TASK-007A — PAQS-E Doctrine Runtime, Structured Output & OpenAI Provider Port
+#### TASK-007A — PAQS-E Doctrine Runtime, Structured Output & OpenAI Provider Port — NEXT PLANNED IMPLEMENTATION
 
 Planned scope direction:
 
-- versioned runtime package extracted from the approved PAQS-E doctrine;
-- compact doctrine, canonical reasoning questions and hard guardrails;
-- PAQS-E request domain bound to snapshot identity;
+- versioned runtime package explicitly adopting the accepted PAQS-E Context-Free Master Spec;
+- compact doctrine/runtime instructions, canonical reasoning questions and hard guardrails;
+- PAQS-E request domain bound to exact Snapshot identity;
 - strict structured output schema;
 - provider-neutral `PaqsEReasoningProvider` port;
 - first adapter: OpenAI only;
 - configurable server-side model identifier;
-- API secret kept server-side and never committed/exposed to frontend;
+- user-supplied OpenAI API credential kept server-side and never committed, persisted in application data, exposed to frontend clients, returned by APIs, or logged;
 - no web/browser/tool calls supplied to the model in the first MVP;
 - stateless/fresh analysis request semantics;
 - deterministic schema/fact/RR post-validation;
@@ -436,24 +447,19 @@ PAQS-Q concrete semantics still require explicit approval before implementation.
 ### Recommended current implementation order
 
 ```text
-PAQS-DUAL-001 docs migration
+PAQS-DUAL-001 docs migration                  [DONE]
         ↓
-TASK-006B2
-Snapshot-on-Demand Current Market Snapshot
+TASK-006B2 Snapshot-on-Demand Market Snapshot [DONE]
         ↓
-TASK-007A
-Doctrine Runtime + Structured Output + OpenAI Provider Port
+TASK-007A Doctrine Runtime + Structured Output + OpenAI Provider Port [NEXT]
         ↓
-TASK-007B
-On-Demand Analysis + Immutable Decision Ledger
+TASK-007B On-Demand Analysis + Immutable Decision Ledger
         ↓
-TASK-007C
-PAQS-E Dashboard / Analyze workflow
+TASK-007C PAQS-E Dashboard / Analyze workflow
         ↓
 usable current-analysis PAQS-E MVP
         ↓
-TASK-006B1
-Local Market Data Store + Replay Foundation
+TASK-006B1 Local Market Data Store + Replay Foundation
         ↓
 PAQS-E strict historical As-Of / Gold-Set evaluation expansion
 
@@ -580,5 +586,6 @@ Unnecessary infrastructure remains excluded: microservices, Kafka, distributed w
 - Research memos/doctrines/amendments do not automatically authorize code changes; each Task Contract must state which research semantics it adopts.
 - Documentation and requirements must preserve data freshness, strict As-Of/no-lookahead, non-fabrication and read-only safety rules.
 - OpenAI API integration is not authorized merely by this Roadmap; it requires the separate TASK-007A Task Contract.
+- OpenAI API credentials are user-supplied locally, server-side only, and must never be committed, persisted in application data, exposed to frontend clients, returned by APIs, or logged.
 - API keys/secrets must never be committed to GitHub or exposed to the frontend.
 - Optional Phase 3/4 work stays dormant until explicitly reactivated.
