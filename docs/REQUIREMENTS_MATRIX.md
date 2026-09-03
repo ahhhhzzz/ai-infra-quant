@@ -79,8 +79,8 @@ Only Phase 0 through Phase 4 are valid target phases.
 | MKT-012 | Missing/delayed/stale/unavailable/error states are explicit; no market value fabricated | RETAINED | all | IMPLEMENTED | provider result/API contracts plus AGENTS |
 | MKT-013 | TASK-006A provides provider-neutral trading calendar/session/coverage/adjustment metadata | RETAINED | 2 | IMPLEMENTED | Calendar port, PAQS bundle/diagnostic tests |
 | MKT-014 | Shared initial PAQS structural evidence roles are completed W1 / D1 / 30m regular session; H1/H4 are not MVP requirements | RETAINED | 2 | DOCUMENTED | Roadmap 5; TASK-006A |
-| MKT-015 | Latest quote may be included in an analysis snapshot only as explicitly reference-only current-price context | RETAINED | 2 | IMPLEMENTED | TASK-006B2 snapshot domain/API/hash tests |
-| MKT-016 | Reference-only quote must not confirm completed-bar structural or strategy facts | RETAINED | 2 | IMPLEMENTED | TASK-006B2 eligibility and no-scope tests |
+| MKT-015 | Latest quote may be included in an analysis snapshot only as explicitly reference-only current-price context | RETAINED | 2 | IMPLEMENTED | TASK-006B2 final SHA `5f996aebb012cc0884d912f6f3eb71c32e9fd627`; `docs/reviews/TASK_006B2_INDEPENDENT_REVIEW.md` |
+| MKT-016 | Reference-only quote must not confirm completed-bar structural or strategy facts | RETAINED | 2 | IMPLEMENTED | TASK-006B2 final SHA `5f996aebb012cc0884d912f6f3eb71c32e9fd627`; independent review |
 | MKT-017 | Strict arbitrary historical As-Of replay requires later local observation/replay support and must not be falsely claimed from current QFQ read-through data | RETAINED | 2–4 | DOCUMENTED | Roadmap 5/7; TASK-006B1 direction |
 
 | ID | Dashboard requirement | Disposition | Phase | Status | Evidence |
@@ -115,9 +115,9 @@ Only Phase 0 through Phase 4 are valid target phases.
 | PAQS-012 | No profitability/Alpha/probability claim from implementation tests, structural validation or uncalibrated LLM reasoning | RETAINED | 2–4 | DOCUMENTED | Roadmap/AGENTS/PAQS-E doctrine |
 | PAQS-013 | PAQS-E and PAQS-Q are parallel strategy branches, not a simple version supersession chain | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 2/6 |
 | PAQS-014 | Strategy execution is explicit user-triggered Snapshot-on-Demand, not continuous/background strategy analysis | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 4/7 |
-| PAQS-015 | TASK-006B2 defines one shared immutable current Snapshot-on-Demand Market Snapshot with canonical serialization and `snapshot_hash` | RETAINED | 2 | IMPLEMENTED | `PaqsMarketSnapshot`; current snapshot API; canonical/golden-hash tests |
-| PAQS-016 | Latest quote is reference-only, preserves nullable provider delay, and cannot confirm completed-bar structural evidence | RETAINED | 2 | IMPLEMENTED | TASK-006B2 quote-reference/hash/API tests |
-| PAQS-019 | Shared W1/D1/M30 evidence exposes machine-readable source status, authoritative counts, W1 exclusions and M30 missing elapsed-bucket provenance | RETAINED | 2 | IMPLEMENTED | TASK-006B2 Amendment 01 domain/API tests |
+| PAQS-015 | TASK-006B2 defines one shared immutable current Snapshot-on-Demand Market Snapshot with canonical serialization and `snapshot_hash` | RETAINED | 2 | IMPLEMENTED | Final accepted SHA `5f996aebb012cc0884d912f6f3eb71c32e9fd627`; `docs/reviews/TASK_006B2_INDEPENDENT_REVIEW.md` |
+| PAQS-016 | Latest quote is reference-only, preserves nullable provider delay, and cannot confirm completed-bar structural evidence | RETAINED | 2 | IMPLEMENTED | TASK-006B2 final independent review at `5f996a...` |
+| PAQS-019 | Shared W1/D1/M30 evidence exposes machine-readable source status, authoritative counts, W1 exclusions and M30 missing elapsed-bucket provenance | RETAINED | 2 | IMPLEMENTED | TASK-006B2 Amendment 01; final independent review at `5f996a...` |
 | PAQS-017 | PAQS branches remain runtime-independent; one provider/branch may fail without disabling the other or ordinary market-data viewing | RETAINED | 2 | DOCUMENTED | Dual-branch architecture decision/review |
 | PAQS-018 | TASK-006B1 Local Market Data Store & Replay Foundation remains shared planned infrastructure but is deferred behind the initial current-analysis PAQS-E MVP | RETAINED | 2 | PLANNED_TASK | Roadmap 7; staged planning history |
 
@@ -125,19 +125,19 @@ Only Phase 0 through Phase 4 are valid target phases.
 
 | ID | Requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
-| PAQSE-001 | `PAQS_E_NAKED_PRICE_ACTION_DOCTRINE.md` is the primary semantic strategy doctrine for PAQS-E after bounded Task Contract adoption | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 6 |
-| PAQSE-002 | PAQS v0.3.x is historical formalization/guardrail/audit/terminology reference, not a requirement to recreate its full deterministic state machine inside PAQS-E | RETAINED | 2 | DOCUMENTED | Roadmap 6; doctrine |
+| PAQSE-001 | `PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md` is the primary PAQS-E runtime semantic strategy authority candidate for bounded future Task Contract adoption; `PAQS_E_NAKED_PRICE_ACTION_DOCTRINE.md` remains the conceptual/doctrine foundation | RETAINED | 2 | DOCUMENTED | Master Spec + focused re-review PASS; Roadmap 6 |
+| PAQSE-002 | PAQS v0.3.x is historical formalization/guardrail/audit/terminology reference, not a requirement to recreate its full deterministic state machine inside PAQS-E | RETAINED | 2 | DOCUMENTED | Roadmap 6; Master Spec/Doctrine |
 | PAQSE-003 | PAQS-E model-provider port is provider-agnostic; OpenAI is the first planned adapter only | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction |
-| PAQSE-004 | First PAQS-E MVP model call receives only product-controlled snapshot/doctrine/prompt/schema inputs and no web/browser/search tools | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction |
+| PAQSE-004 | First PAQS-E MVP model call receives only product-controlled snapshot/runtime/prompt/schema inputs and no web/browser/search tools | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction |
 | PAQSE-005 | Ordinary PAQS-E Analyze calls are stateless/fresh by default; prior decisions/conversation are not hidden prompt context | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction |
-| PAQSE-006 | PAQS-E output is schema-constrained structured output plus concise user explanation | RETAINED | 2 | PLANNED_TASK | Doctrine Section 26; TASK-007A |
+| PAQSE-006 | PAQS-E output is schema-constrained structured output plus concise user explanation | RETAINED | 2 | PLANNED_TASK | Master Spec; TASK-007A |
 | PAQSE-007 | Deterministic post-validation checks schema/factual/arithmetic/RR discipline without replacing LLM strategy reasoning | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction |
 | PAQSE-008 | PAQS-E decisions are immutable revisions storing snapshot/doctrine/prompt/provider/model metadata and structured result | RETAINED | 2 | PLANNED_TASK | TASK-007B scope direction |
-| PAQSE-009 | PAQS-E Entry Advisory and Holder Advisory remain separate questions | RETAINED | 2 | DOCUMENTED | PAQS-E doctrine |
-| PAQSE-010 | `NO_TRADE`, `WATCH`, `WAIT_RETEST`, `UNCERTAIN` and poor-entry states are valid first-class outputs | RETAINED | 2 | DOCUMENTED | PAQS-E doctrine |
+| PAQSE-009 | PAQS-E Entry Advisory and Holder Advisory remain separate questions | RETAINED | 2 | DOCUMENTED | Master Spec / Doctrine |
+| PAQSE-010 | `NO_TRADE`, `WATCH_LONG`, `WAIT_RETEST`, `ENTRY_PENDING_REVALIDATION`, `UNCERTAIN` and poor-entry states are valid first-class outputs | RETAINED | 2 | DOCUMENTED | Master Spec |
 | PAQSE-011 | `TASK-007` is umbrella only; planned bounded tasks are TASK-007A/B/C and later TASK-007D | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSE-012 | TASK-007C completion is the current usability milestone for the current Snapshot-on-Demand PAQS-E MVP; historical Gold-Set replay may follow later | RETAINED | 2 | DOCUMENTED | Roadmap 7 |
-| PAQSE-013 | OpenAI API keys/secrets must remain server-side, uncommitted and unavailable to frontend clients | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction; Roadmap 10 |
+| PAQSE-013 | OpenAI API credentials are user-supplied locally, server-side only, uncommitted, not persisted in application data, not exposed to frontend clients, not returned by APIs and not logged | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction; Roadmap 7/10 |
 | PAQSE-014 | First PAQS-E implementation does not require multi-model voting/ensemble behavior | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 6 |
 
 ### 5.3 PAQS-Q requirements
@@ -145,7 +145,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | ID | Requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
 | PAQSQ-001 | PAQS-Q is the deterministic machine/reference/scanner branch | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 6 |
-| PAQSQ-002 | PAQS-Q mechanical thresholds and future methods do not silently bind PAQS-E semantic reasoning | RETAINED | 2 | DOCUMENTED | Roadmap 6; PAQS-E doctrine |
+| PAQSQ-002 | PAQS-Q mechanical thresholds and future methods do not silently bind PAQS-E semantic reasoning | RETAINED | 2 | DOCUMENTED | Roadmap 6; PAQS-E Master Spec/Doctrine |
 | PAQSQ-003 | PAQS-Q methods may evolve under separate research/Task Contract governance | RETAINED | 2 | DOCUMENTED | Roadmap 6/7 |
 | PAQSQ-004 | TASK-006B-Q — PAQS-Q Structure Stabilization | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSQ-005 | TASK-006C-Q — PAQS-Q Event Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
@@ -205,4 +205,8 @@ TASK-006A passed focused remediation and is integrated at `7909f1c04f7049cf1ccec
 
 TASK-006B passed deterministic implementation review/remediation and was integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`. Its subsequent real-market structure checkpoint returned `STRUCTURE_CONCERNS_FOUND`, including history-origin/path-lock and structure-stability concerns. This evidence motivates the separate PAQS-Q stabilization branch and does not invalidate the accepted deterministic implementation review.
 
-No TASK-006B2 Snapshot implementation, PAQS-E OpenAI integration, PAQS-E Decision Ledger/Dashboard, PAQS-Q successor tasks, broker behavior, paper behavior or backtest behavior is implemented by the `PAQS-DUAL-001` docs migration itself.
+TASK-006B2 passed final independent post-remediation review and is accepted/integrated at `5f996aebb012cc0884d912f6f3eb71c32e9fd627`. It provides the immutable provider-neutral current Snapshot-on-Demand factual contract, including bounded W1/D1/M30 evidence, quote/market-state reference-only facts, machine-readable coverage/provenance, canonical SHA-256 identity and corrected W1 As-Of semantics. Evidence is preserved in `docs/reviews/TASK_006B2_INDEPENDENT_REVIEW.md`.
+
+TASK-007A remains the next planned implementation and is not authorized until its own explicit Task Contract is approved.
+
+No PAQS-E OpenAI integration, PAQS-E Decision Ledger/Dashboard, PAQS-Q successor tasks, broker behavior, paper behavior or backtest behavior is implemented by this docs migration.
