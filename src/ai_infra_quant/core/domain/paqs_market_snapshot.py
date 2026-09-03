@@ -425,7 +425,6 @@ def build_paqs_market_snapshot(
         adjustment.adjustment_as_of,
         *(bar.retrieved_at for bar in d1_bars),
         *(bar.provider_time for bar in d1_bars),
-        *(bar.interval_end for bar in w1_bars),
         *(bar.interval_end for bar in m30_bars),
     ]
     if quote.latest_quote_at is not None:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import FrozenInstanceError, replace
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 
 import pytest
@@ -21,6 +21,9 @@ from ai_infra_quant.core.domain.market_data import (
     MarketStatusSnapshot,
     ProviderResult,
     QuoteSnapshot,
+    TradingDay,
+    TradingDayType,
+    TradingSessionSegment,
 )
 from ai_infra_quant.core.domain.paqs_input import (
     AdjustmentBasis,
@@ -31,6 +34,7 @@ from ai_infra_quant.core.domain.paqs_input import (
     DerivedTimeframe,
     PaqsInputBundle,
     SourceCoverage,
+    derive_weekly_bars,
 )
 from ai_infra_quant.core.domain.paqs_market_snapshot import (
     D1_SNAPSHOT_CAP,
@@ -193,23 +197,25 @@ def _quote(
 
 def _market_state(
     status: DataAvailabilityStatus = DataAvailabilityStatus.AVAILABLE,
+    *,
+    retrieved_at: datetime = NOW,
 ) -> ProviderResult[MarketStatusSnapshot]:
     if status is not DataAvailabilityStatus.AVAILABLE:
         return ProviderResult(
             status=status,
             provider=PROVIDER,
-            retrieved_at=NOW,
+            retrieved_at=retrieved_at,
             reason="state unavailable",
         )
     return ProviderResult(
         status=status,
         provider=PROVIDER,
-        retrieved_at=NOW,
+        retrieved_at=retrieved_at,
         data=MarketStatusSnapshot(
             security="US.AVGO",
             state=CanonicalMarketState.OPEN,
             provider_state="MORNING",
-            retrieved_at=NOW,
+            retrieved_at=retrieved_at,
         ),
     )
 
@@ -348,6 +354,120 @@ def test_as_of_is_after_all_facts_and_clock_is_applied_last() -> None:
     )
     assert snapshot.as_of_timestamp == latest_quote_at
     assert snapshot.created_at == latest_quote_at
+
+
+@pytest.mark.parametrize(
+    ("session_dates", "request_time"),
+    [
+        (
+            tuple(date(2026, 8, 3) + timedelta(days=index) for index in range(5)),
+            datetime(2026, 8, 7, 21, tzinfo=UTC),
+        ),
+        (
+            tuple(date(2026, 8, 3) + timedelta(days=index) for index in range(4)),
+            datetime(2026, 8, 6, 21, tzinfo=UTC),
+        ),
+    ],
+    ids=("friday-final-session", "holiday-shortened-thursday-final-session"),
+)
+def test_completed_w1_nominal_future_interval_does_not_advance_as_of(
+    session_dates: tuple[date, ...],
+    request_time: datetime,
+) -> None:
+    trading_days = tuple(
+        TradingDay(
+            market="US",
+            market_date=session_date,
+            market_timezone="America/New_York",
+            day_type=TradingDayType.FULL,
+            provider_day_type="WHOLE",
+            session_segments=(TradingSessionSegment(time(9, 30), time(16, 0)),),
+            provider=PROVIDER,
+            retrieved_at=request_time,
+        )
+        for session_date in session_dates
+    )
+    daily = tuple(
+        DailyBar(
+            security="US.AVGO",
+            session_date=session_date,
+            provider_time=datetime.combine(session_date, time(20), tzinfo=UTC),
+            open=Decimal("100"),
+            high=Decimal("102"),
+            low=Decimal("99"),
+            close=Decimal("101"),
+            volume=Decimal("1000"),
+            is_completed=True,
+            retrieved_at=request_time,
+        )
+        for session_date in session_dates
+    )
+    weekly = derive_weekly_bars(
+        security="US.AVGO",
+        market_timezone="America/New_York",
+        daily_bars=daily,
+        trading_days=trading_days,
+        as_of=request_time,
+    )
+    assert len(weekly) == 1
+    assert weekly[0].is_completed is True
+    assert weekly[0].coverage is DerivedCoverage.COMPLETE
+    nominal_next_monday = datetime(2026, 8, 10, 4, tzinfo=UTC)
+    assert weekly[0].interval_end == nominal_next_monday
+    assert nominal_next_monday > request_time
+
+    bundle = _bundle(
+        daily=daily,
+        weekly=weekly,
+        m30=(),
+        as_of=request_time,
+        warnings=(),
+        missing_m30=0,
+    )
+    bundle = replace(
+        bundle,
+        calendar=CalendarMetadata(
+            status=DataAvailabilityStatus.AVAILABLE,
+            provider=PROVIDER,
+            retrieved_at=request_time,
+            trading_days=trading_days,
+        ),
+        adjustment=AdjustmentMetadata(
+            basis=AdjustmentBasis.PROVIDER_QFQ_CURRENT,
+            adjustment_as_of=request_time,
+            historical_replay_safe=False,
+        ),
+    )
+    snapshot = _snapshot(
+        bundle=bundle,
+        quote=_quote(
+            retrieved_at=request_time,
+            latest_quote_at=request_time,
+        ),
+        state=_market_state(retrieved_at=request_time),
+        created_at=request_time,
+    )
+
+    assert len(snapshot.w1_bars) == 1
+    assert snapshot.w1_bars[0].interval_end == nominal_next_monday
+    assert snapshot.as_of_timestamp == request_time
+    assert snapshot.created_at == request_time
+    assert snapshot.as_of_timestamp < nominal_next_monday
+    assert snapshot.created_at < nominal_next_monday
+    assert nominal_next_monday.isoformat().replace("+00:00", "Z") in snapshot.canonical_hash_text()
+
+    changed_geometry = replace(weekly[0], interval_end=nominal_next_monday + timedelta(hours=1))
+    changed_snapshot = _snapshot(
+        bundle=replace(bundle, completed_w1_bars=(changed_geometry,)),
+        quote=_quote(
+            retrieved_at=request_time,
+            latest_quote_at=request_time,
+        ),
+        state=_market_state(retrieved_at=request_time),
+        created_at=request_time,
+    )
+    assert changed_snapshot.as_of_timestamp == request_time
+    assert changed_snapshot.snapshot_hash != snapshot.snapshot_hash
 
 
 def test_hash_normalizes_nonsemantic_order_and_decimal_scale() -> None:
