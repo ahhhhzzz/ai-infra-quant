@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -20,6 +21,15 @@ from ai_infra_quant.core.domain.paqs_input import (
 )
 
 
+@dataclass(frozen=True, slots=True)
+class PaqsInputAcquisition:
+    """One input retrieval plus its provider-neutral source statuses."""
+
+    bundle: PaqsInputBundle
+    d1_source_status: DataAvailabilityStatus
+    minute_source_status: DataAvailabilityStatus
+
+
 class PaqsInputQueries:
     """Prepare current provider-agnostic PAQS inputs without strategy interpretation."""
 
@@ -35,6 +45,9 @@ class PaqsInputQueries:
         self._now = now
 
     def current_bundle(self, security_id: str) -> PaqsInputBundle:
+        return self.current_acquisition(security_id).bundle
+
+    def current_acquisition(self, security_id: str) -> PaqsInputAcquisition:
         security, market_security = self._market_data_queries.resolve_research_security(security_id)
         daily_view = self._market_data_queries.daily_bars(security_id, 1500)
         minute_view = self._market_data_queries.minute_bars(security_id, 30)
@@ -115,7 +128,7 @@ class PaqsInputQueries:
             if self._provider_name == PROVIDER_FUTU_QUOTE
             else AdjustmentBasis.UNAVAILABLE
         )
-        return PaqsInputBundle(
+        bundle = PaqsInputBundle(
             security_id=security.id,
             market=security.market,
             symbol=security.symbol,
@@ -147,6 +160,11 @@ class PaqsInputQueries:
                 m30_completed_count=len(completed_m30),
                 m30_partial_count=missing_m30,
             ),
+        )
+        return PaqsInputAcquisition(
+            bundle=bundle,
+            d1_source_status=daily_view.result.status,
+            minute_source_status=minute_view.result.status,
         )
 
 

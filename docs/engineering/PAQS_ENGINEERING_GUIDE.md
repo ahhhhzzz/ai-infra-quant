@@ -1,12 +1,12 @@
-# PAQS Engineering Guide — through TASK-006B Structure
+# PAQS Engineering Guide — through TASK-006B2 Factual Snapshot
 
 ## Authority and boundary
 
 Implementation authority flows from `AGENTS.md`, `docs/ROADMAP.md`, `docs/MASTER_SPEC.md`, and the
-approved TASK-006A and TASK-006B contracts. The PAQS v0.3.1 research lock and Review Amendment A
-provide adopted semantics where a contract says so. TASK-006B stops after ATR, Pivot, Swing, Key
-Level, Zone, Range, and four-state Base Regime. It contains no later Event, setup, advisory,
-target/risk-reward, score, or ranking behavior.
+approved TASK-006A, TASK-006B, and TASK-006B2 contracts plus TASK-006B2 Amendment 01. The PAQS
+v0.3.1 research lock and Review Amendment A provide adopted semantics where a contract says so.
+TASK-006B stops after ATR, Pivot, Swing, Key Level, Zone, Range, and four-state Base Regime. It
+contains no later Event, setup, advisory, target/risk-reward, score, or ranking behavior.
 
 Phase 1 migration and review evidence remain immutable. No calendar, W1, M30, or PAQS input bundle
 is persisted.
@@ -19,7 +19,8 @@ stored canonical Security UUID
   -> read-only Market Data Provider port
   -> canonical quote / completed D1 / completed 1m / trading days
   -> provider-agnostic PAQS input preparation
-  -> summary-only input-status API
+  -> immutable Snapshot-on-Demand factual market snapshot
+  -> canonical serialization and SHA-256 snapshot hash
 ```
 
 Futu SDK enums, DataFrames, and quote contexts stop inside `integrations/futu_quote/`. Core domain
@@ -98,6 +99,43 @@ prices are never represented as zero.
 The diagnostic endpoint returns only counts, latest completed timestamps, adjustment/calendar
 metadata, quality, and warnings. It accepts no public historical `as_of` parameter and emits no
 strategy conclusion.
+
+## TASK-006B2 Snapshot-on-Demand factual contract
+
+`PaqsMarketSnapshotQueries` retrieves one current PAQS input acquisition and one current market
+state, then freezes them into the provider-neutral `PaqsMarketSnapshot`. The read-only endpoint is
+`GET /api/v1/paqs/securities/{security_id}/market-snapshot`; it has no public query parameters and
+does not persist the response. A later request builds a new snapshot, while an already returned
+frozen domain object cannot change.
+
+The initial schema is `paqs-market-snapshot-v1`. It includes the latest 156 completed COMPLETE W1
+bars, 500 completed D1 bars, and 200 completed COMPLETE REGULAR-session M30 bars. Inputs are sorted
+chronologically, duplicate canonical bar identities are rejected, and all OHLCV values remain
+`Decimal` in the domain and canonical decimal strings in JSON. W1 PARTIAL and UNKNOWN bars are not
+authoritative payload bars.
+
+The machine-readable `timeframe_evidence_status` block has explicit `W1`, `D1`, and `M30` entries.
+Each retains its upstream provider-neutral `source_status` and authoritative included count. W1
+also reports excluded PARTIAL and UNKNOWN counts; M30 reports the existing missing elapsed-bucket
+count. The original source coverage, calendar result status/reason, data quality, warnings, and
+adjustment truth are retained separately.
+
+`current_price_reference` and `market_state_reference` are always marked `reference_only`. Missing
+or failed quote/state results retain their exact status, provider, retrieval time, and reason
+without fabricating a price or closed state. Quote `provider_delay_seconds` is preserved when
+reported and remains null when absent; the snapshot applies no freshness or executable-price
+policy.
+
+The snapshot hash is lowercase SHA-256 over compact sorted-key UTF-8 JSON. The canonical payload
+includes schema version, final aware-UTC `as_of_timestamp`, every model-visible factual value, and
+all model-visible source/provenance fields. It excludes only `snapshot_hash` and transient
+`created_at`, so a creation-clock change alone does not alter factual identity. Component retrieval
+finishes before the creation clock is read, and `created_at` is clamped to be no earlier than the
+final as-of boundary.
+
+This shared snapshot is factual infrastructure. It contains no legacy Structure output, objective
+indicator package, branch conclusion, provider model call, database record, dashboard workflow, or
+broker capability.
 
 ## TASK-006B normalized structure input
 

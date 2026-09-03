@@ -79,8 +79,8 @@ Only Phase 0 through Phase 4 are valid target phases.
 | MKT-012 | Missing/delayed/stale/unavailable/error states are explicit; no market value fabricated | RETAINED | all | IMPLEMENTED | provider result/API contracts plus AGENTS |
 | MKT-013 | TASK-006A provides provider-neutral trading calendar/session/coverage/adjustment metadata | RETAINED | 2 | IMPLEMENTED | Calendar port, PAQS bundle/diagnostic tests |
 | MKT-014 | Shared initial PAQS structural evidence roles are completed W1 / D1 / 30m regular session; H1/H4 are not MVP requirements | RETAINED | 2 | DOCUMENTED | Roadmap 5; TASK-006A |
-| MKT-015 | Latest quote may be included in an analysis snapshot only as explicitly reference-only current-price context | RETAINED | 2 | PLANNED_TASK | TASK-006B2 scope direction; `PAQS-DUAL-001` |
-| MKT-016 | Reference-only quote must not confirm completed-bar Pivot/Breakout/Trigger/Follow-through/Setup facts | RETAINED | 2 | PLANNED_TASK | TASK-006B2 scope direction; Roadmap 5 |
+| MKT-015 | Latest quote may be included in an analysis snapshot only as explicitly reference-only current-price context | RETAINED | 2 | IMPLEMENTED | TASK-006B2 snapshot domain/API/hash tests |
+| MKT-016 | Reference-only quote must not confirm completed-bar structural or strategy facts | RETAINED | 2 | IMPLEMENTED | TASK-006B2 eligibility and no-scope tests |
 | MKT-017 | Strict arbitrary historical As-Of replay requires later local observation/replay support and must not be falsely claimed from current QFQ read-through data | RETAINED | 2–4 | DOCUMENTED | Roadmap 5/7; TASK-006B1 direction |
 
 | ID | Dashboard requirement | Disposition | Phase | Status | Evidence |
@@ -115,8 +115,9 @@ Only Phase 0 through Phase 4 are valid target phases.
 | PAQS-012 | No profitability/Alpha/probability claim from implementation tests, structural validation or uncalibrated LLM reasoning | RETAINED | 2–4 | DOCUMENTED | Roadmap/AGENTS/PAQS-E doctrine |
 | PAQS-013 | PAQS-E and PAQS-Q are parallel strategy branches, not a simple version supersession chain | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 2/6 |
 | PAQS-014 | Strategy execution is explicit user-triggered Snapshot-on-Demand, not continuous/background strategy analysis | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 4/7 |
-| PAQS-015 | TASK-006B2 will define one shared immutable current Point-in-Time Market Snapshot contract with canonical serialization and `snapshot_hash` | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
-| PAQS-016 | Latest quote is reference-only and cannot confirm completed-bar structural evidence | RETAINED | 2 | PLANNED_TASK | Roadmap 5/7 |
+| PAQS-015 | TASK-006B2 defines one shared immutable current Snapshot-on-Demand Market Snapshot with canonical serialization and `snapshot_hash` | RETAINED | 2 | IMPLEMENTED | `PaqsMarketSnapshot`; current snapshot API; canonical/golden-hash tests |
+| PAQS-016 | Latest quote is reference-only, preserves nullable provider delay, and cannot confirm completed-bar structural evidence | RETAINED | 2 | IMPLEMENTED | TASK-006B2 quote-reference/hash/API tests |
+| PAQS-019 | Shared W1/D1/M30 evidence exposes machine-readable source status, authoritative counts, W1 exclusions and M30 missing elapsed-bucket provenance | RETAINED | 2 | IMPLEMENTED | TASK-006B2 Amendment 01 domain/API tests |
 | PAQS-017 | PAQS branches remain runtime-independent; one provider/branch may fail without disabling the other or ordinary market-data viewing | RETAINED | 2 | DOCUMENTED | Dual-branch architecture decision/review |
 | PAQS-018 | TASK-006B1 Local Market Data Store & Replay Foundation remains shared planned infrastructure but is deferred behind the initial current-analysis PAQS-E MVP | RETAINED | 2 | PLANNED_TASK | Roadmap 7; staged planning history |
 
