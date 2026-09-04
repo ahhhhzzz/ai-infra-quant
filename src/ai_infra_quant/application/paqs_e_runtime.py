@@ -239,6 +239,22 @@ def validate_reasoning_result(
             )
         )
 
+    ready = result.entry.advisory in {EntryAdvisory.LONG_READY, EntryAdvisory.SHORT_READY}
+    if not result.key_levels and (
+        (
+            result.support.support_status is SupportStatus.SUPPORTED
+            and result.support.input_quality is InputQuality.COMPLETE
+        )
+        or ready
+    ):
+        issues.append(
+            _issue(
+                "KEY_LEVELS_REQUIRED",
+                "key_levels",
+                "supported complete or actionable analysis requires one to four key levels",
+            )
+        )
+
     allowed_followthrough = {
         TriggerStatus.NOT_CONFIRMED: {FollowthroughStatus.NOT_APPLICABLE},
         TriggerStatus.CONFIRMED: {
@@ -372,7 +388,6 @@ def validate_reasoning_result(
             )
         )
 
-    ready = result.entry.advisory in {EntryAdvisory.LONG_READY, EntryAdvisory.SHORT_READY}
     entry_reference = result.price_references.executable_entry_reference
     invalidation = result.invalidation
     targets = result.targets
@@ -607,7 +622,8 @@ def validate_reasoning_result(
                     )
                 guardrails = request.runtime_config.guardrails
                 if (
-                    guardrails is not None
+                    ready
+                    and guardrails is not None
                     and guardrails.minimum_rr_t1 is not None
                     and expected_rr is not None
                     and expected_rr < guardrails.minimum_rr_t1

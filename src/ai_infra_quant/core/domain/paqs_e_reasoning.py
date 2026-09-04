@@ -17,6 +17,8 @@ PAQS_E_PROMPT_VERSION = "paqs-e-runtime-prompt-v1"
 PAQS_E_VALIDATOR_VERSION = "paqs-e-validator-v1"
 OPENAI_PROVIDER_ID = "openai"
 PAQS_E_DEFAULT_STRATEGY_ID = "paqs-e-master"
+PAQS_E_ENTRY_REFERENCE_POLICY_V1 = "SNAPSHOT_QUOTE_REGULAR_OPEN_REQUIRED"
+PAQS_E_QUOTE_FRESHNESS_POLICY_V1 = "UPSTREAM_AVAILABLE_REQUIRED"
 
 
 class AnalysisMode(StrEnum):
@@ -210,8 +212,8 @@ class PaqsERuntimeConfigV1:
     short_advisory_allowed: bool = True
     short_execution_allowed: bool = False
     extended_hours_entry_reference_allowed: bool = False
-    entry_reference_policy: str = "SNAPSHOT_QUOTE_REGULAR_OPEN_REQUIRED"
-    quote_freshness_policy: str = "UPSTREAM_AVAILABLE_REQUIRED"
+    entry_reference_policy: str = PAQS_E_ENTRY_REFERENCE_POLICY_V1
+    quote_freshness_policy: str = PAQS_E_QUOTE_FRESHNESS_POLICY_V1
     guardrails: PaqsERuntimeGuardrails | None = None
 
     def __post_init__(self) -> None:
@@ -227,8 +229,10 @@ class PaqsERuntimeConfigV1:
             raise ValueError("v1 allows short advisory but not actionable short execution")
         if self.extended_hours_entry_reference_allowed:
             raise ValueError("v1 does not allow extended-hours entry references")
-        if not self.entry_reference_policy.strip() or not self.quote_freshness_policy.strip():
-            raise ValueError("runtime reference policies are required")
+        if self.entry_reference_policy != PAQS_E_ENTRY_REFERENCE_POLICY_V1:
+            raise ValueError("unsupported v1 entry reference policy")
+        if self.quote_freshness_policy != PAQS_E_QUOTE_FRESHNESS_POLICY_V1:
+            raise ValueError("unsupported v1 quote freshness policy")
 
 
 @dataclass(frozen=True, slots=True)
@@ -328,9 +332,12 @@ class PaqsEReasoningRequestV1:
             if len(value) != 64 or any(character not in "0123456789abcdef" for character in value):
                 raise ValueError(f"{name} must be a lowercase SHA-256")
         for item in self.auxiliary_context:
+            if not item.as_of_compatible:
+                raise ValueError(
+                    "TASK-007A CURRENT_ANALYSIS rejects As-Of-incompatible auxiliary context"
+                )
             if (
-                item.as_of_compatible
-                and item.source_timestamp is not None
+                item.source_timestamp is not None
                 and item.source_timestamp > self.snapshot_as_of_timestamp
             ):
                 raise ValueError("As-Of-compatible auxiliary context cannot come from the future")

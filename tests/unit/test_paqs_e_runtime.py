@@ -37,7 +37,9 @@ from ai_infra_quant.core.domain.market_data import (
     QuoteSnapshot,
 )
 from ai_infra_quant.core.domain.paqs_e_reasoning import (
+    PAQS_E_ENTRY_REFERENCE_POLICY_V1,
     PAQS_E_OUTPUT_SCHEMA_VERSION,
+    PAQS_E_QUOTE_FRESHNESS_POLICY_V1,
     PAQS_E_REQUEST_SCHEMA_VERSION,
     PAQS_E_VALIDATOR_VERSION,
     AnalysisMode,
@@ -119,7 +121,9 @@ NOW = datetime(2026, 9, 4, 12, tzinfo=UTC)
 SECURITY_ID = "00000000-0000-4000-8000-000000000007"
 
 
-def _snapshot() -> PaqsMarketSnapshot:
+def _snapshot(
+    *, data_quality: SnapshotQualityStatus = SnapshotQualityStatus.COMPLETE
+) -> PaqsMarketSnapshot:
     daily = DailyBar(
         security="US.AVGO",
         session_date=date(2026, 9, 3),
@@ -187,7 +191,7 @@ def _snapshot() -> PaqsMarketSnapshot:
             adjustment_as_of=NOW,
             historical_replay_safe=False,
         ),
-        data_quality=SnapshotQualityStatus.COMPLETE,
+        data_quality=data_quality,
         warnings=(),
         source_coverage=SourceCoverage(
             d1_source_count=1,
@@ -492,6 +496,8 @@ def test_runtime_config_and_request_identity_are_immutable_and_reject_lookahead(
             request,
             auxiliary_context=(replace(item, source_timestamp=NOW + timedelta(seconds=1)),),
         )
+    with pytest.raises(ValueError, match="As-Of-incompatible"):
+        replace(request, auxiliary_context=(replace(item, as_of_compatible=False),))
     with pytest.raises(ValueError, match="snapshot"):
         replace(request, snapshot_hash="0" * 64)
     with pytest.raises(ValueError, match="request"):
@@ -528,6 +534,47 @@ def test_auxiliary_context_is_ordered_and_auditable() -> None:
     assert '"as_of_compatible":true' in serialized
     with pytest.raises(ValueError, match="unique"):
         replace(request, auxiliary_context=(first, first))
+
+
+def test_as_of_incompatible_context_is_rejected_before_provider_input() -> None:
+    incompatible = AuxiliaryContextItem(
+        context_id="future-research",
+        category="analyst_research",
+        source_label="explicit fixture",
+        source_timestamp=None,
+        provenance="user supplied",
+        as_of_compatible=False,
+        content="This must never reach the provider.",
+    )
+    with pytest.raises(ValueError, match="As-Of-incompatible"):
+        build_reasoning_request(
+            snapshot=_snapshot(),
+            model_id="gpt-test-explicit",
+            auxiliary_context=(incompatible,),
+        )
+
+
+def test_runtime_config_requires_exact_v1_policy_identities() -> None:
+    config = PaqsERuntimeConfigV1(
+        entry_reference_policy=PAQS_E_ENTRY_REFERENCE_POLICY_V1,
+        quote_freshness_policy=PAQS_E_QUOTE_FRESHNESS_POLICY_V1,
+    )
+    assert config.entry_reference_policy == "SNAPSHOT_QUOTE_REGULAR_OPEN_REQUIRED"
+    assert config.quote_freshness_policy == "UPSTREAM_AVAILABLE_REQUIRED"
+    with pytest.raises(ValueError, match="entry reference policy"):
+        PaqsERuntimeConfigV1(entry_reference_policy="ARBITRARY_NONEMPTY_POLICY")
+    with pytest.raises(ValueError, match="quote freshness policy"):
+        PaqsERuntimeConfigV1(quote_freshness_policy="ARBITRARY_NONEMPTY_POLICY")
+
+    request = build_reasoning_request(
+        snapshot=_snapshot(),
+        model_id="gpt-test-explicit",
+        runtime_config=config,
+    )
+    assert isinstance(
+        validate_reasoning_result(request=request, result=_ready_long(_result(request))),
+        ValidatedPaqsEResult,
+    )
 
 
 def test_strategy_loader_rejects_unregistered_and_path_traversal(
@@ -683,6 +730,52 @@ def test_validator_accepts_decimal_ready_state_without_mutating_judgment() -> No
             validate_reasoning_result(request=request, result=result),
             ValidatedPaqsEResult,
         )
+
+
+def test_key_level_minimum_depends_on_support_quality_and_actionability() -> None:
+    request = build_reasoning_request(snapshot=_snapshot(), model_id="gpt-test-explicit")
+    complete_zero = replace(_result(request), key_levels=())
+    complete_failure = validate_reasoning_result(request=request, result=complete_zero)
+    assert isinstance(complete_failure, PaqsEValidationFailure)
+    assert "KEY_LEVELS_REQUIRED" in {issue.code for issue in complete_failure.issues}
+
+    ready_zero = replace(_ready_long(_result(request)), key_levels=())
+    ready_failure = validate_reasoning_result(request=request, result=ready_zero)
+    assert isinstance(ready_failure, PaqsEValidationFailure)
+    assert "KEY_LEVELS_REQUIRED" in {issue.code for issue in ready_failure.issues}
+
+    assert isinstance(
+        validate_reasoning_result(request=request, result=_result(request)),
+        ValidatedPaqsEResult,
+    )
+
+    degraded_request = build_reasoning_request(
+        snapshot=_snapshot(data_quality=SnapshotQualityStatus.INVALID),
+        model_id="gpt-test-explicit",
+    )
+    degraded_base = _result(degraded_request)
+    degraded = replace(
+        degraded_base,
+        support=SupportAssessment(
+            support_status=SupportStatus.SUPPORTED,
+            input_quality=InputQuality.INVALID,
+            data_quality_reasons=("snapshot invalid",),
+        ),
+        key_levels=(),
+        entry=replace(degraded_base.entry, advisory=EntryAdvisory.DATA_UNAVAILABLE),
+    )
+    assert isinstance(
+        validate_reasoning_result(request=degraded_request, result=degraded),
+        ValidatedPaqsEResult,
+    )
+
+    degraded_ready_zero = _ready_long(degraded)
+    degraded_ready_failure = validate_reasoning_result(
+        request=degraded_request,
+        result=degraded_ready_zero,
+    )
+    assert isinstance(degraded_ready_failure, PaqsEValidationFailure)
+    assert "KEY_LEVELS_REQUIRED" in {issue.code for issue in degraded_ready_failure.issues}
 
 
 def test_validator_reports_out_of_range_ratio_instead_of_raising() -> None:
@@ -864,6 +957,13 @@ def test_versioned_minimum_rr_guardrail_is_validated_without_rewriting_result() 
     assert "RR_GUARDRAIL_NOT_MET" in {issue.code for issue in failure.issues}
     assert result.risk_reward.rr_t1 == Decimal("2")
 
+    non_action = replace(result, entry=replace(result.entry, advisory=EntryAdvisory.NO_TRADE))
+    validated = validate_reasoning_result(request=request, result=non_action)
+    assert isinstance(validated, ValidatedPaqsEResult)
+    assert validated.result is non_action
+    assert validated.result.entry.advisory is EntryAdvisory.NO_TRADE
+    assert validated.result.risk_reward.rr_t1 == Decimal("2")
+
 
 @pytest.mark.parametrize(
     ("mutator", "code"),
@@ -1008,11 +1108,21 @@ class _FakeClient:
 def test_openai_adapter_uses_strict_stateless_responses_request_without_tools() -> None:
     strategy = load_strategy_package()
     prompt = load_prompt_package()
+    compatible_context = AuxiliaryContextItem(
+        context_id="research-known-at-cutoff",
+        category="analyst_research",
+        source_label="explicit fixture",
+        source_timestamp=NOW,
+        provenance="user supplied",
+        as_of_compatible=True,
+        content="Provider-visible compatible context.",
+    )
     request = build_reasoning_request(
         snapshot=_snapshot(),
         model_id="gpt-explicit-no-fallback",
         strategy=strategy,
         prompt=prompt,
+        auxiliary_context=(compatible_context,),
     )
     parsed = PaqsEReasoningResultSchemaV1.model_validate_json(canonical_json(_result(request)))
     responses = _FakeResponses(SimpleNamespace(output_parsed=parsed, id="resp_007a"))
@@ -1032,6 +1142,7 @@ def test_openai_adapter_uses_strict_stateless_responses_request_without_tools() 
     assert isinstance(provider_input, list)
     assert strategy.content in provider_input[0]["content"]
     assert '"timeframe_evidence_status"' in str(call["input"])
+    assert compatible_context.content in str(call["input"])
 
 
 def test_openai_adapter_returns_truthful_typed_failures_without_secret_leakage(

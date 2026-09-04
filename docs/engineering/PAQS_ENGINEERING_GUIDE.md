@@ -152,8 +152,9 @@ request. Legacy PAQS-Q structure conclusions do not.
 
 Auxiliary context is an ordered frozen tuple. Every item declares its ID, extensible category,
 source label/timestamp, optional provenance, As-Of compatibility, and content. TASK-007A retrieves
-none of it and has no hidden previous result or provider conversation. A timestamp after the
-snapshot cutoff cannot be marked As-Of-compatible.
+none of it and has no hidden previous result or provider conversation. `CURRENT_ANALYSIS` rejects
+every explicitly As-Of-incompatible item before provider dispatch, while compatible items retain
+their declared order and must not have a source timestamp after the snapshot cutoff.
 
 The lightweight registry maps `paqs-e-master` to
 `docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md`. The loader accepts registered repository-
@@ -174,7 +175,12 @@ canonical Decimal strings. Risk and reward use Decimal only; ratios use local pr
 `ROUND_HALF_EVEN` quantization to scale 18. An actionable state requires a regular-session eligible
 entry reference, structural invalidation and nearest structural T1 with separate numeric
 calculation references, valid direction/target ordering, and exact recomputed RR. This is contract
-validation, not a deterministic replacement PAQS-E strategy.
+validation, not a deterministic replacement PAQS-E strategy. V1 machine-enforces the exact
+`SNAPSHOT_QUOTE_REGULAR_OPEN_REQUIRED` and `UPSTREAM_AVAILABLE_REQUIRED` policy identities.
+`SUPPORTED + COMPLETE` outputs, and every READY output, require one to four Key Levels. A
+configured minimum RR is an actionable-state consistency gate: it rejects a below-threshold READY
+judgment but does not invalidate or rewrite an otherwise valid non-action judgment that reports the
+same final RR.
 
 ## TASK-006B normalized structure input
 
