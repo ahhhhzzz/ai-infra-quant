@@ -452,7 +452,7 @@ def test_strategy_prompt_and_request_are_hash_bound_and_snapshot_complete() -> N
     assert strategy.content_sha256 == hashlib.sha256(strategy.content.encode()).hexdigest()
     assert (
         strategy.content_sha256
-        == "0a29f83256cdb21c64e9dfe90e037dddca399ff407d2cd23167f5f504f612ae8"
+        == "73bed86ffef402d3d1e5eff855aaa2cc4bebf1ca1aafa33500c8839f63c16f82"
     )
     assert prompt.content_sha256 == hashlib.sha256(prompt.content.encode()).hexdigest()
     assert request.request_schema_version == PAQS_E_REQUEST_SCHEMA_VERSION
@@ -472,6 +472,14 @@ def test_strategy_prompt_and_request_are_hash_bound_and_snapshot_complete() -> N
         assert f'"{factual_field}"' in payload
     assert "pivots" not in payload
     assert "zones" not in payload
+
+
+def test_hashed_runtime_resources_have_explicit_lf_checkout_policy() -> None:
+    attributes = set(Path(".gitattributes").read_text(encoding="utf-8").splitlines())
+    assert {
+        "docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md text eol=lf",
+        "src/ai_infra_quant/resources/paqs_e/runtime_prompt_v1.md text eol=lf",
+    }.issubset(attributes)
 
 
 def test_runtime_config_and_request_identity_are_immutable_and_reject_lookahead() -> None:
