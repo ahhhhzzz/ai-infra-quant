@@ -1,6 +1,6 @@
 # Architecture Specification
 
-Status: **AUTHORITATIVE — read-only PAQS decision-terminal architecture**
+Status: **AUTHORITATIVE — read-only PAQS decision-terminal architecture through TASK-007A**
 
 Authority: subordinate to `AGENTS.md`, `docs/ROADMAP.md`, and `docs/MASTER_SPEC.md`
 
@@ -30,6 +30,9 @@ Independent read-only boundary:
     Market Data Provider
       -> canonical quote/Daily/minute/status/calendar/security metadata
 
+Internal PAQS-E reasoning boundary (no public route in TASK-007A):
+    application runtime -> provider-neutral reasoning port -> OpenAI Responses adapter
+
 Human boundary:
     advisory display -> user -> broker official client
 ```
@@ -56,6 +59,7 @@ composition root -> backend + application + database + integrations
 | Market-data port | Quote, completed Daily/minute bars, market status, approved calendar/security metadata | Independent provider/import source | Brokerage-account access or execution |
 | PAQS input foundation | W1/D1/30m construction, session/calendar/coverage/adjustment metadata | Canonical market data | Provider SDK objects, broker/account state |
 | PAQS Strategy | Structure, events, setups, invalidation/target/RR/advisory by bounded task | PAQS input foundation | Provider SDKs, broker commands, accounting mutation |
+| PAQS-E reasoning runtime | Versioned snapshot-bound request/result, registered Markdown strategy/prompt packages, deterministic contract validation | Immutable factual snapshot and explicit auxiliary context | API/UI exposure, persistence, provider SDK imports outside integrations, hidden conversation state, broker behavior |
 | Quality/Ranking | Optional derived prioritization/explanation | PAQS states/advisories | Creating setups or bypassing hard gates |
 | Accounting/Portfolio | Accepted Phase 1 historical facts; optional future paper work only if reactivated | Explicit approved internal facts | Real-account state, PAQS rule mutation |
 | Performance/Backtest | Dormant optional future extensions | Canonical historical data if explicitly reactivated | Production mutation, fabricated history |
@@ -206,6 +210,27 @@ Owns conditional Holder Advisory, explanations/reason codes, Dashboard integrati
 Each task is separately approved/reviewed/integrated. No implementation may skip the dependency order by implementing later semantics inside an earlier task.
 
 ## 9. Paper, backtest and human boundaries
+
+### TASK-007A — internal PAQS-E runtime and OpenAI strategy port
+
+TASK-007A introduces an internal-only PAQS-E reasoning boundary. A frozen versioned request binds
+the exact TASK-006B2 snapshot identity and factual payload, fixed v1 runtime permissions, selected
+model ID, selected registered strategy ID/content hash, runtime prompt version/hash, and an ordered
+list of explicit auxiliary-context items. The accepted Master Spec remains a tracked Markdown
+resource loaded through the registry; neither its body nor model choice is hard-coded in the
+provider adapter.
+
+Core and application code depend only on the provider-neutral reasoning port. The first concrete
+adapter lives under `integrations/openai_reasoning/`, uses the OpenAI Responses API strict Pydantic
+output path, sends a fresh request with `store=false`, and supplies no tools, background mode,
+conversation, previous-response state, or fallback model. A deterministic Decimal validator may
+reject identity, factual, permission, state-matrix, structural-reference, target-order, and RR
+contract violations; it never upgrades or downgrades a valid PAQS-E judgment.
+
+`OPENAI_API_KEY` is an optional server environment secret and is never part of the request/result
+domain, logs, APIs, persistence, strategy resources, or prompt resources. TASK-007A registers no
+Analyze endpoint and adds no Decision Ledger, Dashboard workflow, historical replay, PAQS-Q, or
+broker capability.
 
 The application maintains no real-account or real-position state. Whether the user acts in the broker official client remains outside system state.
 

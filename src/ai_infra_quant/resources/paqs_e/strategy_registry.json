@@ -1,0 +1,10 @@
+{
+  "default_strategy_id": "paqs-e-master",
+  "strategies": [
+    {
+      "strategy_id": "paqs-e-master",
+      "display_name": "PAQS-E Context-Free Master Spec",
+      "source_path": "docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md"
+    }
+  ]
+}

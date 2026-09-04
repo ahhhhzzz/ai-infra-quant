@@ -1,4 +1,4 @@
-# PAQS Engineering Guide — through TASK-006B2 Factual Snapshot
+# PAQS Engineering Guide — through TASK-007A PAQS-E Runtime Port
 
 ## Authority and boundary
 
@@ -7,6 +7,10 @@ approved TASK-006A, TASK-006B, and TASK-006B2 contracts plus TASK-006B2 Amendmen
 v0.3.1 research lock and Review Amendment A provide adopted semantics where a contract says so.
 TASK-006B stops after ATR, Pivot, Swing, Key Level, Zone, Range, and four-state Base Regime. It
 contains no later Event, setup, advisory, target/risk-reward, score, or ranking behavior.
+
+TASK-007A separately adopts the accepted PAQS-E Master Spec as a runtime Markdown strategy and
+governs only the internal structured-reasoning runtime and first provider adapter. It does not
+change the legacy TASK-006B structure engine or authorize a public Analyze workflow.
 
 Phase 1 migration and review evidence remain immutable. No calendar, W1, M30, or PAQS input bundle
 is persisted.
@@ -136,6 +140,41 @@ final as-of boundary.
 This shared snapshot is factual infrastructure. It contains no legacy Structure output, objective
 indicator package, branch conclusion, provider model call, database record, dashboard workflow, or
 broker capability.
+
+## TASK-007A PAQS-E runtime contract
+
+`PaqsEReasoningRequestV1` binds `paqs-e-reasoning-request-v1` to the exact immutable snapshot hash,
+security/market/instrument/As-Of identity, `paqs-e-runtime-config-v1`, the selected explicit model,
+the selected strategy ID and exact-byte SHA-256, the runtime prompt version/hash, and
+`paqs-e-reasoning-result-v1`. W1/D1/M30 bars, current quote and market state, calendar,
+adjustment, quality, coverage, provider delay, warnings, and evidence provenance travel inside the
+request. Legacy PAQS-Q structure conclusions do not.
+
+Auxiliary context is an ordered frozen tuple. Every item declares its ID, extensible category,
+source label/timestamp, optional provenance, As-Of compatibility, and content. TASK-007A retrieves
+none of it and has no hidden previous result or provider conversation. A timestamp after the
+snapshot cutoff cannot be marked As-Of-compatible.
+
+The lightweight registry maps `paqs-e-master` to
+`docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md`. The loader accepts registered repository-
+relative UTF-8 Markdown only, blocks traversal/absolute paths, and hashes the exact bytes. The
+separate `paqs-e-runtime-prompt-v1` resource supplies compact transport/guardrail instructions; it
+does not duplicate the strategy.
+
+The provider-neutral port returns either a parsed result or one of `CONFIGURATION_ERROR`,
+`PROVIDER_UNAVAILABLE`, `PROVIDER_REFUSAL`, or `INVALID_STRUCTURED_OUTPUT`. The OpenAI adapter uses
+`responses.parse` with the strict Pydantic result schema, the exact caller model ID, and
+`store=false`. It attaches no tool, conversation, previous response, or background state. Missing
+`OPENAI_API_KEY` is a truthful configuration failure; secret values never enter domain objects or
+error text.
+
+Post-validation is `paqs-e-validator-v1`. It preserves the model judgment and either returns it
+unchanged with safe provider response identity or rejects contract violations. RR inputs are
+canonical Decimal strings. Risk and reward use Decimal only; ratios use local precision 60 and
+`ROUND_HALF_EVEN` quantization to scale 18. An actionable state requires a regular-session eligible
+entry reference, structural invalidation and nearest structural T1 with separate numeric
+calculation references, valid direction/target ordering, and exact recomputed RR. This is contract
+validation, not a deterministic replacement PAQS-E strategy.
 
 ## TASK-006B normalized structure input
 

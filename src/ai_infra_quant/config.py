@@ -7,7 +7,7 @@ from ipaddress import ip_address
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import field_validator, model_validator
+from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -55,6 +55,14 @@ class Settings(BaseSettings):
     valuation_timezone: str = "Asia/Hong_Kong"
     futu_opend_host: str = "127.0.0.1"
     futu_opend_port: int = 11111
+    openai_api_key: SecretStr | None = None
+
+    @field_validator("openai_api_key", mode="before")
+    @classmethod
+    def normalize_optional_openai_api_key(cls, value: object) -> object:
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
 
     @field_validator("host")
     @classmethod

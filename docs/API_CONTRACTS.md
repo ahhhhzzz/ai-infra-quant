@@ -1,6 +1,6 @@
 # API Contracts
 
-Status: **AUTHORITATIVE — dynamic US/HK market data and PAQS structure diagnostics**
+Status: **AUTHORITATIVE — current read APIs plus TASK-007A internal runtime boundary**
 
 Decision: `MTF-001` in `docs/ROADMAP.md`
 
@@ -253,6 +253,19 @@ The response architecture is:
 Nulls above demonstrate truthful unavailability and are not an implemented payload. Formulae,
 weights, thresholds, bands, normalization, sizing, and classification vocabulary require a
 separate strategy Task Contract. No output indicates whether the user traded.
+
+### 5.9 TASK-007A is not an API contract
+
+TASK-007A adds a provider-neutral internal PAQS-E request/result contract, registered strategy and
+runtime-prompt resources, deterministic result validation, and one OpenAI Responses API adapter.
+It intentionally registers no Analyze route and changes no OpenAPI operation. The API key remains
+server-side environment configuration and cannot be accepted from or returned to a client.
+
+Any future current-analysis endpoint, Decision Ledger record, Dashboard Analyze workflow, or
+model/strategy selector requires TASK-007B or TASK-007C approval and a separately reviewed public
+contract. Provider failures in the internal port are typed as configuration error, provider
+unavailable, provider refusal, or invalid structured output; TASK-007A does not fabricate an API
+response or strategy answer around those failures.
 
 ## 6. Phase 3 research and simulated paper direction
 

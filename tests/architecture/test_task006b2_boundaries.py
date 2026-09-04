@@ -46,8 +46,8 @@ def test_task006b2_adds_no_model_provider_strategy_or_write_capability() -> None
         "quote_freshness_policy",
     ):
         assert forbidden not in product_source
-    pyproject = Path("pyproject.toml").read_text(encoding="utf-8").lower()
-    assert '"openai' not in pyproject
+    # TASK-007A adds an OpenAI reasoning adapter, but the accepted TASK-006B2
+    # snapshot modules themselves remain provider- and strategy-neutral.
 
 
 def test_snapshot_public_schema_has_no_strategy_conclusion_fields() -> None:

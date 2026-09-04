@@ -127,17 +127,17 @@ Only Phase 0 through Phase 4 are valid target phases.
 |---|---|---|---:|---|---|
 | PAQSE-001 | `PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md` is the primary PAQS-E runtime semantic strategy authority candidate for bounded future Task Contract adoption; `PAQS_E_NAKED_PRICE_ACTION_DOCTRINE.md` remains the conceptual/doctrine foundation | RETAINED | 2 | DOCUMENTED | Master Spec + focused re-review PASS; Roadmap 6 |
 | PAQSE-002 | PAQS v0.3.x is historical formalization/guardrail/audit/terminology reference, not a requirement to recreate its full deterministic state machine inside PAQS-E | RETAINED | 2 | DOCUMENTED | Roadmap 6; Master Spec/Doctrine |
-| PAQSE-003 | PAQS-E model-provider port is provider-agnostic; OpenAI is the first planned adapter only | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction |
-| PAQSE-004 | First PAQS-E MVP model call receives only product-controlled snapshot/runtime/prompt/schema inputs and no web/browser/search tools | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction |
-| PAQSE-005 | Ordinary PAQS-E Analyze calls are stateless/fresh by default; prior decisions/conversation are not hidden prompt context | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction |
-| PAQSE-006 | PAQS-E output is schema-constrained structured output plus concise user explanation | RETAINED | 2 | PLANNED_TASK | Master Spec; TASK-007A |
-| PAQSE-007 | Deterministic post-validation checks schema/factual/arithmetic/RR discipline without replacing LLM strategy reasoning | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction |
+| PAQSE-003 | PAQS-E model-provider port is provider-agnostic; OpenAI is the first planned adapter only | RETAINED | 2 | DOCUMENTED | TASK-007A implementation branch pending independent review |
+| PAQSE-004 | First PAQS-E MVP model call receives only product-controlled snapshot/runtime/prompt/schema inputs and no web/browser/search tools | RETAINED | 2 | DOCUMENTED | TASK-007A implementation branch pending independent review |
+| PAQSE-005 | Ordinary PAQS-E Analyze calls are stateless/fresh by default; prior decisions/conversation are not hidden prompt context | RETAINED | 2 | DOCUMENTED | TASK-007A implementation branch pending independent review |
+| PAQSE-006 | PAQS-E output is schema-constrained structured output plus concise user explanation | RETAINED | 2 | DOCUMENTED | Master Spec; TASK-007A implementation branch pending independent review |
+| PAQSE-007 | Deterministic post-validation checks schema/factual/arithmetic/RR discipline without replacing LLM strategy reasoning | RETAINED | 2 | DOCUMENTED | TASK-007A implementation branch pending independent review |
 | PAQSE-008 | PAQS-E decisions are immutable revisions storing snapshot/doctrine/prompt/provider/model metadata and structured result | RETAINED | 2 | PLANNED_TASK | TASK-007B scope direction |
 | PAQSE-009 | PAQS-E Entry Advisory and Holder Advisory remain separate questions | RETAINED | 2 | DOCUMENTED | Master Spec / Doctrine |
 | PAQSE-010 | `NO_TRADE`, `WATCH_LONG`, `WAIT_RETEST`, `ENTRY_PENDING_REVALIDATION`, `UNCERTAIN` and poor-entry states are valid first-class outputs | RETAINED | 2 | DOCUMENTED | Master Spec |
 | PAQSE-011 | `TASK-007` is umbrella only; planned bounded tasks are TASK-007A/B/C and later TASK-007D | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSE-012 | TASK-007C completion is the current usability milestone for the current Snapshot-on-Demand PAQS-E MVP; historical Gold-Set replay may follow later | RETAINED | 2 | DOCUMENTED | Roadmap 7 |
-| PAQSE-013 | OpenAI API credentials are user-supplied locally, server-side only, uncommitted, not persisted in application data, not exposed to frontend clients, not returned by APIs and not logged | RETAINED | 2 | PLANNED_TASK | TASK-007A scope direction; Roadmap 7/10 |
+| PAQSE-013 | OpenAI API credentials are user-supplied locally, server-side only, uncommitted, not persisted in application data, not exposed to frontend clients, not returned by APIs and not logged | RETAINED | 2 | DOCUMENTED | TASK-007A implementation branch pending independent review; Roadmap 7/10 |
 | PAQSE-014 | First PAQS-E implementation does not require multi-model voting/ensemble behavior | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 6 |
 
 ### 5.3 PAQS-Q requirements
@@ -207,6 +207,10 @@ TASK-006B passed deterministic implementation review/remediation and was integra
 
 TASK-006B2 passed final independent post-remediation review and is accepted/integrated at `5f996aebb012cc0884d912f6f3eb71c32e9fd627`. It provides the immutable provider-neutral current Snapshot-on-Demand factual contract, including bounded W1/D1/M30 evidence, quote/market-state reference-only facts, machine-readable coverage/provenance, canonical SHA-256 identity and corrected W1 As-Of semantics. Evidence is preserved in `docs/reviews/TASK_006B2_INDEPENDENT_REVIEW.md`.
 
-TASK-007A remains the next planned implementation and is not authorized until its own explicit Task Contract is approved.
+TASK-007A now has an approved contract and an implementation on its dedicated task branch pending
+independent review. It adds only the internal snapshot-bound PAQS-E request/result contracts,
+registered Master Spec/runtime prompt packages, provider-neutral reasoning port, deterministic
+validator, and stateless OpenAI Responses adapter. No public Analyze route exists yet.
 
-No PAQS-E OpenAI integration, PAQS-E Decision Ledger/Dashboard, PAQS-Q successor tasks, broker behavior, paper behavior or backtest behavior is implemented by this docs migration.
+No PAQS-E Decision Ledger/Dashboard, PAQS-Q successor task, broker behavior, paper behavior, or
+backtest behavior is implemented by TASK-007A.

@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 import pytest
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 
 from ai_infra_quant.config import Settings
 from ai_infra_quant.logging_config import redact
@@ -15,6 +15,7 @@ def test_safe_defaults() -> None:
     assert settings.market_data_provider == "none"
     assert settings.futu_opend_host == "127.0.0.1"
     assert settings.futu_opend_port == 11111
+    assert settings.openai_api_key is None
 
 
 def test_futu_market_data_provider_is_allowed_without_changing_safe_default() -> None:
@@ -55,3 +56,12 @@ def test_decimal_settings_reject_float_and_logging_redacts_sensitive_keys() -> N
     assert redact(
         {"api_token": "not-a-real-secret", "nested": {"external_account_id": "private"}}
     ) == {"api_token": "[REDACTED]", "nested": {"external_account_id": "[REDACTED]"}}
+
+
+def test_openai_api_key_is_optional_and_secret() -> None:
+    assert Settings.model_validate({"openai_api_key": "  "}).openai_api_key is None
+    settings = Settings.model_validate({"openai_api_key": "test-only-secret"})
+    assert isinstance(settings.openai_api_key, SecretStr)
+    assert "test-only-secret" not in repr(settings)
+    assert settings.openai_api_key.get_secret_value() == "test-only-secret"
+    assert redact(settings.model_dump())["openai_api_key"] == "[REDACTED]"
