@@ -1,17 +1,17 @@
-# PAQS / Composite Quant Strategy Research Specification
+# PAQS-E / PAQS-Q Strategy Governance and Historical Research Specification
 
-Status: **PROPOSED / RESEARCH_UNVALIDATED**; not approved for implementation except through explicit bounded Task Contracts
+Status: **CURRENT STRATEGY GOVERNANCE + HISTORICAL RESEARCH REFERENCE**; implementation only through approved bounded Task Contracts
 
-Future authority: `docs/ROADMAP.md` decisions `MTF-001` and `PAQS-MVP-001`
+Authority: `docs/ROADMAP.md` decisions `MTF-001`, `PAQS-MVP-001`, `PAQS-DUAL-001` and `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`
 
-Current research definition:
+Historical deterministic PAQS research references:
 
 ```text
 docs/research/PAQS_V0.3.1_COMPLETENESS_LOCK.md
 docs/research/PAQS_V0.3.1_REVIEW_AMENDMENT_A.md
 ```
 
-The PAQS research documents lock research semantics but are not implementation contracts. `PAQS_V0.3.1_REVIEW_AMENDMENT_A.md` governs where it is more specific than the base v0.3.1 document. Implementation authority is granted only by a user-approved bounded TASK-006A/006B/006C/006D/006E Task Contract.
+The PAQS research documents lock research semantics but are not implementation contracts. `PAQS_V0.3.1_REVIEW_AMENDMENT_A.md` governs where it is more specific than the base v0.3.1 document. Their deterministic staging is not the current PAQS-E implementation sequence. The accepted 007A/007B contracts and user-authorized 007C contract govern the current PAQS-E MVP; Q-side successors require separate contracts.
 
 ## 1. Governance and supersession
 
@@ -26,9 +26,19 @@ Instruction precedence remains:
 
 The former completed-daily-only `AIInfraStrategy v1` formula proposal remains withdrawn as implementation authority.
 
-`PAQS_V0.2_CORE_DEFINITION_LOCK.md` remains research history. The v0.3.1 Completeness Lock plus Review Amendment A record the current Price Action research direction.
+`PAQS_V0.2_CORE_DEFINITION_LOCK.md` remains research history. The v0.3.1 Completeness Lock plus Review Amendment A remain deterministic/formalization research references; they do not replace PAQS-E semantic strategy authority.
 
-`PAQS-MVP-001` additionally makes the PAQS decision-terminal the current product-completion line and defines the authoritative future task decomposition. The earlier four-item research staging list is superseded.
+`PAQS-DUAL-001` prioritizes the PAQS-E current-analysis MVP and separates PAQS-Q reference work.
+TASK-007A adopts the registered `docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md`; its exact
+strategy/prompt hashes and deterministic guardrails remain authoritative. TASK-007B at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`
+has independent review PASS (`docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`), with integration verified separately. The next
+user-authorized task is `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`; its UI consumes existing structured outputs and does not
+redefine the strategy. TASK-007C is not yet implemented.
+
+R20 product capability adoption is governed by `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`. `docs/research/R20_ADOPTION_PLAN_AND_CODEX_PROMPT_ZH.md` is historical planning context.
+R20 strategy prompts, ATR thresholds, forced participation, leverage and confidence scoring are
+not adopted into PAQS-E. Council/evolution/news capabilities, if later contracted, are explicit
+research context/review proposals, not hidden memory or automatic changes to frozen doctrine.
 
 No rule, fixture, score or example in these research documents is a profitability or predictive-validity claim.
 
@@ -44,7 +54,7 @@ US.VRT
 HK.09698
 ```
 
-but future Phase 2 scope now plans dynamic supported US/HK securities under TASK-006A. PAQS must not hard-code strategy logic to those three symbols.
+but TASK-006A already supports dynamic provider-validated US/HK securities. PAQS must not hard-code strategy logic to those three symbols.
 
 PAQS consumes provider-agnostic canonical market data and may eventually produce:
 
@@ -63,9 +73,9 @@ Conditional language such as `EXIT_IF_HELD` never means the system knows a real 
 
 Missing/delayed/stale/unavailable/invalid/unsupported/incomplete inputs remain explicit. No market, corporate-action, risk, position or execution value is fabricated.
 
-## 3. PAQS is primary; Score is derived
+## 3. Historical deterministic pipeline; Score remains derived
 
-The historical/current score-level architecture remains recorded as:
+The historical score-level architecture remains recorded as:
 
 ```text
 Composite Quant Score
@@ -77,7 +87,7 @@ Intraday Minute Adjustment
 
 `PAQS-MVP-001` clarifies that this numerical decomposition is not the causal strategy engine.
 
-The causal relationship is:
+The following historical deterministic research pipeline is retained for separately governed PAQS-Q work. PAQS-E uses snapshot-bound semantic reasoning and deterministic post-validation, not a required reconstruction of this state machine:
 
 ```text
 Completed canonical market data
@@ -114,7 +124,7 @@ The score must never:
 
 Exact numerical formulae remain unapproved.
 
-## 4. Current PAQS research pipeline
+## 4. Historical PAQS v0.3.1 deterministic research pipeline
 
 ```text
 Completed Price Data
@@ -150,7 +160,7 @@ Entry / Holder Advisory
 Optional derived Quality / Ranking
 ```
 
-Research semantics are detailed in the current v0.3.1 documents listed above.
+These deterministic research semantics remain in the v0.3.1 references above and are adopted only where a bounded Q-side contract explicitly says so.
 
 ## 5. Time, market-data and PAQS input semantics
 
@@ -207,7 +217,7 @@ They must never silently:
 - treat corporate-action discontinuity as genuine Price Action;
 - infer unknowable intrabar event order from OHLC.
 
-Dashboard recalculation cadence does not authorize background processing after page close.
+Dashboard market-data refresh never automatically reruns PAQS-E. Explicit Analyze freezes a fresh snapshot; neither visible-page polling nor page closure authorizes background strategy processing.
 
 ## 7. PAQS v0.3.1 research locks
 
@@ -224,13 +234,14 @@ The v0.3.1 research definition locks, at research level:
 
 These research locks do not authorize one large implementation task.
 
-## 8. Authoritative TASK-006 decomposition
+## 8. Historical TASK-006 decomposition (superseded future authority)
 
 `TASK-006` is an umbrella workstream only and must never be given to Codex as one implementation request.
+The following 006C/006D/006E descriptions are historical. Their future successors are 006C-Q/006D-Q/006E-Q under the Roadmap, not prerequisites to TASK-007C.
 
 ### TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation
 
-Planned boundary:
+Accepted implementation boundary:
 
 - dynamic supported US/HK security/watchlist workflow;
 - provider support validation without account access;
@@ -256,7 +267,7 @@ Score
 
 ### TASK-006B — PAQS Structure Engine
 
-Approved/implemented task-branch boundary, pending independent review and real-structure checkpoint:
+Accepted deterministic implementation boundary; subsequent real-market checkpoint remains `STRUCTURE_CONCERNS_FOUND`:
 
 - ATR;
 - confirmed Micro/Major Pivot;
@@ -267,7 +278,7 @@ Approved/implemented task-branch boundary, pending independent review and real-s
 - Base Regime;
 - deterministic/no-lookahead fixtures/debug output.
 
-Mandatory real read-only structure-review checkpoint before TASK-006C approval.
+The completed checkpoint motivates future 006B-Q stabilization; it does not block the independent PAQS-E branch.
 
 ### TASK-006C — PAQS Event Engine
 
@@ -317,9 +328,10 @@ Examples include:
 
 - TASK-006A: supported-security validation/user flow, calendar/session contract, coverage, adjustment metadata and documentation contract;
 - TASK-006B: Decimal/rounding, ATR warm-up, Pivot initialization, deterministic Key Level/Zone/Range behavior and structure fixtures;
-- TASK-006C: exact Event/Transition/Trigger/Follow-through parameters adopted;
-- TASK-006D: setup variants, invalidation/target/RR/entry-revalidation parameters and advisory transitions;
-- TASK-006E: holder-state presentation, reason codes, Quality/Ranking formula if included, advisory-history persistence if included.
+- TASK-006C-Q: exact Event/Transition/Trigger/Follow-through parameters adopted;
+- TASK-006D-Q: setup variants, invalidation/target/RR/entry-revalidation parameters and advisory transitions;
+- TASK-006E-Q: deterministic advisory/scanner presentation;
+- TASK-007C: PAQS-E result/history presentation and explicit Analyze interactions without runtime policy changes.
 
 No default in an older proposal silently resolves these task-level choices.
 
@@ -354,8 +366,14 @@ preparation and is integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`.
 TASK-006B implements only deterministic structure interpretation: Decimal ATR, independent
 Micro/Major close-confirmed Pivots, Swing labels, Major-swing and Pivot-cluster geometry, Range,
 and Base Regime limited to `BULL_TREND`, `BEAR_TREND`, `RANGE`, and `UNCERTAIN`. It exposes a
-read-only current structure snapshot with stable configuration/provenance hashes. Independent
-review and the mandatory real-structure human checkpoint remain outstanding.
+read-only current structure snapshot with stable configuration/provenance hashes. Its deterministic
+implementation passed and is integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`; the later
+real-market checkpoint recorded `STRUCTURE_CONCERNS_FOUND`.
 
 No TASK-006C Event/Transition/Trigger behavior, Setup/Risk/Advisory behavior, numerical
 Quality/Ranking, broker write, or optional Phase 3/4 capability is implemented by TASK-006B.
+
+TASK-006B2 factual snapshots and TASK-007A runtime are accepted/integrated. TASK-007B independent
+review PASS is tied to `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` and `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`; this statement does not infer a later integration.
+TASK-007C is separately user-authorized for implementation from its committed contract after that
+baseline is integrated. Later R20 capabilities remain bounded by the adoption record and subsequent contracts.

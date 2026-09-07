@@ -1,10 +1,10 @@
 # Architecture Specification
 
-Status: **AUTHORITATIVE — TASK-007A integrated; TASK-007B architecture implemented pending independent review**
+Status: **AUTHORITATIVE — TASK-007A integrated; TASK-007B independently reviewed; TASK-007C authorized next**
 
 Authority: subordinate to `AGENTS.md`, `docs/ROADMAP.md`, and `docs/MASTER_SPEC.md`
 
-Decisions: `MTF-001`, `PAQS-MVP-001`
+Decisions: `MTF-001`, `PAQS-MVP-001`, `PAQS-DUAL-001`; R20 adoption record: `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`
 
 ## 1. Architectural outcome
 
@@ -21,8 +21,8 @@ Application use cases
     +-- dynamic supported US/HK watchlist administration
     +-- market-data / calendar / session validation
     +-- PAQS input timeframe derivation
-    +-- PAQS structure/events/setups/risk/advisory
-    +-- optional lightweight quality/ranking/history
+    +-- explicit PAQS-E runtime / validation / immutable Decision evidence
+    +-- separate PAQS-Q deterministic/reference work when approved
     |
 SQLite where approved persistence exists
 
@@ -33,7 +33,7 @@ Independent read-only boundary:
 Internal PAQS-E reasoning boundary (no public route in TASK-007A):
     application runtime -> provider-neutral reasoning port -> OpenAI Responses adapter
 
-TASK-007B explicit analysis boundary (pending independent review):
+TASK-007B explicit analysis boundary (independent review PASS; verify integration):
     Analyze API -> application service -> current snapshot + TASK-007A runtime
                                       -> core Decision Ledger port -> SQLAlchemy transaction
 
@@ -62,7 +62,7 @@ composition root -> backend + application + database + integrations
 | Security/Watchlist | Canonical Security UUID identity and user-selected supported instruments | Provider-neutral security capability validation | Provider SDK objects in core, account state |
 | Market-data port | Quote, completed Daily/minute bars, market status, approved calendar/security metadata | Independent provider/import source | Brokerage-account access or execution |
 | PAQS input foundation | W1/D1/30m construction, session/calendar/coverage/adjustment metadata | Canonical market data | Provider SDK objects, broker/account state |
-| PAQS Strategy | Structure, events, setups, invalidation/target/RR/advisory by bounded task | PAQS input foundation | Provider SDKs, broker commands, accounting mutation |
+| PAQS-Q / historical structure | Deterministic structure and separately contracted future event/setup/risk/advisory | PAQS input foundation | Replacing PAQS-E semantics, provider SDKs, broker commands, accounting mutation |
 | PAQS-E reasoning runtime | Versioned snapshot-bound request/result, registered Markdown strategy/prompt packages, deterministic contract validation | Immutable factual snapshot and explicit auxiliary context | API/UI exposure, persistence, provider SDK imports outside integrations, hidden conversation state, broker behavior |
 | PAQS-E Analyze service | One explicit current request, one snapshot/runtime attempt, terminal outcome persistence and safe read queries | TASK-006B2 snapshot query, TASK-007A runtime, core Decision Ledger port | Provider SDK/SQLAlchemy imports, open database transaction across provider call, hidden prior Decision/context, automatic analysis |
 | PAQS-E Decision Ledger adapter | Immutable runtime artifacts, terminal runs, validated Decision revisions and atomic commit | Core/domain evidence and SQLAlchemy session factory | Strategy/prompt loading authority, strategy inference, market-data cache/replay, broker execution facts |
@@ -153,35 +153,28 @@ visible-page incremental/manual refresh
 
 Automatic polling pauses while hidden and refreshes immediately when visible again. Requests do not overlap; abort/generation/security guards prevent stale responses overwriting newly selected securities. Closing the page requires no background activity.
 
-Future TASK-006E may add PAQS advisory presentation without changing the read-only human boundary.
+TASK-007C adds the explicitly authorized PAQS-E workbench under `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`.
+It retains JavaScript/CSS and vendored Lightweight Charts. Market-data refresh, page load,
+Security/model/strategy selection and history reads never trigger Analyze. Only the explicit Analyze
+action sends a new POST; existing Decisions retain their original snapshot/as-of metadata.
+No TASK-007C implementation or acceptance is claimed by this architecture update.
 
 ## 7. PAQS causal architecture
 
-The causal strategy architecture is:
+The current PAQS-E path is explicit Analyze -> immutable TASK-006B2 factual snapshot -> registered
+strategy/prompt and TASK-007A provider-neutral reasoning -> deterministic contract validation ->
+TASK-007B immutable evidence/Decision -> TASK-007C presentation. Storage is evidence, not strategy
+or prompt authority, and prior Decisions are not implicit model context.
 
-```text
-Canonical completed market data
-        ↓
-PAQS Input Foundation
-        ↓
-Structure
-        ↓
-Events / Transition / Trigger / Follow-through
-        ↓
-Setup
-        ↓
-Structural Invalidation / Target / RR
-        ↓
-Entry / Holder Advisory
-        ↓
-Optional derived Quality / Ranking
-```
+PAQS-Q retains separately governed deterministic Structure/Event/Setup/Risk/Advisory research.
+Its exact thresholds do not silently bind PAQS-E. Optional Quality/Ranking may summarize approved
+outputs but cannot create setups, bypass risk gates or conceal Q/E disagreement.
 
-A numerical Quality/Composite Score is a derived presentation/ranking layer if retained. It must not create a setup, bypass RR or override hard structural invalidation.
+## 8. Historical TASK-006 architecture and separate PAQS-Q direction
 
-## 8. TASK-006 architectural decomposition
-
-`TASK-006` is an umbrella workstream only.
+`TASK-006` is an umbrella only. The accepted 006A/006B implementation remains preserved.
+The following old 006C/006D/006E descriptions record historical decomposition; their future
+authority is superseded by 006C-Q/006D-Q/006E-Q in the Roadmap. They do not gate the 007C workbench.
 
 ### TASK-006A — Dynamic US/HK Securities & PAQS Input Foundation
 
@@ -190,7 +183,7 @@ It implements no ATR/Pivot/Zone/Range/Regime behavior.
 
 ### TASK-006B — PAQS Structure Engine
 
-Owns ATR, Micro/Major Pivot, Swing, Key Level geometry, Pivot Zones, Range and Base Regime. Must expose deterministic/no-lookahead structure debug evidence. Must stop for manual real-market structure review before 006C.
+Owns ATR, Micro/Major Pivot, Swing, Key Level geometry, Pivot Zones, Range and Base Regime. Must expose deterministic/no-lookahead structure debug evidence. Its deterministic implementation passed; the recorded real-market checkpoint is `STRUCTURE_CONCERNS_FOUND`, motivating separately governed PAQS-Q stabilization.
 
 The TASK-006B implementation is an in-memory, provider-neutral pipeline under `core/strategy`.
 It normalizes only completed W1/D1/M30 input bars, calculates Decimal ATR, runs independent Micro
@@ -213,7 +206,7 @@ Owns approved setup families, expiry, structural invalidation, T1/T2, no-target-
 
 Owns conditional Holder Advisory, explanations/reason codes, Dashboard integration and optional lightweight Quality/Ranking plus advisory history when approved.
 
-Each task is separately approved/reviewed/integrated. No implementation may skip the dependency order by implementing later semantics inside an earlier task.
+Any Q-side successor requires its own approved contract; it must not silently expand or block the prioritized PAQS-E workstream.
 
 ## 9. Paper, backtest and human boundaries
 
@@ -240,7 +233,8 @@ broker capability.
 
 ### TASK-007B — explicit Analyze and immutable analysis evidence
 
-TASK-007B implementation is pending independent review. The synchronous application service
+TASK-007B independent review PASS covers `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`;
+evidence is `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`. Verify authoritative integration separately. The synchronous application service
 accepts only a supported Security UUID, explicit model ID and registered strategy ID. It obtains
 one fresh snapshot through `PaqsMarketSnapshotQueries`, loads the accepted registered strategy and
 versioned prompt, builds the complete TASK-007A request with server runtime configuration and
@@ -293,11 +287,11 @@ No microservices, queues, distributed workers, Kubernetes, multi-tenancy, high a
 |---:|---|
 | 0 | Historical product definition plus future-scope decisions |
 | 1 | Accepted FastAPI/SQLite foundation, identity/watchlist/opening facts, read APIs |
-| 2 | Active committed Market Data/Dashboard + TASK-006A–006E PAQS Decision Terminal MVP |
+| 2 | Active Market Data/Snapshot + PAQS-E TASK-007A/B/C usability work; separate PAQS-Q reference branch |
 | 3 | Dormant optional research/paper extensions; explicit reactivation required |
 | 4 | Dormant optional validation/backtest/analytics extensions; final possible phase |
 
-The current product-completion line is Phase 2 after TASK-006E. No later phase exists after Phase 4.
+The current-analysis usability milestone is Phase 2 after TASK-007C passes review and integration. Further adopted product capabilities are staged by bounded contracts. No later phase exists after Phase 4.
 
 ## 12. Supersession register
 
@@ -309,7 +303,7 @@ The current product-completion line is Phase 2 after TASK-006E. No later phase e
 | MTF-A004 | Market data could be coupled to broker connector | Replaced by independent provider-agnostic read-only port |
 | MTF-A005 | Future phases extended beyond analytics | Removed; final possible phase is Phase 4 |
 | PAQS-A001 | Broad Paper/Backtest platform required before product completion | Superseded: product completion line is Phase 2 PAQS Decision Terminal MVP |
-| PAQS-A002 | Composite Score is the primary causal strategy | Superseded: PAQS state/hard-gate engine is primary; score is derived if retained |
+| PAQS-A002 | Composite Score is the primary causal strategy | Superseded: PAQS-E and PAQS-Q have separate strategy authority; score is derived/reference only |
 | PAQS-A003 | Three PoC symbols are permanent supported set | Superseded for future work by dynamic supported US/HK security direction |
 
 ## 13. Open decisions
@@ -317,12 +311,25 @@ The current product-completion line is Phase 2 after TASK-006E. No later phase e
 These remain open and do not authorize implementation:
 
 - TASK-006A is completed/integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`;
-- exact PAQS structure/event/setup parameters beyond approved research locks;
+- separately scoped PAQS-Q structure/event/setup methods;
 - exact Quality/Composite Score formula and ranking behavior;
-- whether lightweight advisory history is included in TASK-006E;
+- later product modules and any bounded Vue migration under the R20 adoption record;
 - any optional Phase 3/4 reactivation;
 - any historical-minute expansion or strict real-market historical PAQS replay.
 
-## 14. Historical evidence boundary
+## 14. R20 reuse boundary
+
+`docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md` governs capability adoption. `docs/research/R20_ADOPTION_PLAN_AND_CODEX_PROMPT_ZH.md` is historical planning context.
+007C may adapt isolated CSS/layout assets and reproduce workbench interactions, preserving source
+license notices. Existing API/domain contracts govern data binding. R20 Vue/Pinia/router components
+are not drop-in code; its current TacticalChart uses KLineChart and crypto contract assumptions.
+Do not import R20 execution, unrestricted Python plugins, plaintext secret persistence, automatic
+strategy evolution, provider defaults or public-account display behavior.
+
+Later prompt/model/version workspaces, critique/council, reviewed research suggestions, sourced
+news context, simulated bookkeeping and operations must fit existing application/core/ports/adapters
+and their own contracts. No third-party product document can override the broker/no-live boundary.
+
+## 15. Historical evidence boundary
 
 Accepted Phase 1 plan/review files remain immutable historical evidence and do not govern later PAQS future scope. Future docs/tasks must not rewrite them.

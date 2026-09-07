@@ -1,4 +1,4 @@
-# PAQS Engineering Guide — TASK-007B Analyze/Decision Ledger pending independent review
+# PAQS Engineering Guide — TASK-007B Analyze/Decision Ledger independently accepted
 
 ## Authority and boundary
 
@@ -13,7 +13,8 @@ governs only the internal structured-reasoning runtime and first provider adapte
 change the legacy TASK-006B structure engine or authorize a public Analyze workflow.
 
 TASK-007B separately authorizes the current Analyze API and immutable analysis evidence described
-below. Its implementation remains pending independent review. Phase 1 migration and review
+below. Its implementation passed independent review at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`;
+see `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`. Phase 1 migration and review
 evidence remain immutable. Calendar/W1/D1/M30 facts are preserved only inside each formed
 reasoning request's evidence capsule; no standalone market-data store or replay service is added.
 

@@ -25,6 +25,8 @@ Decision records:
 |---|---|
 | `IMPLEMENTED` | Accepted implementation evidence exists |
 | `PENDING_REVIEW` | Task-branch implementation exists; independent review and integration remain outstanding |
+| `REVIEWED_PASS` | Independent review passed for the exact cited implementation SHA; integration is verified separately |
+| `APPROVED_TASK` | User authorized a bounded task; implementation follows its committed contract and prerequisites, not yet completed |
 | `PARTIAL` | Part of the requirement is accepted/implemented and future work remains |
 | `DOCUMENTED` | Authoritative future contract/direction exists but implementation is not yet approved/completed |
 | `PLANNED_TASK` | Identifier/scope direction is recorded, but an explicit Task Contract is still required |
@@ -91,7 +93,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | UI-003 | Visible-page ~60s market-data refresh, no overlapping requests, hidden pause/resume | RETAINED | 2 | IMPLEMENTED | TASK-005 |
 | UI-004 | Manual refresh and countdown | RETAINED | 2 | IMPLEMENTED | TASK-005 |
 | UI-005 | Dynamic supported US/HK add/remove flow is user-facing rather than backend-only | SUPERSEDED_PAQS_MVP | 2 | IMPLEMENTED | TASK-006A Dashboard form and integration tests |
-| UI-006 | PAQS-E current-analysis Dashboard presents snapshot/as-of, context, key levels, setup, advisory, invalidation, target, RR, uncertainty and explanation | RETAINED | 2 | PLANNED_TASK | TASK-007C scope direction |
+| UI-006 | PAQS-E current-analysis Dashboard presents snapshot/as-of, context, key levels, setup, advisory, invalidation, target, RR, uncertainty and explanation | RETAINED | 2 | APPROVED_TASK | `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`; user authorization; not implemented |
 | UI-007 | No real-order UI/control and no claim user executed advisory | RETAINED | all | DOCUMENTED | Roadmap safety boundary |
 | UI-008 | Market-data page refresh does not automatically trigger PAQS-E or PAQS-Q strategy re-analysis | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 4 |
 | UI-009 | Future dual-branch comparison must show PAQS-E and PAQS-Q separately and surface disagreement without averaging into one synthetic decision score | RETAINED | 2 | PLANNED_TASK | TASK-007D scope direction |
@@ -126,25 +128,25 @@ Only Phase 0 through Phase 4 are valid target phases.
 
 | ID | Requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
-| PAQSE-001 | `PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md` is the primary PAQS-E runtime semantic strategy authority candidate for bounded future Task Contract adoption; `PAQS_E_NAKED_PRICE_ACTION_DOCTRINE.md` remains the conceptual/doctrine foundation | RETAINED | 2 | DOCUMENTED | Master Spec + focused re-review PASS; Roadmap 6 |
+| PAQSE-001 | `PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md` is the registered primary PAQS-E runtime semantic authority adopted by TASK-007A; `PAQS_E_NAKED_PRICE_ACTION_DOCTRINE.md` remains the conceptual foundation | RETAINED | 2 | IMPLEMENTED | TASK-007A accepted exact strategy hash; Roadmap 6 |
 | PAQSE-002 | PAQS v0.3.x is historical formalization/guardrail/audit/terminology reference, not a requirement to recreate its full deterministic state machine inside PAQS-E | RETAINED | 2 | DOCUMENTED | Roadmap 6; Master Spec/Doctrine |
 | PAQSE-003 | PAQS-E model-provider port is provider-agnostic; OpenAI is the first adapter | RETAINED | 2 | IMPLEMENTED | TASK-007A integrated at `ca9712649b7ec26a67047e251200a50b353ad5b4` |
 | PAQSE-004 | First PAQS-E MVP model call receives only product-controlled snapshot/runtime/prompt/schema inputs and no web/browser/search tools | RETAINED | 2 | IMPLEMENTED | TASK-007A integrated at `ca9712649b7ec26a67047e251200a50b353ad5b4` |
-| PAQSE-005 | Ordinary PAQS-E Analyze calls are stateless/fresh by default; prior decisions/conversation are not hidden prompt context | RETAINED | 2 | IMPLEMENTED | TASK-007A integrated runtime; TASK-007B public orchestration pending review |
+| PAQSE-005 | Ordinary PAQS-E Analyze calls are stateless/fresh by default; prior decisions/conversation are not hidden prompt context | RETAINED | 2 | IMPLEMENTED | TASK-007A integrated runtime; TASK-007B independent review PASS at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` |
 | PAQSE-006 | PAQS-E output is schema-constrained structured output plus concise user explanation | RETAINED | 2 | IMPLEMENTED | Master Spec; TASK-007A integrated at `ca9712649b7ec26a67047e251200a50b353ad5b4` |
 | PAQSE-007 | Deterministic post-validation checks schema/factual/arithmetic/RR discipline without replacing LLM strategy reasoning | RETAINED | 2 | IMPLEMENTED | TASK-007A integrated at `ca9712649b7ec26a67047e251200a50b353ad5b4` |
-| PAQSE-008 | PAQS-E decisions are immutable revisions storing snapshot/doctrine/prompt/provider/model metadata and structured result | RETAINED | 2 | PENDING_REVIEW | TASK-007B core ledger, SQLAlchemy adapter, migration 0002 and evidence/revision tests |
+| PAQSE-008 | PAQS-E decisions are immutable revisions storing snapshot/doctrine/prompt/provider/model metadata and structured result | RETAINED | 2 | REVIEWED_PASS | TASK-007B core ledger, SQLAlchemy adapter, migration 0002 and evidence/revision tests; `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md` at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` |
 | PAQSE-009 | PAQS-E Entry Advisory and Holder Advisory remain separate questions | RETAINED | 2 | DOCUMENTED | Master Spec / Doctrine |
 | PAQSE-010 | `NO_TRADE`, `WATCH_LONG`, `WAIT_RETEST`, `ENTRY_PENDING_REVALIDATION`, `UNCERTAIN` and poor-entry states are valid first-class outputs | RETAINED | 2 | DOCUMENTED | Master Spec |
 | PAQSE-011 | `TASK-007` is umbrella only; planned bounded tasks are TASK-007A/B/C and later TASK-007D | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSE-012 | TASK-007C completion is the current usability milestone for the current Snapshot-on-Demand PAQS-E MVP; historical Gold-Set replay may follow later | RETAINED | 2 | DOCUMENTED | Roadmap 7 |
-| PAQSE-013 | OpenAI API credentials are user-supplied locally, server-side only, uncommitted, not persisted in application data, not exposed to frontend clients, not returned by APIs and not logged | RETAINED | 2 | IMPLEMENTED | TASK-007A integrated runtime; TASK-007B ledger/API secrecy tests pending review; Roadmap 7/10 |
+| PAQSE-013 | OpenAI API credentials are user-supplied locally, server-side only, uncommitted, not persisted in application data, not exposed to frontend clients, not returned by APIs and not logged | RETAINED | 2 | IMPLEMENTED | TASK-007A integrated runtime; TASK-007B ledger/API secrecy independent review PASS; Roadmap 7/10 |
 | PAQSE-014 | First PAQS-E implementation does not require multi-model voting/ensemble behavior | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 6 |
-| PAQSE-015 | Explicit current Analyze accepts only Security UUID/model ID/registered strategy ID, acquires one fresh snapshot and makes one runtime attempt with empty auxiliary context | RETAINED | 2 | PENDING_REVIEW | TASK-007B application orchestration and API tests; API Contracts 5.10 |
-| PAQSE-016 | Exact canonical request/result UTF-8 text and immutable strategy/prompt content are hashed, persisted and verified on readback | RETAINED | 2 | PENDING_REVIEW | TASK-007B ledger evidence/artifact tests; engineering guide |
-| PAQSE-017 | Provider/configuration and validation failures commit typed terminal runs without Decisions; success commits artifacts/run/Decision atomically before returning | RETAINED | 2 | PENDING_REVIEW | TASK-007B failure/rollback/API tests |
-| PAQSE-018 | Successful revisions append within `(security_id, strategy_id)` across model/content changes and repeated snapshots, preserving immutable prior evidence | RETAINED | 2 | PENDING_REVIEW | TASK-007B revision/uniqueness/immutability tests |
-| PAQSE-019 | Bounded run/Decision/history reads support future TASK-007C without UI, hidden Decision memory, market-data storage, background work or broker behavior | RETAINED | 2 | PENDING_REVIEW | TASK-007B read/API/architecture tests; API Contracts 5.10 |
+| PAQSE-015 | Explicit current Analyze accepts only Security UUID/model ID/registered strategy ID, acquires one fresh snapshot and makes one runtime attempt with empty auxiliary context | RETAINED | 2 | REVIEWED_PASS | TASK-007B application orchestration and API tests; API Contracts 5.10; `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md` at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` |
+| PAQSE-016 | Exact canonical request/result UTF-8 text and immutable strategy/prompt content are hashed, persisted and verified on readback | RETAINED | 2 | REVIEWED_PASS | TASK-007B ledger evidence/artifact tests; engineering guide; `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md` at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` |
+| PAQSE-017 | Provider/configuration and validation failures commit typed terminal runs without Decisions; success commits artifacts/run/Decision atomically before returning | RETAINED | 2 | REVIEWED_PASS | TASK-007B failure/rollback/API tests; `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md` at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` |
+| PAQSE-018 | Successful revisions append within `(security_id, strategy_id)` across model/content changes and repeated snapshots, preserving immutable prior evidence | RETAINED | 2 | REVIEWED_PASS | TASK-007B revision/uniqueness/immutability tests; `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md` at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` |
+| PAQSE-019 | Bounded run/Decision/history reads support future TASK-007C without UI, hidden Decision memory, market-data storage, background work or broker behavior | RETAINED | 2 | REVIEWED_PASS | TASK-007B read/API/architecture tests; API Contracts 5.10; `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md` at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` |
 
 ### 5.3 PAQS-Q requirements
 
@@ -223,8 +225,19 @@ Analysis Runs, validated Decision revisions and bounded read APIs on its dedicat
 Its migration 0002 follows the untouched Phase 1 foundation. Exact canonical evidence hashes,
 append-only records, atomic success/failure persistence, model-independent strategy revision
 series, and safe readback are covered by focused orchestration, evidence, API, migration and
-architecture tests. Status is **PENDING_REVIEW**; no independent acceptance or integration is claimed.
+architecture tests. Status is **REVIEWED_PASS** at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`;
+evidence: `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`. Authoritative integration must be verified separately.
 
 No TASK-007C Dashboard Analyze UI, PAQS-Q successor task, market-data persistence/replay, hidden
 Decision memory, background analysis, broker behavior, paper behavior, or backtest behavior is
 implemented by TASK-007B. Accepted Phase 1 evidence remains unchanged.
+
+## 9. R20 product adoption and immediate workbench task
+
+| ID | Requirement | Disposition | Phase | Status | Evidence |
+|---|---|---|---:|---|---|
+| R20-001 | Adopt useful R20 workbench/product interactions while preserving PAQS-E and the no-live boundary | RETAINED | 2–4 | DOCUMENTED | `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; historical planning: `docs/research/R20_ADOPTION_PLAN_AND_CODEX_PROMPT_ZH.md` |
+| R20-002 | 007C retains current JS/CSS and vendored Lightweight Charts; copied substantive code retains origin/license notice | RETAINED | 2 | APPROVED_TASK | `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`; not implemented |
+| R20-003 | Explicit Analyze, model/registered-strategy selection, truthful failure and immutable Decision history become usable UI flows | RETAINED | 2 | APPROVED_TASK | `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`; existing 007B APIs |
+| R20-004 | Later prompt/model/version, critique/council, reviewable evolution, news, simulated bookkeeping and operations capabilities follow the adoption record through separate bounded contracts | OPTIONAL_FUTURE | 2–4 | DOCUMENTED | `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; no expansion of 007C |
+| R20-005 | Do not inherit R20 live execution, unrestricted Python plugins, plaintext secret storage, automatic strategy changes or crypto-specific financial assumptions | RETAINED | all | DOCUMENTED | `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; permanent Roadmap boundaries |

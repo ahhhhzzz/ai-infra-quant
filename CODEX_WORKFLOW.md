@@ -4,8 +4,19 @@
 
 - Phase 0 architecture/specification: GPT-5.6 Sol, Extra High, Standard speed.
 - Phase 1/2 implementation: GPT-5.6 Sol, High, Standard speed.
-- Strategy formulas, accounting, backtest timing, broker state machine, live safety: Extra High when needed.
+- Strategy contracts, Decimal accounting, evidence integrity and no-lookahead validation: Extra High when needed.
 - Basic CRUD/CSS/docs: Medium or High.
+
+## Current execution entrypoint
+
+Read `docs/ROADMAP.md`, `docs/MASTER_SPEC.md`, the architecture/strategy specs and the current
+committed Task Contract. The setup/Phase 0 examples below are historical onboarding instructions;
+do not restart completed phases or treat old prompts as current implementation authority.
+
+TASK-007B independent review PASS applies only to `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`; evidence: `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`.
+Verify authoritative integration separately. The user-authorized next task is `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`,
+which remains unimplemented and starts only after its own contract commit and prerequisites.
+R20 product adoption is governed by `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; `docs/research/R20_ADOPTION_PLAN_AND_CODEX_PROMPT_ZH.md` is historical planning context.
 
 ## Local repository setup on Windows PowerShell
 
@@ -67,11 +78,17 @@ In a new chat, paste `prompts/RESUME_IN_NEW_CHAT.md` first.
 
 ## Approval sequence
 
-- Phase 0 completes -> review -> `APPROVE PHASE 1`.
-- Phase 1 completes -> independent review/fixes -> `APPROVE PHASE 2`.
-- Continue the same pattern for each phase.
-- Futu read-only comes before any trading adapter.
-- Live mode requires a separate explicit authorization after the safety phase; completing code is not authorization to enable live trading.
+- Continue only the current authorized bounded task and preserve its accepted exact base/contract.
+- Complete implementation and required tests, then independent review at the exact final SHA.
+- Integrate only an accepted reviewed implementation; verify the actual authoritative branch SHA.
+- Start the next task only with its own authorization and committed contract. TASK-007C already
+  has user authorization; a passing predecessor alone does not authorize unrelated future modules.
+- Futu remains independent quote-only market-data access. No trading adapter, brokerage-account
+  observation or later live mode is part of this product; all real trading is manual outside it.
+- An explicit task's push/branch instructions govern that task. Do not push unrelated branches,
+  rewrite historical evidence, merge unreviewed work or implement umbrella TASK-006/TASK-007.
+- Scope changes require concrete contract/governance updates before coding; a historical R20
+  adoption prompt must not interrupt or replace an already running approved task.
 
 ## What to inspect after every phase
 

@@ -1,6 +1,6 @@
 # API Contracts
 
-Status: **AUTHORITATIVE — TASK-007A integrated; TASK-007B Analyze/Decision Ledger implementation pending independent review**
+Status: **AUTHORITATIVE — TASK-007A integrated; TASK-007B Analyze/Decision Ledger independently accepted**
 
 Decision: `MTF-001` in `docs/ROADMAP.md`
 
@@ -12,8 +12,8 @@ Base path: `/api/v1`
 
 Phase 1 routes remain accepted exactly as implemented. This document describes the implemented
 read-only market-data routes, Dashboard client, TASK-006A supported-security/input workflow, and
-the TASK-006B structure snapshot, and TASK-007B on-demand PAQS-E analysis/evidence APIs pending
-independent review, plus later separately approved directions.
+the TASK-006B structure snapshot, and independently accepted TASK-007B on-demand PAQS-E
+analysis/evidence APIs, plus later separately approved directions.
 
 No API may connect to a brokerage account; read/import real-account cash, positions, orders, or
 trades; match real-account state; or transmit a broker operation.
@@ -65,7 +65,7 @@ Defining a future direction does not expose a route.
 | TASK-004 market state and daily/minute bars | 2 | Available from TASK-004 |
 | TASK-006A supported-security add and PAQS input diagnostics | 2 | Available from TASK-006A |
 | TASK-006B current PAQS structure snapshot | 2 | Available from TASK-006B |
-| TASK-007B explicit PAQS-E Analyze and immutable analysis/Decision reads | 2 | Implemented on TASK-007B branch; pending independent review |
+| TASK-007B explicit PAQS-E Analyze and immutable analysis/Decision reads | 2 | Independently accepted at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` |
 | Aggregate dashboard refresh and first approved score/ranking/risk state | 2 | Ordinary 404 |
 | Expanded research and simulated paper tracking | 3 | Ordinary 404 |
 | Backtest and analytics | 4 | Ordinary 404 |
@@ -271,7 +271,7 @@ response or strategy answer around those failures.
 
 ### 5.10 TASK-007B current Analyze and immutable Decision Ledger
 
-Implementation status: **pending independent review**. These APIs support later TASK-007C; no
+Implementation status: **independent review PASS** at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`. These APIs support TASK-007C; no
 Dashboard Analyze UI is added.
 
 ```text

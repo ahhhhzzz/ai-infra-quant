@@ -12,6 +12,7 @@ Decision records:
 
 - `docs/decisions/PAQS_MVP_SCOPE_REDUCTION.md`
 - `docs/decisions/PAQS_DUAL_BRANCH_ARCHITECTURE.md`
+- `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md` — user-authorized R20 product-capability adoption, staged through bounded tasks
 
 Product: **Personal Quantitative Research and AI-Assisted Decision-Support Tool**
 
@@ -197,11 +198,11 @@ Strict arbitrary historical point-in-time replay is not yet an implemented curre
 
 PAQS-E is the LLM-native Naked Price Action Expert Reasoning Engine.
 
-Preferred semantic authority hierarchy for future bounded PAQS-E Task Contracts is:
+The semantic hierarchy adopted by TASK-007A and retained by later bounded PAQS-E tasks is:
 
 ```text
 docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md
-    -> primary PAQS-E runtime semantic strategy authority candidate
+    -> primary PAQS-E runtime semantic strategy authority adopted at the TASK-007A registered hash
 
 PAQS_E_NAKED_PRICE_ACTION_DOCTRINE.md
     -> conceptual/doctrine foundation
@@ -213,7 +214,7 @@ PAQS-Q research
     -> separate deterministic/reference branch authority only when separately adopted
 ```
 
-The word `candidate` is deliberate: the accepted research Master Spec does not directly authorize code. TASK-007A must explicitly adopt an exact Master Spec version/hash in its own approved Task Contract.
+TASK-007A explicitly adopted the registered Master Spec version/hash. The research document itself still does not authorize unrelated implementation or later edits to the strategy; later tasks consume the accepted runtime contract.
 
 PAQS-E should reason semantically over:
 
@@ -235,7 +236,7 @@ It must retain hard discipline such as strict As-Of, no hindsight, Event != Setu
 
 PAQS-Q exact thresholds must not silently become PAQS-E strategy rules.
 
-Initial PAQS-E provider architecture is model-provider-agnostic. OpenAI is the first planned adapter only. The first MVP does not require multi-model voting or ensemble behavior.
+Initial PAQS-E provider architecture is model-provider-agnostic. OpenAI is the accepted first adapter. The first MVP does not require multi-model voting or ensemble behavior.
 
 Ordinary PAQS-E Analyze calls are stateless/fresh by default. The model receives only product-controlled snapshot facts plus approved doctrine/prompt/output contract. No web/browser/search tools, hidden conversational memory, previous PAQS-E decision, broker data, or future bars are supplied in the initial MVP.
 
@@ -386,11 +387,11 @@ Accepted scope:
 - no continuous/background analysis;
 - no broker behavior.
 
-#### TASK-007B — On-Demand PAQS-E Analysis Service & Immutable Decision Ledger — IMPLEMENTED / PENDING INDEPENDENT REVIEW
+#### TASK-007B — On-Demand PAQS-E Analysis Service & Immutable Decision Ledger — INDEPENDENT REVIEW PASS
 
-Task-branch implementation follows
-`prompts/tasks/TASK-007B_ON_DEMAND_PAQS_E_ANALYSIS_DECISION_LEDGER.md`; it is not yet accepted or
-integrated. Implemented scope:
+Exact reviewed implementation SHA: `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`. Independent review: `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`.
+The review verdict is PASS; authoritative integration must be verified separately before TASK-007C starts.
+Implementation follows `prompts/tasks/TASK-007B_ON_DEMAND_PAQS_E_ANALYSIS_DECISION_LEDGER.md`. Reviewed scope:
 
 - explicit user-triggered Analyze service/API;
 - one request uses one immutable snapshot;
@@ -402,12 +403,18 @@ integrated. Implemented scope:
 
 Terminal Analysis Runs and exact request/strategy/prompt evidence are append-only. Successful
 Decisions append revisions within `(security_id, strategy_id)`; provider/validation failures
-persist a failed run without a Decision. Bounded read APIs support later TASK-007C. Independent
-review and authoritative integration remain required before acceptance.
+persist a failed run without a Decision. Bounded read APIs support TASK-007C. The independent
+review covers this exact implementation SHA and does not claim a later integration has occurred.
 
-#### TASK-007C — PAQS-E User Dashboard
+#### TASK-007C — PAQS-E User Dashboard — USER-AUTHORIZED NEXT BOUNDED TASK
 
-Planned scope direction:
+Task Contract: `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`. The user has authorized this next task; implementation begins only
+from its own committed contract after the reviewed TASK-007B baseline is authoritatively integrated.
+TASK-007C is not yet implemented or independently accepted. It retains the existing JavaScript/CSS
+frontend and vendored Lightweight Charts for the first usable R20-style PAQS-E workbench.
+The contract, rather than R20 source or a historical planning prompt, bounds implementation.
+
+Authorized scope direction:
 
 - user-visible `Analyze with PAQS-E` action;
 - snapshot/as-of metadata;
@@ -462,9 +469,9 @@ TASK-006B2 Snapshot-on-Demand Market Snapshot [DONE]
         ↓
 TASK-007A Doctrine Runtime + Structured Output + OpenAI Provider Port [DONE]
         ↓
-TASK-007B On-Demand Analysis + Immutable Decision Ledger [PENDING INDEPENDENT REVIEW]
+TASK-007B On-Demand Analysis + Immutable Decision Ledger [INDEPENDENT REVIEW PASS; VERIFY INTEGRATION]
         ↓
-TASK-007C PAQS-E Dashboard / Analyze workflow
+TASK-007C PAQS-E Dashboard / Analyze workflow [USER-AUTHORIZED; NOT IMPLEMENTED]
         ↓
 usable current-analysis PAQS-E MVP
         ↓
@@ -475,6 +482,25 @@ PAQS-E strict historical As-Of / Gold-Set evaluation expansion
 PAQS-Q tasks proceed separately as reference/scanner engineering.
 TASK-007D follows only after PAQS-Q is usable.
 ```
+
+### R20 product adoption after the first usable workbench
+
+The user has authorized adopting R20's useful product capabilities, beyond a visual redesign.
+The governing adoption record is `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; `docs/research/R20_ADOPTION_PLAN_AND_CODEX_PROMPT_ZH.md` is preserved as earlier planning context,
+not an executable instruction or a replacement for current contracts.
+
+TASK-007C delivers the bounded current-analysis workbench first. Later task contracts stage
+prompt/model configuration, strategy-version inspection, research critique/council, reviewable
+improvement proposals, sourced news context, simulated bookkeeping and local operational tooling
+as assigned by the adoption record. Only TASK-007C is newly authorized for implementation now;
+paper/NAV remains dormant Phase 3 work. None expands TASK-007C or the current Analyze v1 input.
+PAQS-E doctrine/guardrails, explicit Analyze, immutable evidence, Futu quote-only access and no real
+account/execution boundary remain authoritative. No R20 online Python execution, OKX execution,
+automatic strategy mutation or secret-storage implementation is adopted wholesale.
+
+A later Vue migration may be considered only in a bounded frontend contract with demonstrated
+component-reuse benefit. R20 `.vue` files are not drop-in components for the current frontend.
+Copied substantive code must retain its license/attribution and an exact source-commit record.
 
 ### Phase 3 — Dormant Optional Research / Paper Extensions
 
@@ -591,10 +617,10 @@ Unnecessary infrastructure remains excluded: microservices, Kafka, distributed w
 - Codex receives only a short prompt pointing to repository, task branch, exact authoritative base SHA and Task Contract path.
 - Codex stops after its approved task and pushes only that task branch.
 - Independent GitHub review is required before remediation/integration.
-- One task passing does not approve the next task.
+- One task passing does not by itself approve the next task. TASK-007C has separate explicit user authorization; its own committed contract and prerequisite integration still govern execution.
 - Research memos/doctrines/amendments do not automatically authorize code changes; each Task Contract must state which research semantics it adopts.
 - Documentation and requirements must preserve data freshness, strict As-Of/no-lookahead, non-fabrication and read-only safety rules.
-- OpenAI API integration is not authorized merely by this Roadmap; it requires the separate TASK-007A Task Contract.
+- Accepted OpenAI integration remains bounded by TASK-007A; this Roadmap does not authorize additional provider capabilities or calls beyond later approved contracts.
 - OpenAI API credentials are user-supplied locally, server-side only, and must never be committed, persisted in application data, exposed to frontend clients, returned by APIs, or logged.
 - API keys/secrets must never be committed to GitHub or exposed to the frontend.
 - Optional Phase 3/4 work stays dormant until explicitly reactivated.
