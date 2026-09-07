@@ -342,3 +342,20 @@ and their own contracts. No third-party product document can override the broker
 ## 15. Historical evidence boundary
 
 Accepted Phase 1 plan/review files remain immutable historical evidence and do not govern later PAQS future scope. Future docs/tasks must not rewrite them.
+
+
+### TASK-007C1 — registered models, credentials and bounded research (pending review)
+
+The same monolith now resolves one model through `resources/paqs_e/model_registry.json`.
+`ModelCredentials` uses the provider-neutral `CredentialStore` port; Windows composition supplies
+Credential Manager with fixed per-service targets and no plaintext fallback. Status reads make
+no provider calls. Secrets enter only the selected HTTPS transport's Authorization header.
+
+The application freezes the Snapshot, resolves the model, optionally obtains bounded normalized
+web evidence, then builds the existing capsule and invokes the provider-neutral reasoning port.
+Compatible protocol handling remains under `integrations/openai_reasoning/`; Qwen uses documented
+Chat JSON Schema for reasoning and Responses for research. The final reasoning call has no tools,
+conversation or background state. Strict existing output conversion and deterministic validation
+remain the only path to a Decision. Incomplete research is a precondition failure with no invented
+Run. Actual provider/model and frozen auxiliary context use existing ledger columns/capsules;
+revision identity remains Security + strategy, and migration head stays 0002. See `PAQS_E_MODELS.md`.

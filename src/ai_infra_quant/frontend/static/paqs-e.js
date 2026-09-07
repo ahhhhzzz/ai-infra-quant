@@ -124,11 +124,11 @@
     return body;
   };
   const updateButton = () => {
-    $("analyze-button").disabled = Boolean(inFlight) || !security || !configuration?.api_key_configured;
+    $("analyze-button").disabled = Boolean(inFlight) || !security || !selectedModel()?.credential_configured;
     $("analyze-button").textContent = inFlight ? "分析请求进行中…" : "Analyze · 分析当前快照";
   };
   const state = (message) => { $("analysis-state").textContent = message; };
-  const identityLine = (item) => `${item.symbol} · ${item.market} · 修订 ${item.revision_no} · ${item.strategy_id} · ${item.model_id} · 快照 ${stamp(item.snapshot_as_of_timestamp, item.market)}`;
+  const identityLine = (item) => `${item.symbol} · ${item.market} · 修订 ${item.revision_no} · ${item.strategy_id} · ${modelName(item.model_id)} · 快照 ${stamp(item.snapshot_as_of_timestamp, item.market)}`;
   function renderHeading() {
     const text = decision ? `${historical ? "已选择历史 Decision" : "已选 Decision"}${earlier ? " · 较早成功结果（不是本次尝试）" : ""}\n${identityLine(decision)}` : "尚无选中的 Decision";
     $("decision-heading").textContent = text;
@@ -383,7 +383,7 @@
         button.type = "button";
         button.dataset.decisionId = item.decision_id;
         button.append(node("strong", `${item.strategy_id} · 修订 ${item.revision_no} · ${display(item.entry_advisory)}`),
-          node("span", `${stamp(item.created_at, item.market)} · ${item.model_id}`), node("span", item.one_line_thesis));
+          node("span", `${stamp(item.created_at, item.market)} · ${modelName(item.model_id)}`), node("span", item.one_line_thesis));
         button.addEventListener("click", () => selectDecision(item));
         return button;
       });
@@ -402,14 +402,14 @@
       const run = await get(`analyses/${encodeURIComponent(id)}`);
       parseRun(run, { ...expected, analysis_run_id: id });
       if (token !== runGeneration || nav !== navigation) return;
-      $("known-run-status").textContent = `${run.symbol} · ${run.model_id} · ${run.strategy_id} · ${run.status} · ${run.failure_kind || "无提供方失败"}`;
+      $("known-run-status").textContent = `${run.symbol} · ${modelName(run.model_id)} · ${run.strategy_id} · ${run.status} · ${run.failure_kind || "无提供方失败"}`;
       $("known-run-detail").textContent = JSON.stringify(run, null, 2);
     } catch (error) {
       if (token === runGeneration && nav === navigation) $("known-run-status").textContent = `Run 不可用：${error.message}`;
     }
   }
   const failures = {
-    CONFIGURATION_ERROR: "服务器分析凭据缺失或不可用；配置 OPENAI_API_KEY 后重启服务",
+    CONFIGURATION_ERROR: "所选模型凭据缺失或不可用；请配置此模型 API Key",
     PROVIDER_UNAVAILABLE: "推理提供方不可用", PROVIDER_REFUSAL: "推理提供方拒绝回答",
     INVALID_STRUCTURED_OUTPUT: "提供方输出不符合结构约定",
   };
@@ -418,15 +418,15 @@
     if (inFlight) return;
     const model = $("model-id").value, strategy = $("strategy-id").value;
     if (!security || !uuid(security.id) || !identifier(model) || !identifier(strategy)
-      || !configuration?.api_key_configured || !configuration.strategies.some((item) => item.strategy_id === strategy)) {
-      state("无法提交：请选择证券、已注册策略，并输入非空且不含任何空白的模型 ID。服务器必须已配置凭据。");
+      || !selectedModel()?.credential_configured || !configuration.strategies.some((item) => item.strategy_id === strategy)) {
+      state("无法提交：请选择证券、已注册策略，并配置所选模型的凭据。");
       return;
     }
-    const payload = Object.freeze({ security_id: security.id, model_id: model, strategy_id: strategy });
+    const payload = Object.freeze({ security_id: security.id, model_key: model, strategy_id: strategy, web_research: $("web-research").checked });
     const attempt = { payload, symbol: security.display_symbol, nav: navigation, intent: selectionIntent };
     inFlight = attempt; // Global page guard acquired synchronously, before the first await.
     updateButton();
-    const target = `${attempt.symbol} · ${model} · ${strategy}`;
+    const target = `${attempt.symbol} · ${modelName(model)} · ${strategy}`;
     state(`正在分析：${target}。已提交的目标不会随界面选择改变。`);
     if (decision) { earlier = true; renderHeading(); }
     const controller = new AbortController();
@@ -439,7 +439,7 @@
       });
       const body = await response.json();
       if (response.status === 201 && body.status === "SUCCEEDED") {
-        assertDecision(body, payload);
+        assertDecision(body, { security_id: payload.security_id, model_id: payload.model_key, strategy_id: payload.strategy_id });
         state(`已提交成功 Decision：${target} · 修订 ${body.revision_no}。${attempt.nav !== navigation ? "当前已切换证券；请回到原证券查看历史。" : ""}`);
         if (attempt.nav === navigation && security?.id === payload.security_id) {
           if (attempt.intent === selectionIntent) {
@@ -466,7 +466,7 @@
         state(`${target}：${message}。本次没有新 Decision。Run ${body.analysis_run_id}`);
         if (attempt.nav === navigation) {
           $("known-run-id").value = body.analysis_run_id;
-          void showRun(body.analysis_run_id, { ...payload, status: body.analysis_status });
+          void showRun(body.analysis_run_id, { security_id: payload.security_id, model_id: payload.model_key, strategy_id: payload.strategy_id, status: body.analysis_status });
         }
       } else if ([404, 409, 422, 500].includes(response.status) && body.status === response.status && typeof body.code === "string") {
         state(`${target}：${response.status === 500 ? "账本证据无法提交或验证" : "分析前提失败"} · ${body.code} · ${body.detail || ""}。没有确认新的 Decision。`);
@@ -520,10 +520,71 @@
   }
   $("theme-toggle").addEventListener("click", () => theme(document.documentElement.dataset.theme !== "light"));
   try { theme(localStorage.getItem("paqs-e-theme") === "light"); } catch (_error) { theme(false); }
+  const selectedModel = () => configuration?.models.find((item) => item.model_key === $("model-id").value);
+  const modelName = (id) => configuration?.models.find((item) => item.model_key === id)?.display_name || id;
+  let credentialModel = null, credentialBusy = false;
+  function modelChanged() {
+    const item = selectedModel();
+    $("web-research").disabled = !item?.web_research_supported;
+    $("web-research").checked = !!item?.web_research_supported;
+    $("research-status").textContent = item?.web_research_supported
+      ? ""
+      : "此模型当前未启用可审计联网研究；可关闭研究后分析。";
+    $("configuration-status").textContent = item?.credential_configured
+      ? "凭据已存在（仅确认存在，未验证有效性、模型权限或连接）。"
+      : "未配置此模型凭据。请配置 API Key；行情与历史仍可读取。";
+    updateButton();
+  }
+  $("model-id").addEventListener("change", modelChanged);
+  $("configure-credential").addEventListener("click", async () => {
+    if (!selectedModel() || credentialBusy) return;
+    credentialModel = selectedModel();
+    $("credential-secret").value = "";
+    $("credential-service").textContent = `${credentialModel.display_name} · ${credentialModel.credential_label}`;
+    $("credential-status").textContent = "";
+    $("credential-dialog").showModal();
+    try {
+      const status = await get(`credentials/${encodeURIComponent(credentialModel.model_key)}`);
+      $("credential-status").textContent = status.credential_source === "server_environment_read_only"
+        ? "服务器环境变量只读回退已存在；删除本地凭据不会删除环境变量。"
+        : status.secure_storage_available ? "Windows 安全存储可用。" : "操作系统安全存储不可用；不能保存。";
+    } catch (_error) { $("credential-status").textContent = "无法读取凭据状态。"; }
+  });
+  $("credential-close").addEventListener("click", () => $("credential-dialog").close());
+  $("credential-dialog").addEventListener("close", () => { $("credential-secret").value = ""; });
+  async function mutateCredential(method) {
+    if (credentialBusy || !credentialModel) return;
+    credentialBusy = true;
+    const key = credentialModel.model_key;
+    const body = method === "PUT" ? { secret: $("credential-secret").value } : {};
+    $("credential-save").disabled = true; $("credential-delete").disabled = true;
+    try {
+      const response = await fetch(`/api/v1/paqs-e/credentials/${encodeURIComponent(key)}`, {
+        method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+      });
+      if (!response.ok) throw new Error("Credential mutation failed");
+      $("credential-secret").value = "";
+      const value = await get("configuration");
+      configuration.models = value.models;
+      $("configuration-status").textContent = selectedModel()?.credential_configured ? "凭据已存在；权限与余额未验证。" : "未配置此模型凭据。";
+      $("credential-status").textContent = method === "PUT" ? "已安全保存；未验证权限或余额。" : "已删除本地凭据；服务器环境变量回退不受影响。";
+    } catch (_error) { $("credential-status").textContent = "操作未能确认；请检查安全存储状态后手动重试。"; }
+    finally {
+      delete body.secret;
+      credentialBusy = false; $("credential-save").disabled = false; $("credential-delete").disabled = false;
+      updateButton();
+    }
+  }
+  $("credential-form").addEventListener("submit", (event) => { event.preventDefault(); void mutateCredential("PUT"); });
+  $("credential-delete").addEventListener("click", () => { void mutateCredential("DELETE"); });
   async function configure() {
     try {
       const value = await get("configuration");
-      if (value.model_provider !== "openai" || typeof value.api_key_configured !== "boolean"
+      if (!Array.isArray(value.models) || !value.models.length
+        || !value.models.some((item) => item.model_key === value.default_model_key)
+        || new Set(value.models.map((item) => item.model_key)).size !== value.models.length
+        || value.models.some((item) => !identifier(item.model_key) || typeof item.display_name !== "string"
+          || typeof item.credential_configured !== "boolean" || typeof item.web_research_supported !== "boolean")
         || !Array.isArray(value.strategies) || !value.strategies.length
         || !value.strategies.some((item) => item.strategy_id === value.default_strategy_id)
         || new Set(value.strategies.map((item) => item.strategy_id)).size !== value.strategies.length
@@ -536,9 +597,12 @@
         const filter = option.cloneNode(true); $("history-strategy").append(filter);
       }
       $("strategy-id").value = value.default_strategy_id; $("strategy-id").disabled = false;
-      $("configuration-status").textContent = value.api_key_configured
-        ? "服务器已配置凭据（仅确认存在，未验证有效性、模型权限或连接）。"
-        : "未配置分析凭据。请在服务器设置 OPENAI_API_KEY 后重启；此页面不接收密钥。行情与历史仍可读取。";
+      for (const item of value.models) {
+        const option = node("option", item.display_name);
+        option.value = item.model_key; $("model-id").append(option);
+      }
+      $("model-id").value = value.default_model_key; $("model-id").disabled = false;
+      modelChanged();
     } catch (_error) { $("configuration-status").textContent = "服务器策略配置不可用，请检查注册文件后重启。未提供替代策略。"; }
     updateButton();
   }

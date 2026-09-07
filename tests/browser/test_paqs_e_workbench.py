@@ -8,7 +8,7 @@ import httpx
 import pytest
 from playwright.sync_api import Browser, expect
 
-from .workbench_support import HK, MODEL, STRATEGY, US, Workbench, fixture_pair
+from .workbench_support import HK, MODEL, MODEL_NAME, STRATEGY, US, Workbench, fixture_pair
 
 
 def test_actual_uvicorn_unconfigured_http_and_static_smoke(
@@ -27,16 +27,16 @@ def test_actual_uvicorn_unconfigured_http_and_static_smoke(
         ):
             assert client.get(path).status_code == 200
         configuration = client.get("/api/v1/paqs-e/configuration").json()
-        assert configuration["api_key_configured"] is False
+        assert all(not item["credential_configured"] for item in configuration["models"])
         assert configuration["default_strategy_id"] == STRATEGY
     context = browser.new_context()
     page = context.new_page()
     calls: list[str] = []
     page.on("request", lambda request: calls.append(request.method + " " + request.url))
     page.goto(workbench_server)
-    expect(page.locator("#configuration-status")).to_contain_text("OPENAI_API_KEY")
+    expect(page.locator("#configuration-status")).to_contain_text("API Key")
     expect(page.locator("#analyze-button")).to_be_disabled()
-    expect(page.locator("#model-id")).to_have_value("")
+    expect(page.locator("#model-id")).to_have_value("deepseek-v4-flash")
     assert not any(call.startswith("POST") for call in calls)
     context.close()
 
@@ -46,8 +46,8 @@ def test_all_non_explicit_actions_have_zero_analyze_posts(
 ) -> None:
     app = Workbench(browser, workbench_server)
     page = app.open()
-    expect(page.locator("#model-id")).to_have_value("")
-    page.locator("#model-id").fill("unchanged-model")
+    expect(page.locator("#model-id")).to_have_value("deepseek-v4-flash")
+    page.locator("#model-id").select_option("qwen3.8-max")
     page.locator("#strategy-id").select_option("fixture-alternative")
     page.locator("#theme-toggle").click()
     page.locator("#tab-minute").click()
@@ -82,7 +82,7 @@ def test_all_non_explicit_actions_have_zero_analyze_posts(
         configurable: true, get: () => 'visible'});
     }""")
     page.evaluate("document.dispatchEvent(new Event('visibilitychange'))")
-    expect(page.locator("#model-id")).to_have_value("unchanged-model")
+    expect(page.locator("#model-id")).to_have_value("qwen3.8-max")
     assert app.posts == []
     assert app.errors == []
     assert all(url.startswith(workbench_server) for _, url in app.requests)
@@ -99,17 +99,21 @@ def test_explicit_capture_double_enter_guard_and_security_switch(
     page.locator("#analyze-form").dispatch_event("submit")
     page.locator("#model-id").press("Enter")
     page.locator(f'#security-selector [data-security-id="{HK}"]').click()
-    page.locator("#model-id").fill("new-model")
+    page.locator("#model-id").select_option("glm-5.2")
     page.locator("#strategy-id").select_option("fixture-alternative")
     page.locator("#analyze-form").dispatch_event("submit")
-    expect(page.locator("#analysis-state")).to_contain_text(f"US.AVGO · {MODEL} · {STRATEGY}")
-    assert app.posts == [{"security_id": US, "model_id": MODEL, "strategy_id": STRATEGY}]
+    expect(page.locator("#analysis-state")).to_contain_text(f"US.AVGO · {MODEL_NAME} · {STRATEGY}")
+    assert app.posts == [
+        {"security_id": US, "model_key": MODEL, "strategy_id": STRATEGY, "web_research": True}
+    ]
     app.hold = None
     app.respond(app.pending.pop())
     expect(page.locator("#analysis-state")).to_contain_text("当前已切换证券")
     expect(page.locator("#decision-heading")).to_have_text("尚无选中的 Decision")
-    expect(page.locator("#model-id")).to_have_value("new-model")
-    assert app.posts == [{"security_id": US, "model_id": MODEL, "strategy_id": STRATEGY}]
+    expect(page.locator("#model-id")).to_have_value("glm-5.2")
+    assert app.posts == [
+        {"security_id": US, "model_key": MODEL, "strategy_id": STRATEGY, "web_research": True}
+    ]
     app.close()
 
 
@@ -498,7 +502,11 @@ def test_configuration_get_failure_and_invalid_models_never_dispatch(
     app = Workbench(browser, workbench_server)
     page = app.open()
     for value in ("bad model", " model", "model\u0085id", "model\u001fid"):
-        page.locator("#model-id").fill(value)
+        page.locator("#model-id").evaluate(
+            "(select, value) => { const option = new Option(value, value); "
+            "select.add(option); select.value = value; }",
+            value,
+        )
         page.locator("#analyze-form").dispatch_event("submit")
         expect(page.locator("#model-id")).to_have_value(value)
         expect(page.locator("#analysis-state")).to_contain_text("无法提交")
@@ -513,13 +521,13 @@ def test_changed_form_does_not_relabel_captured_success(
     page = app.open()
     app.hold = "/paqs-e/analyses"
     app.analyze()
-    page.locator("#model-id").fill("different-explicit-model")
+    page.locator("#model-id").select_option("kimi-k3")
     page.locator("#strategy-id").select_option("fixture-alternative")
     app.hold = None
     app.respond(app.pending.pop())
-    expect(page.locator("#decision-heading")).to_contain_text(MODEL)
-    expect(page.locator("#decision-heading")).not_to_contain_text("different-explicit-model")
-    expect(page.locator("#model-id")).to_have_value("different-explicit-model")
+    expect(page.locator("#decision-heading")).to_contain_text(MODEL_NAME)
+    expect(page.locator("#decision-heading")).not_to_contain_text("kimi-k3")
+    expect(page.locator("#model-id")).to_have_value("kimi-k3")
     assert len(app.posts) == 1
     app.close()
 

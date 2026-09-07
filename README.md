@@ -141,3 +141,10 @@ Phase 2 market-data backend, TASK-005 adds its read-only Dashboard client, TASK-
 paged chart history/incremental refresh, and TASK-006A adds only the dynamic-security and PAQS input
 foundation. No derived-input persistence, PAQS structure/advisory, PaperBroker, paper fill/order,
 backtest, brokerage-account access, or real-order route was added.
+
+
+TASK-007C1 adds a flat eleven-model selector and local **配置此模型 API Key** dialog.
+Use the existing Windows launcher, open the loopback workbench, select a model, securely save its
+key and explicitly Analyze. UI-managed keys need no `.env` edit. See
+[model and credential guide](docs/PAQS_E_MODELS.md) for supported routes, research limits and
+separate opt-in live-provider acceptance. This task is pending independent review; no merge is claimed.

@@ -14,13 +14,15 @@ from urllib.parse import parse_qs, urlparse
 
 from playwright.sync_api import Browser, Page, Route
 
+from ai_infra_quant.application.paqs_e_models import ModelRegistry
 from ai_infra_quant.application.paqs_e_runtime import build_reasoning_request, load_strategy_package
 from ai_infra_quant.backend.schemas.paqs_e import AnalysisRunRead, DecisionRead
 from ai_infra_quant.core.domain.paqs_market_snapshot import canonical_json
 
 US = "00000000-0000-4000-8000-000000000007"
 HK = "00000000-0000-4000-8000-000000000008"
-MODEL = "explicit-fixture-model"
+MODEL = "gpt-5.6-luna"
+MODEL_NAME = "GPT-5.6 Luna"
 STRATEGY = "paqs-e-master"
 
 
@@ -250,8 +252,17 @@ class Workbench:
             return self.fulfill(
                 route,
                 {
-                    "model_provider": "openai",
-                    "api_key_configured": self.configured,
+                    "default_model_key": "deepseek-v4-flash",
+                    "models": [
+                        {
+                            "model_key": item.model_key,
+                            "display_name": item.display_name,
+                            "credential_label": item.credential_label,
+                            "credential_configured": self.configured,
+                            "web_research_supported": item.web_research_supported,
+                        }
+                        for item in ModelRegistry().models
+                    ],
                     "default_strategy_id": STRATEGY,
                     "strategies": [
                         {
@@ -416,7 +427,7 @@ class Workbench:
         )
 
     def analyze(self) -> None:
-        self.page.locator("#model-id").fill(MODEL)
+        self.page.locator("#model-id").select_option(MODEL)
         self.page.locator("#analyze-button").click()
 
     def close(self) -> None:

@@ -241,3 +241,15 @@ implemented by TASK-007B. Accepted Phase 1 evidence remains unchanged.
 | R20-003 | Explicit Analyze, model/registered-strategy selection, truthful failure and immutable Decision history become usable UI flows | RETAINED | 2 | IMPLEMENTED_PENDING_REVIEW | `tests/browser/test_paqs_e_workbench.py`; `tests/integration/test_paqs_e_configuration.py`; `docs/PAQS_E_WORKBENCH.md` |
 | R20-004 | Later prompt/model/version, critique/council, reviewable evolution, news, simulated bookkeeping and operations capabilities follow the adoption record through separate bounded contracts | OPTIONAL_FUTURE | 2–4 | DOCUMENTED | `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; no expansion of 007C |
 | R20-005 | Do not inherit R20 live execution, unrestricted Python plugins, plaintext secret storage, automatic strategy changes or crypto-specific financial assumptions | RETAINED | all | DOCUMENTED | `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; permanent Roadmap boundaries |
+
+
+## 10. TASK-007C1 model and secure research increment
+
+| ID | Requirement | Status | Evidence |
+|---|---|---|---|
+| 007C1-001 | Exact eleven-model flat registry, default DeepSeek V4 Flash, fixed official routes | IMPLEMENTED_PENDING_REVIEW | `model_registry.json`; model gateway and browser catalog tests |
+| 007C1-002 | Windows OS-protected credential save/update/delete, safe dynamic status, loopback/Origin boundary | IMPLEMENTED_PENDING_REVIEW | `windows_credentials.py`; credential unit/integration/browser tests |
+| 007C1-003 | Four-field explicit Analyze, actual model identity and unchanged cross-model revision series | IMPLEMENTED_PENDING_REVIEW | `test_paqs_e_multi_model.py`; retained ledger API regressions |
+| 007C1-004 | Bounded source-specific web capsule, As-Of filtering, tool-free final reasoning | IMPLEMENTED_PENDING_REVIEW | `test_paqs_e_model_gateway.py`; lifecycle integration and browser tests |
+| 007C1-005 | No automatic paid retry/fallback or broker/live scope; no migration or protected review changes | IMPLEMENTED_PENDING_REVIEW | adapter tests, full architecture suite, implementation diff |
+| 007C1-006 | Opt-in live domestic-provider product acceptance | SEPARATE_EXECUTION_EVIDENCE_REQUIRED | no user credential supplied through UI; deterministic tests make no paid calls |

@@ -20,6 +20,23 @@
   box-sizing: border-box;
 }
 
+#credential-dialog {
+  color: inherit;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 24px;
+}
+#credential-dialog::backdrop { background: #0009; }
+#credential-form { display: grid; gap: 14px; }
+#credential-form label { display: grid; gap: 8px; }
+#credential-secret { width: 100%; min-width: 0; }
+.analysis-controls .research-toggle { display: flex; gap: 8px; align-items: center; }
+.analysis-controls .research-toggle input { width: auto; }
+#research-status:empty { display: none; }
+
 body {
   margin: 0;
   min-width: 320px;
@@ -835,6 +852,9 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; fo
   .analysis-panel { display: contents; }
   .watchlist-panel { grid-column: 1; grid-row: 1; }
   .analysis-controls { grid-column: 2; grid-row: 1; border: 1px solid var(--border); background: var(--surface); }
+  .analysis-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .analysis-controls > p, .analysis-controls > .section-heading,
+  .analysis-controls > .analysis-state, #analyze-button { grid-column: 1 / -1; }
   .market-panel { grid-column: 1 / -1; grid-row: 2; }
   .analysis-results { grid-column: 1 / -1; grid-row: 3; padding: 16px; border: 1px solid var(--border); background: var(--surface); }
   .security-selector { grid-template-columns: 1fr; max-height: 180px; overflow-y: auto; }

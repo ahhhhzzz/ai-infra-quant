@@ -16,17 +16,20 @@ under a clearly historical/local disclosure; they are not actual holdings or PAQ
    only refresh market data. Daily history remains 1,300 sessions and minute history 30 calendar
    days; incremental requests remain five Daily rows / two minute-history days. Cached data and
    viewport are retained on refresh, including errors with previously cached evidence.
-3. Enter an explicit model ID, initially empty. Whitespace is invalid and is never trimmed into
-   a different identifier. Choose from actual registered primary strategies. Navigation preserves
-   model text; history never supplies a model default. The configuration response is documented in
-   `API_CONTRACTS.md` section 5.11. A missing server key disables Analyze and explains setting
-   `OPENAI_API_KEY` on the server and restarting. The UI has no key input, probe, discovery, pricing
-   or model recommendation. A configured presence flag does not promise provider availability.
-4. Submit **Analyze** explicitly. A single synchronous page guard captures exactly
-   `{security_id, model_id, strategy_id}` before any asynchronous step. Repeated Enter/click events
-   while pending do not create additional requests, even after switching securities. The original
-   target stays identified beside the Analyze control. Each later explicit submission is a new
-   attempt, with no retry, queue, hidden prior context or idempotency fiction.
+3. Select one of the eleven registered model names, initially **DeepSeek V4 Flash**. Model
+   changes preserve the chosen primary strategy and never Analyze. Choose **配置此模型 API Key**
+   to save/update the selected service's key in Windows Credential Manager. The password input
+   clears after successful save or closing the dialog; it is never read back. Models sharing a
+   service share its credential status. Presence does not verify balance, entitlement or connectivity.
+   OpenAI alone retains an optional read-only server environment fallback. No manual `.env` edit
+   is needed for UI-managed credentials. Missing credentials disable Analyze for that model.
+4. Choose **联网研究**, enabled by default for supported model routes, then submit **Analyze**
+   explicitly. A synchronous page guard captures exactly `{security_id, model_key, strategy_id,
+   web_research}` before any asynchronous step. Repeated Enter/click while pending creates no
+   extra request, even after changing selections. Research freezes source-specific auxiliary
+   evidence after the Snapshot cutoff is established; final reasoning has tools disabled.
+   Unsupported requested research fails explicitly. There is no retry, queue, provider fallback,
+   hidden prior context or idempotency fiction. See `PAQS_E_MODELS.md` for the catalog and limits.
 5. A confirmed 201 `SUCCEEDED` response displays its committed Decision and actual identity,
    then uses GET for successful history and the associated Run. Changing form values cannot relabel
    this result. An explicit history selection made while Analyze or another GET is pending remains
@@ -132,5 +135,6 @@ environment-dependent; a skip is not a performed PostgreSQL validation.
 ## Scope and reuse
 
 See `THIRD_PARTY_WORKBENCH.md`. R20 is design-reference-only; vendor bytes/notices are retained.
-No runtime, strategy, reasoning, ledger, migration, market-data provider, scheduler, replay store,
-PAQS-Q, paper portfolio, broker/account/order or protected review/contract behavior was changed.
+TASK-007C1 adds model resolution, secure credentials and a pre-reasoning research stage.
+The accepted strategy, Snapshot, deterministic validator, ledger schema, migrations, market-data
+provider, scheduler, PAQS-Q, portfolio and broker boundaries remain unchanged.

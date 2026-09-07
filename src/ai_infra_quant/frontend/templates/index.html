@@ -158,15 +158,30 @@
 
         <aside class="analysis-panel" aria-label="PAQS-E 分析与结果">
           <form id="analyze-form" class="analysis-controls">
-            <div class="section-heading"><div><p class="eyebrow">ON-DEMAND ANALYSIS</p><h2>新的当前分析</h2></div><span>OpenAI</span></div>
+            <div class="section-heading"><div><p class="eyebrow">ON-DEMAND ANALYSIS</p><h2>新的当前分析</h2></div></div>
             <p id="analysis-security" class="identity-line">请选择证券</p>
-            <label>模型 ID<input id="model-id" name="model_id" autocomplete="off" spellcheck="false" placeholder="请输入明确的模型 ID" required></label>
+            <label>模型<select id="model-id" name="model_key" required disabled></select></label>
             <label>主策略<select id="strategy-id" name="strategy_id" required disabled></select></label>
+            <label class="research-toggle"><input id="web-research" type="checkbox"> 联网研究</label>
+            <p id="research-status" class="note"></p>
+            <button id="configure-credential" type="button">配置此模型 API Key</button>
             <p id="configuration-status" class="note" role="status">读取服务器配置…</p>
             <button id="analyze-button" type="submit" disabled>Analyze · 分析当前快照</button>
             <p class="note">每次显式提交采集新快照。行情刷新不会运行分析。</p>
             <div id="analysis-state" class="analysis-state" role="status" aria-live="polite">尚未发起分析</div>
           </form>
+          <dialog id="credential-dialog">
+            <form id="credential-form" autocomplete="off">
+              <h3>配置此模型 API Key</h3>
+              <p id="credential-service"></p>
+              <p class="note">仅保存在当前 Windows 用户的凭据管理器；存在不代表余额或权限已验证。</p>
+              <label>API Key<input id="credential-secret" type="password" autocomplete="new-password" maxlength="1024" required></label>
+              <p id="credential-status" role="status"></p>
+              <button id="credential-save" type="submit">安全保存 / 更新</button>
+              <button id="credential-delete" type="button">删除已保存凭据</button>
+              <button id="credential-close" type="button">关闭</button>
+            </form>
+          </dialog>
           <section class="analysis-results">
             <div id="decision-heading" class="decision-heading">尚无选中的 Decision</div>
             <div id="decision-result"><p class="note">选择成功历史，或填写模型后显式 Analyze。</p></div>

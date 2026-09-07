@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict
+from ipaddress import ip_address
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
 from ai_infra_quant.application.market_data_queries import (
@@ -13,6 +14,7 @@ from ai_infra_quant.application.market_data_queries import (
     MarketDataSecurityNotFound,
     MarketDataSecurityNotSupported,
 )
+from ai_infra_quant.application.paqs_e_research import ResearchFailure
 from ai_infra_quant.application.paqs_e_runtime import RuntimePackageError
 from ai_infra_quant.backend.api.errors import problem_response
 from ai_infra_quant.backend.dependencies import ContainerDep
@@ -23,8 +25,13 @@ from ai_infra_quant.backend.schemas.paqs_e import (
     AnalyzeCreate,
     AnalyzeCreated,
     ConfigurationRead,
+    CredentialDelete,
+    CredentialSave,
+    CredentialStatusRead,
     DecisionHistoryRead,
     DecisionRead,
+    ModelOptionRead,
+    StrategyOptionRead,
     analysis_run_read,
     analyze_created,
     decision_read,
@@ -55,7 +62,98 @@ def get_configuration(
             title="PAQS-E configuration unavailable",
             detail="Registered strategy configuration could not be loaded. Restart after repair.",
         )
-    return ConfigurationRead(**asdict(configuration))
+    return ConfigurationRead(
+        default_model_key=container.paqs_e_credentials.registry.default_model_key,
+        models=[
+            ModelOptionRead.model_validate(item)
+            for item in container.paqs_e_credentials.projection()
+        ],
+        default_strategy_id=configuration.default_strategy_id,
+        strategies=tuple(StrategyOptionRead(**asdict(item)) for item in configuration.strategies),
+    )
+
+
+async def _credential_boundary(request: Request) -> None:
+    try:
+        client_local = request.client is not None and ip_address(request.client.host).is_loopback
+        host = request.url.hostname
+        host_local = host == "localhost" or (host is not None and ip_address(host).is_loopback)
+    except ValueError:
+        client_local = host_local = False
+    if not client_local or not host_local:
+        raise HTTPException(403, "Credential access requires loopback")
+    if request.url.query:
+        raise HTTPException(400, "Credential requests do not accept query parameters")
+    if request.method != "GET":
+        expected_origin = f"{request.url.scheme}://{request.url.netloc}"
+        if (
+            request.headers.get("origin") != expected_origin
+            or request.headers.get("sec-fetch-site") not in {None, "same-origin"}
+            or request.headers.get("content-type", "").split(";")[0].lower() != "application/json"
+        ):
+            raise HTTPException(403, "Same-origin JSON credential mutation required")
+        if len(await request.body()) > 8192:
+            raise HTTPException(413, "Credential request exceeds limit")
+
+
+def _credential_failure(request: Request, status: int) -> JSONResponse:
+    return problem_response(
+        request,
+        status=status,
+        code="PAQS_E_CREDENTIAL_UNAVAILABLE",
+        title="Credential operation unavailable",
+        detail="Check the registered model and operating-system secure store.",
+    )
+
+
+@router.get(
+    "/credentials/{model_key}",
+    response_model=CredentialStatusRead,
+    dependencies=[Depends(_credential_boundary)],
+)
+def credential_status(
+    model_key: str, request: Request, container: ContainerDep
+) -> CredentialStatusRead | JSONResponse:
+    try:
+        return CredentialStatusRead(**asdict(container.paqs_e_credentials.status(model_key)))
+    except ValueError:
+        return _credential_failure(request, 422)
+    except Exception:
+        return _credential_failure(request, 503)
+
+
+@router.put(
+    "/credentials/{model_key}",
+    response_model=CredentialStatusRead,
+    dependencies=[Depends(_credential_boundary)],
+)
+def save_credential(
+    model_key: str, payload: CredentialSave, request: Request, container: ContainerDep
+) -> CredentialStatusRead | JSONResponse:
+    try:
+        status = container.paqs_e_credentials.save(model_key, payload.secret.get_secret_value())
+        return CredentialStatusRead(**asdict(status))
+    except ValueError:
+        return _credential_failure(request, 422)
+    except Exception:
+        return _credential_failure(request, 503)
+
+
+@router.delete(
+    "/credentials/{model_key}",
+    response_model=CredentialStatusRead,
+    dependencies=[Depends(_credential_boundary)],
+)
+def delete_credential(
+    model_key: str, payload: CredentialDelete, request: Request, container: ContainerDep
+) -> CredentialStatusRead | JSONResponse:
+    del payload
+    try:
+        return CredentialStatusRead(**asdict(container.paqs_e_credentials.delete(model_key)))
+    except ValueError:
+        return _credential_failure(request, 422)
+    except Exception:
+        return _credential_failure(request, 503)
 
 
 def _ledger_error(request: Request) -> JSONResponse:
@@ -133,8 +231,18 @@ def analyze(
     try:
         persisted = container.paqs_e_analysis_service.analyze(
             security_id=str(payload.security_id),
-            model_id=payload.model_id,
+            model_key=payload.model_key,
             strategy_id=payload.strategy_id,
+            web_research=payload.web_research,
+        )
+    except ResearchFailure as failure:
+        return problem_response(
+            request,
+            status=422,
+            code="PAQS_E_RESEARCH_PRECONDITION_FAILED",
+            title="Web research failed",
+            detail=str(failure),
+            extra={"failure_kind": failure.kind.value},
         )
     except MarketDataSecurityNotFound:
         return _not_found(request, "SECURITY")
