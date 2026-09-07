@@ -7,6 +7,11 @@ from ai_infra_quant.database.models.accounting import (
     PortfolioSnapshotModel,
     UnitTransactionModel,
 )
+from ai_infra_quant.database.models.paqs_e_ledger import (
+    PaqsEAnalysisRunModel,
+    PaqsEDecisionModel,
+    PaqsERuntimeArtifactModel,
+)
 from ai_infra_quant.database.models.portfolio import (
     BrokerAccountModel,
     BrokerProfileModel,
@@ -33,6 +38,9 @@ __all__ = [
     "LedgerAccountModel",
     "LedgerEntryModel",
     "LedgerTransactionModel",
+    "PaqsEAnalysisRunModel",
+    "PaqsEDecisionModel",
+    "PaqsERuntimeArtifactModel",
     "PortfolioAccountModel",
     "PortfolioModel",
     "PortfolioSnapshotModel",

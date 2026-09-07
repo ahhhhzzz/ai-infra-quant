@@ -11,6 +11,8 @@ from ai_infra_quant.application.market_data_queries import (
     MarketDataProviderFactory,
     MarketDataQueries,
 )
+from ai_infra_quant.application.paqs_e_analysis import PaqsEAnalysisService
+from ai_infra_quant.application.paqs_e_runtime import PaqsEReasoningRuntime
 from ai_infra_quant.application.paqs_input_queries import PaqsInputQueries
 from ai_infra_quant.application.paqs_market_snapshot_queries import PaqsMarketSnapshotQueries
 from ai_infra_quant.application.paqs_structure_queries import PaqsStructureQueries
@@ -23,9 +25,12 @@ from ai_infra_quant.config import Settings
 from ai_infra_quant.core.domain.enums import CapabilityStatus, DataAvailabilityStatus
 from ai_infra_quant.core.domain.market_data import PROVIDER_FUTU_QUOTE
 from ai_infra_quant.core.domain.strategy import StrategyDefinition
+from ai_infra_quant.core.ports.paqs_e_ledger import PaqsELedger
 from ai_infra_quant.core.strategy.registry import StrategyRegistry
+from ai_infra_quant.database.repositories.paqs_e_ledger import SQLAlchemyPaqsELedger
 from ai_infra_quant.database.repositories.unit_of_work import SQLAlchemyUnitOfWork
 from ai_infra_quant.integrations.futu_quote.adapter import FutuQuoteAdapter
+from ai_infra_quant.integrations.openai_reasoning.adapter import OpenAIPaqsEReasoningAdapter
 from ai_infra_quant.integrations.registry import Registries
 
 
@@ -45,6 +50,8 @@ class AppContainer:
     paqs_input_queries: PaqsInputQueries
     paqs_market_snapshot_queries: PaqsMarketSnapshotQueries
     paqs_structure_queries: PaqsStructureQueries
+    paqs_e_ledger: PaqsELedger
+    paqs_e_analysis_service: PaqsEAnalysisService
 
 
 def build_container(
@@ -100,6 +107,8 @@ def build_container(
         market_data_queries,
         provider_name=provider_name,
     )
+    snapshot_queries = PaqsMarketSnapshotQueries(paqs_input_queries, market_data_queries)
+    paqs_e_ledger = SQLAlchemyPaqsELedger(session_factory)
     return AppContainer(
         settings=settings,
         engine=engine,
@@ -122,11 +131,14 @@ def build_container(
             provider_factory=provider_factory,
         ),
         paqs_input_queries=paqs_input_queries,
-        paqs_market_snapshot_queries=PaqsMarketSnapshotQueries(
-            paqs_input_queries,
-            market_data_queries,
-        ),
+        paqs_market_snapshot_queries=snapshot_queries,
         paqs_structure_queries=PaqsStructureQueries(paqs_input_queries),
+        paqs_e_ledger=paqs_e_ledger,
+        paqs_e_analysis_service=PaqsEAnalysisService(
+            snapshot_queries,
+            PaqsEReasoningRuntime(OpenAIPaqsEReasoningAdapter(api_key=settings.openai_api_key)),
+            paqs_e_ledger,
+        ),
     )
 
 

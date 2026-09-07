@@ -8,6 +8,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+from ai_infra_quant.application.bootstrap import EXPECTED_REVISION
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SOURCE_ALEMBIC_INI = PROJECT_ROOT / "alembic.ini"
 MIGRATION_SCRIPTS = PROJECT_ROOT / "src/ai_infra_quant/database/migrations"
@@ -45,7 +47,7 @@ def _run_alembic(cwd: Path, *arguments: str, env: dict[str, str]) -> str:
 def _assert_at_head(database_path: Path) -> None:
     with sqlite3.connect(database_path) as connection:
         revision = connection.execute("SELECT version_num FROM alembic_version").fetchone()
-    assert revision == ("0001_phase1_foundation",)
+    assert revision == (EXPECTED_REVISION,)
 
 
 def test_default_command_creates_pristine_nested_sqlite_parent(tmp_path: Path) -> None:

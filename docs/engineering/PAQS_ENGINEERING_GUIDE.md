@@ -1,4 +1,4 @@
-# PAQS Engineering Guide — through TASK-007A PAQS-E Runtime Port
+# PAQS Engineering Guide — TASK-007B Analyze/Decision Ledger pending independent review
 
 ## Authority and boundary
 
@@ -12,8 +12,10 @@ TASK-007A separately adopts the accepted PAQS-E Master Spec as a runtime Markdow
 governs only the internal structured-reasoning runtime and first provider adapter. It does not
 change the legacy TASK-006B structure engine or authorize a public Analyze workflow.
 
-Phase 1 migration and review evidence remain immutable. No calendar, W1, M30, or PAQS input bundle
-is persisted.
+TASK-007B separately authorizes the current Analyze API and immutable analysis evidence described
+below. Its implementation remains pending independent review. Phase 1 migration and review
+evidence remain immutable. Calendar/W1/D1/M30 facts are preserved only inside each formed
+reasoning request's evidence capsule; no standalone market-data store or replay service is added.
 
 ## Data flow and module boundaries
 
@@ -181,6 +183,65 @@ validation, not a deterministic replacement PAQS-E strategy. V1 machine-enforces
 configured minimum RR is an actionable-state consistency gate: it rejects a below-threshold READY
 judgment but does not invalidate or rewrite an otherwise valid non-action judgment that reports the
 same final RR.
+
+## TASK-007B current Analyze and Decision Ledger
+
+`application/paqs_e_analysis.py` composes the existing snapshot query and TASK-007A runtime through
+core-facing boundaries. Public POST input is only Security UUID, unchanged explicit model ID and
+registered strategy ID. Runtime config and prompt are server-controlled, and public v1 always
+sets `auxiliary_context=()`. Each POST acquires exactly one new current immutable snapshot and
+makes exactly one reasoning attempt, even for a repeated snapshot/model/strategy selection.
+Dashboard polling never calls this service and previous Decisions are never implicit context.
+
+Before runtime dispatch, canonicalize the complete `PaqsEReasoningRequestV1` and hash its UTF-8
+bytes. This captures bounded W1/D1/M30 bars, quote/state references, calendar/session/adjustment,
+quality/coverage/provider provenance, runtime identities, selected model/strategy and empty
+auxiliary context. Store the canonical JSON text itself as byte authority; do not reconstruct
+old evidence from a later cache or a database JSON serializer.
+
+The dedicated Decision Ledger port lives under `core/ports/`; entities and evidence invariants
+live under `core/domain/`. SQLAlchemy models/repository implement persistence under `database/`.
+No database write transaction spans the provider call. Once TASK-007A returns, one transaction
+resolves immutable strategy/prompt artifacts and inserts a terminal Analysis Run. A validated
+success also inserts its Decision before the transaction commits. The API may return success
+only afterward. Insert/commit failure rolls back artifacts, run and Decision together.
+
+Run statuses are `SUCCEEDED`, `PROVIDER_FAILED`, and `VALIDATION_FAILED`. Provider failures keep
+the exact safe TASK-007A kind/reason; validation failures keep validator version and exact issues.
+Both failure types commit one run with no Decision before returning a truthful non-2xx response.
+A Security/snapshot precondition failure before a request exists creates no invented run.
+
+The new migration file is `0002_task007b_paqs_e_decision_ledger.py`, with revision
+`0002_task007b_paqs_e_ledger` and
+`down_revision="0001_phase1_foundation"`. It uses the current `DATABASE_URL` and creates only:
+
+- `paqs_e_runtime_artifacts`: immutable exact strategy/prompt content, verified SHA-256 and
+  deduplication by `(artifact_kind, artifact_key, content_sha256)`;
+- `paqs_e_analysis_runs`: immutable complete canonical request/hash, terminal outcome, identities
+  and timestamps;
+- `paqs_e_decisions`: immutable validated canonical result/hash, direct query-friendly summary
+  copies and revision lineage.
+
+SQLite UPDATE/DELETE triggers protect all three tables. Repositories expose no mutation/delete
+operation. Canonical payload hashes and artifact hashes are verified on readback; mismatches and
+summary disagreements fail truthfully. `rr_t1` stays Decimal and uses the accepted exact
+dialect-aware persistence type. Database artifact content is evidence only; the registry and
+versioned prompt resource retain runtime authority.
+
+Canonical Decimal rendering and bounds checks are independent of the ambient arithmetic precision:
+all accepted digits survive evidence hashing, while existing scale-insensitive forms stay unchanged.
+
+Revision identity is `(security_id, strategy_id)`. Revision 1 has no predecessor; each success
+appends the next revision and supersedes the immediately previous Decision. Model or content-hash
+changes continue that series, while a new strategy ID starts a separate series. Unique run and
+series/revision constraints plus transaction logic prevent duplicate revision claims, without
+silently deduplicating explicit Analyze attempts.
+
+Read endpoints expose a run by ID, a Decision by ID and newest-first Security history with an
+optional strategy filter and `limit` 1..100 (default 20). They preserve hashes, exact Decimal text,
+UTC instants and safe audit identities. No key/header/environment/exception dump is part of an
+API schema or evidence row. TASK-007C UI, replay storage, PAQS-Q, paper state, background work and
+broker/account/order capabilities remain outside this task.
 
 ## TASK-006B normalized structure input
 

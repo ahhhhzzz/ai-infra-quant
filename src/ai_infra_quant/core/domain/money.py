@@ -30,7 +30,7 @@ def parse_decimal(value: object) -> Decimal:
         raise ValueError("financial values must be finite")
     if exponent < -SCALE:
         raise ValueError("financial value exceeds scale 18")
-    if abs(parsed) > MAX_EXACT_DECIMAL:
+    if parsed.copy_abs() > MAX_EXACT_DECIMAL:
         raise ValueError("financial value exceeds precision 38")
     if parsed == 0:
         return parsed.copy_abs()
@@ -47,7 +47,10 @@ def canonical_decimal_string(value: Decimal) -> str:
     parsed = parse_decimal(value)
     if parsed == 0:
         return "0"
-    return format(parsed.normalize(), "f")
+    # Decimal.normalize() rounds through the ambient arithmetic context. Audit
+    # serialization must retain every accepted digit even at a lower precision.
+    rendered = format(parsed, "f")
+    return rendered.rstrip("0").rstrip(".") if "." in rendered else rendered
 
 
 @dataclass(frozen=True, slots=True)

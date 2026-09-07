@@ -71,6 +71,10 @@ def test_snapshot_public_schema_has_no_strategy_conclusion_fields() -> None:
     )
 
 
-def test_task006b2_does_not_add_a_migration() -> None:
+def test_snapshot_has_no_separate_market_data_storage_migration() -> None:
     migrations = Path("src/ai_infra_quant/database/migrations/versions").glob("*.py")
-    assert sorted(path.name for path in migrations) == ["0001_phase1_foundation.py"]
+    assert sorted(path.name for path in migrations) == [
+        "0001_phase1_foundation.py",
+        "0002_task007b_paqs_e_decision_ledger.py",
+    ]
+    assert not Path("src/ai_infra_quant/database/models/paqs_market_snapshot.py").exists()

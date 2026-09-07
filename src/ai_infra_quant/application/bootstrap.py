@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-EXPECTED_REVISION = "0001_phase1_foundation"
+EXPECTED_REVISION = "0002_task007b_paqs_e_ledger"
 
 
 class DatabaseNotReadyError(RuntimeError):

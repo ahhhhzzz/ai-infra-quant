@@ -1,6 +1,6 @@
 # API Contracts
 
-Status: **AUTHORITATIVE — current read APIs plus TASK-007A internal runtime boundary**
+Status: **AUTHORITATIVE — TASK-007A integrated; TASK-007B Analyze/Decision Ledger implementation pending independent review**
 
 Decision: `MTF-001` in `docs/ROADMAP.md`
 
@@ -12,7 +12,8 @@ Base path: `/api/v1`
 
 Phase 1 routes remain accepted exactly as implemented. This document describes the implemented
 read-only market-data routes, Dashboard client, TASK-006A supported-security/input workflow, and
-the TASK-006B structure snapshot, plus later separately approved directions.
+the TASK-006B structure snapshot, and TASK-007B on-demand PAQS-E analysis/evidence APIs pending
+independent review, plus later separately approved directions.
 
 No API may connect to a brokerage account; read/import real-account cash, positions, orders, or
 trades; match real-account state; or transmit a broker operation.
@@ -64,6 +65,7 @@ Defining a future direction does not expose a route.
 | TASK-004 market state and daily/minute bars | 2 | Available from TASK-004 |
 | TASK-006A supported-security add and PAQS input diagnostics | 2 | Available from TASK-006A |
 | TASK-006B current PAQS structure snapshot | 2 | Available from TASK-006B |
+| TASK-007B explicit PAQS-E Analyze and immutable analysis/Decision reads | 2 | Implemented on TASK-007B branch; pending independent review |
 | Aggregate dashboard refresh and first approved score/ranking/risk state | 2 | Ordinary 404 |
 | Expanded research and simulated paper tracking | 3 | Ordinary 404 |
 | Backtest and analytics | 4 | Ordinary 404 |
@@ -261,11 +263,83 @@ runtime-prompt resources, deterministic result validation, and one OpenAI Respon
 It intentionally registers no Analyze route and changes no OpenAPI operation. The API key remains
 server-side environment configuration and cannot be accepted from or returned to a client.
 
-Any future current-analysis endpoint, Decision Ledger record, Dashboard Analyze workflow, or
-model/strategy selector requires TASK-007B or TASK-007C approval and a separately reviewed public
-contract. Provider failures in the internal port are typed as configuration error, provider
+TASK-007B separately adopts this runtime for the public contract below. Dashboard Analyze workflow
+and model/strategy selector widgets remain TASK-007C work. Provider failures in the internal port
+are typed as configuration error, provider
 unavailable, provider refusal, or invalid structured output; TASK-007A does not fabricate an API
 response or strategy answer around those failures.
+
+### 5.10 TASK-007B current Analyze and immutable Decision Ledger
+
+Implementation status: **pending independent review**. These APIs support later TASK-007C; no
+Dashboard Analyze UI is added.
+
+```text
+POST /api/v1/paqs-e/analyses
+GET  /api/v1/paqs-e/analyses/{analysis_run_id}
+GET  /api/v1/paqs-e/decisions/{decision_id}
+GET  /api/v1/paqs-e/securities/{security_id}/decisions
+```
+
+The POST body has exactly `security_id` (canonical Security UUID), `model_id` (explicit non-empty
+identifier passed unchanged to TASK-007A), and `strategy_id` (registered strategy identity).
+Unknown fields are rejected. Model and strategy are independent choices. The server controls the
+OpenAI adapter, `PaqsERuntimeConfigV1`, prompt package, and empty `auxiliary_context=()`; a caller
+cannot submit an API key, Markdown/path, prompt, policy override, prior Decision, or historical
+As-Of cutoff.
+
+Each explicit POST acquires one fresh current TASK-006B2 immutable snapshot through the application
+query boundary and makes one TASK-007A reasoning attempt. Repeated identical selections and
+snapshot hashes are never deduplicated. The POST returns success only after runtime artifacts,
+one `SUCCEEDED` Analysis Run and its Decision commit atomically. The response includes
+`analysis_run_id`, `decision_id`, `revision_no`, `snapshot_hash`, `snapshot_as_of_timestamp`,
+`model_id`, `strategy_id`, `strategy_content_sha256`, `status=SUCCEEDED`, and the full structured
+`result`.
+
+A complete request that encounters provider/configuration failure first commits one
+`PROVIDER_FAILED` Analysis Run, then returns a non-2xx problem containing its `analysis_run_id`,
+status, and exact typed `failure_kind`: `CONFIGURATION_ERROR`, `PROVIDER_UNAVAILABLE`,
+`PROVIDER_REFUSAL`, or `INVALID_STRUCTURED_OUTPUT`. Deterministic rejection similarly commits one
+`VALIDATION_FAILED` run and returns a non-2xx problem with run identity, validator version and
+exact validation issues. Neither failure creates or returns a Decision. Security/snapshot
+precondition failure before a complete request exists preserves existing truthful error semantics
+and creates no fabricated run. A failed success transaction rolls back and returns a persistence
+error without a successful run/Decision pair.
+
+The problem envelope retains integer HTTP `status`. Ledger status is available as
+`analysis_status` and as `analysis_run.status`; the nested `analysis_run` also carries the safe
+run ID, typed failure kind, validator version and validation issues.
+
+| HTTP | Code | Condition |
+|---:|---|---|
+| 503 | `PAQS_E_PROVIDER_FAILED` | `CONFIGURATION_ERROR` or `PROVIDER_UNAVAILABLE` |
+| 502 | `PAQS_E_PROVIDER_FAILED` | `PROVIDER_REFUSAL` or `INVALID_STRUCTURED_OUTPUT` |
+| 502 | `PAQS_E_VALIDATION_FAILED` | Deterministic TASK-007A validation rejection |
+| 422 | `PAQS_E_RUNTIME_PACKAGE_UNAVAILABLE` | Unregistered/unloadable strategy or prompt package |
+| 422 | `PAQS_E_ANALYSIS_PRECONDITION_FAILED` | Complete reasoning request cannot be constructed |
+| 500 | `PAQS_E_LEDGER_ERROR` | Persistence failure or corrupt stored audit evidence |
+
+Security/snapshot errors retain `404 SECURITY_NOT_FOUND`, `409 SECURITY_METADATA_CONFLICT`, and
+`422 PAQS_MARKET_SNAPSHOT_SECURITY_NOT_SUPPORTED` where applicable. Schema-invalid request input
+returns the project's validation error response before analysis dispatch.
+
+Analysis Run reads expose terminal status, Security/snapshot identity, model/strategy/prompt/runtime
+and available validator metadata, exact canonical request evidence and SHA-256, safe provider
+response identity, typed failure/validation evidence, and aware-UTC timestamps. Decision reads
+expose revision/supersedes identity, Security/snapshot/As-Of and runtime metadata, the full
+structured result and its SHA-256, and creation time. Missing IDs return 404.
+
+Security Decision history is newest first, accepts `limit` in 1..100 (default 20), and optionally
+filters `strategy_id`. Summary fields are direct copies of the validated result. Revision series
+are keyed by `(security_id, strategy_id)`: revision 1 has no predecessor, and each later successful
+Analyze supersedes the immediately preceding revision. Model or strategy-content-hash changes
+continue the same strategy series; a different strategy ID starts its own series.
+
+Request/result hashes bind exact canonical UTF-8 JSON text, preserving Decimal strings and aware
+UTC. Readback verifies hashes and result summary consistency before exposing evidence. No API
+returns credentials, environment dumps, raw exception traces, or request headers. Ledger records
+have no UPDATE/DELETE API. History never supplies hidden model memory, and market-data/Dashboard
+refresh never triggers Analyze.
 
 ## 6. Phase 3 research and simulated paper direction
 

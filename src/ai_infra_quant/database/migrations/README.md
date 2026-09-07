@@ -1,7 +1,12 @@
 # Database migrations
 
-Alembic is the only Phase 1 schema-change path. Normal application startup checks for revision
-`0001_phase1_foundation` and never calls `Base.metadata.create_all()`.
+Alembic is the only application schema-change path. Normal application startup checks for
+the required application revision and never calls `Base.metadata.create_all()`.
+
+TASK-007B adds `0002_task007b_paqs_e_ledger` after the unchanged
+`0001_phase1_foundation`. Run `alembic upgrade head` before application startup.
+Its migration adds only the three immutable PAQS-E evidence tables; downgrade to
+`0001_phase1_foundation` removes only those TASK-007B objects.
 
 The initial revision emits SQLite `TEXT` for every `ExactDecimal(38,18)` column and installs
 append-only triggers for posted opening facts. PostgreSQL compilation emits `NUMERIC(38,18)`.

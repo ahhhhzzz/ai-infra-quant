@@ -67,10 +67,13 @@ def test_task006b_adds_no_later_event_decision_or_write_vocabulary() -> None:
         assert forbidden not in sources
 
 
-def test_task006b_adds_no_migration_or_persistence_model() -> None:
+def test_structure_remains_unpersisted_with_only_approved_migrations() -> None:
     revisions = sorted(
         path.name for path in Path("src/ai_infra_quant/database/migrations/versions").glob("*.py")
     )
-    assert revisions == ["0001_phase1_foundation.py"]
+    assert revisions == [
+        "0001_phase1_foundation.py",
+        "0002_task007b_paqs_e_decision_ledger.py",
+    ]
     assert not Path("src/ai_infra_quant/database/models/paqs_structure.py").exists()
     assert not Path("src/ai_infra_quant/database/repositories/paqs_structure.py").exists()

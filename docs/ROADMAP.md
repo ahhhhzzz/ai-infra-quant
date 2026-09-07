@@ -366,9 +366,11 @@ TASK-007 — PAQS-E Expert Reasoning Workstream
 
 `TASK-007` is umbrella only and must never itself become one implementation Task Contract.
 
-#### TASK-007A — PAQS-E Doctrine Runtime, Structured Output & OpenAI Provider Port — NEXT PLANNED IMPLEMENTATION
+#### TASK-007A — PAQS-E Doctrine Runtime, Structured Output & OpenAI Provider Port — COMPLETED / INTEGRATED
 
-Planned scope direction:
+Final accepted/integrated SHA: `ca9712649b7ec26a67047e251200a50b353ad5b4`.
+
+Accepted scope:
 
 - versioned runtime package explicitly adopting the accepted PAQS-E Context-Free Master Spec;
 - compact doctrine/runtime instructions, canonical reasoning questions and hard guardrails;
@@ -384,9 +386,11 @@ Planned scope direction:
 - no continuous/background analysis;
 - no broker behavior.
 
-#### TASK-007B — On-Demand PAQS-E Analysis Service & Immutable Decision Ledger
+#### TASK-007B — On-Demand PAQS-E Analysis Service & Immutable Decision Ledger — IMPLEMENTED / PENDING INDEPENDENT REVIEW
 
-Planned scope direction:
+Task-branch implementation follows
+`prompts/tasks/TASK-007B_ON_DEMAND_PAQS_E_ANALYSIS_DECISION_LEDGER.md`; it is not yet accepted or
+integrated. Implemented scope:
 
 - explicit user-triggered Analyze service/API;
 - one request uses one immutable snapshot;
@@ -395,6 +399,11 @@ Planned scope direction:
 - snapshot/doctrine/prompt/provider/model metadata;
 - truthful provider-unavailable behavior;
 - no automatic re-analysis on market-data refresh.
+
+Terminal Analysis Runs and exact request/strategy/prompt evidence are append-only. Successful
+Decisions append revisions within `(security_id, strategy_id)`; provider/validation failures
+persist a failed run without a Decision. Bounded read APIs support later TASK-007C. Independent
+review and authoritative integration remain required before acceptance.
 
 #### TASK-007C — PAQS-E User Dashboard
 
@@ -451,9 +460,9 @@ PAQS-DUAL-001 docs migration                  [DONE]
         ↓
 TASK-006B2 Snapshot-on-Demand Market Snapshot [DONE]
         ↓
-TASK-007A Doctrine Runtime + Structured Output + OpenAI Provider Port [NEXT]
+TASK-007A Doctrine Runtime + Structured Output + OpenAI Provider Port [DONE]
         ↓
-TASK-007B On-Demand Analysis + Immutable Decision Ledger
+TASK-007B On-Demand Analysis + Immutable Decision Ledger [PENDING INDEPENDENT REVIEW]
         ↓
 TASK-007C PAQS-E Dashboard / Analyze workflow
         ↓

@@ -39,6 +39,7 @@ PHASE_ONE_TABLES = {
     "watchlist_items",
     "watchlists",
 }
+TASK007B_TABLES = {"paqs_e_runtime_artifacts", "paqs_e_analysis_runs", "paqs_e_decisions"}
 PARTIAL_UNIQUE_INDEXES = {
     "uq_provider_mappings_active_security",
     "uq_provider_mappings_active_reverse",
@@ -79,7 +80,9 @@ def _alembic_config(database_url: str) -> Config:
 def _prepare_empty_database(engine: Engine, config: Config) -> None:
     tables = set(inspect(engine).get_table_names())
     if tables:
-        if "alembic_version" not in tables or not tables.issubset(PHASE_ONE_TABLES):
+        if "alembic_version" not in tables or not tables.issubset(
+            PHASE_ONE_TABLES | TASK007B_TABLES
+        ):
             pytest.fail("dedicated PostgreSQL test database contains unrelated tables")
         command.downgrade(config, "base")
         with engine.begin() as connection:
@@ -137,7 +140,7 @@ def test_postgresql_16_fresh_upgrade_downgrade_reupgrade_and_invariants() -> Non
         command.upgrade(config, "head")
         with engine.connect() as connection:
             assert MigrationContext.configure(connection).get_current_revision() == (
-                "0001_phase1_foundation"
+                "0002_task007b_paqs_e_ledger"
             )
 
         command.downgrade(config, "base")
@@ -147,6 +150,13 @@ def test_postgresql_16_fresh_upgrade_downgrade_reupgrade_and_invariants() -> Non
         command.upgrade(config, "head")
 
         inspector = inspect(engine)
+        assert set(inspector.get_table_names()) == PHASE_ONE_TABLES | TASK007B_TABLES
+        rr_column = next(
+            column
+            for column in inspector.get_columns("paqs_e_decisions")
+            if column["name"] == "rr_t1"
+        )
+        assert str(rr_column["type"]) == "NUMERIC(38, 18)"
         index_names = {
             index["name"]
             for table in PHASE_ONE_TABLES - {"alembic_version"}

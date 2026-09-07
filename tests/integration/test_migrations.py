@@ -40,13 +40,17 @@ def _alembic_config(database_url: str) -> Config:
     return config
 
 
-def test_fresh_migration_is_at_head_and_has_phase_one_tables(migrated_engine: Engine) -> None:
-    with migrated_engine.connect() as connection:
-        assert MigrationContext.configure(connection).get_current_revision() == (
-            "0001_phase1_foundation"
-        )
-    tables = set(inspect(migrated_engine).get_table_names())
-    assert tables == PHASE_ONE_TABLES
+def test_fresh_migration_0001_has_phase_one_tables(database_url: str) -> None:
+    command.upgrade(_alembic_config(database_url), "0001_phase1_foundation")
+    engine = create_database_engine(database_url)
+    try:
+        with engine.connect() as connection:
+            assert MigrationContext.configure(connection).get_current_revision() == (
+                "0001_phase1_foundation"
+            )
+        assert set(inspect(engine).get_table_names()) == PHASE_ONE_TABLES
+    finally:
+        engine.dispose()
 
 
 def test_migration_decimal_columns_are_declared_text(migrated_engine: Engine) -> None:
@@ -83,7 +87,7 @@ def test_revision_0001_ignores_later_orm_tables(tmp_path: Path) -> None:
     database_url = f"sqlite:///{(tmp_path / 'isolated.db').resolve().as_posix()}"
     config = _alembic_config(database_url)
     try:
-        command.upgrade(config, "head")
+        command.upgrade(config, "0001_phase1_foundation")
         engine = create_database_engine(database_url)
         try:
             assert set(inspect(engine).get_table_names()) == PHASE_ONE_TABLES

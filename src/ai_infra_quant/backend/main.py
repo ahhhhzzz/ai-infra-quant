@@ -92,7 +92,7 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
                 status=503,
                 code="DATABASE_NOT_READY",
                 title="Database not ready",
-                detail="The local database is not at the Phase 1 migration revision.",
+                detail="The local database is not at the required application migration revision.",
             )
         return {
             "status": "OK",

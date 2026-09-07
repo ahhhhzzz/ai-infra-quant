@@ -39,8 +39,11 @@ def test_task006a_introduces_no_account_or_write_provider_capability() -> None:
         assert forbidden not in sources
 
 
-def test_phase_one_migration_set_remains_exactly_one_revision() -> None:
+def test_migration_set_contains_only_the_approved_foundation_and_decision_ledger() -> None:
     revisions = sorted(
         path.name for path in Path("src/ai_infra_quant/database/migrations/versions").glob("*.py")
     )
-    assert revisions == ["0001_phase1_foundation.py"]
+    assert revisions == [
+        "0001_phase1_foundation.py",
+        "0002_task007b_paqs_e_decision_ledger.py",
+    ]

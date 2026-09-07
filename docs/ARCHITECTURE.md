@@ -1,6 +1,6 @@
 # Architecture Specification
 
-Status: **AUTHORITATIVE — read-only PAQS decision-terminal architecture through TASK-007A**
+Status: **AUTHORITATIVE — TASK-007A integrated; TASK-007B architecture implemented pending independent review**
 
 Authority: subordinate to `AGENTS.md`, `docs/ROADMAP.md`, and `docs/MASTER_SPEC.md`
 
@@ -33,6 +33,10 @@ Independent read-only boundary:
 Internal PAQS-E reasoning boundary (no public route in TASK-007A):
     application runtime -> provider-neutral reasoning port -> OpenAI Responses adapter
 
+TASK-007B explicit analysis boundary (pending independent review):
+    Analyze API -> application service -> current snapshot + TASK-007A runtime
+                                      -> core Decision Ledger port -> SQLAlchemy transaction
+
 Human boundary:
     advisory display -> user -> broker official client
 ```
@@ -60,6 +64,8 @@ composition root -> backend + application + database + integrations
 | PAQS input foundation | W1/D1/30m construction, session/calendar/coverage/adjustment metadata | Canonical market data | Provider SDK objects, broker/account state |
 | PAQS Strategy | Structure, events, setups, invalidation/target/RR/advisory by bounded task | PAQS input foundation | Provider SDKs, broker commands, accounting mutation |
 | PAQS-E reasoning runtime | Versioned snapshot-bound request/result, registered Markdown strategy/prompt packages, deterministic contract validation | Immutable factual snapshot and explicit auxiliary context | API/UI exposure, persistence, provider SDK imports outside integrations, hidden conversation state, broker behavior |
+| PAQS-E Analyze service | One explicit current request, one snapshot/runtime attempt, terminal outcome persistence and safe read queries | TASK-006B2 snapshot query, TASK-007A runtime, core Decision Ledger port | Provider SDK/SQLAlchemy imports, open database transaction across provider call, hidden prior Decision/context, automatic analysis |
+| PAQS-E Decision Ledger adapter | Immutable runtime artifacts, terminal runs, validated Decision revisions and atomic commit | Core/domain evidence and SQLAlchemy session factory | Strategy/prompt loading authority, strategy inference, market-data cache/replay, broker execution facts |
 | Quality/Ranking | Optional derived prioritization/explanation | PAQS states/advisories | Creating setups or bypassing hard gates |
 | Accounting/Portfolio | Accepted Phase 1 historical facts; optional future paper work only if reactivated | Explicit approved internal facts | Real-account state, PAQS rule mutation |
 | Performance/Backtest | Dormant optional future extensions | Canonical historical data if explicitly reactivated | Production mutation, fabricated history |
@@ -231,6 +237,40 @@ contract violations; it never upgrades or downgrades a valid PAQS-E judgment.
 domain, logs, APIs, persistence, strategy resources, or prompt resources. TASK-007A registers no
 Analyze endpoint and adds no Decision Ledger, Dashboard workflow, historical replay, PAQS-Q, or
 broker capability.
+
+### TASK-007B — explicit Analyze and immutable analysis evidence
+
+TASK-007B implementation is pending independent review. The synchronous application service
+accepts only a supported Security UUID, explicit model ID and registered strategy ID. It obtains
+one fresh snapshot through `PaqsMarketSnapshotQueries`, loads the accepted registered strategy and
+versioned prompt, builds the complete TASK-007A request with server runtime configuration and
+`auxiliary_context=()`, and canonicalizes/hashes the exact request before one runtime attempt.
+It neither calls the snapshot HTTP endpoint nor fetches prior Decisions as reasoning context.
+
+Persistence follows the core-facing Decision Ledger port. The SQLAlchemy adapter opens its
+transaction only after the runtime returns. Runtime artifacts plus a terminal Analysis Run commit
+together; success also requires exactly one Decision in that same transaction. Provider and
+validation failures commit truthful failed runs with no Decision. Success is returned only after
+commit, and any failed success transaction rolls back the whole pair.
+
+Migration revision `0002_task007b_paqs_e_ledger` follows `0001_phase1_foundation` and adds only
+`paqs_e_runtime_artifacts`, `paqs_e_analysis_runs`, and `paqs_e_decisions` with their indexes,
+constraints and immutable triggers. SQLite rejects UPDATE and DELETE on all three tables.
+Canonical request/result JSON is stored as exact TEXT with SHA-256; artifacts preserve exact
+runtime-loaded UTF-8 text and deduplicate by kind, logical key and content hash. Readback verifies
+stored hashes and the Decision's direct result-summary copies. Exact Decimal/UTC persistence
+uses the existing dialect-aware types; SQLite remains the configured runtime, while SQLAlchemy
+and core ports preserve future PostgreSQL replaceability without a deployment change.
+
+Decision series are `(security_id, strategy_id)`, independent of model/content version. Every
+successful explicit Analyze appends the next positive revision and references its immediate
+predecessor, including repeated identical snapshots. Uniqueness and transaction logic protect
+revision allocation; old rows remain immutable. The request capsule stores bounded factual
+evidence for a formed reasoning request, not a market-data persistence/replay service.
+
+Read-only run, Decision and bounded Security-history APIs prepare TASK-007C without adding its
+frontend. No hidden Decision memory, background analysis, PAQS-Q, paper portfolio, position state,
+broker access, or execution behavior is introduced. The API key stays outside all ledger evidence.
 
 The application maintains no real-account or real-position state. Whether the user acts in the broker official client remains outside system state.
 

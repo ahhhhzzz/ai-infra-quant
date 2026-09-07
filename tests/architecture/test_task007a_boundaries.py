@@ -26,11 +26,17 @@ def test_core_and_application_do_not_import_openai_or_provider_adapter() -> None
         assert not any(module.startswith(forbidden) for module in _imports(path))
 
 
-def test_task007a_adds_no_api_ui_persistence_migration_or_broker_capability() -> None:
-    route_names = {path.name for path in Path("src/ai_infra_quant/backend/api/v1").glob("*.py")}
-    assert "paqs_e.py" not in route_names
+def test_task007a_runtime_remains_independent_of_task007b_api_and_persistence() -> None:
     migrations = Path("src/ai_infra_quant/database/migrations/versions").glob("*.py")
-    assert sorted(path.name for path in migrations) == ["0001_phase1_foundation.py"]
+    assert sorted(path.name for path in migrations) == [
+        "0001_phase1_foundation.py",
+        "0002_task007b_paqs_e_decision_ledger.py",
+    ]
+    runtime_imports = _imports(Path("src/ai_infra_quant/application/paqs_e_runtime.py"))
+    assert not any(
+        module.startswith(("ai_infra_quant.backend", "ai_infra_quant.database"))
+        for module in runtime_imports
+    )
     task_source = "\n".join(
         path.read_text(encoding="utf-8").lower()
         for path in (
