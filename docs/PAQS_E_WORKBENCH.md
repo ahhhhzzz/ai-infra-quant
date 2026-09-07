@@ -1,0 +1,136 @@
+# PAQS-E current-analysis workbench — TASK-007C
+
+Status: **implemented / pending independent review**. No merge or next-task approval is implied.
+
+The existing FastAPI application serves the workbench at `/`. No frontend build server or Node
+production runtime is required. Use the existing documented migration and Uvicorn/Windows launcher
+workflow. All API calls use local, fixed same-origin paths. Existing Phase 1 opening facts remain
+under a clearly historical/local disclosure; they are not actual holdings or PAQS-E paper state.
+
+## User workflow
+
+1. Select an existing US/HK canonical Security from the watchlist, or add one through the existing
+   provider-validated symbol form. Quote/entitlement failures remain explicit. Removing a Security
+   invalidates its market, Decision and evidence display; it does not cancel a submitted server run.
+2. Read current Daily or completed 1-minute data. Manual refresh and the existing 60-second timer
+   only refresh market data. Daily history remains 1,300 sessions and minute history 30 calendar
+   days; incremental requests remain five Daily rows / two minute-history days. Cached data and
+   viewport are retained on refresh, including errors with previously cached evidence.
+3. Enter an explicit model ID, initially empty. Whitespace is invalid and is never trimmed into
+   a different identifier. Choose from actual registered primary strategies. Navigation preserves
+   model text; history never supplies a model default. The configuration response is documented in
+   `API_CONTRACTS.md` section 5.11. A missing server key disables Analyze and explains setting
+   `OPENAI_API_KEY` on the server and restarting. The UI has no key input, probe, discovery, pricing
+   or model recommendation. A configured presence flag does not promise provider availability.
+4. Submit **Analyze** explicitly. A single synchronous page guard captures exactly
+   `{security_id, model_id, strategy_id}` before any asynchronous step. Repeated Enter/click events
+   while pending do not create additional requests, even after switching securities. The original
+   target stays identified beside the Analyze control. Each later explicit submission is a new
+   attempt, with no retry, queue, hidden prior context or idempotency fiction.
+5. A confirmed 201 `SUCCEEDED` response displays its committed Decision and actual identity,
+   then uses GET for successful history and the associated Run. Changing form values cannot relabel
+   this result. An explicit history selection made while Analyze or another GET is pending remains
+   selected when late responses arrive. List reload and list order never force a detail selection.
+6. Select a successful history row to read the exact Decision and its Run input capsule. History
+   shows only the latest 20 successful records under the selected strategy filter. Revisions are
+   separate per `(Security, strategy_id)`; model changes do not create a new strategy series.
+   “View list latest” selects the first currently listed Decision and does not run analysis.
+
+At desktop widths, watchlist, chart/history and analysis/results form three columns. At 900px,
+watchlist and explicit controls are placed above full-width chart and results. At 390px, the
+watchlist has an explicit expand control and the workbench becomes a readable single column.
+Labels, focus outlines, real buttons, collapsible semantic sections and live request announcements
+support keyboard use. Theme changes affect both charts and text; only the non-secret theme name
+is persisted locally.
+
+## Decision and evidence reading
+
+Structured sections retain support/quality reasons, W1/D1/M30 states and evidence, regime/trend/
+bias/avoid-long, key levels and location, Event/transition/impulse/channel, Setup family/direction/
+stage/why/missing/expiry/alternative, distinct Trigger and Follow-through, Entry/wait/chase and
+reference qualification, full Invalidation, T1/T2/nearest-obstacle, exact Risk/RR, conditional
+Holder basis/prior-ID/advisory, uncertainty/conflicts/limitations, next evidence, reasons and
+explanation. Canonical enums accompany Chinese labels. Holder output explicitly does not assert
+that the user owns the Security. No confidence score, win rate, valuation or financial result is
+invented. Audit disclosure retains all exact result, identity and associated Run request fields,
+hashes, versions, revision lineage, provider identity and original UTC timestamps.
+
+Current market and frozen Decision evidence are separate modes and separate chart instances.
+Frozen W1/HTF, D1/STF and M30/TTF data come only from the selected Run's persisted
+`request_payload_json.market_snapshot`. The browser compares Decision, Run, request and snapshot
+Security, hash/As-Of, model/strategy and version identities before association. Backend canonical
+hash validation remains authoritative. Failed/malformed/mismatched Run reads clear the frozen
+chart and overlays, retaining an independently loaded Decision with an unavailable-evidence label.
+There is no current-data or synthetic fallback.
+
+Daily uses the exact market-local session date. W1/M30 retain interval start/end, display IANA
+market time including DST, and do not discard completed W1 evidence because its nominal week end
+is later than the snapshot. Volume has its own pane; absent volume is omitted, not replaced with
+zero. Evidence disclosure retains exact OHLCV, source coverage, excluded partial/unknown counts,
+missing-bucket counts, delays, warnings and current-adjustment provenance. These current snapshots
+do not claim strict point-in-time replay safety.
+
+Numeric lines use only executable entry price, invalidation calculation reference, and T1/T2
+calculation references. Labels preserve exact Decimal strings; finite JavaScript numbers are used
+only at the chart drawing boundary. Free-form Key Level/entry/target zones remain text; no regular
+expression extracts prices or constructs zone midpoints. Mode/Decision/Security changes and
+evidence failures clear old lines. Current quote refresh cannot mutate frozen data or judgment.
+
+## Failure and uncertainty
+
+The numeric Problem `status` is distinct from `analysis_status` and nested `analysis_run.status`.
+The UI separately renders configuration error, provider unavailable, refusal, invalid structured
+output, and deterministic validation failure (including exact version/code/field/message).
+404/409/422 preconditions and 500 ledger/integrity failures do not invent a Run or Decision.
+A previous successful Decision stays visible with its own revision/time and an earlier-result
+label. Failures never become a new `NO_TRADE`, `UNCERTAIN`, revision or success row.
+
+Disconnect, non-JSON/malformed/unconfirmed response, identity anomaly or the browser's 180-second
+response timeout is **unknown outcome**. The server may have committed after disconnection. No
+automatic POST retry occurs. Check successful history or a known Run ID before choosing another
+explicit attempt. Browser abort/closing the page is not server cancellation.
+
+Known failure responses provide a Run ID for GET detail, and the disclosure accepts a pasted UUID.
+This is not a failed-run list/search endpoint. Without a known ID, a successful-history read cannot
+prove that no failed run was recorded. No pagination/cursor/exhaustiveness or cancellation API is
+invented.
+
+## Reproducible validation
+
+Install the repository's pinned `.[dev]` extra in a Python 3.12 development environment. Playwright
+is dev-only and normal application startup does not import it. Browser tests default to an
+installed Chrome channel; set `TASK007C_BROWSER_CHANNEL` to another installed Playwright channel
+if required. A missing browser is a failed mandatory gate, not a silently skipped test.
+
+```text
+python -m pytest tests/integration/test_paqs_e_configuration.py tests/browser -q
+python -m pytest -q
+python -m ruff check src tests
+python -m ruff format --check src tests
+python -m mypy src tests
+```
+
+The browser fixture creates a fresh temporary SQLite DB, runs Alembic upgrade to the unchanged
+`0002_task007b_paqs_e_ledger`, launches the actual `ai_infra_quant.backend.main:app` via Uvicorn on
+an ephemeral loopback port, unsets `OPENAI_API_KEY` and selects provider `none`. It checks real
+health/OpenAPI/configuration/page/static HTTP routes before browser scenarios. Only its own
+subprocess is terminated during cleanup. No existing user process or database is touched.
+Behavioral scenarios run the real owned JavaScript and existing chart library in Chrome, with
+test-only intercepted API payloads. They require no Futu service or paid OpenAI call.
+
+Set `TASK007C_SCREENSHOT_DIR` to a local output directory and run:
+
+```text
+python -m pytest tests/browser/test_paqs_e_workbench.py -k visual -q
+```
+
+Screenshot JSON sidecars record viewport, theme, scenario and synthetic-fixture status. Committed
+visual evidence is under `docs/evidence/TASK_007C/`; actual run results and inspected screenshots
+are recorded in the implementation report. The accepted optional PostgreSQL smoke remains
+environment-dependent; a skip is not a performed PostgreSQL validation.
+
+## Scope and reuse
+
+See `THIRD_PARTY_WORKBENCH.md`. R20 is design-reference-only; vendor bytes/notices are retained.
+No runtime, strategy, reasoning, ledger, migration, market-data provider, scheduler, replay store,
+PAQS-Q, paper portfolio, broker/account/order or protected review/contract behavior was changed.

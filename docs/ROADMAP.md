@@ -406,13 +406,18 @@ Decisions append revisions within `(security_id, strategy_id)`; provider/validat
 persist a failed run without a Decision. Bounded read APIs support TASK-007C. The independent
 review covers this exact implementation SHA and does not claim a later integration has occurred.
 
-#### TASK-007C — PAQS-E User Dashboard — USER-AUTHORIZED NEXT BOUNDED TASK
+#### TASK-007C — PAQS-E User Dashboard — IMPLEMENTED / PENDING INDEPENDENT REVIEW
 
 Task Contract: `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`. The user has authorized this next task; implementation begins only
 from its own committed contract after the reviewed TASK-007B baseline is authoritatively integrated.
-TASK-007C is not yet implemented or independently accepted. It retains the existing JavaScript/CSS
+TASK-007C is implemented on its dedicated branch and pending independent review. It retains the existing JavaScript/CSS
 frontend and vendored Lightweight Charts for the first usable R20-style PAQS-E workbench.
 The contract, rather than R20 source or a historical planning prompt, bounds implementation.
+
+The workbench adds an explicit Analyze form, safe registered-strategy configuration GET,
+structured Decision reading, successful history, known Run lookup, and separate frozen evidence
+charts. See `docs/PAQS_E_WORKBENCH.md` for workflow and validation. No independent PASS or
+integration is claimed; this task stops for review.
 
 Authorized scope direction:
 
@@ -471,7 +476,7 @@ TASK-007A Doctrine Runtime + Structured Output + OpenAI Provider Port [DONE]
         ↓
 TASK-007B On-Demand Analysis + Immutable Decision Ledger [INDEPENDENT REVIEW PASS; VERIFY INTEGRATION]
         ↓
-TASK-007C PAQS-E Dashboard / Analyze workflow [USER-AUTHORIZED; NOT IMPLEMENTED]
+TASK-007C PAQS-E Dashboard / Analyze workflow [IMPLEMENTED; PENDING INDEPENDENT REVIEW]
         ↓
 usable current-analysis PAQS-E MVP
         ↓

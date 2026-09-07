@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Annotated, cast
 
@@ -12,7 +13,8 @@ from ai_infra_quant.application.market_data_queries import (
     MarketDataQueries,
 )
 from ai_infra_quant.application.paqs_e_analysis import PaqsEAnalysisService
-from ai_infra_quant.application.paqs_e_runtime import PaqsEReasoningRuntime
+from ai_infra_quant.application.paqs_e_configuration import PaqsEConfiguration, read_configuration
+from ai_infra_quant.application.paqs_e_runtime import PaqsEReasoningRuntime, RuntimePackageError
 from ai_infra_quant.application.paqs_input_queries import PaqsInputQueries
 from ai_infra_quant.application.paqs_market_snapshot_queries import PaqsMarketSnapshotQueries
 from ai_infra_quant.application.paqs_structure_queries import PaqsStructureQueries
@@ -52,6 +54,7 @@ class AppContainer:
     paqs_structure_queries: PaqsStructureQueries
     paqs_e_ledger: PaqsELedger
     paqs_e_analysis_service: PaqsEAnalysisService
+    paqs_e_configuration: PaqsEConfiguration | None
 
 
 def build_container(
@@ -109,6 +112,16 @@ def build_container(
     )
     snapshot_queries = PaqsMarketSnapshotQueries(paqs_input_queries, market_data_queries)
     paqs_e_ledger = SQLAlchemyPaqsELedger(session_factory)
+    # Match the adapter's effective credential source; only presence crosses this boundary.
+    effective_key = (
+        settings.openai_api_key.get_secret_value()
+        if settings.openai_api_key is not None
+        else os.environ.get("OPENAI_API_KEY", "")
+    )
+    try:
+        configuration = read_configuration(api_key_configured=bool(effective_key.strip()))
+    except RuntimePackageError:
+        configuration = None
     return AppContainer(
         settings=settings,
         engine=engine,
@@ -134,6 +147,7 @@ def build_container(
         paqs_market_snapshot_queries=snapshot_queries,
         paqs_structure_queries=PaqsStructureQueries(paqs_input_queries),
         paqs_e_ledger=paqs_e_ledger,
+        paqs_e_configuration=configuration,
         paqs_e_analysis_service=PaqsEAnalysisService(
             snapshot_queries,
             PaqsEReasoningRuntime(OpenAIPaqsEReasoningAdapter(api_key=settings.openai_api_key)),

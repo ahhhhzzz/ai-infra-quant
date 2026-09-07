@@ -645,6 +645,7 @@ def test_openapi_exposes_bounded_read_only_ledger_contract_without_secret_fields
         f"{ANALYSES}/{{analysis_run_id}}": {"get"},
         f"{DECISIONS}/{{decision_id}}": {"get"},
         "/api/v1/paqs-e/securities/{security_id}/decisions": {"get"},
+        "/api/v1/paqs-e/configuration": {"get"},
     }
     assert {
         path: set(operations) for path, operations in paths.items() if "/paqs-e/" in path
@@ -666,7 +667,16 @@ def test_openapi_exposes_bounded_read_only_ledger_contract_without_secret_fields
         "maximum": 100,
         "default": 20,
     }
-    schema_text = json.dumps(document["components"]["schemas"]).lower()
+    schemas = json.loads(json.dumps(document["components"]["schemas"]))
+    # TASK-007C permits only this exact boolean presence flag. Keep the existing
+    # secret-name ban over every remaining schema, including the configuration.
+    configuration = schemas["ConfigurationRead"]
+    assert configuration["properties"].pop("api_key_configured") == {
+        "type": "boolean",
+        "title": "Api Key Configured",
+    }
+    configuration["required"].remove("api_key_configured")
+    schema_text = json.dumps(schemas).lower()
     for forbidden in (
         "openai_api_key",
         "api_key",

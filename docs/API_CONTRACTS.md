@@ -341,6 +341,39 @@ returns credentials, environment dumps, raw exception traces, or request headers
 have no UPDATE/DELETE API. History never supplies hidden model memory, and market-data/Dashboard
 refresh never triggers Analyze.
 
+### 5.11 TASK-007C safe workbench configuration
+
+`GET /api/v1/paqs-e/configuration` returns exactly:
+
+```json
+{
+  "model_provider": "openai",
+  "api_key_configured": false,
+  "default_strategy_id": "paqs-e-master",
+  "strategies": [
+    {
+      "strategy_id": "paqs-e-master",
+      "display_name": "<actual registered display name>",
+      "content_sha256": "<actual exact-byte SHA-256>"
+    }
+  ]
+}
+```
+
+The read-only configuration projection loads the accepted registry and validates every registered
+Markdown with the existing runtime loader at container construction. It never calls a provider or
+writes application data. Missing/corrupt metadata or files return a safe 503 Problem with code
+`PAQS_E_CONFIGURATION_UNAVAILABLE`, without a synthetic default or discarded invalid entries.
+Repair or environment changes require a restart. Credential presence follows the same settings /
+`OPENAI_API_KEY` fallback source as the accepted adapter; it is not validity, connectivity, model
+availability or entitlement. No key, prefix, suffix, environment, transport, path, strategy body,
+prompt body or invented model inventory is returned.
+
+All TASK-007B routes, request fields, runtime and persistence semantics remain unchanged.
+The browser's only Analyze POST originates in an explicit form submission. GETs, quote refresh,
+history and navigation cannot dispatch reasoning. See `PAQS_E_WORKBENCH.md` for outcome uncertainty
+and frozen evidence association rules.
+
 ## 6. Phase 3 research and simulated paper direction
 
 Later approved APIs may expose richer factor/risk analytics, signal history, simulated portfolios,

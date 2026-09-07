@@ -261,17 +261,26 @@ const clearChart = () => {
   if (volumeSeries) volumeSeries.setData([]);
 };
 
+const chartNumber = (value) => {
+  if (typeof value !== "string" || !/^-?\d+(?:\.\d+)?$/.test(value)) {
+    throw new Error("图表数值缺失或无效；未替换为零");
+  }
+  const number = Number(value);
+  if (!Number.isFinite(number)) throw new Error("图表数值超出有限范围");
+  return number;
+};
+
 const numericBar = (bar, time) => ({
   time,
-  open: Number(bar.open),
-  high: Number(bar.high),
-  low: Number(bar.low),
-  close: Number(bar.close),
+  open: chartNumber(bar.open),
+  high: chartNumber(bar.high),
+  low: chartNumber(bar.low),
+  close: chartNumber(bar.close),
 });
 
 const volumeBar = (bar, time) => ({
   time,
-  value: Number(bar.volume),
+  value: chartNumber(bar.volume),
   color: Number(bar.close) >= Number(bar.open) ? "rgba(38, 166, 154, .55)" : "rgba(239, 83, 80, .55)",
 });
 
@@ -286,6 +295,8 @@ const setRecentViewport = (barCount) => {
 
 const renderChart = ({ resetViewport = false } = {}) => {
   if (!chart || !candleSeries || !volumeSeries || !selectedSecurity) return;
+  const viewport = chart.timeScale().getVisibleLogicalRange();
+  try {
   const timeZone = stateSnapshot?.market_timezone
     || dailySnapshot?.market_timezone
     || minuteSnapshot?.market_timezone
@@ -304,7 +315,8 @@ const renderChart = ({ resetViewport = false } = {}) => {
       return;
     }
     candleSeries.setData(bars.map((bar) => numericBar(bar, bar.session_date)));
-    volumeSeries.setData(bars.map((bar) => volumeBar(bar, bar.session_date)));
+    volumeSeries.setData(bars.filter((bar) => bar.volume != null)
+      .map((bar) => volumeBar(bar, bar.session_date)));
   } else {
     element("#chart-caption").textContent = "Completed 1-minute OHLCV · recent 30 calendar days";
     const bars = minuteSnapshot?.bars || [];
@@ -322,7 +334,7 @@ const renderChart = ({ resetViewport = false } = {}) => {
     for (const bar of bars) {
       const intervalTime = Math.floor(Date.parse(bar.interval_start) / 1000);
       candleData.push(numericBar(bar, intervalTime));
-      volumeData.push(volumeBar(bar, intervalTime));
+      if (bar.volume != null) volumeData.push(volumeBar(bar, intervalTime));
     }
     candleSeries.setData(candleData);
     volumeSeries.setData(volumeData);
@@ -331,6 +343,11 @@ const renderChart = ({ resetViewport = false } = {}) => {
   if (resetViewport) setRecentViewport(activeTimeframe === "daily"
     ? dailySnapshot.bars.length
     : minuteSnapshot.bars.length);
+  else if (viewport) chart.timeScale().setVisibleLogicalRange(viewport);
+  } catch (error) {
+    clearChart();
+    showChartMessage("图表数据不可用", safeErrorMessage(error));
+  }
 };
 
 const renderSecurityHeader = () => {
@@ -685,6 +702,7 @@ const selectSecurity = (security) => {
   renderSecuritySelector();
   renderSecurityHeader();
   resetMarketView();
+  document.dispatchEvent(new CustomEvent("security-selected", { detail: security }));
   if (document.visibilityState === "visible") refreshSelectedSecurity("security-switch");
 };
 
@@ -693,6 +711,7 @@ const clearSelectedSecurity = () => {
   cancelActiveRequest();
   clearRefreshSchedule();
   selectedSecurity = null;
+  document.dispatchEvent(new CustomEvent("security-selected", { detail: null }));
   renderSecuritySelector();
   resetMarketView();
   element("#selected-identity").textContent = "—";
@@ -734,6 +753,20 @@ const renderAdminWatchlist = () => {
   replaceChildren("#watchlist-admin", rows);
   element("#admin-watchlist-status").textContent = `${rows.length} identities`;
 };
+
+element("#remove-selected").addEventListener("click", async () => {
+  if (!selectedSecurity) return;
+  const button = element("#remove-selected");
+  button.disabled = true;
+  try {
+    await api(`${API_BASE}/watchlist/${encodeURIComponent(selectedSecurity.id)}`, { method: "DELETE" });
+    await loadWatchlist();
+  } catch (error) {
+    element("#supported-security-result").textContent = safeErrorMessage(error);
+  } finally {
+    button.disabled = false;
+  }
+});
 
 const loadWatchlist = async (preferredSecurityId = null) => {
   const data = await api(`${API_BASE}/watchlist`);

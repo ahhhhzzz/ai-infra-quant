@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
 from typing import Annotated
 from uuid import UUID
 
@@ -21,6 +22,7 @@ from ai_infra_quant.backend.schemas.paqs_e import (
     AnalysisRunRead,
     AnalyzeCreate,
     AnalyzeCreated,
+    ConfigurationRead,
     DecisionHistoryRead,
     DecisionRead,
     analysis_run_read,
@@ -38,6 +40,22 @@ from ai_infra_quant.core.domain.paqs_market_snapshot import canonical_json
 from ai_infra_quant.core.ports.paqs_e_reasoning import ReasoningFailureKind
 
 router = APIRouter(prefix="/paqs-e", tags=["paqs-e"])
+
+
+@router.get("/configuration", response_model=ConfigurationRead, responses={503: {"model": Problem}})
+def get_configuration(
+    request: Request, container: ContainerDep
+) -> ConfigurationRead | JSONResponse:
+    configuration = container.paqs_e_configuration
+    if configuration is None:
+        return problem_response(
+            request,
+            status=503,
+            code="PAQS_E_CONFIGURATION_UNAVAILABLE",
+            title="PAQS-E configuration unavailable",
+            detail="Registered strategy configuration could not be loaded. Restart after repair.",
+        )
+    return ConfigurationRead(**asdict(configuration))
 
 
 def _ledger_error(request: Request) -> JSONResponse:

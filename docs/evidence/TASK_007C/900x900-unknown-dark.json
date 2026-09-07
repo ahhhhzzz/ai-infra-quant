@@ -1,0 +1,12 @@
+{
+  "viewport": [
+    900,
+    900
+  ],
+  "scenario": "unknown",
+  "theme": "dark",
+  "source": "actual Uvicorn with synthetic API fixtures; not real market evidence",
+  "screenshot": "900x900-unknown-dark.png",
+  "horizontal_overflow": false,
+  "page_errors": []
+}

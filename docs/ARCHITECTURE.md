@@ -1,6 +1,15 @@
 # Architecture Specification
 
-Status: **AUTHORITATIVE — TASK-007A integrated; TASK-007B independently reviewed; TASK-007C authorized next**
+Status: **AUTHORITATIVE — TASK-007A/B integrated; TASK-007C implemented / pending independent review**
+
+TASK-007C keeps the same FastAPI/Jinja/JavaScript/CSS monolith and local Lightweight Charts.
+`application/paqs_e_configuration.py` projects startup-validated registry metadata and effective
+credential presence through the sole new configuration GET. Existing runtime and ledger remain
+unchanged. The frontend's market refresh controller emits a Security-selection event; an independent
+workbench controller owns explicit Analyze, separately versioned history/detail reads and frozen
+request evidence. No market event can invoke its Analyze form handler. Frozen charts are populated
+only after Decision/Run/request identity checks, and never read current chart caches.
+See `docs/PAQS_E_WORKBENCH.md` and real browser behavior tests for lifecycle and limitations.
 
 Authority: subordinate to `AGENTS.md`, `docs/ROADMAP.md`, and `docs/MASTER_SPEC.md`
 

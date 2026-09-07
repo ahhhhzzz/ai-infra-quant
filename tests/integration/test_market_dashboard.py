@@ -89,7 +89,9 @@ def test_lightweight_charts_5_2_1_is_vendored_and_attributed(client: TestClient)
 
 
 def test_dashboard_has_no_runtime_cdn_or_unapproved_route_dependency() -> None:
-    sources = "\n".join((_source(TEMPLATE), _source(APP_JS), _source(APP_CSS))).lower()
+    sources = "\n".join(
+        _source(path) for path in [TEMPLATE, APP_CSS, *STATIC_ROOT.glob("*.js")]
+    ).lower()
     for runtime_cdn in ("unpkg.com", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"):
         assert runtime_cdn not in sources
     for unapproved_route in ("/dashboard", "/refresh", "/terminal"):
@@ -186,7 +188,9 @@ def test_dashboard_exposes_truthful_capability_and_empty_states() -> None:
 
 
 def test_frontend_has_no_fake_market_values_or_forbidden_controls() -> None:
-    owned_sources = "\n".join((_source(TEMPLATE), _source(APP_JS), _source(APP_CSS)))
+    owned_sources = "\n".join(
+        _source(path) for path in [TEMPLATE, APP_CSS, *STATIC_ROOT.glob("*.js")]
+    )
     lowered = owned_sources.lower()
 
     assert not re.search(r"\b(buy|sell)\b", lowered)

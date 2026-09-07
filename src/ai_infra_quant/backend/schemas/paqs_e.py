@@ -35,6 +35,19 @@ from ai_infra_quant.core.domain.paqs_market_snapshot import canonical_json
 from ai_infra_quant.core.ports.paqs_e_reasoning import ReasoningFailureKind
 
 
+class StrategyOptionRead(StrictSchema):
+    strategy_id: str
+    display_name: str
+    content_sha256: str
+
+
+class ConfigurationRead(StrictSchema):
+    model_provider: Literal["openai"] = "openai"
+    api_key_configured: bool
+    default_strategy_id: str
+    strategies: tuple[StrategyOptionRead, ...]
+
+
 class AnalyzeCreate(StrictSchema):
     security_id: UUID
     model_id: str = Field(min_length=1)

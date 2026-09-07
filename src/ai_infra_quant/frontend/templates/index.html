@@ -3,16 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AI Infra Quant · Market Dashboard</title>
+    <title>PAQS-E · 决策工作台</title>
     <link rel="stylesheet" href="/static/app.css">
   </head>
   <body>
     <header class="terminal-header">
       <div class="brand-block">
-        <p class="eyebrow">LOCAL QUANT TERMINAL</p>
-        <h1>AI INFRA QUANT</h1>
+        <p class="eyebrow">AI INFRA QUANT / RESEARCH</p>
+        <h1>PAQS-E 决策工作台</h1>
       </div>
       <div class="header-actions">
+        <span id="service-health" role="status">服务检查中</span>
+        <button id="theme-toggle" type="button" aria-label="切换明暗主题">浅色模式</button>
         <span class="read-only-badge">READ ONLY · DECISION SUPPORT</span>
         <span id="provider-mode" class="provider-mode">Provider —</span>
         <button id="refresh-market" class="refresh-button" type="button">刷新最新行情</button>
@@ -21,12 +23,13 @@
     </header>
 
     <main>
+      <button id="watchlist-toggle" class="watchlist-toggle" type="button" aria-expanded="false" aria-controls="watchlist-panel">展开关注证券 / 添加与移除</button>
       <section class="terminal-grid" aria-label="Market data Dashboard">
-        <aside class="watchlist-panel">
+        <aside id="watchlist-panel" class="watchlist-panel">
           <div class="section-heading">
             <div>
               <p class="eyebrow">WATCHLIST</p>
-              <h2>Tracked securities</h2>
+              <h2>关注证券</h2>
             </div>
             <span id="market-watchlist-status" class="small-status">Loading</span>
           </div>
@@ -45,6 +48,7 @@
           <p id="supported-security-result" class="add-security-result" role="status"></p>
           <div id="security-selector" class="security-selector" role="listbox"
                aria-label="Select security"></div>
+          <button id="remove-selected" type="button">移除当前证券</button>
         </aside>
 
         <article class="market-panel">
@@ -72,7 +76,11 @@
             </div>
           </section>
 
-          <div class="chart-toolbar">
+          <div class="chart-mode-toolbar" role="group" aria-label="图表来源">
+            <button id="mode-current" type="button" aria-pressed="true">当前行情</button>
+            <button id="mode-frozen" type="button" aria-pressed="false">Decision 冻结证据</button>
+          </div>
+          <div class="chart-toolbar current-chart-part">
             <div class="timeframe-tabs" role="tablist" aria-label="Chart timeframe">
               <button id="tab-daily" class="timeframe-tab active" type="button"
                       role="tab" aria-selected="true" data-timeframe="daily">日 K</button>
@@ -82,13 +90,29 @@
             <span id="chart-caption" class="chart-caption">Completed daily OHLCV</span>
           </div>
 
-          <div id="chart-stage" class="chart-stage" aria-label="Candlestick and volume chart">
+          <div id="chart-stage" class="chart-stage current-chart-part" aria-label="Candlestick and volume chart">
             <div id="market-chart" class="market-chart"></div>
             <div id="chart-empty" class="chart-empty" role="status">
               <strong>Loading market data</strong>
               <span>The chart will show completed candles only.</span>
             </div>
           </div>
+
+          <section id="frozen-section" hidden aria-label="Decision 冻结图表">
+            <p id="evidence-identity" class="identity-line">尚未选择 Decision</p>
+            <div class="chart-mode-toolbar" role="group" aria-label="冻结证据周期">
+              <button type="button" data-evidence-frame="W1" aria-pressed="true">W1 · 背景</button>
+              <button type="button" data-evidence-frame="D1" aria-pressed="false">D1 · 结构</button>
+              <button type="button" data-evidence-frame="M30" aria-pressed="false">M30 · 触发</button>
+            </div>
+            <div class="chart-stage">
+              <div id="frozen-chart" class="market-chart"></div>
+              <div id="evidence-empty" class="chart-empty visible" role="status">冻结证据尚不可用</div>
+            </div>
+            <p id="evidence-status" class="identity-line" role="status"></p>
+            <div id="overlay-labels" class="overlay-labels"></div>
+            <details><summary>证据质量、完成区间与精确 OHLCV</summary><div id="evidence-facts"></div></details>
+          </section>
 
           <section class="data-status-panel" aria-label="Market data status and timestamps">
             <div class="status-cell">
@@ -122,11 +146,42 @@
             TradingView Lightweight Charts™ · Copyright © 2025 TradingView, Inc. ·
             <a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">TradingView</a>
           </p>
+          <section class="decision-history" aria-label="成功 Decision 历史">
+            <div class="section-heading"><h2>Decision 历史</h2><button id="reload-history" type="button">刷新历史</button></div>
+            <label>策略序列筛选<select id="history-strategy"><option value="">全部策略</option></select></label>
+            <p class="note">仅成功记录 · 最近 20 条 · 修订号按证券与策略分别计数</p>
+            <p id="history-status" role="status"></p>
+            <div id="decision-history"></div>
+            <button id="latest-decision" type="button">查看列表最新 Decision</button>
+          </section>
         </article>
+
+        <aside class="analysis-panel" aria-label="PAQS-E 分析与结果">
+          <form id="analyze-form" class="analysis-controls">
+            <div class="section-heading"><div><p class="eyebrow">ON-DEMAND ANALYSIS</p><h2>新的当前分析</h2></div><span>OpenAI</span></div>
+            <p id="analysis-security" class="identity-line">请选择证券</p>
+            <label>模型 ID<input id="model-id" name="model_id" autocomplete="off" spellcheck="false" placeholder="请输入明确的模型 ID" required></label>
+            <label>主策略<select id="strategy-id" name="strategy_id" required disabled></select></label>
+            <p id="configuration-status" class="note" role="status">读取服务器配置…</p>
+            <button id="analyze-button" type="submit" disabled>Analyze · 分析当前快照</button>
+            <p class="note">每次显式提交采集新快照。行情刷新不会运行分析。</p>
+            <div id="analysis-state" class="analysis-state" role="status" aria-live="polite">尚未发起分析</div>
+          </form>
+          <section class="analysis-results">
+            <div id="decision-heading" class="decision-heading">尚无选中的 Decision</div>
+            <div id="decision-result"><p class="note">选择成功历史，或填写模型后显式 Analyze。</p></div>
+            <details class="audit"><summary>Decision 审计身份与原始结果</summary><pre id="decision-audit">—</pre></details>
+            <details class="known-run"><summary>已知 Analysis Run 查询与失败详情</summary>
+              <form id="known-run-form"><label>Run UUID<input id="known-run-id" autocomplete="off" required></label><button type="submit">读取 Run</button></form>
+              <p class="note">此处仅按已知 ID 读取，不是失败列表。未知结果且无 ID 时，成功历史不能证明没有失败 Run。页面离开不等于服务端取消。</p>
+              <div id="known-run-status" role="status"></div><pre id="known-run-detail">—</pre>
+            </details>
+          </section>
+        </aside>
       </section>
 
       <details class="local-admin">
-        <summary>Portfolio facts and local administration</summary>
+        <summary>Portfolio facts and local administration · Phase 1 历史本地开仓事实</summary>
         <div class="admin-content">
           <section class="summary-grid" aria-label="Opening portfolio facts">
             <article><span>Portfolio equity</span><strong id="equity">—</strong></article>
@@ -160,5 +215,6 @@
     </main>
     <script src="/static/vendor/lightweight-charts.standalone.production.js" defer></script>
     <script src="/static/app.js" defer></script>
+    <script src="/static/paqs-e.js" defer></script>
   </body>
 </html>

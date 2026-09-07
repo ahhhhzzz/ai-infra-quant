@@ -115,24 +115,33 @@ def test_task007b_adds_only_analysis_evidence_tables() -> None:
     }
 
 
-def test_frontend_and_market_refresh_have_no_analyze_action_or_hidden_dispatch() -> None:
+def test_market_refresh_has_no_analyze_action_or_hidden_dispatch() -> None:
+    # TASK-007C explicitly adopts a user form; the backend refresh ban remains intact.
+    # Real browser non-action/POST-count coverage lives in tests/browser/test_paqs_e_workbench.py.
     paths = [
-        path
-        for path in (SOURCE_ROOT / "frontend").rglob("*")
-        if path.is_file() and path.suffix in {".html", ".js", ".css"}
-    ]
-    paths.extend(
         SOURCE_ROOT / path
         for path in (
             "application/market_data_queries.py",
             "application/paqs_market_snapshot_queries.py",
             "backend/api/v1/market_data.py",
         )
-    )
+    ]
     for path in paths:
         source = path.read_text(encoding="utf-8").lower()
         assert "paqs-e" not in source
         assert "paqs_e" not in source
+
+
+def test_frontend_analyze_post_is_owned_only_by_explicit_form() -> None:
+    owned = list((SOURCE_ROOT / "frontend/static").glob("*.js"))
+    sources = {path.name: path.read_text(encoding="utf-8") for path in owned}
+    assert "/paqs-e/analyses" not in sources["app.js"]
+    assert sum(source.count('fetch("/api/v1/paqs-e/analyses",') for source in sources.values()) == 1
+    source = sources["paqs-e.js"]
+    form = source.index('$("analyze-form").addEventListener("submit"')
+    guard = source.index("inFlight = attempt;", form)
+    dispatch = source.index('await fetch("/api/v1/paqs-e/analyses",', guard)
+    assert form < guard < dispatch
 
 
 def test_no_later_strategy_execution_or_broker_state_is_added_to_the_ledger() -> None:
