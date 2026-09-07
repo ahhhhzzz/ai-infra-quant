@@ -186,7 +186,7 @@ def test_out_of_order_reads_do_not_overwrite_selection(
         "nonjson",
         "abort",
         "mismatched",
-        "timeout",
+        "long_wait_connection_failure",
     ],
 )
 def test_typed_failures_unknown_no_retry_and_prior_decision_retention(
@@ -203,7 +203,7 @@ def test_typed_failures_unknown_no_retry_and_prior_decision_retention(
             "model_id": "wrong",
             "status": "SUCCEEDED",
         }
-    elif kind == "timeout":
+    elif kind == "long_wait_connection_failure":
         page.clock.install()
         app.hold = "/paqs-e/analyses"
     elif kind.isdigit():
@@ -249,11 +249,15 @@ def test_typed_failures_unknown_no_retry_and_prior_decision_retention(
             "analysis_run": context,
         }
     app.analyze()
-    if kind == "timeout":
+    if kind == "long_wait_connection_failure":
         page.clock.run_for(180001)
+        expect(page.locator("#analysis-state")).to_contain_text("仍在分析")
+        expect(page.locator("#analyze-button")).to_be_disabled()
+        assert len(app.posts) == 1
+        app.pending.pop().abort("connectionfailed")
     expected = (
         "结果未知"
-        if kind in ("nonjson", "abort", "mismatched", "timeout")
+        if kind in ("nonjson", "abort", "mismatched", "long_wait_connection_failure")
         else "失败"
         if kind in ("404", "409", "422", "VALIDATION_FAILED")
         else "账本证据"

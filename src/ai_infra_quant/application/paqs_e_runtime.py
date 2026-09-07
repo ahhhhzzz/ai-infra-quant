@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from decimal import localcontext
 from pathlib import Path
 from typing import Any
@@ -756,6 +756,53 @@ class PaqsEReasoningRuntime:
             raise TypeError("reasoning provider returned an unsupported outcome")
         return validate_reasoning_result(
             request=request,
-            result=outcome.result,
+            result=project_snapshot_price_facts(request=request, result=outcome.result),
             provider_response_id=outcome.provider_response_id,
         )
+
+
+def project_snapshot_price_facts(
+    *, request: PaqsEReasoningRequestV1, result: PaqsEReasoningResultV1
+) -> PaqsEReasoningResultV1:
+    """Project factual echoes after strict parsing, before the unchanged validator.
+
+    These mappings mirror the accepted validator. No semantic assessment, eligibility,
+    policy text, identity, invalidation, target or RR field is corrected here.
+    """
+    quote = request.market_snapshot.current_price_reference
+    market = request.market_snapshot.market_state_reference
+    freshness = {
+        DataAvailabilityStatus.AVAILABLE: FreshnessStatus.FRESH,
+        DataAvailabilityStatus.STALE: FreshnessStatus.STALE,
+        DataAvailabilityStatus.DELAYED: FreshnessStatus.DELAYED,
+    }.get(quote.status, FreshnessStatus.UNKNOWN)
+    session = {
+        None: PriceSessionType.UNKNOWN,
+        CanonicalMarketState.OPEN: PriceSessionType.REGULAR,
+        CanonicalMarketState.PRE_MARKET: PriceSessionType.PRE,
+        CanonicalMarketState.AFTER_HOURS: PriceSessionType.POST,
+        CanonicalMarketState.CLOSED: PriceSessionType.CLOSED_REFERENCE,
+    }.get(market.canonical_state, PriceSessionType.UNKNOWN)
+    references = result.price_references
+    current = replace(
+        references.current_price_reference,
+        price=quote.price,
+        timestamp=quote.latest_quote_at,
+        freshness_status=freshness,
+        session_type=session,
+    )
+    entry = references.executable_entry_reference
+    if entry.eligible:
+        entry = replace(
+            entry,
+            price=current.price,
+            timestamp=current.timestamp,
+            freshness_status=current.freshness_status,
+            session_type=current.session_type,
+        )
+    return replace(
+        result,
+        price_references=replace(
+            references, current_price_reference=current, executable_entry_reference=entry
+        ),
+    )

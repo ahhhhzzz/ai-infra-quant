@@ -94,6 +94,12 @@ GET    /api/v1/fundamental-data/providers
 GET    /api/v1/event-data/providers
 ```
 
+The health response includes `source_revision`: exactly 40 lowercase hexadecimal characters
+captured once when the application is created from `AI_INFRA_SOURCE_REVISION`, or `unknown` when
+manual startup has no valid launcher identity. It exposes no paths or environment values. The
+Windows launcher resolves the checkout HEAD and passes this dedicated variable to its new process;
+only an exact valid match permits reuse. Health never dynamically rereads Git after startup.
+
 These routes retain their reviewed Phase 1 behavior. Inert historical descriptors do not authorize
 a future brokerage-account connection. This documentation task neither expands nor removes the
 allowlist.

@@ -359,3 +359,10 @@ conversation or background state. Strict existing output conversion and determin
 remain the only path to a Decision. Incomplete research is a precondition failure with no invented
 Run. Actual provider/model and frozen auxiliary context use existing ledger columns/capsules;
 revision identity remains Security + strategy, and migration head stays 0002. See `PAQS_E_MODELS.md`.
+
+Remediation 01 adds a startup-captured source revision handshake for safe launcher reuse, accepts
+DeepSeek's documented page/find native actions without promoting their targets to source authority,
+and keeps long synchronous Analyze requests guarded past the 180-second informational notice.
+After strict parsing, runtime code projects only Snapshot price/timestamp/freshness/session echoes
+for current price and model-eligible entry references. The existing validator function, semantic
+judgments, eligibility, structural numeric references and Decimal RR remain unchanged.

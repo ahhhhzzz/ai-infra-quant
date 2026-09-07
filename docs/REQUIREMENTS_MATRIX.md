@@ -253,3 +253,12 @@ implemented by TASK-007B. Accepted Phase 1 evidence remains unchanged.
 | 007C1-004 | Bounded source-specific web capsule, As-Of filtering, tool-free final reasoning | IMPLEMENTED_PENDING_REVIEW | `test_paqs_e_model_gateway.py`; lifecycle integration and browser tests |
 | 007C1-005 | No automatic paid retry/fallback or broker/live scope; no migration or protected review changes | IMPLEMENTED_PENDING_REVIEW | adapter tests, full architecture suite, implementation diff |
 | 007C1-006 | Opt-in live domestic-provider product acceptance | SEPARATE_EXECUTION_EVIDENCE_REQUIRED | no user credential supplied through UI; deterministic tests make no paid calls |
+
+## TASK-007C1 Remediation 01 evidence (pending independent re-review)
+
+| Requirement | Implementation | Regression evidence |
+|---|---|---|
+| R1 startup revision handshake | Frozen health identity; launcher exact-SHA reuse or safe stale rejection | `test_runtime_source_revision.py`, existing Windows launcher tests |
+| R2 DeepSeek native page actions | Search/page/find <=10 actions; <=4 queries; native source/citation authority | `test_paqs_e_remediation_01.py` provenance/bounds/tool-free capsule tests |
+| R3 long synchronous Analyze | Non-aborting 180-second notice; one-in-flight guard until terminal/network failure | `test_paqs_e_long_running.py`, retained unknown-outcome browser regression |
+| R4 deterministic factual projection | Four current/eligible-entry quote echoes before unchanged validator | All eleven model routes, direct mismatch rejection, market/availability mapping regression |

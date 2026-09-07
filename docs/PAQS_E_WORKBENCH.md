@@ -88,8 +88,11 @@ output, and deterministic validation failure (including exact version/code/field
 A previous successful Decision stays visible with its own revision/time and an earlier-result
 label. Failures never become a new `NO_TRADE`, `UNCERTAIN`, revision or success row.
 
-Disconnect, non-JSON/malformed/unconfirmed response, identity anomaly or the browser's 180-second
-response timeout is **unknown outcome**. The server may have committed after disconnection. No
+After 180 seconds, a long-wait notice says the synchronous analysis is still running and must not
+be resubmitted. The request remains pending and the Analyze guard remains held. A later terminal
+success/provider failure/validation failure is rendered normally. Disconnect, a real network
+failure, non-JSON/malformed/unconfirmed response or identity anomaly is **unknown outcome**.
+The server may have committed after disconnection. No
 automatic POST retry occurs. Check successful history or a known Run ID before choosing another
 explicit attempt. Browser abort/closing the page is not server cancellation.
 

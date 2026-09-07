@@ -429,13 +429,14 @@
     const target = `${attempt.symbol} · ${modelName(model)} · ${strategy}`;
     state(`正在分析：${target}。已提交的目标不会随界面选择改变。`);
     if (decision) { earlier = true; renderHeading(); }
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 180000);
+    const longWaitNotice = window.setTimeout(() => {
+      if (inFlight === attempt) state(`仍在分析：${target}。请求仍在进行，请勿重复提交；正在等待服务端最终结果。`);
+    }, 180000);
     try {
       // The sole Analyze POST source. No other event invokes this handler.
       const response = await fetch("/api/v1/paqs-e/analyses", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload), signal: controller.signal,
+        body: JSON.stringify(payload),
       });
       const body = await response.json();
       if (response.status === 201 && body.status === "SUCCEEDED") {
@@ -474,7 +475,7 @@
     } catch (_error) {
       state(`${target}：结果未知，响应未能确认（可能断连、超时、格式或身份异常）。服务端可能已保存结果。请检查成功历史或已知 Run，再决定是否显式发起新尝试；不会自动重试。`);
     } finally {
-      window.clearTimeout(timeout);
+      window.clearTimeout(longWaitNotice);
       if (inFlight === attempt) inFlight = null;
       updateButton();
     }

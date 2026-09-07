@@ -64,12 +64,19 @@ Revisions stay keyed by Security + strategy across model changes. Current refres
 persisted market or research evidence. Missing credentials disable the button for the selected model.
 
 Research sends one bounded native-search HTTP request, without retries or continuation calls.
-The application accepts at most four reported search queries, four search-call records, 64 raw
+The application accepts at most four reported search queries, 64 raw
 source records and eight included items. Each source-specific summary is at most 1,600 Unicode
 characters; summary plus label/provenance is at most 4,000 per item and 24,000 total. Oversized,
 unattributed, malformed, empty or incomplete results fail closed. The HTTP response cap is 2 MB,
 research output limit is 6,000 tokens and each transport timeout is 120 seconds. The browser's
-180-second timeout is an unknown outcome, not cancellation; it does not retry.
+180-second notice leaves the synchronous request pending and guarded until its terminal response
+or a real connection failure. It neither aborts nor retries.
+
+DeepSeek alone accepts up to ten completed native action records: `search`, `open_page`, and
+`find_in_page`. At least one actual search is required; only searches supply query provenance.
+Page/find targets and contents are ignored for evidence construction: only native search sources
+and native URL citations can ground included summaries. Other providers retain the four-action,
+search-only acceptance shape. Action/query/source excess fails closed, without silent truncation.
 
 OpenAI also receives `max_tool_calls=4`. DeepSeek documents that this option is ignored and its
 server-side auto-continuation limit is ten rounds; Qwen does not document an equivalent request
@@ -94,6 +101,13 @@ An unsupported requested route, missing research credentials or incomplete resea
 returns a typed precondition failure without a fabricated Run ID. The system never proceeds without
 requested research. Failures after a complete reasoning capsule retain existing failed-Run semantics.
 Prior successful Decisions remain visibly historical. No retry or provider/model fallback occurs.
+
+After strict provider parsing, the provider-neutral runtime projects only current quote price,
+timestamp, freshness and session from the immutable Snapshot before the unchanged validator.
+The same four factual echoes are projected for model-eligible executable entry references; the
+eligibility flag and policy text remain model-authored. Identity, support/input quality, semantic
+assessments, invalidation, targets, RR and explanation fields are not corrected. Market-open,
+freshness, session, RR and semantic rules can still reject the result.
 
 ## Official API evidence and limitations
 

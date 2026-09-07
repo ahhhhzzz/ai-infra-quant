@@ -64,8 +64,11 @@ entitlements are external prerequisites; no credential belongs in this app. The 
 ## Windows one-click Dashboard
 
 After completing the local setup, double-click `start_dashboard.bat` in the repository root. It
-reuses an already-running OpenD and FastAPI instance when healthy; otherwise it starts OpenD,
-waits for `127.0.0.1:11111`, starts FastAPI with the Futu market-data provider in a separate visible
+reuses an already-running OpenD and reuses a healthy FastAPI instance only when its startup-captured
+source revision exactly matches the current Git checkout. A stale/missing/invalid backend revision
+fails safely and asks you to close/restart the existing dashboard process; it never kills it.
+It starts OpenD as needed and waits for `127.0.0.1:11111`. When the application port is free,
+it starts FastAPI with the Futu market-data provider in a separate visible
 console, waits for `/health`, and then opens `http://127.0.0.1:8000` in the default browser.
 
 The launcher checks common Futu OpenD installation locations. If it cannot find the executable,

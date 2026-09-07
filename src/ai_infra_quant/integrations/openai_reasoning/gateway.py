@@ -297,12 +297,18 @@ def normalize_research(
 ) -> tuple[AuxiliaryContextItem, ...]:
     text = _text(response, "responses", research=True)
     calls = [item for item in response["output"] if item.get("type") == "web_search_call"]
-    if not 1 <= len(calls) <= 4:
+    max_actions = 10 if model.provider_id == "deepseek" else 4
+    if not 1 <= len(calls) <= max_actions:
         raise ValueError("Research query bound")
     sources: dict[str, dict[str, Any]] = {}
     future_sources: set[str] = set()
+    raw_source_count = 0
 
     def remember(source: dict[str, Any]) -> None:
+        nonlocal raw_source_count
+        raw_source_count += 1
+        if raw_source_count > 64:
+            raise ValueError("Research raw source bound")
         published = _publication_time(source)
         if published is not None and published > snapshot.as_of_timestamp:
             future_sources.add(source["url"])
@@ -313,19 +319,28 @@ def normalize_research(
 
     queries: list[str] = []
     for call in calls:
-        if call.get("status") != "completed" or call["action"].get("type") != "search":
+        if call.get("status") != "completed" or not isinstance(call.get("action"), dict):
             raise ValueError("Incomplete search")
         action = call["action"]
+        action_type = action.get("type")
+        if model.provider_id == "deepseek" and action_type in {"open_page", "find_in_page"}:
+            # Page targets/contents are not source authority. Only native search sources
+            # and URL citations below can ground included evidence; never persist traces.
+            continue
+        if action_type != "search":
+            raise ValueError("Unknown search action")
         query = action.get("query")
         values = action.get("queries", [query] if query else [])
-        if not values or any(
-            not isinstance(value, str) or not 0 < len(value) <= 500 for value in values
+        if (
+            not isinstance(values, list)
+            or not values
+            or any(not isinstance(value, str) or not 0 < len(value) <= 500 for value in values)
         ):
             raise ValueError("Missing query provenance")
         queries.extend(values)
         for source in action.get("sources", []):
             remember(source)
-    if len(queries) > 4 or len(sources) > 64:
+    if not 1 <= len(queries) <= 4 or len(sources) > 64:
         raise ValueError("Research query/source bound")
     # Annotations may add titles/publication metadata to the exact native source URLs.
     for message in response["output"]:
