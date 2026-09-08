@@ -140,7 +140,7 @@ def test_postgresql_16_fresh_upgrade_downgrade_reupgrade_and_invariants() -> Non
         command.upgrade(config, "head")
         with engine.connect() as connection:
             assert MigrationContext.configure(connection).get_current_revision() == (
-                "0002_task007b_paqs_e_ledger"
+                "0003_task007c1_narrative_ledger"
             )
 
         command.downgrade(config, "base")
@@ -150,7 +150,10 @@ def test_postgresql_16_fresh_upgrade_downgrade_reupgrade_and_invariants() -> Non
         command.upgrade(config, "head")
 
         inspector = inspect(engine)
-        assert set(inspector.get_table_names()) == PHASE_ONE_TABLES | TASK007B_TABLES
+        assert set(inspector.get_table_names()) == PHASE_ONE_TABLES | TASK007B_TABLES | {
+            "paqs_e_narrative_runs",
+            "paqs_e_narrative_results",
+        }
         rr_column = next(
             column
             for column in inspector.get_columns("paqs_e_decisions")

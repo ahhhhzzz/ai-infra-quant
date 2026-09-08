@@ -104,6 +104,7 @@
   let detailGeneration = 0;
   let selectionIntent = 0;
   let historyGeneration = 0;
+  let legacyGeneration = 0;
   let runGeneration = 0;
   let history = [];
   let decision = null;
@@ -117,6 +118,11 @@
   let frozenVolume = null;
   let priceLines = [];
 
+  const narrative = (item) => item?.narrative_result_id != null || item?.narrative_run_id != null;
+  const resultId = (item) => item?.narrative_result_id || item?.decision_id;
+  const runId = (item) => item?.narrative_run_id || item?.analysis_run_id;
+  const identityFields = (item) => [...identityKeys.filter(key => key !== "output_schema_version"),
+    narrative(item) ? "output_format_version" : "output_schema_version", ...(narrative(item) ? ["web_research"] : [])];
   const get = async (path) => {
     const response = await fetch(`/api/v1/paqs-e/${path}`, { headers: { Accept: "application/json" } });
     const body = await response.json();
@@ -124,18 +130,20 @@
     return body;
   };
   const updateButton = () => {
-    $("analyze-button").disabled = Boolean(inFlight) || !security || !configuration?.api_key_configured;
+    $("analyze-button").disabled = Boolean(inFlight) || !security || !selectedModel()?.credential_configured;
     $("analyze-button").textContent = inFlight ? "分析请求进行中…" : "Analyze · 分析当前快照";
   };
   const state = (message) => { $("analysis-state").textContent = message; };
-  const identityLine = (item) => `${item.symbol} · ${item.market} · 修订 ${item.revision_no} · ${item.strategy_id} · ${item.model_id} · 快照 ${stamp(item.snapshot_as_of_timestamp, item.market)}`;
+  const identityLine = (item) => `${item.symbol} · ${item.market} · 修订 ${item.revision_no} · ${item.strategy_id} · ${modelName(item.model_id)} · 快照 ${stamp(item.snapshot_as_of_timestamp, item.market)}`;
   function renderHeading() {
-    const text = decision ? `${historical ? "已选择历史 Decision" : "已选 Decision"}${earlier ? " · 较早成功结果（不是本次尝试）" : ""}\n${identityLine(decision)}` : "尚无选中的 Decision";
+    const selectedLabel = narrative(decision) ? "Narrative" : "Decision";
+    const text = decision ? `${narrative(decision) ? "Narrative 最终分析 · " : "Legacy 结构化历史 · "}${historical ? `已选择历史 ${selectedLabel}` : `已选 ${selectedLabel}`}${earlier ? " · 较早成功结果（不是本次尝试）" : ""}\n${identityLine(decision)}` : "尚无选中的分析结果";
     $("decision-heading").textContent = text;
     $("evidence-identity").textContent = text;
   }
   function clearEvidence(message = "冻结证据尚不可用") {
     snapshot = null;
+    $("research-evidence").textContent = "—";
     for (const line of priceLines) frozenCandles?.removePriceLine(line);
     priceLines = [];
     frozenCandles?.setData([]);
@@ -146,11 +154,31 @@
     $("evidence-empty").classList.add("visible");
     $("evidence-status").textContent = message;
   }
+  let narrativeView = "formatted";
   function renderDecision() {
     renderHeading();
     if (!decision) {
       $("decision-result").replaceChildren(node("p", "选择成功历史，或填写模型后显式 Analyze。", "note"));
       $("decision-audit").textContent = "—";
+      return;
+    }
+    if (narrative(decision)) {
+      const text = node("pre", decision.response_text, "narrative-text");
+      const formatted = window.PaqsNarrativeMarkdown.render(decision.response_text);
+      const controls = node("div", "", "narrative-view-controls");
+      const buttons = [["formatted", "格式化"], ["raw", "原文"]].map(([value, label]) => {
+        const button = node("button", label); button.type = "button";
+        button.dataset.narrativeView = value;
+        button.addEventListener("click", () => { narrativeView = value; updateView(); });
+        controls.append(button); return button;
+      });
+      function updateView() {
+        text.hidden = narrativeView !== "raw"; formatted.hidden = narrativeView !== "formatted";
+        for (const button of buttons) button.setAttribute("aria-pressed", String(button.dataset.narrativeView === narrativeView));
+      }
+      updateView();
+      $("decision-result").replaceChildren(node("p", `模型生成的分析，未经过结构化语义校验。联网研究：${decision.web_research ? "已冻结辅助上下文" : "关闭"}`, "note"), controls, formatted, text);
+      $("decision-audit").textContent = JSON.stringify(decision, null, 2);
       return;
     }
     const result = decision.result;
@@ -179,7 +207,7 @@
     "request_schema_version", "output_schema_version", "runtime_config_version", "model_provider", "model_id",
     "prompt_version", "prompt_content_sha256"];
   function assertIdentity(ledger, payload) {
-    if (!payload || identityKeys.some((key) => !same(ledger[key], payload[key]))
+    if (!payload || identityFields(ledger).some((key) => !same(ledger[key], payload[key]))
       || !instant(ledger.snapshot_as_of_timestamp, payload.snapshot_as_of_timestamp)
       || !same(ledger.strategy_id, payload.primary_strategy_id)
       || !same(ledger.strategy_content_sha256, payload.primary_strategy_content_sha256)) {
@@ -187,6 +215,18 @@
     }
   }
   function assertDecision(item, expected) {
+    if (narrative(item)) {
+      if (!uuid(item.narrative_result_id) || !uuid(item.narrative_run_id)
+        || !same(item.security_id, expected.security_id) || !hash(item.snapshot_hash)
+        || !hash(item.response_text_sha256) || !Number.isInteger(item.revision_no) || item.revision_no < 1
+        || item.request_schema_version !== "paqs-e-narrative-request-v1"
+        || item.output_format_version !== "paqs-e-narrative-markdown-v1"
+        || typeof item.web_research !== "boolean" || typeof item.response_text !== "string"
+        || !item.response_text.trim() || [...item.response_text].length > 100000
+        || ["narrative_result_id", "narrative_run_id", "model_id", "strategy_id", "snapshot_hash", "web_research"].some(
+          key => expected[key] != null && !same(item[key], expected[key]))) throw new Error("Narrative 响应身份不匹配");
+      return;
+    }
     if (!item || !uuid(item.decision_id) || !uuid(item.analysis_run_id) || !hash(item.snapshot_hash)
       || !Number.isInteger(item.revision_no) || item.revision_no < 1
       || !same(item.security_id, expected.security_id)
@@ -205,7 +245,7 @@
     }
   }
   function parseRun(run, expected) {
-    if (!run || !uuid(run.analysis_run_id) || !same(run.analysis_run_id, expected.analysis_run_id)
+    if (!run || !uuid(runId(run)) || !same(runId(run), runId(expected))
       || (expected.security_id && !same(run.security_id, expected.security_id))
       || (expected.status && !same(run.status, expected.status))
       || (expected.model_id && !same(run.model_id, expected.model_id))
@@ -215,7 +255,7 @@
       throw new Error("Run 响应身份或状态不匹配");
     }
     if (expected.snapshot_hash) {
-      for (const key of [...identityKeys, "strategy_id", "strategy_content_sha256", "security_id"])
+      for (const key of [...identityFields(run), "strategy_id", "strategy_content_sha256", "security_id"])
         if (!same(run[key], expected[key])) throw new Error("Decision 与 Run 身份不匹配");
       if (!instant(run.snapshot_as_of_timestamp, expected.snapshot_as_of_timestamp)) throw new Error("快照时间不匹配");
     }
@@ -290,6 +330,7 @@
       $("evidence-empty").classList.toggle("visible", !candles.length);
       $("evidence-empty").textContent = "该周期没有已完成的权威证据 K 线";
       $("evidence-status").textContent = `冻结 ${evidenceFrame} · ${candles.length} 根已完成 K 线 · 成交量独立窗格，缺失不补零 · ${marketZone} · 当前复权不代表严格历史时点可重放`;
+      if (!narrative(decision)) {
       const entry = decision.result.price_references.executable_entry_reference;
       const overlays = [
         [`入场参考 · ${entry.session_type} · ${entry.eligible ? "合格" : "不合格"}`, entry.price, "#269e8c"],
@@ -303,6 +344,7 @@
         $("overlay-labels").append(node("p", `${label}：${value}`, "overlay-label"));
         if (candles.length) priceLines.push(frozenCandles.createPriceLine({ price, color,
           lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title: label }));
+      }
       }
       const metadata = { ...snapshot };
       delete metadata.w1_bars; delete metadata.d1_bars; delete metadata.m30_bars;
@@ -325,10 +367,11 @@
   }
   async function attachEvidence(item, token, nav) {
     try {
-      const run = await get(`analyses/${encodeURIComponent(item.analysis_run_id)}`);
+      const run = await get(`${narrative(item) ? "narrative-analyses" : "analyses"}/${encodeURIComponent(runId(item))}`);
       const evidence = parseRun(run, { ...item, status: "SUCCEEDED" });
-      if (token !== detailGeneration || nav !== navigation || decision?.decision_id !== item.decision_id) return;
+      if (token !== detailGeneration || nav !== navigation || resultId(decision) !== resultId(item)) return;
       snapshot = evidence;
+      $("research-evidence").textContent = JSON.stringify(JSON.parse(run.request_payload_json).auxiliary_context || [], null, 2);
       $("evidence-status").textContent = "冻结输入已按 Decision / Run / 请求身份关联；切换冻结证据查看";
       $("decision-audit").textContent = JSON.stringify({ decision: item, run }, null, 2);
       drawEvidence();
@@ -337,7 +380,7 @@
     }
   }
   async function selectDecision(item, explicit = true) {
-    if (!security || !uuid(item.decision_id)) return;
+    if (!security || !uuid(resultId(item))) return;
     if (explicit) selectionIntent += 1;
     const token = ++detailGeneration, nav = navigation;
     const expected = { ...item, security_id: security.id };
@@ -347,7 +390,7 @@
     clearEvidence("正在读取所选 Decision 的冻结证据…");
     renderDecision();
     try {
-      const loaded = await get(`decisions/${encodeURIComponent(item.decision_id)}`);
+      const loaded = await get(`${narrative(item) ? "narrative-results" : "decisions"}/${encodeURIComponent(resultId(item))}`);
       assertDecision(loaded, expected);
       if (token !== detailGeneration || nav !== navigation) return;
       decision = loaded;
@@ -365,82 +408,114 @@
     const token = ++historyGeneration, nav = navigation;
     history = [];
     $("decision-history").replaceChildren();
+    if ($("legacy-history-section").open) void reloadLegacyHistory();
     if (!security) { $("history-status").textContent = "请选择证券"; return; }
     const id = security.id, strategy = $("history-strategy").value;
     $("history-status").textContent = "读取成功历史…";
     try {
-      const result = await get(`securities/${encodeURIComponent(id)}/decisions?limit=20${strategy ? `&strategy_id=${encodeURIComponent(strategy)}` : ""}`);
+      const body = await get(`securities/${encodeURIComponent(id)}/narrative-results?limit=20${strategy ? `&strategy_id=${encodeURIComponent(strategy)}` : ""}`);
       if (token !== historyGeneration || nav !== navigation) return;
+      if (!Array.isArray(body.items) || body.items.length > 20 || body.items.some(item =>
+        !same(item.security_id, id) || !uuid(item.narrative_result_id) || !uuid(item.narrative_run_id)
+        || (strategy && !same(item.strategy_id, strategy)) || !Number.isInteger(item.revision_no)
+        || item.revision_no < 1 || !hash(item.snapshot_hash) || !identifier(item.model_id)
+        || !identifier(item.strategy_id) || typeof item.preview !== "string" || [...item.preview].length > 160))
+        throw new Error("Narrative 历史响应身份或范围不匹配");
+      history = body.items;
+      $("decision-history").replaceChildren(...history.map(item => {
+        const button = node("button", "", "history-row");
+        button.type = "button"; button.dataset.narrativeResultId = item.narrative_result_id;
+        button.append(node("strong", `${item.strategy_id} · Narrative 修订 ${item.revision_no}`),
+          node("span", `${stamp(item.created_at, item.market)} · ${modelName(item.model_id)}`), node("span", item.preview));
+        button.addEventListener("click", () => selectDecision(item));
+        return button;
+      }));
+      $("history-status").textContent = history.length ? `已显示 ${history.length} 条成功 Narrative` : "此筛选下暂无成功 Narrative";
+    } catch (error) {
+      if (token === historyGeneration && nav === navigation) $("history-status").textContent = `历史不可用：${error.message}`;
+    }
+  }
+  async function reloadLegacyHistory() {
+    const token = ++legacyGeneration, nav = navigation;
+    $("legacy-history").replaceChildren();
+    if (!security) { $("legacy-history-status").textContent = "请选择证券"; return; }
+    const id = security.id, strategy = $("history-strategy").value;
+    $("legacy-history-status").textContent = "读取成功历史…";
+    try {
+      const result = await get(`securities/${encodeURIComponent(id)}/decisions?limit=20${strategy ? `&strategy_id=${encodeURIComponent(strategy)}` : ""}`);
+      if (token !== legacyGeneration || nav !== navigation) return;
       if (!Array.isArray(result.items) || result.items.length > 20 || result.items.some((item) =>
         !same(item.security_id, id) || !uuid(item.decision_id) || !uuid(item.analysis_run_id)
         || (strategy && !same(item.strategy_id, strategy)) || !Number.isInteger(item.revision_no)
         || item.revision_no < 1 || !hash(item.snapshot_hash) || !identifier(item.model_id)
         || !identifier(item.strategy_id) || !item.entry_advisory || !item.one_line_thesis
         || (item.status != null && item.status !== "SUCCEEDED") || item.analysis_status != null)) throw new Error("历史响应身份或范围不匹配");
-      history = result.items;
-      const rows = history.map((item) => {
+      const legacyItems = result.items;
+      const rows = legacyItems.map((item) => {
         const button = node("button", "", "history-row");
         button.type = "button";
         button.dataset.decisionId = item.decision_id;
         button.append(node("strong", `${item.strategy_id} · 修订 ${item.revision_no} · ${display(item.entry_advisory)}`),
-          node("span", `${stamp(item.created_at, item.market)} · ${item.model_id}`), node("span", item.one_line_thesis));
+          node("span", `${stamp(item.created_at, item.market)} · ${modelName(item.model_id)}`), node("span", item.one_line_thesis));
         button.addEventListener("click", () => selectDecision(item));
         return button;
       });
-      $("decision-history").replaceChildren(...rows);
-      $("history-status").textContent = rows.length ? `已显示 ${rows.length} 条成功 Decision；不是全部 Run 记录` : "此筛选下暂无成功 Decision";
+      $("legacy-history").replaceChildren(...rows);
+      $("legacy-history-status").textContent = rows.length ? `已显示 ${rows.length} 条成功 Decision；不是全部 Run 记录` : "此筛选下暂无成功 Decision";
     } catch (error) {
-      if (token === historyGeneration && nav === navigation) $("history-status").textContent = `历史不可用：${error.message}`;
+      if (token === legacyGeneration && nav === navigation) $("legacy-history-status").textContent = `历史不可用：${error.message}`;
     }
   }
-  async function showRun(id, expected = {}) {
+  async function showRun(id, expected = {}, legacy = $("known-run-kind").value === "legacy") {
     const token = ++runGeneration, nav = navigation;
     $("known-run-detail").textContent = "—";
     if (!uuid(id)) { $("known-run-status").textContent = "请输入合法 Run UUID"; return; }
     $("known-run-status").textContent = "读取已知 Run…";
     try {
-      const run = await get(`analyses/${encodeURIComponent(id)}`);
-      parseRun(run, { ...expected, analysis_run_id: id });
+      const run = await get(`${legacy ? "analyses" : "narrative-analyses"}/${encodeURIComponent(id)}`);
+      parseRun(run, { ...expected, [legacy ? "analysis_run_id" : "narrative_run_id"]: id });
       if (token !== runGeneration || nav !== navigation) return;
-      $("known-run-status").textContent = `${run.symbol} · ${run.model_id} · ${run.strategy_id} · ${run.status} · ${run.failure_kind || "无提供方失败"}`;
+      $("known-run-status").textContent = `${run.symbol} · ${modelName(run.model_id)} · ${run.strategy_id} · ${run.status} · ${run.failure_kind || "无提供方失败"}`;
       $("known-run-detail").textContent = JSON.stringify(run, null, 2);
     } catch (error) {
       if (token === runGeneration && nav === navigation) $("known-run-status").textContent = `Run 不可用：${error.message}`;
     }
   }
   const failures = {
-    CONFIGURATION_ERROR: "服务器分析凭据缺失或不可用；配置 OPENAI_API_KEY 后重启服务",
+    CONFIGURATION_ERROR: "所选模型凭据缺失或不可用；请配置此模型 API Key",
     PROVIDER_UNAVAILABLE: "推理提供方不可用", PROVIDER_REFUSAL: "推理提供方拒绝回答",
-    INVALID_STRUCTURED_OUTPUT: "提供方输出不符合结构约定",
+    PROVIDER_INCOMPLETE: "提供方回答未完成", INVALID_FINAL_TEXT: "提供方最终文本无效",
   };
   $("analyze-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (inFlight) return;
     const model = $("model-id").value, strategy = $("strategy-id").value;
     if (!security || !uuid(security.id) || !identifier(model) || !identifier(strategy)
-      || !configuration?.api_key_configured || !configuration.strategies.some((item) => item.strategy_id === strategy)) {
-      state("无法提交：请选择证券、已注册策略，并输入非空且不含任何空白的模型 ID。服务器必须已配置凭据。");
+      || !selectedModel()?.credential_configured || !configuration.strategies.some((item) => item.strategy_id === strategy)) {
+      state("无法提交：请选择证券、已注册策略，并配置所选模型的凭据。");
       return;
     }
-    const payload = Object.freeze({ security_id: security.id, model_id: model, strategy_id: strategy });
+    const payload = Object.freeze({ security_id: security.id, model_key: model, strategy_id: strategy, web_research: $("web-research").checked });
     const attempt = { payload, symbol: security.display_symbol, nav: navigation, intent: selectionIntent };
     inFlight = attempt; // Global page guard acquired synchronously, before the first await.
     updateButton();
-    const target = `${attempt.symbol} · ${model} · ${strategy}`;
+    const target = `${attempt.symbol} · ${modelName(model)} · ${strategy}`;
     state(`正在分析：${target}。已提交的目标不会随界面选择改变。`);
     if (decision) { earlier = true; renderHeading(); }
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 180000);
+    const longWaitNotice = window.setTimeout(() => {
+      if (inFlight === attempt) state(`仍在分析：${target}。请求仍在进行，请勿重复提交；正在等待服务端最终结果。`);
+    }, 180000);
     try {
       // The sole Analyze POST source. No other event invokes this handler.
-      const response = await fetch("/api/v1/paqs-e/analyses", {
+      const response = await fetch("/api/v1/paqs-e/narrative-analyses", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload), signal: controller.signal,
+        body: JSON.stringify(payload),
       });
       const body = await response.json();
       if (response.status === 201 && body.status === "SUCCEEDED") {
-        assertDecision(body, payload);
-        state(`已提交成功 Decision：${target} · 修订 ${body.revision_no}。${attempt.nav !== navigation ? "当前已切换证券；请回到原证券查看历史。" : ""}`);
+        if (!narrative(body)) throw new Error("未收到 Narrative 结果");
+        assertDecision(body, { security_id: payload.security_id, model_id: payload.model_key, strategy_id: payload.strategy_id, web_research: payload.web_research });
+        state(`已提交成功 Narrative：${target} · 修订 ${body.revision_no}。${attempt.nav !== navigation ? "当前已切换证券；请回到原证券查看历史。" : ""}`);
         if (attempt.nav === navigation && security?.id === payload.security_id) {
           if (attempt.intent === selectionIntent) {
             const token = ++detailGeneration;
@@ -452,38 +527,50 @@
           void reloadHistory();
         }
       } else if ([502, 503].includes(response.status)
-        && ["PROVIDER_FAILED", "VALIDATION_FAILED"].includes(body.analysis_status)
-        && body.status === response.status && uuid(body.analysis_run_id)
-        && body.analysis_run?.analysis_run_id === body.analysis_run_id
-        && body.analysis_run.status === body.analysis_status
-        && body.analysis_run.failure_kind === body.failure_kind
-        && body.analysis_run.validator_version === body.validator_version
-        && ((body.analysis_status === "VALIDATION_FAILED" && response.status === 502 && Array.isArray(body.validation_issues))
-          || (body.analysis_status === "PROVIDER_FAILED" && failures[body.failure_kind]
-            && response.status === (["CONFIGURATION_ERROR", "PROVIDER_UNAVAILABLE"].includes(body.failure_kind) ? 503 : 502)))) {
-        const message = body.analysis_status === "VALIDATION_FAILED"
-          ? `确定性校验失败 · ${body.validator_version} · ${JSON.stringify(body.validation_issues)}` : failures[body.failure_kind];
-        state(`${target}：${message}。本次没有新 Decision。Run ${body.analysis_run_id}`);
+        && body.analysis_status === "PROVIDER_FAILED" && body.status === response.status
+        && uuid(body.narrative_run_id) && failures[body.failure_kind]
+        && response.status === (["CONFIGURATION_ERROR", "PROVIDER_UNAVAILABLE"].includes(body.failure_kind) ? 503 : 502)) {
+        state(`${target}：${failures[body.failure_kind]}。本次没有新 Narrative。Run ${body.narrative_run_id}`);
         if (attempt.nav === navigation) {
-          $("known-run-id").value = body.analysis_run_id;
-          void showRun(body.analysis_run_id, { ...payload, status: body.analysis_status });
+          $("known-run-id").value = body.narrative_run_id;
+          $("known-run-kind").value = "narrative";
+          void showRun(body.narrative_run_id, { security_id: payload.security_id, model_id: payload.model_key,
+            strategy_id: payload.strategy_id, status: body.analysis_status }, false);
         }
       } else if ([404, 409, 422, 500].includes(response.status) && body.status === response.status && typeof body.code === "string") {
-        state(`${target}：${response.status === 500 ? "账本证据无法提交或验证" : "分析前提失败"} · ${body.code} · ${body.detail || ""}。没有确认新的 Decision。`);
+        const researchFailure = body.code === "PAQS_E_RESEARCH_PRECONDITION_FAILED";
+        const detail = researchFailure ? "联网研究未完成" : (body.detail || "");
+        state(`${target}：${response.status === 500 ? "账本证据无法提交或验证" : "分析前提失败"} · ${body.code} · ${detail}。没有确认新的 Narrative。${researchFailure ? researchDiagnostic(body.research_diagnostic) : ""}`);
       } else throw new Error("未确认响应");
     } catch (_error) {
       state(`${target}：结果未知，响应未能确认（可能断连、超时、格式或身份异常）。服务端可能已保存结果。请检查成功历史或已知 Run，再决定是否显式发起新尝试；不会自动重试。`);
     } finally {
-      window.clearTimeout(timeout);
+      window.clearTimeout(longWaitNotice);
       if (inFlight === attempt) inFlight = null;
       updateButton();
     }
   });
 
+  function researchDiagnostic(value) {
+    if (!value || value.detail_version !== "paqs-e-research-diagnostic-v1"
+      || !["SEARCH", "SYNTHESIS"].includes(value.stage)
+      || !["TRANSPORT_ERROR", "INVALID_RESPONSE", "UNSAFE_RESPONSE", "REFUSAL"].includes(value.failure_class)
+      || ![1, 2].includes(value.research_http_request_count)) return "";
+    const fields = [value.web_search_call_count, value.search_action_count, value.message_count];
+    if (!fields.every((count) => Number.isInteger(count) && count >= 0 && count <= 129)) return "";
+    const boundaries = ["SEARCH_ENVELOPE", "SEARCH_OUTPUT_SHAPE", "ACTION_SHAPE", "ACTION_TYPE", "ACTION_STATUS", "ACTION_BOUND", "NO_COMPLETED_SEARCH", "QUERY_STRUCTURE", "QUERY_INTEGRITY", "QUERY_STRUCTURAL_BOUND", "SOURCE_STRUCTURE", "SOURCE_BOUND", "SOURCE_URL", "MESSAGE_SHAPE", "MESSAGE_INTEGRITY", "PASSBACK_BOUND", "PROVENANCE_BOUND", "SYNTHESIS_ENVELOPE", "SYNTHESIS_OUTPUT_SHAPE", "SYNTHESIS_MESSAGE", "SYNTHESIS_MEMO_INTEGRITY"];
+    const boundary = boundaries.includes(value.boundary_code) ? `边界 ${value.boundary_code}；` : "";
+    const additional = [["completed_action_count", "动作 completed"], ["in_progress_action_count", "动作 in_progress"], ["incomplete_action_count", "动作 incomplete"], ["failed_action_count", "动作 failed"], ["cancelled_action_count", "动作 cancelled"], ["completed_search_count", "完成搜索"], ["non_completed_search_count", "未完成搜索"], ["provider_exposed_query_count", "查询"], ["raw_source_record_count", "来源记录"], ["unknown_action_count", "未知动作"], ["missing_or_unknown_status_count", "未知状态"], ["invalid_query_value_count", "无效查询值"], ["malformed_action_count", "异常动作结构"], ["unexpected_output_item_count", "异常输出项"]];
+    const suffix = additional.filter(([key]) => Number.isInteger(value[key]) && value[key] >= 0 && value[key] <= 1024)
+      .map(([key, label]) => `${label} ${value[key]}`).join("，");
+    return `研究诊断：${value.stage} / ${value.failure_class}；请求 ${value.research_http_request_count}，研究动作 ${fields[0]}，搜索 ${fields[1]}，消息 ${fields[2]}。${boundary}${suffix ? `${suffix}。` : ""}`;
+  }
+
   function onSecurity(item) {
     security = item;
     navigation += 1; selectionIntent += 1; detailGeneration += 1; runGeneration += 1;
     decision = null; historical = false; earlier = false;
+    legacyGeneration += 1; $("legacy-history").replaceChildren();
     clearEvidence(); renderDecision(); mode(false);
     $("analysis-security").textContent = item ? `${item.display_symbol} · ${item.market} · ${item.currency}` : "请选择证券";
     $("known-run-id").value = "";
@@ -504,6 +591,9 @@
     for (const other of document.querySelectorAll("[data-evidence-frame]")) other.setAttribute("aria-pressed", String(other === button));
     drawEvidence();
   });
+  $("legacy-history-section").addEventListener("toggle", () => {
+    if ($("legacy-history-section").open) void reloadLegacyHistory();
+  });
   $("reload-history").addEventListener("click", reloadHistory);
   $("history-strategy").addEventListener("change", reloadHistory);
   $("latest-decision").addEventListener("click", () => {
@@ -520,10 +610,70 @@
   }
   $("theme-toggle").addEventListener("click", () => theme(document.documentElement.dataset.theme !== "light"));
   try { theme(localStorage.getItem("paqs-e-theme") === "light"); } catch (_error) { theme(false); }
+  const selectedModel = () => configuration?.models.find((item) => item.model_key === $("model-id").value);
+  const modelName = (id) => configuration?.models.find((item) => item.model_key === id)?.display_name || id;
+  let credentialModel = null, credentialBusy = false;
+  function modelChanged() {
+    const item = selectedModel();
+    $("web-research").disabled = !item?.web_research_supported;
+    $("web-research").checked = false;
+    $("research-status").textContent = "联网研究默认关闭；开启可能在最终分析前增加最多 2 次研究请求，增加耗时和 API 成本。"
+      + (item?.web_research_supported ? "" : "此模型当前未启用可审计联网研究；可关闭研究后分析。");
+    $("configuration-status").textContent = item?.credential_configured
+      ? "凭据已存在（仅确认存在，未验证有效性、模型权限或连接）。"
+      : "未配置此模型凭据。请配置 API Key；行情与历史仍可读取。";
+    updateButton();
+  }
+  $("model-id").addEventListener("change", modelChanged);
+  $("configure-credential").addEventListener("click", async () => {
+    if (!selectedModel() || credentialBusy) return;
+    credentialModel = selectedModel();
+    $("credential-secret").value = "";
+    $("credential-service").textContent = `${credentialModel.display_name} · ${credentialModel.credential_label}`;
+    $("credential-status").textContent = "";
+    $("credential-dialog").showModal();
+    try {
+      const status = await get(`credentials/${encodeURIComponent(credentialModel.model_key)}`);
+      $("credential-status").textContent = status.credential_source === "server_environment_read_only"
+        ? "服务器环境变量只读回退已存在；删除本地凭据不会删除环境变量。"
+        : status.secure_storage_available ? "Windows 安全存储可用。" : "操作系统安全存储不可用；不能保存。";
+    } catch (_error) { $("credential-status").textContent = "无法读取凭据状态。"; }
+  });
+  $("credential-close").addEventListener("click", () => $("credential-dialog").close());
+  $("credential-dialog").addEventListener("close", () => { $("credential-secret").value = ""; });
+  async function mutateCredential(method) {
+    if (credentialBusy || !credentialModel) return;
+    credentialBusy = true;
+    const key = credentialModel.model_key;
+    const body = method === "PUT" ? { secret: $("credential-secret").value } : {};
+    $("credential-save").disabled = true; $("credential-delete").disabled = true;
+    try {
+      const response = await fetch(`/api/v1/paqs-e/credentials/${encodeURIComponent(key)}`, {
+        method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+      });
+      if (!response.ok) throw new Error("Credential mutation failed");
+      $("credential-secret").value = "";
+      const value = await get("configuration");
+      configuration.models = value.models;
+      $("configuration-status").textContent = selectedModel()?.credential_configured ? "凭据已存在；权限与余额未验证。" : "未配置此模型凭据。";
+      $("credential-status").textContent = method === "PUT" ? "已安全保存；未验证权限或余额。" : "已删除本地凭据；服务器环境变量回退不受影响。";
+    } catch (_error) { $("credential-status").textContent = "操作未能确认；请检查安全存储状态后手动重试。"; }
+    finally {
+      delete body.secret;
+      credentialBusy = false; $("credential-save").disabled = false; $("credential-delete").disabled = false;
+      updateButton();
+    }
+  }
+  $("credential-form").addEventListener("submit", (event) => { event.preventDefault(); void mutateCredential("PUT"); });
+  $("credential-delete").addEventListener("click", () => { void mutateCredential("DELETE"); });
   async function configure() {
     try {
       const value = await get("configuration");
-      if (value.model_provider !== "openai" || typeof value.api_key_configured !== "boolean"
+      if (!Array.isArray(value.models) || !value.models.length
+        || !value.models.some((item) => item.model_key === value.default_model_key)
+        || new Set(value.models.map((item) => item.model_key)).size !== value.models.length
+        || value.models.some((item) => !identifier(item.model_key) || typeof item.display_name !== "string"
+          || typeof item.credential_configured !== "boolean" || typeof item.web_research_supported !== "boolean")
         || !Array.isArray(value.strategies) || !value.strategies.length
         || !value.strategies.some((item) => item.strategy_id === value.default_strategy_id)
         || new Set(value.strategies.map((item) => item.strategy_id)).size !== value.strategies.length
@@ -536,9 +686,12 @@
         const filter = option.cloneNode(true); $("history-strategy").append(filter);
       }
       $("strategy-id").value = value.default_strategy_id; $("strategy-id").disabled = false;
-      $("configuration-status").textContent = value.api_key_configured
-        ? "服务器已配置凭据（仅确认存在，未验证有效性、模型权限或连接）。"
-        : "未配置分析凭据。请在服务器设置 OPENAI_API_KEY 后重启；此页面不接收密钥。行情与历史仍可读取。";
+      for (const item of value.models) {
+        const option = node("option", item.display_name);
+        option.value = item.model_key; $("model-id").append(option);
+      }
+      $("model-id").value = value.default_model_key; $("model-id").disabled = false;
+      modelChanged();
     } catch (_error) { $("configuration-status").textContent = "服务器策略配置不可用，请检查注册文件后重启。未提供替代策略。"; }
     updateButton();
   }

@@ -108,6 +108,7 @@ def test_task007b_adds_only_analysis_evidence_tables() -> None:
         "__init__.py",
         "accounting.py",
         "paqs_e_ledger.py",
+        "paqs_e_narrative.py",
         "portfolio.py",
         "security.py",
         "settings.py",
@@ -136,11 +137,17 @@ def test_frontend_analyze_post_is_owned_only_by_explicit_form() -> None:
     owned = list((SOURCE_ROOT / "frontend/static").glob("*.js"))
     sources = {path.name: path.read_text(encoding="utf-8") for path in owned}
     assert "/paqs-e/analyses" not in sources["app.js"]
-    assert sum(source.count('fetch("/api/v1/paqs-e/analyses",') for source in sources.values()) == 1
+    assert (
+        sum(
+            source.count('fetch("/api/v1/paqs-e/narrative-analyses",')
+            for source in sources.values()
+        )
+        == 1
+    )
     source = sources["paqs-e.js"]
     form = source.index('$("analyze-form").addEventListener("submit"')
     guard = source.index("inFlight = attempt;", form)
-    dispatch = source.index('await fetch("/api/v1/paqs-e/analyses",', guard)
+    dispatch = source.index('await fetch("/api/v1/paqs-e/narrative-analyses",', guard)
     assert form < guard < dispatch
 
 

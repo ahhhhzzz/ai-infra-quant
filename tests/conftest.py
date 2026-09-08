@@ -8,12 +8,20 @@ import pytest
 from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
+from paqs_e_support import MemoryCredentials
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from ai_infra_quant.backend.main import create_app
 from ai_infra_quant.config import Settings
 from ai_infra_quant.database.session import create_database_engine, create_session_factory
+
+
+@pytest.fixture(autouse=True)
+def isolated_os_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "ai_infra_quant.backend.dependencies.WindowsCredentialStore", MemoryCredentials
+    )
 
 
 def sqlite_url(path: Path) -> str:

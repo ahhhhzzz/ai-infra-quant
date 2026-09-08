@@ -11,8 +11,12 @@ EXPECTED_PATHS = {
     "/api/v1/strategies/paqs/securities/{security_id}/input-status",
     "/api/v1/strategies/paqs/securities/{security_id}/structure",
     "/api/v1/paqs/securities/{security_id}/market-snapshot",
-    "/api/v1/paqs-e/analyses",
+    "/api/v1/paqs-e/narrative-analyses",
+    "/api/v1/paqs-e/narrative-analyses/{run_id}",
+    "/api/v1/paqs-e/narrative-results/{result_id}",
+    "/api/v1/paqs-e/securities/{security_id}/narrative-results",
     "/api/v1/paqs-e/configuration",
+    "/api/v1/paqs-e/credentials/{model_key}",
     "/api/v1/paqs-e/analyses/{analysis_run_id}",
     "/api/v1/paqs-e/decisions/{decision_id}",
     "/api/v1/paqs-e/securities/{security_id}/decisions",
@@ -34,6 +38,11 @@ def test_openapi_has_exact_approved_allowlist(client: TestClient) -> None:
     document = client.get("/openapi.json").json()
     assert set(document["paths"]) == EXPECTED_PATHS
     assert set(document["paths"]["/api/v1/paqs-e/configuration"]) == {"get"}
+    assert set(document["paths"]["/api/v1/paqs-e/credentials/{model_key}"]) == {
+        "get",
+        "put",
+        "delete",
+    }
     serialized = str(document).lower()
     for forbidden in (
         "/live",

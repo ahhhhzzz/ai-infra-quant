@@ -64,8 +64,11 @@ entitlements are external prerequisites; no credential belongs in this app. The 
 ## Windows one-click Dashboard
 
 After completing the local setup, double-click `start_dashboard.bat` in the repository root. It
-reuses an already-running OpenD and FastAPI instance when healthy; otherwise it starts OpenD,
-waits for `127.0.0.1:11111`, starts FastAPI with the Futu market-data provider in a separate visible
+reuses an already-running OpenD and reuses a healthy FastAPI instance only when its startup-captured
+source revision exactly matches the current Git checkout. A stale/missing/invalid backend revision
+fails safely and asks you to close/restart the existing dashboard process; it never kills it.
+It starts OpenD as needed and waits for `127.0.0.1:11111`. When the application port is free,
+it starts FastAPI with the Futu market-data provider in a separate visible
 console, waits for `/health`, and then opens `http://127.0.0.1:8000` in the default browser.
 
 The launcher checks common Futu OpenD installation locations. If it cannot find the executable,
@@ -141,3 +144,10 @@ Phase 2 market-data backend, TASK-005 adds its read-only Dashboard client, TASK-
 paged chart history/incremental refresh, and TASK-006A adds only the dynamic-security and PAQS input
 foundation. No derived-input persistence, PAQS structure/advisory, PaperBroker, paper fill/order,
 backtest, brokerage-account access, or real-order route was added.
+
+
+TASK-007C1 adds a flat eleven-model selector and local **配置此模型 API Key** dialog.
+Use the existing Windows launcher, open the loopback workbench, select a model, securely save its
+key and explicitly Analyze. UI-managed keys need no `.env` edit. See
+[model and credential guide](docs/PAQS_E_MODELS.md) for supported routes, research limits and
+separate opt-in live-provider acceptance. This task is pending independent review; no merge is claimed.

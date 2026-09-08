@@ -29,7 +29,11 @@ echo [2/4] Futu OpenD is reachable on 127.0.0.1:11111.
 if not exist "%PYTHON_EXE%" goto python_missing
 
 echo [3/4] Checking AI Infra Quant...
+set "AI_INFRA_SOURCE_REVISION="
+for /f "delims=" %%R in ('powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%REPO_ROOT%scripts\dashboard_runtime.ps1" -Mode Resolve') do set "AI_INFRA_SOURCE_REVISION=%%R"
+if not defined AI_INFRA_SOURCE_REVISION goto revision_unavailable
 call :health_ready
+if errorlevel 2 goto fail
 if not errorlevel 1 goto dashboard_ready
 
 call :tcp_ready 127.0.0.1 8000
@@ -40,6 +44,7 @@ set "MARKET_DATA_PROVIDER=futu"
 start "AI Infra Quant Dashboard" "%ComSpec%" /k ""%PYTHON_EXE%" -m uvicorn ai_infra_quant.backend.main:app --host 127.0.0.1 --port 8000"
 
 call :wait_health %FASTAPI_TIMEOUT_SECONDS%
+if errorlevel 2 goto fail
 if errorlevel 1 goto fastapi_timeout
 
 :dashboard_ready
@@ -73,11 +78,11 @@ powershell.exe -NoProfile -NonInteractive -Command "$deadline = [DateTime]::UtcN
 exit /b %errorlevel%
 
 :health_ready
-powershell.exe -NoProfile -NonInteractive -Command "try { $health = Invoke-RestMethod -Uri '%HEALTH_URL%' -TimeoutSec 2; if ($health.status -eq 'OK' -and $health.database -eq 'READY') { exit 0 } } catch {}; exit 1" >nul 2>&1
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%REPO_ROOT%scripts\dashboard_runtime.ps1" -HealthUrl "%HEALTH_URL%"
 exit /b %errorlevel%
 
 :wait_health
-powershell.exe -NoProfile -NonInteractive -Command "$deadline = [DateTime]::UtcNow.AddSeconds(%~1); do { try { $health = Invoke-RestMethod -Uri '%HEALTH_URL%' -TimeoutSec 2; if ($health.status -eq 'OK' -and $health.database -eq 'READY') { exit 0 } } catch {}; Start-Sleep -Seconds 1 } while ([DateTime]::UtcNow -lt $deadline); exit 1" >nul 2>&1
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%REPO_ROOT%scripts\dashboard_runtime.ps1" -HealthUrl "%HEALTH_URL%" -TimeoutSeconds %~1
 exit /b %errorlevel%
 
 :opend_not_found
@@ -99,6 +104,11 @@ goto fail
 :port_conflict
 echo [ERROR] Port 8000 is occupied, but the AI Infra Quant health endpoint is not healthy.
 echo Stop the conflicting application and try again. No process was terminated.
+goto fail
+
+:revision_unavailable
+echo [ERROR] Current checkout source revision is unavailable. Install Git and use a valid checkout.
+echo The existing backend was not reused. No process was terminated.
 goto fail
 
 :fastapi_timeout

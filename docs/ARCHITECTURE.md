@@ -342,3 +342,108 @@ and their own contracts. No third-party product document can override the broker
 ## 15. Historical evidence boundary
 
 Accepted Phase 1 plan/review files remain immutable historical evidence and do not govern later PAQS future scope. Future docs/tasks must not rewrite them.
+
+
+### TASK-007C1 — registered models, credentials and bounded research (pending review)
+
+The same monolith now resolves one model through `resources/paqs_e/model_registry.json`.
+`ModelCredentials` uses the provider-neutral `CredentialStore` port; Windows composition supplies
+Credential Manager with fixed per-service targets and no plaintext fallback. Status reads make
+no provider calls. Secrets enter only the selected HTTPS transport's Authorization header.
+
+The application freezes the Snapshot, resolves the model, optionally obtains bounded normalized
+web evidence, then builds the existing capsule and invokes the provider-neutral reasoning port.
+Compatible protocol handling remains under `integrations/openai_reasoning/`; Qwen uses documented
+Chat JSON Schema for reasoning and Responses for research. The final reasoning call has no tools,
+conversation or background state. Strict existing output conversion and deterministic validation
+remain the only path to a Decision. Incomplete research is a precondition failure with no invented
+Run. Actual provider/model and frozen auxiliary context use existing ledger columns/capsules;
+revision identity remains Security + strategy, and migration head stays 0002. See `PAQS_E_MODELS.md`.
+
+Remediation 01 adds a startup-captured source revision handshake for safe launcher reuse, accepts
+DeepSeek's documented page/find native actions without promoting their targets to source authority,
+and keeps long synchronous Analyze requests guarded past the 180-second informational notice.
+After strict parsing, runtime code projects only Snapshot price/timestamp/freshness/session echoes
+for current price and model-eligible entry references. The existing validator function, semantic
+judgments, eligibility, structural numeric references and Decimal RR remain unchanged.
+
+## TASK-007C1 Remediation 02: new analyses are narrative-first
+
+This supersedes earlier descriptions of the normal strict-output path, without changing legacy
+structured runtime semantics. `NarrativeAnalysisService` freezes the accepted Snapshot, resolves the
+unchanged registry and performs requested bounded research through the existing gateway. It creates
+`paqs-e-narrative-request-v1` with `paqs-e-narrative-markdown-v1` and the new hash-bound
+`paqs-e-narrative-prompt-v1`. The provider-neutral `PaqsENarrativeProvider.reason_text` port returns
+final visible text or a fixed safe failure; `NarrativeGateway` owns provider transport. No final
+JSON schema, JSON parsing, factual projection or semantic validator gates this path.
+
+`SQLAlchemyNarrativeLedger` opens its transaction after the provider returns. It stores immutable
+runtime artifacts and a terminal Run; success atomically includes one exact-text Result. The UI
+uses only the narrative POST, inert text rendering and narrative history by default. Legacy GETs,
+structured validator and Decision history remain readable/testable. The old POST is hidden from
+OpenAPI and returns 410 by default; only an explicit in-process `legacy_analysis_enabled=True`
+construction is available to legacy regression tests, never a public/user configuration.
+
+Migration head is `0003_task007c1_narrative_ledger`, directly after untouched 0002. No model, endpoint,
+credential, research provenance, As-Of, source-handshake, long-running guard or no-live-trading
+boundary changes. No automatic retry/fallback, execution or prose-to-structured extraction exists.
+
+## TASK-007C1 Remediation 03: native research memo and safe presentation
+
+Only DeepSeek's optional research stage now requests and freezes one final native factual memo,
+without JSON/source-array compliance. The isolated `deepseek_research.py` normalizer checks a
+completed envelope, 1–10 completed search/page/find actions including a search, bounded actual
+queries and optional native URLs, and an exact bounded memo. It records honest provenance and
+cutoff limitations; prose URLs and hidden reasoning never become source evidence. OpenAI/Alibaba
+source normalization, final `NarrativeGateway`, Narrative service/prompt/ledger and hashes are unchanged.
+
+The local DOM-only `narrative-markdown.js` derives a safe formatted view from exact stored text.
+Raw text remains separately available. No HTML parser, remote renderer, executable model links/images,
+provider request or ledger mutation is involved in changing views. Research is unchecked initially
+and after every model change; explicit opt-in is never persisted. Migrations remain untouched at 0003.
+This implementation stops for independent review; the Contract's subsequent user-run DeepSeek
+research-ON live checkpoint on the exact final SHA is still required.
+
+## TASK-007C1 Remediation 04: bounded stateless DeepSeek research
+
+`deepseek_research_flow.py` owns one SEARCH and optional tool-free SYNTHESIS, selected only for
+valid completed tool-only SEARCH output. Both disable thinking with Responses effort `none`.
+The parser accepts up to 64 native calls / 128 output items; the provider's ten continuation rounds
+are not an output-item limit. Continuation reconstructs the original intent, exact accepted native
+call items, and a factual memo instruction without previous-response/conversation state. Native
+items remain transient transport material; only the exact final memo and bounded safe provenance
+enter the unchanged Narrative request. No retry, fallback, second SEARCH, schema or migration exists.
+
+The application research failure carries an optional immutable allowlisted diagnostic; the API
+adds that safe projection to the existing precondition error. No failure Run/Result is invented.
+The UI discloses up to two additional research requests and shows only fixed diagnostic fields.
+Other providers, NarrativeGateway, ledger/lineage, strategy/prompt, validator, Markdown/raw views,
+default-OFF opt-in, credentials, source handshake and no-live-trading boundaries are unchanged.
+
+## TASK-007C1 Remediation 05: provider-owned DeepSeek multiplicity
+
+R05 removes DeepSeek's normal four-query acceptance cap while keeping R04's complete request
+state machine and request bodies unchanged. The parser validates every query with structural
+limits of 256 queries / 64,000 characters; provenance captures only an ordered whole-query prefix
+of 16 queries / 4,000 characters with total count and capture-completeness metadata. Native calls
+remain unchanged for transient stateless pass-back. Action/output/source bounds remain 64/128/64.
+The diagnostic projection adds three optional bounded numeric counts and no text/body fields.
+Other providers, NarrativeGateway, schemas/lineage/migrations, strategy/prompt/validator, Markdown,
+credentials, default-OFF intent and no-live-trading semantics remain unchanged.
+
+## TASK-007C1 Remediation 06: partial actions and exact parser boundaries
+
+DeepSeek SEARCH still requires a completed envelope and at least one completed native search.
+Within the same 64-action/128-output bounds, recognized non-completed search/page/find actions
+may coexist with completed evidence. Only completed actions contribute trusted queries/sources
+and enter the unchanged stateless SYNTHESIS input, deep-copied in order. Partial action payloads
+are never trusted, frozen, or restored. R05 completed-query validation/capture budgets remain.
+
+`deepseek_research_diagnostics.py` provides bounded numeric observations and an internal parse
+failure carrying the actual application-owned boundary code. The parser raises it at each rule;
+the adapter projects the safe code/counts through the existing immutable `ResearchDiagnostic`.
+Envelope, pass-back, provenance, and synthesis checks likewise identify their own boundaries.
+Unknown observations are omitted, secret-tainted bodies are not reparsed, and private provider
+text never enters diagnostics. The browser independently allowlists the codes and numeric fields.
+There is no diagnostic persistence or schema change. SEARCH/SYNTHESIS request bodies and
+instructions, final Narrative behavior, and the maximum two research requests remain unchanged.

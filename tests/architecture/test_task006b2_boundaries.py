@@ -76,5 +76,6 @@ def test_snapshot_has_no_separate_market_data_storage_migration() -> None:
     assert sorted(path.name for path in migrations) == [
         "0001_phase1_foundation.py",
         "0002_task007b_paqs_e_decision_ledger.py",
+        "0003_task007c1_narrative_ledger.py",
     ]
     assert not Path("src/ai_infra_quant/database/models/paqs_market_snapshot.py").exists()

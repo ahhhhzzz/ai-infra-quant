@@ -18,8 +18,11 @@ LEDGER_TABLES = {"paqs_e_runtime_artifacts", "paqs_e_analysis_runs", "paqs_e_dec
 
 
 def test_fresh_sqlite_head_has_only_task007b_objects(migrated_engine: Engine) -> None:
-    assert current_migration_revision(migrated_engine) == "0002_task007b_paqs_e_ledger"
-    assert set(inspect(migrated_engine).get_table_names()) == PHASE_ONE_TABLES | LEDGER_TABLES
+    assert current_migration_revision(migrated_engine) == "0003_task007c1_narrative_ledger"
+    assert set(inspect(migrated_engine).get_table_names()) == PHASE_ONE_TABLES | LEDGER_TABLES | {
+        "paqs_e_narrative_runs",
+        "paqs_e_narrative_results",
+    }
     with migrated_engine.connect() as connection:
         triggers = set(
             connection.execute(
@@ -73,7 +76,7 @@ def test_existing_0001_upgrade_downgrade_preserves_all_phase_one_objects_and_dat
         bootstrap_phase_one(create_session_factory(engine), Settings(database_url=database_url))
         original = _phase_one_shape(engine)
         command.upgrade(config, "head")
-        assert current_migration_revision(engine) == "0002_task007b_paqs_e_ledger"
+        assert current_migration_revision(engine) == "0003_task007c1_narrative_ledger"
         assert _phase_one_shape(engine) == original
         command.downgrade(config, "0001_phase1_foundation")
         assert current_migration_revision(engine) == "0001_phase1_foundation"

@@ -74,6 +74,7 @@ def test_structure_remains_unpersisted_with_only_approved_migrations() -> None:
     assert revisions == [
         "0001_phase1_foundation.py",
         "0002_task007b_paqs_e_decision_ledger.py",
+        "0003_task007c1_narrative_ledger.py",
     ]
     assert not Path("src/ai_infra_quant/database/models/paqs_structure.py").exists()
     assert not Path("src/ai_infra_quant/database/repositories/paqs_structure.py").exists()

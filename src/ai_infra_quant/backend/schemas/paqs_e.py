@@ -6,8 +6,9 @@ from decimal import Decimal
 from typing import Literal
 from uuid import UUID
 
-from pydantic import Field, field_serializer, field_validator
+from pydantic import Field, SecretStr, StrictBool, field_serializer, field_validator
 
+from ai_infra_quant.application.paqs_e_models import ModelRegistry
 from ai_infra_quant.backend.schemas.common import Problem, StrictSchema
 from ai_infra_quant.core.domain.enums import InstrumentType
 from ai_infra_quant.core.domain.money import canonical_decimal_string
@@ -41,23 +42,52 @@ class StrategyOptionRead(StrictSchema):
     content_sha256: str
 
 
+class ModelOptionRead(StrictSchema):
+    model_key: str
+    display_name: str
+    credential_label: str
+    credential_configured: bool
+    web_research_supported: bool
+
+
+class CredentialStatusRead(StrictSchema):
+    credential_configured: bool
+    credential_source: str
+    secure_storage_available: bool
+
+
+class CredentialSave(StrictSchema):
+    secret: SecretStr = Field(min_length=1, max_length=1024)
+
+
+class CredentialDelete(StrictSchema):
+    pass
+
+
 class ConfigurationRead(StrictSchema):
-    model_provider: Literal["openai"] = "openai"
-    api_key_configured: bool
+    default_model_key: str
+    models: list[ModelOptionRead]
     default_strategy_id: str
     strategies: tuple[StrategyOptionRead, ...]
 
 
 class AnalyzeCreate(StrictSchema):
     security_id: UUID
-    model_id: str = Field(min_length=1)
+    model_key: str = Field(min_length=1, max_length=80)
     strategy_id: str = Field(min_length=1)
+    web_research: StrictBool
 
-    @field_validator("model_id", "strategy_id")
+    @field_validator("model_key", "strategy_id")
     @classmethod
     def identifier_is_explicit(cls, value: str) -> str:
         if not value.strip() or any(character.isspace() for character in value):
             raise ValueError("identifier must be non-empty and contain no whitespace")
+        return value
+
+    @field_validator("model_key")
+    @classmethod
+    def registered_model(cls, value: str) -> str:
+        ModelRegistry().resolve(value)
         return value
 
 

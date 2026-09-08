@@ -46,4 +46,5 @@ def test_migration_set_contains_only_the_approved_foundation_and_decision_ledger
     assert revisions == [
         "0001_phase1_foundation.py",
         "0002_task007b_paqs_e_decision_ledger.py",
+        "0003_task007c1_narrative_ledger.py",
     ]

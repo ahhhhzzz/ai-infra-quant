@@ -241,3 +241,99 @@ implemented by TASK-007B. Accepted Phase 1 evidence remains unchanged.
 | R20-003 | Explicit Analyze, model/registered-strategy selection, truthful failure and immutable Decision history become usable UI flows | RETAINED | 2 | IMPLEMENTED_PENDING_REVIEW | `tests/browser/test_paqs_e_workbench.py`; `tests/integration/test_paqs_e_configuration.py`; `docs/PAQS_E_WORKBENCH.md` |
 | R20-004 | Later prompt/model/version, critique/council, reviewable evolution, news, simulated bookkeeping and operations capabilities follow the adoption record through separate bounded contracts | OPTIONAL_FUTURE | 2–4 | DOCUMENTED | `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; no expansion of 007C |
 | R20-005 | Do not inherit R20 live execution, unrestricted Python plugins, plaintext secret storage, automatic strategy changes or crypto-specific financial assumptions | RETAINED | all | DOCUMENTED | `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; permanent Roadmap boundaries |
+
+
+## 10. TASK-007C1 model and secure research increment
+
+| ID | Requirement | Status | Evidence |
+|---|---|---|---|
+| 007C1-001 | Exact eleven-model flat registry, default DeepSeek V4 Flash, fixed official routes | IMPLEMENTED_PENDING_REVIEW | `model_registry.json`; model gateway and browser catalog tests |
+| 007C1-002 | Windows OS-protected credential save/update/delete, safe dynamic status, loopback/Origin boundary | IMPLEMENTED_PENDING_REVIEW | `windows_credentials.py`; credential unit/integration/browser tests |
+| 007C1-003 | Four-field explicit Analyze, actual model identity and unchanged cross-model revision series | IMPLEMENTED_PENDING_REVIEW | `test_paqs_e_multi_model.py`; retained ledger API regressions |
+| 007C1-004 | Bounded source-specific web capsule, As-Of filtering, tool-free final reasoning | IMPLEMENTED_PENDING_REVIEW | `test_paqs_e_model_gateway.py`; lifecycle integration and browser tests |
+| 007C1-005 | No automatic paid retry/fallback or broker/live scope; no migration or protected review changes | IMPLEMENTED_PENDING_REVIEW | adapter tests, full architecture suite, implementation diff |
+| 007C1-006 | Opt-in live domestic-provider product acceptance | SEPARATE_EXECUTION_EVIDENCE_REQUIRED | no user credential supplied through UI; deterministic tests make no paid calls |
+
+## TASK-007C1 Remediation 01 evidence (pending independent re-review)
+
+| Requirement | Implementation | Regression evidence |
+|---|---|---|
+| R1 startup revision handshake | Frozen health identity; launcher exact-SHA reuse or safe stale rejection | `test_runtime_source_revision.py`, existing Windows launcher tests |
+| R2 DeepSeek native page actions | Search/page/find <=10 actions; <=4 queries; native source/citation authority | `test_paqs_e_remediation_01.py` provenance/bounds/tool-free capsule tests |
+| R3 long synchronous Analyze | Non-aborting 180-second notice; one-in-flight guard until terminal/network failure | `test_paqs_e_long_running.py`, retained unknown-outcome browser regression |
+| R4 deterministic factual projection | Four current/eligible-entry quote echoes before unchanged validator | All eleven model routes, direct mismatch rejection, market/availability mapping regression |
+
+## TASK-007C1 Remediation 02 (implemented; independent review pending)
+
+| Requirement | Implementation / evidence |
+|---|---|
+| Narrative-first exact final text, no semantic gate | Narrative port/service/gateway; all eleven routes in `test_paqs_e_narrative_provider.py` |
+| Only additive 0003; preserve historical structured evidence | `test_paqs_e_narrative_ledger_api.py`: upgrade/downgrade byte preservation, immutable rows, independent revisions, failure and rollback |
+| New normal API and primary prose/history UI | Narrative API and `test_paqs_e_narrative.py`; legacy POST disabled by default, legacy reads retained |
+| Frozen Snapshot/research, credentials and no automatic retry/fallback | New narrative lifecycle tests plus retained original/R01 provenance, credential, source and long-running tests |
+| Final live product gate | USER_EXECUTED_EVIDENCE_PENDING: DeepSeek V4 Flash, one explicit attempt OFF then ON on final implementation SHA |
+
+R02 supersedes earlier no-new-migration, normal structured-output/validator, and primary Decision UI
+requirements only. Legacy validator, master strategy, accepted evidence and no-live-trading boundaries
+remain unchanged. No independent acceptance or merge is claimed.
+
+## TASK-007C1 Remediation 03 (implemented; independent review pending)
+
+| Requirement | Implementation / evidence |
+|---|---|
+| DeepSeek native memo, optional truthful provenance, bounded failure without retry | `deepseek_research.py`; `test_paqs_e_native_research.py` |
+| Frozen memo before tool-free final reasoning; exact text/hash and failure atomicity | `test_paqs_e_native_memo_ledger.py`; unchanged Narrative provider/API/Ledger regression suites |
+| DOM-only Markdown default plus exact raw view, inert HTML/links/images, responsive tables/code | `narrative-markdown.js`; `test_paqs_e_safe_markdown.py` |
+| Research default OFF, explicit opt-in, reset on model change, no automatic POST | Safe-Markdown, model, Narrative, workbench and long-running browser suites |
+| Protected OFF path, migrations 0001/0002/0003, strategy, validator, registry and accepted evidence | R03 report protected hash/diff audit; no migration or ledger changes |
+| Remaining live acceptance | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one DeepSeek V4 Flash research-ON attempt on exact final R03 SHA; R03 Contract records successful OFF evidence at 74a19387adc408e9453c30fdbb30e6636ac4e695 |
+
+R03 supersedes strict DeepSeek source-array/JSON research and the old default-ON/raw-only UI.
+It preserves other providers' research guarantees and all Narrative/legacy persistence semantics.
+
+## TASK-007C1 Remediation 04 (implemented; independent review pending)
+
+| Requirement | Implementation / regression evidence |
+|---|---|
+| One SEARCH; direct memo or exactly one tool-free SYNTHESIS; no retry | `deepseek_research_flow.py`; `test_paqs_e_research_continuation.py` |
+| 11-call tool-only compatibility; exact stateless pass-back; effort none; 64/128 limits | Continuation unit and API tests; native memo bounds tests |
+| Safe stage diagnostics, no raw provider or reasoning persistence | Immutable `ResearchDiagnostic`; API failure projection; continuation API and browser diagnostic tests |
+| OFF zero research; ON at most two research + one unchanged final Narrative | API integration cases with exact text/request hashes, unchanged rows/schema after failure |
+| Default OFF, up-to-two request/cost disclosure, safe Markdown/raw and no automatic Analyze | `test_paqs_e_research_diagnostic.py` plus all retained R03 and browser regressions |
+| Protected migration head 0003, strategy/prompt/validator/ledger/registry/credentials/source guard | R04 implementation report protected audit and required validation |
+| Final live gate | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one explicit DeepSeek V4 Flash Research-ON attempt on exact reviewed R04 SHA; no automatic retry or merge |
+
+R04 supersedes only DeepSeek's one-request/final-message-in-first-response/ten-output-item
+assumptions. Accepted historical reports and reviews remain unchanged.
+
+## TASK-007C1 Remediation 05 (implemented; independent review pending)
+
+| Requirement | Implementation / evidence |
+|---|---|
+| DeepSeek >4 searches/queries accepted; live-like 20 calls / 6 searches / 0 messages | `test_paqs_e_search_multiplicity.py` direct/optional-synthesis regressions |
+| Validate all queries; 256 / 64,000 structural bounds; 16 / 4,000 ordered prefix capture | Query type/UTF-8/control/size, duplicate/order/boundary/after-capture tests |
+| Truthful query count and capture completeness | Unit and API tests covering six and 37 queries with full/truncated capture |
+| Safe numeric query/source/unknown-action failure diagnostics | Unit and browser tests for malformed/overflow/secret-tainted data and exact integer validation |
+| R04 request counts, pass-back, final tool-free Narrative and immutable hashes/rows/schema | R04 suites plus `test_paqs_e_search_multiplicity_api.py`; no migration or retry |
+| Protected OFF path, Markdown/default-OFF, registry/credentials/source/strategy/ledger | R05 report protected-file audit and full deterministic validation |
+| Final live gate | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one explicit DeepSeek V4 Flash Research-ON attempt on exact reviewed R05 SHA; no automatic retry or merge |
+
+R05 supersedes only normal DeepSeek four-query rejection and bounded query capture/diagnostics.
+It does not prove that query multiplicity was the only cause of the prior live failure.
+
+## TASK-007C1 Remediation 06 (implemented; independent review pending)
+
+| Requirement | Implementation / evidence |
+|---|---|
+| Recognized partial native statuses without trusting failed payloads | `test_paqs_e_partial_actions.py`: all four partial statuses across search/open/find; malformed payload exclusion |
+| Completed-search quorum; unknown action/status/shape fails closed | Exact `NO_COMPLETED_SEARCH`, `ACTION_TYPE`, `ACTION_STATUS`, `ACTION_SHAPE` unit and API failures |
+| Live-like 16 calls / 7 searches / 24 queries / no message | Synthetic shared fixture: 13 completed actions, three partial; exactly one tool-free SYNTHESIS, unchanged completed-item pass-back |
+| R05 query and source safety/capture preserved | R04/R05 suites unchanged; R06 completed-query/source integrity and structural-bound tests |
+| Exact safe parser boundary and per-status/invalid counters | Parser-originated `NativeParseFailure`, strict `ResearchDiagnostic`, secret-tainted omission tests |
+| Safe browser projection and prior Narrative preservation | R06 browser tests: allowlisted code/counts, invalid fields omitted, one explicit POST, no retry, raw/formatted view retained |
+| Immutable Narrative hashes/rows/schema and OFF path | `test_paqs_e_partial_actions_api.py`: OFF/direct/tool-only, request/response SHA, failed precondition creates no rows, unchanged SQLite schema/head 0003 |
+| Protected components | R06 implementation report: diff/hash audit, full/focused/browser/static/startup validation |
+| Final live gate | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one explicit DeepSeek V4 Flash Research-ON attempt on exact reviewed R06 SHA; no retry or merge |
+
+R06 changes only partial-action compatibility and exact bounded diagnostics. It does not claim the
+previous live response failed solely because of partial status, or that live Research-ON now passes.

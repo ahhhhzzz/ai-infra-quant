@@ -76,7 +76,7 @@ def workbench_server(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
                 time.sleep(0.1)
             else:
                 raise AssertionError("Actual Uvicorn startup timed out")
-            assert health.json()["migration_revision"] == "0002_task007b_paqs_e_ledger"
+            assert health.json()["migration_revision"] == "0003_task007c1_narrative_ledger"
             yield address
         finally:
             # Only the subprocess created above belongs to this fixture.

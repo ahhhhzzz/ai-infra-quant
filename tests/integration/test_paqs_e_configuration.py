@@ -9,10 +9,12 @@ from fastapi.testclient import TestClient
 from sqlalchemy import Engine, event
 
 from ai_infra_quant.application import paqs_e_runtime as runtime
+from ai_infra_quant.application.paqs_e_models import ModelRegistry
 from ai_infra_quant.backend.main import create_app
 from ai_infra_quant.config import Settings
 from ai_infra_quant.integrations.futu_quote.adapter import FutuQuoteAdapter
 from ai_infra_quant.integrations.openai_reasoning.adapter import OpenAIPaqsEReasoningAdapter
+from ai_infra_quant.integrations.openai_reasoning.gateway import HttpJsonTransport, ModelGateway
 
 PATH = "/api/v1/paqs-e/configuration"
 
@@ -33,6 +35,8 @@ def test_configuration_is_exact_read_only_and_secret_free(
         raise AssertionError("configuration must not call a provider")
 
     monkeypatch.setattr(OpenAIPaqsEReasoningAdapter, "reason", forbidden)
+    monkeypatch.setattr(ModelGateway, "reason", forbidden)
+    monkeypatch.setattr(HttpJsonTransport, "post", forbidden)
     monkeypatch.setattr(FutuQuoteAdapter, "__init__", forbidden)
     settings = Settings(database_url=database_url, market_data_provider="none")
     with TestClient(create_app(settings, migrated_engine)) as client:
@@ -51,8 +55,18 @@ def test_configuration_is_exact_read_only_and_secret_free(
         assert response.status_code == 200
         actual = runtime.load_strategy_package()
         assert response.json() == {
-            "model_provider": "openai",
-            "api_key_configured": bool(credential and credential.strip()),
+            "default_model_key": "deepseek-v4-flash",
+            "models": [
+                {
+                    "model_key": item.model_key,
+                    "display_name": item.display_name,
+                    "credential_label": item.credential_label,
+                    "credential_configured": bool(credential and credential.strip())
+                    and item.provider_id == "openai",
+                    "web_research_supported": item.web_research_supported,
+                }
+                for item in ModelRegistry().models
+            ],
             "default_strategy_id": actual.strategy_id,
             "strategies": [
                 {

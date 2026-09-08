@@ -94,6 +94,12 @@ GET    /api/v1/fundamental-data/providers
 GET    /api/v1/event-data/providers
 ```
 
+The health response includes `source_revision`: exactly 40 lowercase hexadecimal characters
+captured once when the application is created from `AI_INFRA_SOURCE_REVISION`, or `unknown` when
+manual startup has no valid launcher identity. It exposes no paths or environment values. The
+Windows launcher resolves the checkout HEAD and passes this dedicated variable to its new process;
+only an exact valid match permits reuse. Health never dynamically rereads Git after startup.
+
 These routes retain their reviewed Phase 1 behavior. Inert historical descriptors do not authorize
 a future brokerage-account connection. This documentation task neither expands nor removes the
 allowlist.
@@ -281,12 +287,12 @@ GET  /api/v1/paqs-e/decisions/{decision_id}
 GET  /api/v1/paqs-e/securities/{security_id}/decisions
 ```
 
-The POST body has exactly `security_id` (canonical Security UUID), `model_id` (explicit non-empty
-identifier passed unchanged to TASK-007A), and `strategy_id` (registered strategy identity).
-Unknown fields are rejected. Model and strategy are independent choices. The server controls the
-OpenAI adapter, `PaqsERuntimeConfigV1`, prompt package, and empty `auxiliary_context=()`; a caller
-cannot submit an API key, Markdown/path, prompt, policy override, prior Decision, or historical
-As-Of cutoff.
+TASK-007C1 supersedes the old three-field input. The POST body has exactly
+`security_id` (canonical Security UUID), `model_key` (enabled repository registry entry),
+`strategy_id` (registered primary strategy), and `web_research` (required strict boolean).
+Unknown fields, arbitrary `model_id`, provider, URL, credentials, prompt overrides and caller
+As-Of cutoffs are rejected. The server resolves the actual provider/model identity and freezes
+research evidence when requested; those identities and evidence enter the existing capsule.
 
 Each explicit POST acquires one fresh current TASK-006B2 immutable snapshot through the application
 query boundary and makes one TASK-007A reasoning attempt. Repeated identical selections and
@@ -341,38 +347,36 @@ returns credentials, environment dumps, raw exception traces, or request headers
 have no UPDATE/DELETE API. History never supplies hidden model memory, and market-data/Dashboard
 refresh never triggers Analyze.
 
-### 5.11 TASK-007C safe workbench configuration
+### 5.11 TASK-007C1 model catalog and local credentials
 
-`GET /api/v1/paqs-e/configuration` returns exactly:
+`GET /api/v1/paqs-e/configuration` returns `default_model_key`, the flat `models` array,
+`default_strategy_id` and actual registered `strategies`. Each model has exactly `model_key`,
+`display_name`, `credential_label`, `credential_configured`, and `web_research_supported`.
+The service label appears only in the credential dialog. No endpoint, secret fragment, path,
+prompt or strategy body is exposed. Model entries come from the single repository JSON registry.
+Strategy metadata still uses the accepted loader. GET makes zero provider calls and application
+writes. Credential presence is dynamic; strategy metadata remains restart-scoped.
 
-```json
-{
-  "model_provider": "openai",
-  "api_key_configured": false,
-  "default_strategy_id": "paqs-e-master",
-  "strategies": [
-    {
-      "strategy_id": "paqs-e-master",
-      "display_name": "<actual registered display name>",
-      "content_sha256": "<actual exact-byte SHA-256>"
-    }
-  ]
-}
-```
+Model-centric credential endpoints:
 
-The read-only configuration projection loads the accepted registry and validates every registered
-Markdown with the existing runtime loader at container construction. It never calls a provider or
-writes application data. Missing/corrupt metadata or files return a safe 503 Problem with code
-`PAQS_E_CONFIGURATION_UNAVAILABLE`, without a synthetic default or discarded invalid entries.
-Repair or environment changes require a restart. Credential presence follows the same settings /
-`OPENAI_API_KEY` fallback source as the accepted adapter; it is not validity, connectivity, model
-availability or entitlement. No key, prefix, suffix, environment, transport, path, strategy body,
-prompt body or invented model inventory is returned.
+- `GET /api/v1/paqs-e/credentials/{model_key}`: status only.
+- `PUT /api/v1/paqs-e/credentials/{model_key}`: JSON `{ "secret": "<user-entered key>" }`.
+- `DELETE /api/v1/paqs-e/credentials/{model_key}`: JSON `{}`.
 
-All TASK-007B routes, request fields, runtime and persistence semantics remain unchanged.
-The browser's only Analyze POST originates in an explicit form submission. GETs, quote refresh,
-history and navigation cannot dispatch reasoning. See `PAQS_E_WORKBENCH.md` for outcome uncertainty
-and frozen evidence association rules.
+All return only `credential_configured`, `credential_source` (`secure_store`,
+`server_environment_read_only`, or `missing`) and `secure_storage_available`. Keys are write-only.
+Mutations require the literal same Origin as the loopback request, JSON content type, and absent
+or same-origin Fetch Metadata. Host and peer must be loopback; query parameters are rejected.
+The secret is bounded to 1–1024 non-whitespace ASCII characters, represented as `SecretStr` at the
+API boundary. Unknown keys/fields cannot create arbitrary credential slots. Windows Credential
+Manager is the only production store; unavailable storage returns safe 503. An optional existing
+OpenAI server environment fallback is read-only; deleting a stored key does not remove that fallback.
+
+Requested research that cannot form a complete auditable capsule returns 422
+`PAQS_E_RESEARCH_PRECONDITION_FAILED` with one of the accepted typed `failure_kind` values,
+without a Run ID or Decision. Reasoning failures after capsule construction retain section 5.10
+persistence semantics. No automatic retries, provider/model substitutions, hidden follow-up searches,
+or automatic analysis are performed. See `PAQS_E_MODELS.md` for exact routes, bounds and limitations.
 
 ## 6. Phase 3 research and simulated paper direction
 
@@ -436,3 +440,28 @@ Phase-relevant tests must prove:
 - score provenance exposes all four required time semantics;
 - paper records remain simulated;
 - no route or schema represents brokerage-account access or a broker write.
+
+### TASK-007C1 Remediation 02 normal narrative API (supersedes strict POST)
+
+New explicit Analyze is `POST /api/v1/paqs-e/narrative-analyses`, accepting exactly the existing
+four required fields: `security_id`, `model_key`, `strategy_id`, `web_research`. It returns 201 only
+following commit of one successful Narrative Run and Result. The response includes `status=SUCCEEDED`,
+`narrative_result_id`, `narrative_run_id`, full frozen model/strategy/Snapshot identity, narrative
+revision/predecessor, exact `response_text`, `response_text_sha256`, research flag and created time.
+Final prose is not JSON-schema-constrained or semantically validated.
+
+| Method/path | Behavior |
+|---|---|
+| GET `/api/v1/paqs-e/narrative-analyses/{run_id}` | Known immutable Run with full canonical request/hash and safe terminal evidence |
+| GET `/api/v1/paqs-e/narrative-results/{result_id}` | Exact persisted final text and audit identity |
+| GET `/api/v1/paqs-e/securities/{security_id}/narrative-results` | Newest first; `limit` 1..100, default 20; optional bounded strategy filter; metadata and first 160 Unicode characters as inert preview, no full text |
+
+Configuration/unavailable failures return 503; refusal/incomplete/invalid-final-text return 502.
+The problem includes `narrative_run_id`, `analysis_status=PROVIDER_FAILED` and `failure_kind`.
+Preconditions/research failure produce no fabricated Run or Result; ledger failure is a safe 500.
+No new narrative response uses `VALIDATION_FAILED` or `INVALID_STRUCTURED_OUTPUT`.
+
+Legacy structured `POST /api/v1/paqs-e/analyses` returns 410 by default and is absent from OpenAPI.
+Only explicit in-process legacy regression construction can enable it; no environment/API/UI switch
+exists. All original structured GET reads remain unchanged. Earlier strict-output lifecycle descriptions
+in this document now describe legacy evidence only. No PUT/PATCH/DELETE ledger mutations are added.

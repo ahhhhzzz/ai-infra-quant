@@ -78,7 +78,7 @@
 
           <div class="chart-mode-toolbar" role="group" aria-label="图表来源">
             <button id="mode-current" type="button" aria-pressed="true">当前行情</button>
-            <button id="mode-frozen" type="button" aria-pressed="false">Decision 冻结证据</button>
+            <button id="mode-frozen" type="button" aria-pressed="false">分析结果冻结证据</button>
           </div>
           <div class="chart-toolbar current-chart-part">
             <div class="timeframe-tabs" role="tablist" aria-label="Chart timeframe">
@@ -98,7 +98,7 @@
             </div>
           </div>
 
-          <section id="frozen-section" hidden aria-label="Decision 冻结图表">
+          <section id="frozen-section" hidden aria-label="分析结果冻结图表">
             <p id="evidence-identity" class="identity-line">尚未选择 Decision</p>
             <div class="chart-mode-toolbar" role="group" aria-label="冻结证据周期">
               <button type="button" data-evidence-frame="W1" aria-pressed="true">W1 · 背景</button>
@@ -146,33 +146,52 @@
             TradingView Lightweight Charts™ · Copyright © 2025 TradingView, Inc. ·
             <a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">TradingView</a>
           </p>
-          <section class="decision-history" aria-label="成功 Decision 历史">
-            <div class="section-heading"><h2>Decision 历史</h2><button id="reload-history" type="button">刷新历史</button></div>
+          <section class="decision-history" aria-label="成功 Narrative 历史">
+            <div class="section-heading"><h2>Narrative 历史</h2><button id="reload-history" type="button">刷新历史</button></div>
             <label>策略序列筛选<select id="history-strategy"><option value="">全部策略</option></select></label>
             <p class="note">仅成功记录 · 最近 20 条 · 修订号按证券与策略分别计数</p>
             <p id="history-status" role="status"></p>
             <div id="decision-history"></div>
-            <button id="latest-decision" type="button">查看列表最新 Decision</button>
+            <details id="legacy-history-section"><summary>Legacy 结构化 Decision 历史（只读）</summary>
+              <p id="legacy-history-status" role="status"></p><div id="legacy-history"></div>
+            </details>
+            <button id="latest-decision" type="button">查看列表最新 Narrative</button>
           </section>
         </article>
 
         <aside class="analysis-panel" aria-label="PAQS-E 分析与结果">
           <form id="analyze-form" class="analysis-controls">
-            <div class="section-heading"><div><p class="eyebrow">ON-DEMAND ANALYSIS</p><h2>新的当前分析</h2></div><span>OpenAI</span></div>
+            <div class="section-heading"><div><p class="eyebrow">ON-DEMAND ANALYSIS</p><h2>新的当前分析</h2></div></div>
             <p id="analysis-security" class="identity-line">请选择证券</p>
-            <label>模型 ID<input id="model-id" name="model_id" autocomplete="off" spellcheck="false" placeholder="请输入明确的模型 ID" required></label>
+            <label>模型<select id="model-id" name="model_key" required disabled></select></label>
             <label>主策略<select id="strategy-id" name="strategy_id" required disabled></select></label>
+            <label class="research-toggle"><input id="web-research" type="checkbox"> 联网研究</label>
+            <button id="configure-credential" type="button">配置此模型 API Key</button>
+            <p id="research-status" class="note"></p>
             <p id="configuration-status" class="note" role="status">读取服务器配置…</p>
             <button id="analyze-button" type="submit" disabled>Analyze · 分析当前快照</button>
             <p class="note">每次显式提交采集新快照。行情刷新不会运行分析。</p>
             <div id="analysis-state" class="analysis-state" role="status" aria-live="polite">尚未发起分析</div>
           </form>
+          <dialog id="credential-dialog">
+            <form id="credential-form" autocomplete="off">
+              <h3>配置此模型 API Key</h3>
+              <p id="credential-service"></p>
+              <p class="note">仅保存在当前 Windows 用户的凭据管理器；存在不代表余额或权限已验证。</p>
+              <label>API Key<input id="credential-secret" type="password" autocomplete="new-password" maxlength="1024" required></label>
+              <p id="credential-status" role="status"></p>
+              <button id="credential-save" type="submit">安全保存 / 更新</button>
+              <button id="credential-delete" type="button">删除已保存凭据</button>
+              <button id="credential-close" type="button">关闭</button>
+            </form>
+          </dialog>
           <section class="analysis-results">
-            <div id="decision-heading" class="decision-heading">尚无选中的 Decision</div>
+            <div id="decision-heading" class="decision-heading">尚无选中的分析结果</div>
             <div id="decision-result"><p class="note">选择成功历史，或填写模型后显式 Analyze。</p></div>
-            <details class="audit"><summary>Decision 审计身份与原始结果</summary><pre id="decision-audit">—</pre></details>
+            <details class="audit"><summary>审计身份与原始结果</summary><pre id="decision-audit">—</pre></details>
+            <details class="research-audit"><summary>所选结果的冻结联网研究证据</summary><pre id="research-evidence">—</pre></details>
             <details class="known-run"><summary>已知 Analysis Run 查询与失败详情</summary>
-              <form id="known-run-form"><label>Run UUID<input id="known-run-id" autocomplete="off" required></label><button type="submit">读取 Run</button></form>
+              <form id="known-run-form"><label>记录类型<select id="known-run-kind"><option value="narrative">Narrative Run</option><option value="legacy">Legacy 结构化 Run</option></select></label><label>Run UUID<input id="known-run-id" autocomplete="off" required></label><button type="submit">读取 Run</button></form>
               <p class="note">此处仅按已知 ID 读取，不是失败列表。未知结果且无 ID 时，成功历史不能证明没有失败 Run。页面离开不等于服务端取消。</p>
               <div id="known-run-status" role="status"></div><pre id="known-run-detail">—</pre>
             </details>
@@ -215,6 +234,7 @@
     </main>
     <script src="/static/vendor/lightweight-charts.standalone.production.js" defer></script>
     <script src="/static/app.js" defer></script>
+    <script src="/static/narrative-markdown.js" defer></script>
     <script src="/static/paqs-e.js" defer></script>
   </body>
 </html>

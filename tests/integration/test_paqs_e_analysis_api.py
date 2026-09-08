@@ -56,7 +56,7 @@ _result = cast(
 ANALYSES = "/api/v1/paqs-e/analyses"
 DECISIONS = "/api/v1/paqs-e/decisions"
 STRATEGY_ID = "paqs-e-master"
-MODEL_ID = "gpt-fixture-explicit-007b"
+MODEL_ID = "gpt-5.6-luna"
 
 
 class RecordingSnapshots:
@@ -136,8 +136,9 @@ class AnalysisHarness:
     def payload(self, **changes: Any) -> dict[str, Any]:
         return {
             "security_id": self.security_id,
-            "model_id": MODEL_ID,
+            "model_key": MODEL_ID,
             "strategy_id": STRATEGY_ID,
+            "web_research": False,
             **changes,
         }
 
@@ -162,7 +163,8 @@ def analysis(
     migrated_engine: Engine,
     session_factory: sessionmaker[Session],
 ) -> Iterator[AnalysisHarness]:
-    app = create_app(settings, migrated_engine)
+    # Explicit in-process legacy regression only; normal composition keeps this disabled.
+    app = create_app(settings, migrated_engine, legacy_analysis_enabled=True)
     container = cast(AppContainer, app.state.container)
     market_provider = SnapshotFakeProvider()
     market_queries = MarketDataQueries(
@@ -281,7 +283,7 @@ def test_repeated_explicit_posts_are_fresh_without_hidden_history_or_deduplicati
     first_read = analysis.client.get(f"{DECISIONS}/{first['decision_id']}").content
     second = analysis.client.post(ANALYSES, json=analysis.payload()).json()
     changed_model = analysis.client.post(
-        ANALYSES, json=analysis.payload(model_id="other-explicit-model")
+        ANALYSES, json=analysis.payload(model_key="qwen3.8-max")
     ).json()
     assert [first["revision_no"], second["revision_no"], changed_model["revision_no"]] == [1, 2, 3]
     assert second["supersedes_decision_id"] == first["decision_id"]
@@ -294,7 +296,7 @@ def test_repeated_explicit_posts_are_fresh_without_hidden_history_or_deduplicati
     assert len(analysis.snapshots.snapshots) == len(analysis.provider.requests) == 3
     assert analysis.snapshots.snapshots[0] is not analysis.snapshots.snapshots[1]
     assert all(request.auxiliary_context == () for request in analysis.provider.requests)
-    assert analysis.provider.requests[-1].model_id == "other-explicit-model"
+    assert analysis.provider.requests[-1].model_id == "qwen3.8-max"
     assert all(
         item["result"]["holder"]["prior_decision_id"] is None
         for item in (first, second, changed_model)
@@ -322,7 +324,9 @@ def test_strategy_selection_is_independent_and_history_is_bounded_and_filterable
     alternate_run = analysis.client.post(
         ANALYSES, json=analysis.payload(strategy_id=alternate.strategy_id)
     ).json()
-    last = analysis.client.post(ANALYSES, json=analysis.payload(model_id="different-model")).json()
+    last = analysis.client.post(
+        ANALYSES, json=analysis.payload(model_key="deepseek-v4-flash")
+    ).json()
     assert selected == [STRATEGY_ID, alternate.strategy_id, STRATEGY_ID]
     assert [item.strategy_id for item in analysis.provider.strategies] == selected
     assert [first["revision_no"], alternate_run["revision_no"], last["revision_no"]] == [1, 1, 2]
@@ -362,11 +366,11 @@ def test_history_accepts_limit_boundaries(analysis: AnalysisHarness, limit: int)
     assert response.json()["items"] == []
 
 
-@pytest.mark.parametrize("model_id", ["", " ", " model", "model name", "model\n", None, 123])
+@pytest.mark.parametrize("model_key", ["", " ", " model", "model name", "model\n", None, 123])
 def test_invalid_model_rejected_before_snapshot_or_provider(
-    analysis: AnalysisHarness, migrated_engine: Engine, model_id: object
+    analysis: AnalysisHarness, migrated_engine: Engine, model_key: object
 ) -> None:
-    response = analysis.client.post(ANALYSES, json=analysis.payload(model_id=model_id))
+    response = analysis.client.post(ANALYSES, json=analysis.payload(model_key=model_key))
     assert response.status_code == 422
     assert not analysis.snapshots.snapshots and not analysis.provider.requests
     assert _counts(migrated_engine) == (0, 0, 0)
@@ -641,11 +645,15 @@ def test_openapi_exposes_bounded_read_only_ledger_contract_without_secret_fields
     document = analysis.client.get("/openapi.json").json()
     paths = document["paths"]
     expected = {
-        ANALYSES: {"post"},
+        "/api/v1/paqs-e/narrative-analyses": {"post"},
+        "/api/v1/paqs-e/narrative-analyses/{run_id}": {"get"},
+        "/api/v1/paqs-e/narrative-results/{result_id}": {"get"},
+        "/api/v1/paqs-e/securities/{security_id}/narrative-results": {"get"},
         f"{ANALYSES}/{{analysis_run_id}}": {"get"},
         f"{DECISIONS}/{{decision_id}}": {"get"},
         "/api/v1/paqs-e/securities/{security_id}/decisions": {"get"},
         "/api/v1/paqs-e/configuration": {"get"},
+        "/api/v1/paqs-e/credentials/{model_key}": {"get", "put", "delete"},
     }
     assert {
         path: set(operations) for path, operations in paths.items() if "/paqs-e/" in path
@@ -654,7 +662,7 @@ def test_openapi_exposes_bounded_read_only_ledger_contract_without_secret_fields
     assert (
         set(schema["properties"])
         == set(schema["required"])
-        == {"security_id", "model_id", "strategy_id"}
+        == {"security_id", "model_key", "strategy_id", "web_research"}
     )
     assert schema["additionalProperties"] is False
     limit = next(
@@ -668,14 +676,11 @@ def test_openapi_exposes_bounded_read_only_ledger_contract_without_secret_fields
         "default": 20,
     }
     schemas = json.loads(json.dumps(document["components"]["schemas"]))
-    # TASK-007C permits only this exact boolean presence flag. Keep the existing
-    # secret-name ban over every remaining schema, including the configuration.
-    configuration = schemas["ConfigurationRead"]
-    assert configuration["properties"].pop("api_key_configured") == {
-        "type": "boolean",
-        "title": "Api Key Configured",
-    }
-    configuration["required"].remove("api_key_configured")
+    # TASK-007C1 allows one write-only secret request; all read/ledger schemas stay secret-free.
+    credential = schemas.pop("CredentialSave")
+    assert set(credential["properties"]) == {"secret"}
+    assert credential["properties"]["secret"]["writeOnly"] is True
+    assert credential["properties"]["secret"]["format"] == "password"
     schema_text = json.dumps(schemas).lower()
     for forbidden in (
         "openai_api_key",

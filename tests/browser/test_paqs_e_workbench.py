@@ -8,7 +8,7 @@ import httpx
 import pytest
 from playwright.sync_api import Browser, expect
 
-from .workbench_support import HK, MODEL, STRATEGY, US, Workbench, fixture_pair
+from .workbench_support import HK, MODEL, MODEL_NAME, STRATEGY, US, Workbench, fixture_pair
 
 
 def test_actual_uvicorn_unconfigured_http_and_static_smoke(
@@ -27,16 +27,16 @@ def test_actual_uvicorn_unconfigured_http_and_static_smoke(
         ):
             assert client.get(path).status_code == 200
         configuration = client.get("/api/v1/paqs-e/configuration").json()
-        assert configuration["api_key_configured"] is False
+        assert all(not item["credential_configured"] for item in configuration["models"])
         assert configuration["default_strategy_id"] == STRATEGY
     context = browser.new_context()
     page = context.new_page()
     calls: list[str] = []
     page.on("request", lambda request: calls.append(request.method + " " + request.url))
     page.goto(workbench_server)
-    expect(page.locator("#configuration-status")).to_contain_text("OPENAI_API_KEY")
+    expect(page.locator("#configuration-status")).to_contain_text("API Key")
     expect(page.locator("#analyze-button")).to_be_disabled()
-    expect(page.locator("#model-id")).to_have_value("")
+    expect(page.locator("#model-id")).to_have_value("deepseek-v4-flash")
     assert not any(call.startswith("POST") for call in calls)
     context.close()
 
@@ -46,8 +46,8 @@ def test_all_non_explicit_actions_have_zero_analyze_posts(
 ) -> None:
     app = Workbench(browser, workbench_server)
     page = app.open()
-    expect(page.locator("#model-id")).to_have_value("")
-    page.locator("#model-id").fill("unchanged-model")
+    expect(page.locator("#model-id")).to_have_value("deepseek-v4-flash")
+    page.locator("#model-id").select_option("qwen3.8-max")
     page.locator("#strategy-id").select_option("fixture-alternative")
     page.locator("#theme-toggle").click()
     page.locator("#tab-minute").click()
@@ -82,7 +82,7 @@ def test_all_non_explicit_actions_have_zero_analyze_posts(
         configurable: true, get: () => 'visible'});
     }""")
     page.evaluate("document.dispatchEvent(new Event('visibilitychange'))")
-    expect(page.locator("#model-id")).to_have_value("unchanged-model")
+    expect(page.locator("#model-id")).to_have_value("qwen3.8-max")
     assert app.posts == []
     assert app.errors == []
     assert all(url.startswith(workbench_server) for _, url in app.requests)
@@ -94,22 +94,26 @@ def test_explicit_capture_double_enter_guard_and_security_switch(
 ) -> None:
     app = Workbench(browser, workbench_server)
     page = app.open()
-    app.hold = "/paqs-e/analyses"
+    app.hold = "/paqs-e/narrative-analyses"
     app.analyze()
     page.locator("#analyze-form").dispatch_event("submit")
     page.locator("#model-id").press("Enter")
     page.locator(f'#security-selector [data-security-id="{HK}"]').click()
-    page.locator("#model-id").fill("new-model")
+    page.locator("#model-id").select_option("glm-5.2")
     page.locator("#strategy-id").select_option("fixture-alternative")
     page.locator("#analyze-form").dispatch_event("submit")
-    expect(page.locator("#analysis-state")).to_contain_text(f"US.AVGO · {MODEL} · {STRATEGY}")
-    assert app.posts == [{"security_id": US, "model_id": MODEL, "strategy_id": STRATEGY}]
+    expect(page.locator("#analysis-state")).to_contain_text(f"US.AVGO · {MODEL_NAME} · {STRATEGY}")
+    assert app.posts == [
+        {"security_id": US, "model_key": MODEL, "strategy_id": STRATEGY, "web_research": False}
+    ]
     app.hold = None
     app.respond(app.pending.pop())
     expect(page.locator("#analysis-state")).to_contain_text("当前已切换证券")
-    expect(page.locator("#decision-heading")).to_have_text("尚无选中的 Decision")
-    expect(page.locator("#model-id")).to_have_value("new-model")
-    assert app.posts == [{"security_id": US, "model_id": MODEL, "strategy_id": STRATEGY}]
+    expect(page.locator("#decision-heading")).to_have_text("尚无选中的分析结果")
+    expect(page.locator("#model-id")).to_have_value("glm-5.2")
+    assert app.posts == [
+        {"security_id": US, "model_key": MODEL, "strategy_id": STRATEGY, "web_research": False}
+    ]
     app.close()
 
 
@@ -118,13 +122,20 @@ def test_history_selection_survives_pending_analyze_and_refresh(
 ) -> None:
     app = Workbench(browser, workbench_server)
     page = app.open()
-    app.hold = "/paqs-e/analyses"
+    app.hold = "/paqs-e/narrative-analyses"
     app.analyze()
+    # Click completion can precede interception on a busy browser. Keep the hold until
+    # this scenario actually has its one pending POST, before selecting history.
+    for _ in range(500):
+        if app.pending:
+            break
+        page.wait_for_timeout(10)
+    assert len(app.pending) == 1 and len(app.posts) == 1
     app.hold = None
     app.select(1)
     selected = page.locator("#decision-heading").inner_text()
     app.respond(app.pending.pop())
-    expect(page.locator("#analysis-state")).to_contain_text("已提交成功 Decision")
+    expect(page.locator("#analysis-state")).to_contain_text("已提交成功 Narrative")
     expect(page.locator("#decision-heading")).to_have_text(selected)
     page.locator("#reload-history").click()
     expect(page.locator(".history-row")).to_have_count(2)
@@ -173,8 +184,8 @@ def test_out_of_order_reads_do_not_overwrite_selection(
         "CONFIGURATION_ERROR",
         "PROVIDER_UNAVAILABLE",
         "PROVIDER_REFUSAL",
-        "INVALID_STRUCTURED_OUTPUT",
-        "VALIDATION_FAILED",
+        "INVALID_FINAL_TEXT",
+        "PROVIDER_INCOMPLETE",
         "404",
         "409",
         "422",
@@ -182,7 +193,7 @@ def test_out_of_order_reads_do_not_overwrite_selection(
         "nonjson",
         "abort",
         "mismatched",
-        "timeout",
+        "long_wait_connection_failure",
     ],
 )
 def test_typed_failures_unknown_no_retry_and_prior_decision_retention(
@@ -199,9 +210,9 @@ def test_typed_failures_unknown_no_retry_and_prior_decision_retention(
             "model_id": "wrong",
             "status": "SUCCEEDED",
         }
-    elif kind == "timeout":
+    elif kind == "long_wait_connection_failure":
         page.clock.install()
-        app.hold = "/paqs-e/analyses"
+        app.hold = "/paqs-e/narrative-analyses"
     elif kind.isdigit():
         app.post_status = int(kind)
         app.post_body = {
@@ -210,51 +221,32 @@ def test_typed_failures_unknown_no_retry_and_prior_decision_retention(
             "detail": "synthetic safe failure",
         }
     else:
-        run = app.runs["10000000-0000-4000-8000-000000000002"]
-        validation = kind == "VALIDATION_FAILED"
+        run = app.narrative_runs["10000000-0000-4000-8000-000000000002"]
         run.update(
-            status="VALIDATION_FAILED" if validation else "PROVIDER_FAILED",
-            failure_kind=None if validation else kind,
-            failure_reason=None if validation else "synthetic provider failure",
-            validator_version="paqs-e-validator-v1" if validation else None,
-            validation_issues=[
-                {
-                    "code": "SYNTHETIC_ISSUE",
-                    "field": "entry",
-                    "message": "synthetic validation issue",
-                }
-            ]
-            if validation
-            else [],
+            status="PROVIDER_FAILED", failure_kind=kind, failure_reason="synthetic provider failure"
         )
         app.post_status = 503 if kind in ("CONFIGURATION_ERROR", "PROVIDER_UNAVAILABLE") else 502
-        context = {
-            key: run[key]
-            for key in (
-                "analysis_run_id",
-                "status",
-                "failure_kind",
-                "validator_version",
-                "validation_issues",
-            )
-        }
         app.post_body = {
-            **context,
             "status": app.post_status,
-            "analysis_status": run["status"],
-            "analysis_run": context,
+            "analysis_status": "PROVIDER_FAILED",
+            "narrative_run_id": run["narrative_run_id"],
+            "failure_kind": kind,
         }
     app.analyze()
-    if kind == "timeout":
+    if kind == "long_wait_connection_failure":
         page.clock.run_for(180001)
+        expect(page.locator("#analysis-state")).to_contain_text("仍在分析")
+        expect(page.locator("#analyze-button")).to_be_disabled()
+        assert len(app.posts) == 1
+        app.pending.pop().abort("connectionfailed")
     expected = (
         "结果未知"
-        if kind in ("nonjson", "abort", "mismatched", "timeout")
+        if kind in ("nonjson", "abort", "mismatched", "long_wait_connection_failure")
         else "失败"
-        if kind in ("404", "409", "422", "VALIDATION_FAILED")
+        if kind in ("404", "409", "422")
         else "账本证据"
         if kind == "500"
-        else "本次没有新 Decision"
+        else "本次没有新 Narrative"
     )
     expect(page.locator("#analysis-state")).to_contain_text(expected)
     expect(page.locator("#decision-heading")).to_contain_text("较早成功结果")
@@ -262,14 +254,12 @@ def test_typed_failures_unknown_no_retry_and_prior_decision_retention(
     expect(page.locator(".history-row")).to_have_count(2)
     expect(page.locator("#analyze-button")).to_be_enabled()
     assert len(app.posts) == 1
-    if kind == "VALIDATION_FAILED":
-        expect(page.locator("#analysis-state")).to_contain_text("SYNTHETIC_ISSUE")
     if kind in (
         "CONFIGURATION_ERROR",
         "PROVIDER_UNAVAILABLE",
         "PROVIDER_REFUSAL",
-        "INVALID_STRUCTURED_OUTPUT",
-        "VALIDATION_FAILED",
+        "INVALID_FINAL_TEXT",
+        "PROVIDER_INCOMPLETE",
     ):
         expect(page.locator("#known-run-status")).to_contain_text(kind)
     app.close()
@@ -439,7 +429,7 @@ def test_empty_watchlist_removal_add_error_and_current_viewport(
     assert any("daily-bars?limit=5" in url for _, url in app.requests)
     assert any("minute-bars?lookback_days=2" in url for _, url in app.requests)
     app.select(1)
-    app.hold = "/paqs-e/analyses"
+    app.hold = "/paqs-e/narrative-analyses"
     app.analyze()
     page.locator("#remove-selected").click()
     expect(page.locator("#analysis-security")).to_contain_text("HK.00700")
@@ -448,7 +438,7 @@ def test_empty_watchlist_removal_add_error_and_current_viewport(
     app.hold = None
     app.respond(app.pending.pop())
     expect(page.locator("#analyze-button")).to_be_disabled()
-    expect(page.locator("#decision-heading")).to_have_text("尚无选中的 Decision")
+    expect(page.locator("#decision-heading")).to_have_text("尚无选中的分析结果")
     assert page.evaluate("chartCaptures[0].series[0].bars.length") == 0
     app.add_error = True
     page.locator('#supported-security-form [name="symbol"]').fill("700")
@@ -498,7 +488,11 @@ def test_configuration_get_failure_and_invalid_models_never_dispatch(
     app = Workbench(browser, workbench_server)
     page = app.open()
     for value in ("bad model", " model", "model\u0085id", "model\u001fid"):
-        page.locator("#model-id").fill(value)
+        page.locator("#model-id").evaluate(
+            "(select, value) => { const option = new Option(value, value); "
+            "select.add(option); select.value = value; }",
+            value,
+        )
         page.locator("#analyze-form").dispatch_event("submit")
         expect(page.locator("#model-id")).to_have_value(value)
         expect(page.locator("#analysis-state")).to_contain_text("无法提交")
@@ -511,15 +505,15 @@ def test_changed_form_does_not_relabel_captured_success(
 ) -> None:
     app = Workbench(browser, workbench_server)
     page = app.open()
-    app.hold = "/paqs-e/analyses"
+    app.hold = "/paqs-e/narrative-analyses"
     app.analyze()
-    page.locator("#model-id").fill("different-explicit-model")
+    page.locator("#model-id").select_option("kimi-k3")
     page.locator("#strategy-id").select_option("fixture-alternative")
     app.hold = None
     app.respond(app.pending.pop())
-    expect(page.locator("#decision-heading")).to_contain_text(MODEL)
-    expect(page.locator("#decision-heading")).not_to_contain_text("different-explicit-model")
-    expect(page.locator("#model-id")).to_have_value("different-explicit-model")
+    expect(page.locator("#decision-heading")).to_contain_text(MODEL_NAME)
+    expect(page.locator("#decision-heading")).not_to_contain_text("kimi-k3")
+    expect(page.locator("#model-id")).to_have_value("kimi-k3")
     assert len(app.posts) == 1
     app.close()
 
@@ -554,7 +548,7 @@ def test_visual_acceptance_artifacts(
         app.select(1)
     elif scenario in ("success", "unknown"):
         app.analyze()
-        expect(page.locator("#analysis-state")).to_contain_text("已提交成功 Decision")
+        expect(page.locator("#analysis-state")).to_contain_text("已提交成功 Narrative")
         expect(page.locator("#evidence-status")).to_contain_text("冻结 W1")
         if scenario == "unknown":
             app.post_mode = "nonjson"
