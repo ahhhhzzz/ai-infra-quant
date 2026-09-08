@@ -1,5 +1,36 @@
 # Requirements Traceability Matrix
 
+## Current delivery status — 2026-09-08
+
+TASK-007A, TASK-007B and TASK-007C are accepted and integrated. TASK-007C1 is
+**USER_ACCEPTED / FUNCTIONALLY_CLOSED**, including the user's Research-ON confirmation.
+The authorized ordinary fast-forward of `roadmap/no-live-trading` from
+`0c1713d4409c69a45f8ce5e37951bba72d73d819` to
+`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4` has been executed and read back from GitHub.
+The integrated application is the reviewed `3e98d8c5f9948dcaefe59eb3b7b847bd99ba8908` tree,
+plus the independent review and user closeout documents. See the immutable
+[R06 review](reviews/TASK_007C1_REMEDIATION_06_INDEPENDENT_REVIEW.md) and
+[user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md) for evidence attribution.
+User acceptance is not a claim that the C2 implementer repeated paid provider tests or
+independently recomputed the user's local Run hashes. Historical pending/not-merged statements
+in original contracts, reports and reviews describe their original checkpoints and remain unchanged.
+
+TASK-007C2 is **implemented / pending independent review** on its task branch; it is not
+independently passed or integrated. Its bounded change repairs the credential dialog and removes
+the old opening portfolio cards and duplicate administration UI. The main watchlist, market
+quality/provenance, history and frozen evidence remain available. Backend compatibility APIs,
+existing databases, opening seed values and migrations 0001/0002/0003 are preserved; head remains
+`0003_task007c1_narrative_ledger`. See the [C2 report](reports/TASK_007C2_IMPLEMENTATION_REPORT.md).
+
+The normal explicit Analyze path is Narrative-first: one immutable Snapshot, optional bounded
+research, tool-free final reasoning, and exact final text persisted in the Narrative Ledger.
+Saving complete prose does not certify strategy semantics, Entry/Holder judgments or RR by machine.
+The legacy structured validator is unchanged and historical structured Runs/Decisions remain readable.
+Research defaults OFF and resets OFF on model changes. Refresh, credentials and history never Analyze.
+The product remains a read-only market and decision-support terminal, without initial asset cards
+in its normal UI. Paper/PaperFill, performance statistics, TASK-006B1, PAQS-Q successors, TASK-007D,
+and Phase 3/4 are not activated by this work; broker/account/trading capabilities remain forbidden.
+
 Status: Phase 1 accepted after independent post-remediation review — PASS; reviewed commit: `f6decf2fbe171c1b9eb46340a9174bc21f293ede`; reviewed tree: `f03d23ededaef37096b508a3040c87ae69d89e32`; GitHub Actions run: `33458517601`; job: `99703528272`; artifact: `9782355130`; result: `119 passed`
 
 Future-scope authority: `docs/ROADMAP.md` decisions `MTF-001`, `PAQS-MVP-001`, and `PAQS-DUAL-001`
@@ -93,7 +124,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | UI-003 | Visible-page ~60s market-data refresh, no overlapping requests, hidden pause/resume | RETAINED | 2 | IMPLEMENTED | TASK-005 |
 | UI-004 | Manual refresh and countdown | RETAINED | 2 | IMPLEMENTED | TASK-005 |
 | UI-005 | Dynamic supported US/HK add/remove flow is user-facing rather than backend-only | SUPERSEDED_PAQS_MVP | 2 | IMPLEMENTED | TASK-006A Dashboard form and integration tests |
-| UI-006 | PAQS-E current-analysis Dashboard presents snapshot/as-of, context, key levels, setup, advisory, invalidation, target, RR, uncertainty and explanation | RETAINED | 2 | IMPLEMENTED_PENDING_REVIEW | `docs/PAQS_E_WORKBENCH.md`; `tests/browser/test_paqs_e_workbench.py`; `docs/evidence/TASK_007C/` |
+| UI-006 | PAQS-E current-analysis Dashboard presents snapshot/as-of, context, key levels, setup, advisory, invalidation, target, RR, uncertainty and explanation | RETAINED | 2 | IMPLEMENTED | `docs/PAQS_E_WORKBENCH.md`; `tests/browser/test_paqs_e_workbench.py`; `docs/evidence/TASK_007C/` |
 | UI-007 | No real-order UI/control and no claim user executed advisory | RETAINED | all | DOCUMENTED | Roadmap safety boundary |
 | UI-008 | Market-data page refresh does not automatically trigger PAQS-E or PAQS-Q strategy re-analysis | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 4 |
 | UI-009 | Future dual-branch comparison must show PAQS-E and PAQS-Q separately and surface disagreement without averaging into one synthetic decision score | RETAINED | 2 | PLANNED_TASK | TASK-007D scope direction |
@@ -226,7 +257,7 @@ Its migration 0002 follows the untouched Phase 1 foundation. Exact canonical evi
 append-only records, atomic success/failure persistence, model-independent strategy revision
 series, and safe readback are covered by focused orchestration, evidence, API, migration and
 architecture tests. Status is **REVIEWED_PASS** at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`;
-evidence: `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`. Authoritative integration must be verified separately.
+evidence: `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`. The reviewed implementation is integrated in the current authoritative baseline.
 
 No TASK-007C Dashboard Analyze UI, PAQS-Q successor task, market-data persistence/replay, hidden
 Decision memory, background analysis, broker behavior, paper behavior, or backtest behavior is
@@ -237,8 +268,8 @@ implemented by TASK-007B. Accepted Phase 1 evidence remains unchanged.
 | ID | Requirement | Disposition | Phase | Status | Evidence |
 |---|---|---|---:|---|---|
 | R20-001 | Adopt useful R20 workbench/product interactions while preserving PAQS-E and the no-live boundary | RETAINED | 2–4 | DOCUMENTED | `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; historical planning: `docs/research/R20_ADOPTION_PLAN_AND_CODEX_PROMPT_ZH.md` |
-| R20-002 | 007C retains current JS/CSS and vendored Lightweight Charts; copied substantive code retains origin/license notice | RETAINED | 2 | IMPLEMENTED_PENDING_REVIEW | `docs/THIRD_PARTY_WORKBENCH.md`; existing vendor hash regression |
-| R20-003 | Explicit Analyze, model/registered-strategy selection, truthful failure and immutable Decision history become usable UI flows | RETAINED | 2 | IMPLEMENTED_PENDING_REVIEW | `tests/browser/test_paqs_e_workbench.py`; `tests/integration/test_paqs_e_configuration.py`; `docs/PAQS_E_WORKBENCH.md` |
+| R20-002 | 007C retains current JS/CSS and vendored Lightweight Charts; copied substantive code retains origin/license notice | RETAINED | 2 | IMPLEMENTED | `docs/THIRD_PARTY_WORKBENCH.md`; existing vendor hash regression |
+| R20-003 | Explicit Analyze, model/registered-strategy selection, truthful failure and immutable Decision history become usable UI flows | RETAINED | 2 | IMPLEMENTED | `tests/browser/test_paqs_e_workbench.py`; `tests/integration/test_paqs_e_configuration.py`; `docs/PAQS_E_WORKBENCH.md` |
 | R20-004 | Later prompt/model/version, critique/council, reviewable evolution, news, simulated bookkeeping and operations capabilities follow the adoption record through separate bounded contracts | OPTIONAL_FUTURE | 2–4 | DOCUMENTED | `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; no expansion of 007C |
 | R20-005 | Do not inherit R20 live execution, unrestricted Python plugins, plaintext secret storage, automatic strategy changes or crypto-specific financial assumptions | RETAINED | all | DOCUMENTED | `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`; permanent Roadmap boundaries |
 
@@ -247,14 +278,14 @@ implemented by TASK-007B. Accepted Phase 1 evidence remains unchanged.
 
 | ID | Requirement | Status | Evidence |
 |---|---|---|---|
-| 007C1-001 | Exact eleven-model flat registry, default DeepSeek V4 Flash, fixed official routes | IMPLEMENTED_PENDING_REVIEW | `model_registry.json`; model gateway and browser catalog tests |
-| 007C1-002 | Windows OS-protected credential save/update/delete, safe dynamic status, loopback/Origin boundary | IMPLEMENTED_PENDING_REVIEW | `windows_credentials.py`; credential unit/integration/browser tests |
-| 007C1-003 | Four-field explicit Analyze, actual model identity and unchanged cross-model revision series | IMPLEMENTED_PENDING_REVIEW | `test_paqs_e_multi_model.py`; retained ledger API regressions |
-| 007C1-004 | Bounded source-specific web capsule, As-Of filtering, tool-free final reasoning | IMPLEMENTED_PENDING_REVIEW | `test_paqs_e_model_gateway.py`; lifecycle integration and browser tests |
-| 007C1-005 | No automatic paid retry/fallback or broker/live scope; no migration or protected review changes | IMPLEMENTED_PENDING_REVIEW | adapter tests, full architecture suite, implementation diff |
-| 007C1-006 | Opt-in live domestic-provider product acceptance | SEPARATE_EXECUTION_EVIDENCE_REQUIRED | no user credential supplied through UI; deterministic tests make no paid calls |
+| 007C1-001 | Exact eleven-model flat registry, default DeepSeek V4 Flash, fixed official routes | IMPLEMENTED | `model_registry.json`; model gateway and browser catalog tests |
+| 007C1-002 | Windows OS-protected credential save/update/delete, safe dynamic status, loopback/Origin boundary | IMPLEMENTED | `windows_credentials.py`; credential unit/integration/browser tests |
+| 007C1-003 | Four-field explicit Analyze, actual model identity and unchanged cross-model revision series | IMPLEMENTED | `test_paqs_e_multi_model.py`; retained ledger API regressions |
+| 007C1-004 | Bounded source-specific web capsule, As-Of filtering, tool-free final reasoning | IMPLEMENTED | `test_paqs_e_model_gateway.py`; lifecycle integration and browser tests |
+| 007C1-005 | No automatic paid retry/fallback or broker/live scope; only authorized additive R02 migration 0003 | IMPLEMENTED | adapter tests, full architecture suite, implementation diff |
+| 007C1-006 | Opt-in live product acceptance | USER_ACCEPTED | User closeout of 2026-09-08; C2 does not repeat paid calls or certify user-local hashes |
 
-## TASK-007C1 Remediation 01 evidence (pending independent re-review)
+## TASK-007C1 Remediation 01 evidence (accepted historical structured behavior)
 
 | Requirement | Implementation | Regression evidence |
 |---|---|---|
@@ -263,7 +294,7 @@ implemented by TASK-007B. Accepted Phase 1 evidence remains unchanged.
 | R3 long synchronous Analyze | Non-aborting 180-second notice; one-in-flight guard until terminal/network failure | `test_paqs_e_long_running.py`, retained unknown-outcome browser regression |
 | R4 deterministic factual projection | Four current/eligible-entry quote echoes before unchanged validator | All eleven model routes, direct mismatch rejection, market/availability mapping regression |
 
-## TASK-007C1 Remediation 02 (implemented; independent review pending)
+## TASK-007C1 Remediation 02 (accepted/integrated; see current status and closeout above)
 
 | Requirement | Implementation / evidence |
 |---|---|
@@ -271,13 +302,13 @@ implemented by TASK-007B. Accepted Phase 1 evidence remains unchanged.
 | Only additive 0003; preserve historical structured evidence | `test_paqs_e_narrative_ledger_api.py`: upgrade/downgrade byte preservation, immutable rows, independent revisions, failure and rollback |
 | New normal API and primary prose/history UI | Narrative API and `test_paqs_e_narrative.py`; legacy POST disabled by default, legacy reads retained |
 | Frozen Snapshot/research, credentials and no automatic retry/fallback | New narrative lifecycle tests plus retained original/R01 provenance, credential, source and long-running tests |
-| Final live product gate | USER_EXECUTED_EVIDENCE_PENDING: DeepSeek V4 Flash, one explicit attempt OFF then ON on final implementation SHA |
+| Final live gate | Historical remediation checkpoint; final user acceptance and integration are recorded in the current status and immutable closeout above |
 
 R02 supersedes earlier no-new-migration, normal structured-output/validator, and primary Decision UI
 requirements only. Legacy validator, master strategy, accepted evidence and no-live-trading boundaries
-remain unchanged. No independent acceptance or merge is claimed.
+remain unchanged. The later user acceptance and actual integration are recorded above.
 
-## TASK-007C1 Remediation 03 (implemented; independent review pending)
+## TASK-007C1 Remediation 03 (accepted/integrated; see current status and closeout above)
 
 | Requirement | Implementation / evidence |
 |---|---|
@@ -291,7 +322,7 @@ remain unchanged. No independent acceptance or merge is claimed.
 R03 supersedes strict DeepSeek source-array/JSON research and the old default-ON/raw-only UI.
 It preserves other providers' research guarantees and all Narrative/legacy persistence semantics.
 
-## TASK-007C1 Remediation 04 (implemented; independent review pending)
+## TASK-007C1 Remediation 04 (accepted/integrated; see current status and closeout above)
 
 | Requirement | Implementation / regression evidence |
 |---|---|
@@ -301,12 +332,12 @@ It preserves other providers' research guarantees and all Narrative/legacy persi
 | OFF zero research; ON at most two research + one unchanged final Narrative | API integration cases with exact text/request hashes, unchanged rows/schema after failure |
 | Default OFF, up-to-two request/cost disclosure, safe Markdown/raw and no automatic Analyze | `test_paqs_e_research_diagnostic.py` plus all retained R03 and browser regressions |
 | Protected migration head 0003, strategy/prompt/validator/ledger/registry/credentials/source guard | R04 implementation report protected audit and required validation |
-| Final live gate | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one explicit DeepSeek V4 Flash Research-ON attempt on exact reviewed R04 SHA; no automatic retry or merge |
+| Final live gate | Historical remediation checkpoint; final user acceptance and integration are recorded in the current status and immutable closeout above |
 
 R04 supersedes only DeepSeek's one-request/final-message-in-first-response/ten-output-item
 assumptions. Accepted historical reports and reviews remain unchanged.
 
-## TASK-007C1 Remediation 05 (implemented; independent review pending)
+## TASK-007C1 Remediation 05 (accepted/integrated; see current status and closeout above)
 
 | Requirement | Implementation / evidence |
 |---|---|
@@ -316,12 +347,12 @@ assumptions. Accepted historical reports and reviews remain unchanged.
 | Safe numeric query/source/unknown-action failure diagnostics | Unit and browser tests for malformed/overflow/secret-tainted data and exact integer validation |
 | R04 request counts, pass-back, final tool-free Narrative and immutable hashes/rows/schema | R04 suites plus `test_paqs_e_search_multiplicity_api.py`; no migration or retry |
 | Protected OFF path, Markdown/default-OFF, registry/credentials/source/strategy/ledger | R05 report protected-file audit and full deterministic validation |
-| Final live gate | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one explicit DeepSeek V4 Flash Research-ON attempt on exact reviewed R05 SHA; no automatic retry or merge |
+| Final live gate | Historical remediation checkpoint; final user acceptance and integration are recorded in the current status and immutable closeout above |
 
 R05 supersedes only normal DeepSeek four-query rejection and bounded query capture/diagnostics.
 It does not prove that query multiplicity was the only cause of the prior live failure.
 
-## TASK-007C1 Remediation 06 (implemented; independent review pending)
+## TASK-007C1 Remediation 06 (accepted/integrated; see current status and closeout above)
 
 | Requirement | Implementation / evidence |
 |---|---|
@@ -333,7 +364,17 @@ It does not prove that query multiplicity was the only cause of the prior live f
 | Safe browser projection and prior Narrative preservation | R06 browser tests: allowlisted code/counts, invalid fields omitted, one explicit POST, no retry, raw/formatted view retained |
 | Immutable Narrative hashes/rows/schema and OFF path | `test_paqs_e_partial_actions_api.py`: OFF/direct/tool-only, request/response SHA, failed precondition creates no rows, unchanged SQLite schema/head 0003 |
 | Protected components | R06 implementation report: diff/hash audit, full/focused/browser/static/startup validation |
-| Final live gate | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one explicit DeepSeek V4 Flash Research-ON attempt on exact reviewed R06 SHA; no retry or merge |
+| Final live gate | USER_ACCEPTED / FUNCTIONALLY_CLOSED per the 2026-09-08 user closeout; actual integration now recorded above |
 
 R06 changes only partial-action compatibility and exact bounded diagnostics. It does not claim the
-previous live response failed solely because of partial status, or that live Research-ON now passes.
+previous live response failed solely because of partial status, and does not substitute synthetic execution for the separate user Research-ON acceptance.
+
+## TASK-007C2 — implemented / pending independent review
+
+| Requirement | Evidence |
+|---|---|
+| Single-column credential dialog, distinct actions, scroll/focus/keyboard | `tests/browser/test_paqs_e_ui_cleanup.py`; six viewport/theme cases plus 200% text |
+| Main watchlist retained; obsolete cards, duplicate UI and six background reads retired | Browser add/delete/switch/refresh/history/known-Run/frozen-chart assertions; homepage absence regression |
+| No automatic Analyze/provider calls, no JS/console errors | Synthetic interception and actual Chromium request/error assertions |
+| Current status and evidence attribution synchronized | Five current specifications, model/workbench guides and C2 report; immutable historical evidence untouched |
+| Backend/data/strategy/provider boundaries unchanged | Protected Git-byte audit and full validation in `reports/TASK_007C2_IMPLEMENTATION_REPORT.md` |

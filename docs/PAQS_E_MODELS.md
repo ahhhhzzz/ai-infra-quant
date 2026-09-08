@@ -1,6 +1,8 @@
 # TASK-007C1 model, credential and research guide
 
-Implementation pending independent review. The launcher and workbench remain local-only and
+TASK-007C1 is user-accepted and integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`.
+See [user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md) for evidence attribution.
+TASK-007C2 repairs credential layout and awaits independent review. The launcher and workbench remain local-only and
 read-only decision support; real trades remain manual in the broker's own client.
 
 ## Select a model and configure its key
@@ -221,8 +223,8 @@ The browser suite runs actual Uvicorn against a fresh migrated SQLite DB through
 network fixtures for business scenarios. Unit/integration tests inject synthetic credential stores.
 
 No real-provider call is part of ordinary tests. The R03 Contract records successful research-OFF
-live acceptance at `74a19387adc408e9453c30fdbb30e6636ac4e695`; this remediation preserves that final
-provider/prompt/ledger path. After independent review, the mandatory remaining live check is one
-explicit DeepSeek V4 Flash research-ON attempt on the exact reviewed final R06 SHA using the user's locally
-entered key. Record safe Run/Result identities, exact response/request hash verification, frozen
-memo/provenance and formatted/raw readability. This does not claim that live ON gate or integration.
+live acceptance at `74a19387adc408e9453c30fdbb30e6636ac4e695`. Final R06 code review and the user's
+Research-ON acceptance are attributed in the immutable [user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md).
+C1 is functionally closed and integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`.
+The C2 UI change preserves that provider/prompt/ledger path and does not repeat paid acceptance,
+reopen the user gate, or claim independent verification of the user's local hashes.

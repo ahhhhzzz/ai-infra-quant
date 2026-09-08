@@ -731,29 +731,6 @@ const clearSelectedSecurity = () => {
   updateCountdown();
 };
 
-const renderAdminWatchlist = () => {
-  const rows = watchlistSecurities.map((security) => {
-    const row = document.createElement("div");
-    row.className = "watchlist-row";
-    row.append(
-      textElement("span", security.display_symbol, "symbol"),
-      textElement("span", security.currency, "muted"),
-      textElement("span", security.metadata_status, "status"),
-    );
-    const button = textElement("button", "Remove", "remove-button");
-    button.type = "button";
-    button.dataset.securityId = security.id;
-    button.addEventListener("click", async () => {
-      await api(`${API_BASE}/watchlist/${button.dataset.securityId}`, { method: "DELETE" });
-      await loadWatchlist();
-    });
-    row.append(button);
-    return row;
-  });
-  replaceChildren("#watchlist-admin", rows);
-  element("#admin-watchlist-status").textContent = `${rows.length} identities`;
-};
-
 element("#remove-selected").addEventListener("click", async () => {
   if (!selectedSecurity) return;
   const button = element("#remove-selected");
@@ -776,7 +753,6 @@ const loadWatchlist = async (preferredSecurityId = null) => {
     || watchlistSecurities.find((item) => item.display_symbol === "US.AVGO")
     || watchlistSecurities[0]
     || null;
-  renderAdminWatchlist();
   if (!defaultSecurity) {
     clearSelectedSecurity();
     return;
@@ -788,35 +764,6 @@ const loadWatchlist = async (preferredSecurityId = null) => {
     renderSecuritySelector();
     renderSecurityHeader();
   }
-};
-
-const loadAdministration = async () => {
-  const [portfolio, performance, brokers, market, fundamental, events] = await Promise.all([
-    api(`${API_BASE}/portfolio`),
-    api(`${API_BASE}/performance`),
-    api(`${API_BASE}/brokers`),
-    api(`${API_BASE}/market-data/providers`),
-    api(`${API_BASE}/fundamental-data/providers`),
-    api(`${API_BASE}/event-data/providers`),
-  ]);
-  element("#equity").textContent = `${portfolio.base_currency} ${portfolio.total_equity}`;
-  element("#cash").textContent = `${portfolio.base_currency} ${portfolio.cash_value}`;
-  element("#nav").textContent = portfolio.nav;
-  element("#units").textContent = portfolio.units_outstanding;
-  element("#invested").textContent = portfolio.invested_ratio;
-  element("#return").textContent = performance.summary.since_inception_return;
-
-  const statuses = [...brokers.items, ...market.items, ...fundamental.items, ...events.items];
-  const rows = statuses.map((item) => {
-    const row = document.createElement("div");
-    row.className = "status-row";
-    row.append(
-      textElement("span", item.name),
-      textElement("span", `${item.implementation_status} / ${item.connection_status}`, "status"),
-    );
-    return row;
-  });
-  replaceChildren("#providers", rows);
 };
 
 for (const tab of document.querySelectorAll(".timeframe-tab")) {
@@ -872,9 +819,6 @@ element("#supported-security-form").addEventListener("submit", async (event) => 
 const initialize = async () => {
   initializeChart();
   await loadWatchlist();
-  loadAdministration().catch((error) => {
-    replaceChildren("#providers", [textElement("p", safeErrorMessage(error), "note")]);
-  });
 };
 
 initialize().catch((error) => {

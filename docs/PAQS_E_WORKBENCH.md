@@ -1,11 +1,15 @@
-# PAQS-E narrative-first workbench — TASK-007C1 Remediation 03
+# PAQS-E narrative-first workbench
 
-Status: **implemented / pending independent review**. No merge or next-task approval is implied.
+Status: TASK-007A/B/C accepted/integrated; TASK-007C1 user-accepted/integrated at
+`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`. See the immutable
+[user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md).
+TASK-007C2 UI cleanup is **implemented / pending independent review**, without C2 merge or next-task approval.
 
 The existing FastAPI application serves the workbench at `/`. No frontend build server or Node
 production runtime is required. Use the existing documented migration and Uvicorn/Windows launcher
-workflow. All API calls use local, fixed same-origin paths. Existing Phase 1 opening facts remain
-under a clearly historical/local disclosure; they are not actual holdings or PAQS-E paper state.
+workflow. All API calls use local, fixed same-origin paths. TASK-007C2 removes the old opening portfolio cards, duplicate Watchlist administration and mixed
+provider list from the normal UI, including their six dedicated background reads. Historical
+databases, seeds and compatibility APIs remain intact. The main watchlist and market state stay active.
 
 ## User workflow
 
@@ -18,7 +22,9 @@ under a clearly historical/local disclosure; they are not actual holdings or PAQ
    viewport are retained on refresh, including errors with previously cached evidence.
 3. Select one of the eleven registered model names, initially **DeepSeek V4 Flash**. Model
    changes preserve the chosen primary strategy and never Analyze. Choose **配置此模型 API Key**
-   to save/update the selected service's key in Windows Credential Manager. The password input
+   to save/update the selected service's key in Windows Credential Manager. The dialog has a dedicated single-column layout and separate actions, wraps long text and
+   scrolls within the viewport. Opening focuses the password; Escape/Close returns focus to
+   the configuration button. The password input
    clears after successful save or closing the dialog; it is never read back. Models sharing a
    service share its credential status. Presence does not verify balance, entitlement or connectivity.
    OpenAI alone retains an optional read-only server environment fallback. No manual `.env` edit
@@ -167,4 +173,11 @@ TASK-007C1 adds model resolution, secure credentials and a pre-reasoning researc
 Remediation 02 adds only migration 0003 and a distinct narrative prompt/provider/ledger path.
 Migrations 0001/0002, legacy validator, accepted strategy, Snapshot, market-data and no-live-trading
 boundaries remain unchanged. The source-revision launcher handshake and secure credentials remain
-in force. No paid smoke is automatic; final live acceptance is user-executed on the final SHA.
+in force. No paid smoke is automatic. C1 user live acceptance is recorded in its immutable closeout; C2
+does not reopen that acceptance or run paid providers.
+
+
+TASK-007C2 screenshots are separately generated with `TASK007C2_SCREENSHOT_DIR` pointing at
+`docs/evidence/TASK_007C2/` and `python -m pytest tests/browser/test_paqs_e_ui_cleanup.py -ra`.
+The [scenario index](evidence/TASK_007C2/README.md) distinguishes full-page captures from viewport
+size and records the equivalent 200% text-enlargement method. All data and errors are synthetic.

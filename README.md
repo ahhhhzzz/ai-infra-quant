@@ -150,4 +150,9 @@ TASK-007C1 adds a flat eleven-model selector and local **配置此模型 API Key
 Use the existing Windows launcher, open the loopback workbench, select a model, securely save its
 key and explicitly Analyze. UI-managed keys need no `.env` edit. See
 [model and credential guide](docs/PAQS_E_MODELS.md) for supported routes, research limits and
-separate opt-in live-provider acceptance. This task is pending independent review; no merge is claimed.
+the user acceptance recorded in [C1 closeout](docs/decisions/TASK_007C1_CLOSEOUT_2026_09_08.md).
+TASK-007A/B/C and user-accepted TASK-007C1 are integrated; the authoritative integration is
+`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`. TASK-007C2 repairs this dialog and removes obsolete
+initial-account administration from the normal UI, preserving data and all accepted analysis behavior.
+C2 is implemented pending independent review, with no C2 merge. See the
+[implementation report](docs/reports/TASK_007C2_IMPLEMENTATION_REPORT.md).

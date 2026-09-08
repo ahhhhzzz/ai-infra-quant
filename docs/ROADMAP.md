@@ -1,5 +1,36 @@
 # Read-Only PAQS Dual-Branch Decision-Terminal Product Roadmap
 
+## Current delivery status — 2026-09-08
+
+TASK-007A, TASK-007B and TASK-007C are accepted and integrated. TASK-007C1 is
+**USER_ACCEPTED / FUNCTIONALLY_CLOSED**, including the user's Research-ON confirmation.
+The authorized ordinary fast-forward of `roadmap/no-live-trading` from
+`0c1713d4409c69a45f8ce5e37951bba72d73d819` to
+`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4` has been executed and read back from GitHub.
+The integrated application is the reviewed `3e98d8c5f9948dcaefe59eb3b7b847bd99ba8908` tree,
+plus the independent review and user closeout documents. See the immutable
+[R06 review](reviews/TASK_007C1_REMEDIATION_06_INDEPENDENT_REVIEW.md) and
+[user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md) for evidence attribution.
+User acceptance is not a claim that the C2 implementer repeated paid provider tests or
+independently recomputed the user's local Run hashes. Historical pending/not-merged statements
+in original contracts, reports and reviews describe their original checkpoints and remain unchanged.
+
+TASK-007C2 is **implemented / pending independent review** on its task branch; it is not
+independently passed or integrated. Its bounded change repairs the credential dialog and removes
+the old opening portfolio cards and duplicate administration UI. The main watchlist, market
+quality/provenance, history and frozen evidence remain available. Backend compatibility APIs,
+existing databases, opening seed values and migrations 0001/0002/0003 are preserved; head remains
+`0003_task007c1_narrative_ledger`. See the [C2 report](reports/TASK_007C2_IMPLEMENTATION_REPORT.md).
+
+The normal explicit Analyze path is Narrative-first: one immutable Snapshot, optional bounded
+research, tool-free final reasoning, and exact final text persisted in the Narrative Ledger.
+Saving complete prose does not certify strategy semantics, Entry/Holder judgments or RR by machine.
+The legacy structured validator is unchanged and historical structured Runs/Decisions remain readable.
+Research defaults OFF and resets OFF on model changes. Refresh, credentials and history never Analyze.
+The product remains a read-only market and decision-support terminal, without initial asset cards
+in its normal UI. Paper/PaperFill, performance statistics, TASK-006B1, PAQS-Q successors, TASK-007D,
+and Phase 3/4 are not activated by this work; broker/account/trading capabilities remain forbidden.
+
 Status: **AUTHORITATIVE — local read-only PAQS-E prioritized MVP, parallel PAQS-Q reference branch, and optional Phase 3/4 extensions**
 
 Decisions:
@@ -387,10 +418,10 @@ Accepted scope:
 - no continuous/background analysis;
 - no broker behavior.
 
-#### TASK-007B — On-Demand PAQS-E Analysis Service & Immutable Decision Ledger — INDEPENDENT REVIEW PASS
+#### TASK-007B — On-Demand PAQS-E Analysis Service & Immutable Decision Ledger — ACCEPTED / INTEGRATED
 
 Exact reviewed implementation SHA: `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`. Independent review: `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`.
-The review verdict is PASS; authoritative integration must be verified separately before TASK-007C starts.
+The review verdict is PASS and this implementation is included in the integrated baseline above.
 Implementation follows `prompts/tasks/TASK-007B_ON_DEMAND_PAQS_E_ANALYSIS_DECISION_LEDGER.md`. Reviewed scope:
 
 - explicit user-triggered Analyze service/API;
@@ -404,20 +435,17 @@ Implementation follows `prompts/tasks/TASK-007B_ON_DEMAND_PAQS_E_ANALYSIS_DECISI
 Terminal Analysis Runs and exact request/strategy/prompt evidence are append-only. Successful
 Decisions append revisions within `(security_id, strategy_id)`; provider/validation failures
 persist a failed run without a Decision. Bounded read APIs support TASK-007C. The independent
-review covers this exact implementation SHA and does not claim a later integration has occurred.
+review covers this exact implementation SHA; the current integrated status is recorded above.
 
-#### TASK-007C — PAQS-E User Dashboard — IMPLEMENTED / PENDING INDEPENDENT REVIEW
+#### TASK-007C — PAQS-E User Dashboard — ACCEPTED / INTEGRATED
 
-Task Contract: `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`. The user has authorized this next task; implementation begins only
-from its own committed contract after the reviewed TASK-007B baseline is authoritatively integrated.
-TASK-007C is implemented on its dedicated branch and pending independent review. It retains the existing JavaScript/CSS
-frontend and vendored Lightweight Charts for the first usable R20-style PAQS-E workbench.
-The contract, rather than R20 source or a historical planning prompt, bounds implementation.
-
-The workbench adds an explicit Analyze form, safe registered-strategy configuration GET,
-structured Decision reading, successful history, known Run lookup, and separate frozen evidence
-charts. See `docs/PAQS_E_WORKBENCH.md` for workflow and validation. No independent PASS or
-integration is claimed; this task stops for review.
+Task Contract: `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`.
+The accepted workbench retains JavaScript/CSS and vendored Lightweight Charts, explicit Analyze,
+truthful failure states, immutable history, known Run lookup and frozen evidence charts.
+TASK-007C1 extends the accepted UI with registered models, secure credentials, optional bounded
+research and Narrative-first results; TASK-007C2 cleans up presentation and awaits review.
+The original 007C structured presentation remains available for legacy Decision history.
+See `docs/PAQS_E_WORKBENCH.md` for the current workflow and limitations.
 
 Authorized scope direction:
 
@@ -439,7 +467,7 @@ Authorized scope direction:
 - prior immutable decisions displayed separately when explicitly requested;
 - no real-order controls.
 
-After TASK-007C passes independent review/integration, the product has a usable **current Snapshot-on-Demand PAQS-E MVP**. Historical As-Of evaluation remains a later validation capability and does not need to block current-analysis usability.
+TASK-007C has passed independent review and integration, delivering a usable **current Snapshot-on-Demand PAQS-E MVP**. Historical As-Of evaluation remains a later validation capability and does not need to block current-analysis usability.
 
 #### TASK-007D — Dual-Branch Comparison / Disagreement Dashboard
 
@@ -474,9 +502,9 @@ TASK-006B2 Snapshot-on-Demand Market Snapshot [DONE]
         ↓
 TASK-007A Doctrine Runtime + Structured Output + OpenAI Provider Port [DONE]
         ↓
-TASK-007B On-Demand Analysis + Immutable Decision Ledger [INDEPENDENT REVIEW PASS; VERIFY INTEGRATION]
+TASK-007B On-Demand Analysis + Immutable Decision Ledger [ACCEPTED / INTEGRATED]
         ↓
-TASK-007C PAQS-E Dashboard / Analyze workflow [IMPLEMENTED; PENDING INDEPENDENT REVIEW]
+TASK-007C PAQS-E Dashboard / Analyze workflow [ACCEPTED / INTEGRATED]
         ↓
 usable current-analysis PAQS-E MVP
         ↓
@@ -497,8 +525,8 @@ not an executable instruction or a replacement for current contracts.
 TASK-007C delivers the bounded current-analysis workbench first. Later task contracts stage
 prompt/model configuration, strategy-version inspection, research critique/council, reviewable
 improvement proposals, sourced news context, simulated bookkeeping and local operational tooling
-as assigned by the adoption record. Only TASK-007C is newly authorized for implementation now;
-paper/NAV remains dormant Phase 3 work. None expands TASK-007C or the current Analyze v1 input.
+as assigned by the adoption record. TASK-007C1 has delivered its separately approved model/credential/research scope; only TASK-007C2 UI cleanup is authorized now;
+paper/NAV remains dormant Phase 3 work. None authorizes extra Analyze fields beyond the current four-field Narrative request.
 PAQS-E doctrine/guardrails, explicit Analyze, immutable evidence, Futu quote-only access and no real
 account/execution boundary remain authoritative. No R20 online Python execution, OKX execution,
 automatic strategy mutation or secret-storage implementation is adopted wholesale.
@@ -622,7 +650,7 @@ Unnecessary infrastructure remains excluded: microservices, Kafka, distributed w
 - Codex receives only a short prompt pointing to repository, task branch, exact authoritative base SHA and Task Contract path.
 - Codex stops after its approved task and pushes only that task branch.
 - Independent GitHub review is required before remediation/integration.
-- One task passing does not by itself approve the next task. TASK-007C has separate explicit user authorization; its own committed contract and prerequisite integration still govern execution.
+- One task passing does not by itself approve the next task. TASK-007C2 has separate explicit authorization; its committed contract and exact integration prerequisite govern this execution.
 - Research memos/doctrines/amendments do not automatically authorize code changes; each Task Contract must state which research semantics it adopts.
 - Documentation and requirements must preserve data freshness, strict As-Of/no-lookahead, non-fabrication and read-only safety rules.
 - Accepted OpenAI integration remains bounded by TASK-007A; this Roadmap does not authorize additional provider capabilities or calls beyond later approved contracts.

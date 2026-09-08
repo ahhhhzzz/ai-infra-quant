@@ -23,8 +23,10 @@ def test_migrated_app_starts_offline_and_renders_dashboard(client: TestClient) -
     assert dashboard.status_code == 200
     text = dashboard.text.upper()
     assert "AI INFRA QUANT" in text
-    assert "PAPER BROKER: NOT IMPLEMENTED" in text
-    assert "LIVE ROUTES: ABSENT" in text
+    assert "READ ONLY · DECISION SUPPORT" in text
+    assert 'ID="SECURITY-SELECTOR"' in text
+    assert 'ID="DECISION-HISTORY"' in text
+    assert "PORTFOLIO FACTS AND LOCAL ADMINISTRATION" not in text
     assert "BUY" not in text and "SELL" not in text
 
 

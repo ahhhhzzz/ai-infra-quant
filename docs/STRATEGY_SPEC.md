@@ -1,5 +1,36 @@
 # PAQS-E / PAQS-Q Strategy Governance and Historical Research Specification
 
+## Current delivery status — 2026-09-08
+
+TASK-007A, TASK-007B and TASK-007C are accepted and integrated. TASK-007C1 is
+**USER_ACCEPTED / FUNCTIONALLY_CLOSED**, including the user's Research-ON confirmation.
+The authorized ordinary fast-forward of `roadmap/no-live-trading` from
+`0c1713d4409c69a45f8ce5e37951bba72d73d819` to
+`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4` has been executed and read back from GitHub.
+The integrated application is the reviewed `3e98d8c5f9948dcaefe59eb3b7b847bd99ba8908` tree,
+plus the independent review and user closeout documents. See the immutable
+[R06 review](reviews/TASK_007C1_REMEDIATION_06_INDEPENDENT_REVIEW.md) and
+[user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md) for evidence attribution.
+User acceptance is not a claim that the C2 implementer repeated paid provider tests or
+independently recomputed the user's local Run hashes. Historical pending/not-merged statements
+in original contracts, reports and reviews describe their original checkpoints and remain unchanged.
+
+TASK-007C2 is **implemented / pending independent review** on its task branch; it is not
+independently passed or integrated. Its bounded change repairs the credential dialog and removes
+the old opening portfolio cards and duplicate administration UI. The main watchlist, market
+quality/provenance, history and frozen evidence remain available. Backend compatibility APIs,
+existing databases, opening seed values and migrations 0001/0002/0003 are preserved; head remains
+`0003_task007c1_narrative_ledger`. See the [C2 report](reports/TASK_007C2_IMPLEMENTATION_REPORT.md).
+
+The normal explicit Analyze path is Narrative-first: one immutable Snapshot, optional bounded
+research, tool-free final reasoning, and exact final text persisted in the Narrative Ledger.
+Saving complete prose does not certify strategy semantics, Entry/Holder judgments or RR by machine.
+The legacy structured validator is unchanged and historical structured Runs/Decisions remain readable.
+Research defaults OFF and resets OFF on model changes. Refresh, credentials and history never Analyze.
+The product remains a read-only market and decision-support terminal, without initial asset cards
+in its normal UI. Paper/PaperFill, performance statistics, TASK-006B1, PAQS-Q successors, TASK-007D,
+and Phase 3/4 are not activated by this work; broker/account/trading capabilities remain forbidden.
+
 Status: **CURRENT STRATEGY GOVERNANCE + HISTORICAL RESEARCH REFERENCE**; implementation only through approved bounded Task Contracts
 
 Authority: `docs/ROADMAP.md` decisions `MTF-001`, `PAQS-MVP-001`, `PAQS-DUAL-001` and `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`
@@ -11,7 +42,7 @@ docs/research/PAQS_V0.3.1_COMPLETENESS_LOCK.md
 docs/research/PAQS_V0.3.1_REVIEW_AMENDMENT_A.md
 ```
 
-The PAQS research documents lock research semantics but are not implementation contracts. `PAQS_V0.3.1_REVIEW_AMENDMENT_A.md` governs where it is more specific than the base v0.3.1 document. Their deterministic staging is not the current PAQS-E implementation sequence. The accepted 007A/007B contracts and user-authorized 007C contract govern the current PAQS-E MVP; Q-side successors require separate contracts.
+The PAQS research documents lock research semantics but are not implementation contracts. `PAQS_V0.3.1_REVIEW_AMENDMENT_A.md` governs where it is more specific than the base v0.3.1 document. Their deterministic staging is not the current PAQS-E implementation sequence. The accepted 007A/007B/007C and 007C1 contracts govern the current PAQS-E MVP; Q-side successors require separate contracts.
 
 ## 1. Governance and supersession
 
@@ -31,9 +62,10 @@ The former completed-daily-only `AIInfraStrategy v1` formula proposal remains wi
 `PAQS-DUAL-001` prioritizes the PAQS-E current-analysis MVP and separates PAQS-Q reference work.
 TASK-007A adopts the registered `docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md`; its exact
 strategy/prompt hashes and deterministic guardrails remain authoritative. TASK-007B at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`
-has independent review PASS (`docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`), with integration verified separately. The next
-user-authorized task is `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md`; its UI consumes existing structured outputs and does not
-redefine the strategy. TASK-007C is not yet implemented.
+has independent review PASS (`docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`) and is integrated.
+TASK-007C and TASK-007C1 are also accepted/integrated; TASK-007C2 is presentation-only and
+awaits review. Narrative-first changes the result contract, not the PAQS-E master strategy.
+The legacy validator is retained unchanged; normal prose success is not semantic certification.
 
 R20 product capability adoption is governed by `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`. `docs/research/R20_ADOPTION_PLAN_AND_CODEX_PROMPT_ZH.md` is historical planning context.
 R20 strategy prompts, ATR thresholds, forced participation, leverage and confidence scoring are
@@ -87,7 +119,8 @@ Intraday Minute Adjustment
 
 `PAQS-MVP-001` clarifies that this numerical decomposition is not the causal strategy engine.
 
-The following historical deterministic research pipeline is retained for separately governed PAQS-Q work. PAQS-E uses snapshot-bound semantic reasoning and deterministic post-validation, not a required reconstruction of this state machine:
+The following historical deterministic research pipeline is retained for separately governed PAQS-Q work. Normal PAQS-E uses snapshot-bound Narrative reasoning without a structured semantic gate.
+Legacy structured outputs retain deterministic post-validation. Neither requires reconstructing this state machine:
 
 ```text
 Completed canonical market data
@@ -373,7 +406,6 @@ real-market checkpoint recorded `STRUCTURE_CONCERNS_FOUND`.
 No TASK-006C Event/Transition/Trigger behavior, Setup/Risk/Advisory behavior, numerical
 Quality/Ranking, broker write, or optional Phase 3/4 capability is implemented by TASK-006B.
 
-TASK-006B2 factual snapshots and TASK-007A runtime are accepted/integrated. TASK-007B independent
-review PASS is tied to `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` and `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`; this statement does not infer a later integration.
-TASK-007C is separately user-authorized for implementation from its committed contract after that
-baseline is integrated. Later R20 capabilities remain bounded by the adoption record and subsequent contracts.
+TASK-006B2 and TASK-007A/B/C are accepted/integrated. TASK-007C1 is user-accepted and
+integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`; TASK-007C2 is implemented pending
+independent review. Later R20 capabilities remain bounded by separate approved contracts.

@@ -39,9 +39,16 @@ def test_homepage_renders_market_first_read_only_dashboard(client: TestClient) -
         "READ ONLY · DECISION SUPPORT",
     ):
         assert required in page
-    assert page.index('aria-label="Market data Dashboard"') < page.index(
-        "Portfolio facts and local administration"
-    )
+    for retired in (
+        "Portfolio facts and local administration",
+        'id="equity"',
+        'id="nav"',
+        'id="watchlist-admin"',
+        'id="providers"',
+    ):
+        assert retired not in page
+    assert 'id="remove-selected"' in page
+    assert 'id="decision-history"' in page
 
 
 def test_dashboard_uses_canonical_watchlist_security_ids(client: TestClient) -> None:

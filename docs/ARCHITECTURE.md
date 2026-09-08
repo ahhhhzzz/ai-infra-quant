@@ -1,6 +1,37 @@
 # Architecture Specification
 
-Status: **AUTHORITATIVE — TASK-007A/B integrated; TASK-007C implemented / pending independent review**
+## Current delivery status — 2026-09-08
+
+TASK-007A, TASK-007B and TASK-007C are accepted and integrated. TASK-007C1 is
+**USER_ACCEPTED / FUNCTIONALLY_CLOSED**, including the user's Research-ON confirmation.
+The authorized ordinary fast-forward of `roadmap/no-live-trading` from
+`0c1713d4409c69a45f8ce5e37951bba72d73d819` to
+`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4` has been executed and read back from GitHub.
+The integrated application is the reviewed `3e98d8c5f9948dcaefe59eb3b7b847bd99ba8908` tree,
+plus the independent review and user closeout documents. See the immutable
+[R06 review](reviews/TASK_007C1_REMEDIATION_06_INDEPENDENT_REVIEW.md) and
+[user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md) for evidence attribution.
+User acceptance is not a claim that the C2 implementer repeated paid provider tests or
+independently recomputed the user's local Run hashes. Historical pending/not-merged statements
+in original contracts, reports and reviews describe their original checkpoints and remain unchanged.
+
+TASK-007C2 is **implemented / pending independent review** on its task branch; it is not
+independently passed or integrated. Its bounded change repairs the credential dialog and removes
+the old opening portfolio cards and duplicate administration UI. The main watchlist, market
+quality/provenance, history and frozen evidence remain available. Backend compatibility APIs,
+existing databases, opening seed values and migrations 0001/0002/0003 are preserved; head remains
+`0003_task007c1_narrative_ledger`. See the [C2 report](reports/TASK_007C2_IMPLEMENTATION_REPORT.md).
+
+The normal explicit Analyze path is Narrative-first: one immutable Snapshot, optional bounded
+research, tool-free final reasoning, and exact final text persisted in the Narrative Ledger.
+Saving complete prose does not certify strategy semantics, Entry/Holder judgments or RR by machine.
+The legacy structured validator is unchanged and historical structured Runs/Decisions remain readable.
+Research defaults OFF and resets OFF on model changes. Refresh, credentials and history never Analyze.
+The product remains a read-only market and decision-support terminal, without initial asset cards
+in its normal UI. Paper/PaperFill, performance statistics, TASK-006B1, PAQS-Q successors, TASK-007D,
+and Phase 3/4 are not activated by this work; broker/account/trading capabilities remain forbidden.
+
+Status: **AUTHORITATIVE — TASK-007A/B integrated; TASK-007C integrated; TASK-007C1 user-accepted/integrated; TASK-007C2 pending review**
 
 TASK-007C keeps the same FastAPI/Jinja/JavaScript/CSS monolith and local Lightweight Charts.
 `application/paqs_e_configuration.py` projects startup-validated registry metadata and effective
@@ -30,7 +61,7 @@ Application use cases
     +-- dynamic supported US/HK watchlist administration
     +-- market-data / calendar / session validation
     +-- PAQS input timeframe derivation
-    +-- explicit PAQS-E runtime / validation / immutable Decision evidence
+    +-- explicit PAQS-E Narrative / exact-text immutable evidence; legacy structured reads
     +-- separate PAQS-Q deterministic/reference work when approved
     |
 SQLite where approved persistence exists
@@ -42,7 +73,7 @@ Independent read-only boundary:
 Internal PAQS-E reasoning boundary (no public route in TASK-007A):
     application runtime -> provider-neutral reasoning port -> OpenAI Responses adapter
 
-TASK-007B explicit analysis boundary (independent review PASS; verify integration):
+TASK-007B explicit analysis boundary (accepted/integrated historical structured path):
     Analyze API -> application service -> current snapshot + TASK-007A runtime
                                       -> core Decision Ledger port -> SQLAlchemy transaction
 
@@ -67,7 +98,7 @@ composition root -> backend + application + database + integrations
 
 | Module/port | Owns | May consume | Must not own or call |
 |---|---|---|---|
-| Dashboard | Selector/watchlist UI, chart views, polling/countdown, later PAQS presentation | Canonical local API responses | Provider SDK objects, real account/execution concepts |
+| Dashboard | Selector/watchlist UI, chart views, polling/countdown, Narrative and Legacy presentation | Canonical local API responses | Provider SDK objects, real account/execution concepts |
 | Security/Watchlist | Canonical Security UUID identity and user-selected supported instruments | Provider-neutral security capability validation | Provider SDK objects in core, account state |
 | Market-data port | Quote, completed Daily/minute bars, market status, approved calendar/security metadata | Independent provider/import source | Brokerage-account access or execution |
 | PAQS input foundation | W1/D1/30m construction, session/calendar/coverage/adjustment metadata | Canonical market data | Provider SDK objects, broker/account state |
@@ -166,13 +197,15 @@ TASK-007C adds the explicitly authorized PAQS-E workbench under `prompts/tasks/T
 It retains JavaScript/CSS and vendored Lightweight Charts. Market-data refresh, page load,
 Security/model/strategy selection and history reads never trigger Analyze. Only the explicit Analyze
 action sends a new POST; existing Decisions retain their original snapshot/as-of metadata.
-No TASK-007C implementation or acceptance is claimed by this architecture update.
+TASK-007C is accepted/integrated. C1 supplies the current Narrative result workflow; C2
+cleans up the modal/old administration while preserving this lifecycle and awaits review.
 
 ## 7. PAQS causal architecture
 
-The current PAQS-E path is explicit Analyze -> immutable TASK-006B2 factual snapshot -> registered
-strategy/prompt and TASK-007A provider-neutral reasoning -> deterministic contract validation ->
-TASK-007B immutable evidence/Decision -> TASK-007C presentation. Storage is evidence, not strategy
+The current PAQS-E path is explicit Analyze -> immutable TASK-006B2 factual snapshot -> optional
+bounded research -> registered strategy/Narrative prompt -> tool-free NarrativeGateway -> immutable
+Narrative Run and exact-text Result -> safe Markdown/raw presentation. Legacy structured validation
+and TASK-007B evidence remain available for historical reads. Storage is evidence, not strategy
 or prompt authority, and prior Decisions are not implicit model context.
 
 PAQS-Q retains separately governed deterministic Structure/Event/Setup/Risk/Advisory research.
@@ -243,7 +276,7 @@ broker capability.
 ### TASK-007B — explicit Analyze and immutable analysis evidence
 
 TASK-007B independent review PASS covers `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`;
-evidence is `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`. Verify authoritative integration separately. The synchronous application service
+evidence is `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`. This implementation is integrated; the following describes the retained legacy path. The synchronous application service
 accepts only a supported Security UUID, explicit model ID and registered strategy ID. It obtains
 one fresh snapshot through `PaqsMarketSnapshotQueries`, loads the accepted registered strategy and
 versioned prompt, builds the complete TASK-007A request with server runtime configuration and
@@ -300,7 +333,7 @@ No microservices, queues, distributed workers, Kubernetes, multi-tenancy, high a
 | 3 | Dormant optional research/paper extensions; explicit reactivation required |
 | 4 | Dormant optional validation/backtest/analytics extensions; final possible phase |
 
-The current-analysis usability milestone is Phase 2 after TASK-007C passes review and integration. Further adopted product capabilities are staged by bounded contracts. No later phase exists after Phase 4.
+The current-analysis usability milestone was delivered in Phase 2 by accepted/integrated TASK-007C and extended by user-accepted/integrated TASK-007C1. Further adopted product capabilities are staged by bounded contracts. No later phase exists after Phase 4.
 
 ## 12. Supersession register
 
@@ -344,14 +377,15 @@ and their own contracts. No third-party product document can override the broker
 Accepted Phase 1 plan/review files remain immutable historical evidence and do not govern later PAQS future scope. Future docs/tasks must not rewrite them.
 
 
-### TASK-007C1 — registered models, credentials and bounded research (pending review)
+### TASK-007C1 — registered models, credentials and bounded research (accepted/integrated)
 
 The same monolith now resolves one model through `resources/paqs_e/model_registry.json`.
 `ModelCredentials` uses the provider-neutral `CredentialStore` port; Windows composition supplies
 Credential Manager with fixed per-service targets and no plaintext fallback. Status reads make
 no provider calls. Secrets enter only the selected HTTPS transport's Authorization header.
 
-The application freezes the Snapshot, resolves the model, optionally obtains bounded normalized
+The original C1 structured path described here was superseded for new analyses by R02 below.
+It freezes the Snapshot, resolves the model, optionally obtains bounded normalized
 web evidence, then builds the existing capsule and invokes the provider-neutral reasoning port.
 Compatible protocol handling remains under `integrations/openai_reasoning/`; Qwen uses documented
 Chat JSON Schema for reasoning and Responses for research. The final reasoning call has no tools,
@@ -390,9 +424,10 @@ boundary changes. No automatic retry/fallback, execution or prose-to-structured 
 
 ## TASK-007C1 Remediation 03: native research memo and safe presentation
 
-Only DeepSeek's optional research stage now requests and freezes one final native factual memo,
+R03 introduced DeepSeek's optional research stage, which requests and freezes one final native factual memo,
 without JSON/source-array compliance. The isolated `deepseek_research.py` normalizer checks a
-completed envelope, 1–10 completed search/page/find actions including a search, bounded actual
+completed envelope and bounded native search/page/find actions (the original R03 limits and
+all-completed rule are superseded by R04/R05/R06 below), bounded actual
 queries and optional native URLs, and an exact bounded memo. It records honest provenance and
 cutoff limitations; prose URLs and hidden reasoning never become source evidence. OpenAI/Alibaba
 source normalization, final `NarrativeGateway`, Narrative service/prompt/ledger and hashes are unchanged.
@@ -401,8 +436,8 @@ The local DOM-only `narrative-markdown.js` derives a safe formatted view from ex
 Raw text remains separately available. No HTML parser, remote renderer, executable model links/images,
 provider request or ledger mutation is involved in changing views. Research is unchecked initially
 and after every model change; explicit opt-in is never persisted. Migrations remain untouched at 0003.
-This implementation stops for independent review; the Contract's subsequent user-run DeepSeek
-research-ON live checkpoint on the exact final SHA is still required.
+The subsequent user Research-ON acceptance is recorded in the immutable C1 closeout linked above;
+this C2 change repeats no paid calls.
 
 ## TASK-007C1 Remediation 04: bounded stateless DeepSeek research
 

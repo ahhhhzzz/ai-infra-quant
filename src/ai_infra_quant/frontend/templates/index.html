@@ -173,16 +173,18 @@
             <p class="note">每次显式提交采集新快照。行情刷新不会运行分析。</p>
             <div id="analysis-state" class="analysis-state" role="status" aria-live="polite">尚未发起分析</div>
           </form>
-          <dialog id="credential-dialog">
+          <dialog id="credential-dialog" aria-labelledby="credential-title" aria-describedby="credential-storage">
             <form id="credential-form" autocomplete="off">
-              <h3>配置此模型 API Key</h3>
+              <h3 id="credential-title">配置此模型 API Key</h3>
               <p id="credential-service"></p>
-              <p class="note">仅保存在当前 Windows 用户的凭据管理器；存在不代表余额或权限已验证。</p>
-              <label>API Key<input id="credential-secret" type="password" autocomplete="new-password" maxlength="1024" required></label>
+              <p id="credential-storage" class="note">仅保存在当前 Windows 用户的凭据管理器；存在不代表余额或权限已验证。</p>
+              <label>API Key<input id="credential-secret" type="password" autocomplete="new-password" maxlength="1024" required autofocus></label>
               <p id="credential-status" role="status"></p>
-              <button id="credential-save" type="submit">安全保存 / 更新</button>
-              <button id="credential-delete" type="button">删除已保存凭据</button>
-              <button id="credential-close" type="button">关闭</button>
+              <div class="credential-actions">
+                <button id="credential-save" type="submit">安全保存 / 更新</button>
+                <button id="credential-delete" type="button">删除已保存凭据</button>
+                <button id="credential-close" type="button">关闭</button>
+              </div>
             </form>
           </dialog>
           <section class="analysis-results">
@@ -199,38 +201,6 @@
         </aside>
       </section>
 
-      <details class="local-admin">
-        <summary>Portfolio facts and local administration · Phase 1 历史本地开仓事实</summary>
-        <div class="admin-content">
-          <section class="summary-grid" aria-label="Opening portfolio facts">
-            <article><span>Portfolio equity</span><strong id="equity">—</strong></article>
-            <article><span>Cash</span><strong id="cash">—</strong></article>
-            <article><span>NAV</span><strong id="nav">—</strong></article>
-            <article><span>Units</span><strong id="units">—</strong></article>
-            <article><span>Invested</span><strong id="invested">—</strong></article>
-            <article><span>Since inception</span><strong id="return">—</strong></article>
-          </section>
-
-          <section class="admin-grid">
-            <article class="panel">
-              <div class="section-heading">
-                <div><p class="eyebrow">LOCAL IDENTITY</p><h2>Watchlist administration</h2></div>
-                <span id="admin-watchlist-status" class="small-status">Loading</span>
-              </div>
-              <div id="watchlist-admin" class="watchlist-admin"></div>
-            </article>
-
-            <article class="panel">
-              <p class="eyebrow">SYSTEM BOUNDARIES</p>
-              <h2>Provider capabilities</h2>
-              <p class="note">Paper Broker: NOT IMPLEMENTED</p>
-              <p class="note">Live routes: ABSENT</p>
-              <div id="providers" class="status-list"></div>
-            </article>
-          </section>
-
-        </div>
-      </details>
     </main>
     <script src="/static/vendor/lightweight-charts.standalone.production.js" defer></script>
     <script src="/static/app.js" defer></script>

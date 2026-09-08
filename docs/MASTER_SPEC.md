@@ -1,6 +1,37 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
-Status: **AUTHORITATIVE — PAQS-E Snapshot-on-Demand MVP; TASK-007B independently reviewed; TASK-007C authorized next**
+## Current delivery status — 2026-09-08
+
+TASK-007A, TASK-007B and TASK-007C are accepted and integrated. TASK-007C1 is
+**USER_ACCEPTED / FUNCTIONALLY_CLOSED**, including the user's Research-ON confirmation.
+The authorized ordinary fast-forward of `roadmap/no-live-trading` from
+`0c1713d4409c69a45f8ce5e37951bba72d73d819` to
+`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4` has been executed and read back from GitHub.
+The integrated application is the reviewed `3e98d8c5f9948dcaefe59eb3b7b847bd99ba8908` tree,
+plus the independent review and user closeout documents. See the immutable
+[R06 review](reviews/TASK_007C1_REMEDIATION_06_INDEPENDENT_REVIEW.md) and
+[user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md) for evidence attribution.
+User acceptance is not a claim that the C2 implementer repeated paid provider tests or
+independently recomputed the user's local Run hashes. Historical pending/not-merged statements
+in original contracts, reports and reviews describe their original checkpoints and remain unchanged.
+
+TASK-007C2 is **implemented / pending independent review** on its task branch; it is not
+independently passed or integrated. Its bounded change repairs the credential dialog and removes
+the old opening portfolio cards and duplicate administration UI. The main watchlist, market
+quality/provenance, history and frozen evidence remain available. Backend compatibility APIs,
+existing databases, opening seed values and migrations 0001/0002/0003 are preserved; head remains
+`0003_task007c1_narrative_ledger`. See the [C2 report](reports/TASK_007C2_IMPLEMENTATION_REPORT.md).
+
+The normal explicit Analyze path is Narrative-first: one immutable Snapshot, optional bounded
+research, tool-free final reasoning, and exact final text persisted in the Narrative Ledger.
+Saving complete prose does not certify strategy semantics, Entry/Holder judgments or RR by machine.
+The legacy structured validator is unchanged and historical structured Runs/Decisions remain readable.
+Research defaults OFF and resets OFF on model changes. Refresh, credentials and history never Analyze.
+The product remains a read-only market and decision-support terminal, without initial asset cards
+in its normal UI. Paper/PaperFill, performance statistics, TASK-006B1, PAQS-Q successors, TASK-007D,
+and Phase 3/4 are not activated by this work; broker/account/trading capabilities remain forbidden.
+
+Status: **AUTHORITATIVE — PAQS-E Snapshot-on-Demand MVP; TASK-007A/B/C integrated; TASK-007C1 user-accepted/integrated; TASK-007C2 pending review**
 
 Superseding future-scope decisions:
 
@@ -35,7 +66,7 @@ The committed MVP should let the user:
 - maintain supported US/HK securities in a local watchlist;
 - inspect truthful latest/Daily/recent-minute market data;
 - explicitly request current PAQS-E expert analysis over one immutable market snapshot;
-- inspect structured context, event/setup, structural invalidation/target and RR;
+- read model-generated Narrative analysis and separately retained legacy structured context/levels/RR;
 - retain the historical deterministic PAQS structure implementation as PAQS-Q reference work;
 - receive conditional Entry and Holder advisory;
 - review immutable analysis evidence and Decision revisions;
@@ -62,8 +93,9 @@ During an active visible Dashboard session, market-data display may refresh appr
 Security-generation guards. This refresh obtains bounded quotes/completed Daily/minute data,
 validates provenance/session/quality, and redraws charts; it never triggers PAQS-E reasoning.
 
-Only an explicit Analyze action freezes one current TASK-006B2 snapshot, invokes TASK-007A once,
-and persists a terminal TASK-007B Analysis Run and, on validated success, a new immutable Decision.
+Only an explicit Analyze action freezes one current TASK-006B2 snapshot, optionally obtains bounded
+research, invokes tool-free Narrative reasoning and persists a terminal Narrative Run and, on success,
+an exact-text Narrative Result. The accepted TASK-007A/B structured runtime/ledger is historical.
 Changing Security/model/strategy, loading a page, reading history or receiving a new quote does not
 implicitly Analyze. A prior Decision keeps its original snapshot/as-of identity and is never updated
 by chart refresh. No hidden Decision memory or background strategy execution is introduced.
@@ -83,8 +115,9 @@ Ordinary HTTP/REST remains sufficient for the local MVP; no streaming execution 
 - dynamic supported US/HK watchlist implemented under TASK-006A;
 - PAQS input/session/calendar foundation implemented under TASK-006A;
 - accepted TASK-006B2 factual snapshots and TASK-007A structured PAQS-E runtime;
-- reviewed TASK-007B explicit Analyze and immutable evidence/Decision revisions;
-- authorized TASK-007C user workbench, pending implementation and review;
+- accepted/integrated TASK-007B immutable structured evidence and TASK-007C workbench;
+- accepted/integrated TASK-007C1 Narrative-first analysis, secure models and optional research;
+- implemented TASK-007C2 credential layout and administration cleanup, pending independent review;
 - conditional Entry/Holder advisory;
 - lightweight explanation/reason codes;
 - immutable Decision history; optional Quality/Ranking only under a separate approved contract;
@@ -144,8 +177,9 @@ Browser
           -> market-data queries
           -> supported-security/watchlist administration
           -> PAQS input/session/calendar preparation
-          -> explicit PAQS-E Analyze -> runtime/provider port -> deterministic validation
-          -> immutable Analysis Run / Decision Ledger and user-requested history
+          -> explicit PAQS-E Analyze -> optional research -> tool-free Narrative provider
+          -> immutable Narrative Run / exact-text Result and user-requested history
+          -> legacy structured Run / Decision reads with unchanged historical validator
           -> separately scoped PAQS-Q reference work
               -> SQLite only where approved persistence exists
 
@@ -212,8 +246,9 @@ Provider current-QFQ data must not automatically be described as strict point-in
 
 PAQS-E is the current prioritized expert-reasoning branch. Its accepted runtime loads the registered
 `docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md` and versioned prompt; immutable current
-snapshot facts enter the provider-neutral reasoning port and deterministic post-validation checks
-identity, factual/arithmetic and risk/permission discipline without replacing semantic judgment.
+snapshot facts enter the Narrative provider-neutral port. New final text is preserved without a
+structured semantic validator gate. Legacy post-validation remains unchanged for historical
+structured evidence; neither text persistence nor formatting certifies strategy/RR correctness.
 
 PAQS-Q is a separate deterministic/reference branch. Historical v0.3.x research and 006B structure
 rules must not silently become required PAQS-E thresholds or a prerequisite to the 007C workbench.
@@ -225,11 +260,11 @@ calibrated probability without separate evidence and approval.
 
 ## 9. Dashboard product contract
 
-The Dashboard retains accepted market-data, watchlist, chart and refresh behavior. The user-authorized
-TASK-007C contract is `prompts/tasks/TASK-007C_PAQS_E_USER_DASHBOARD.md` and is not yet implemented. Its first R20-style workbench uses
-existing JavaScript/CSS and vendored Lightweight Charts, with explicit independent model/registered
-strategy selection, Analyze, structured PAQS-E result and truthful failure states, snapshot/as-of
-identity, and user-requested immutable Decision history.
+The Dashboard retains accepted market-data, watchlist, chart and refresh behavior. TASK-007C is
+accepted and integrated. TASK-007C1 adds the accepted registered-model/secure-credential/research
+workflow and exact-text Narrative results, with safe local Markdown and raw views. TASK-007C2
+repairs the credential dialog and retires old initial-account cards/duplicate administration.
+The normal view preserves Narrative/Legacy history, known Runs, identity and frozen evidence.
 
 Chart refresh must not relabel an old Decision as current. Entry and conditional Holder advisory
 remain separate; invalidation, targets, RR, uncertainty and alternative evidence remain visible.
@@ -266,12 +301,10 @@ The authoritative phases remain 0 through 4: historical definition, accepted fou
 Phase 2 decision terminal, and optional Phase 3/4 extensions as assigned by the Roadmap/adoption record.
 Phase 4 is the final possible phase; no execution phase exists.
 
-Current sequence is TASK-006B2 accepted immutable snapshots -> TASK-007A accepted runtime ->
-TASK-007B independent review PASS at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` ->
-TASK-007C user-authorized workbench -> usable current-analysis PAQS-E MVP.
-Review evidence: `docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`. Verify authoritative integration of the reviewed implementation
-before starting the separately committed TASK-007C contract. Neither this status nor a PASS review
-claims that integration or TASK-007C completion has already occurred.
+Current sequence: TASK-006B2 -> TASK-007A/B/C accepted and integrated -> TASK-007C1
+user-accepted and integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4` -> TASK-007C2
+implemented, awaiting independent review. The evidence attribution and preserved historical
+records are linked in the current delivery status above. No next task is authorized.
 
 TASK-006A is integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B deterministic
 implementation is integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`; its real-market

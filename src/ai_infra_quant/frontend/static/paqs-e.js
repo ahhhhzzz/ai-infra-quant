@@ -640,7 +640,10 @@
     } catch (_error) { $("credential-status").textContent = "无法读取凭据状态。"; }
   });
   $("credential-close").addEventListener("click", () => $("credential-dialog").close());
-  $("credential-dialog").addEventListener("close", () => { $("credential-secret").value = ""; });
+  $("credential-dialog").addEventListener("close", () => {
+    $("credential-secret").value = "";
+    $("configure-credential").focus();
+  });
   async function mutateCredential(method) {
     if (credentialBusy || !credentialModel) return;
     credentialBusy = true;
