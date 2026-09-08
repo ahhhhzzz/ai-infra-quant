@@ -40,6 +40,65 @@ def _safe_id(value: object) -> str | None:
     )
 
 
+def _search_counts(response: object) -> dict[str, int]:
+    """Count exposed slots, never copy their text. Omit totals with unknowable shapes."""
+    if not isinstance(response, dict) or not isinstance(response.get("output"), list):
+        return {}
+    output = response["output"]
+    if len(output) > 128 or any(not isinstance(item, dict) for item in output):
+        return {}
+    queries = sources = unknown = 0
+    queries_known = sources_known = actions_known = True
+    for item in output:
+        if item.get("type") == "web_search_call":
+            action = item.get("action")
+            if not isinstance(action, dict):
+                queries_known = sources_known = actions_known = False
+                continue
+            if action.get("type") not in ("search", "open_page", "find_in_page"):
+                unknown += 1
+            if action.get("type") == "search":
+                for field, value in action.items():
+                    if field == "queries":
+                        if isinstance(value, list):
+                            queries = min(1024, queries + len(value))
+                        else:
+                            queries_known = False
+                    elif field == "query":
+                        queries = min(1024, queries + 1)
+                records = action.get("sources", [])
+                if isinstance(records, list):
+                    sources = min(1024, sources + len(records))
+                else:
+                    sources_known = False
+        elif item.get("type") == "message":
+            parts = item.get("content")
+            if not isinstance(parts, list) or len(parts) > 1024:
+                sources_known = False
+                continue
+            for part in parts:
+                if not isinstance(part, dict):
+                    sources_known = False
+                    continue
+                annotations = part.get("annotations", [])
+                if not isinstance(annotations, list) or len(annotations) > 1024:
+                    sources_known = False
+                    continue
+                for annotation in annotations:
+                    if not isinstance(annotation, dict):
+                        sources_known = False
+                    elif annotation.get("type") == "url_citation":
+                        sources = min(1024, sources + 1)
+    result = {}
+    if queries_known:
+        result["provider_exposed_query_count"] = queries
+    if sources_known:
+        result["raw_source_record_count"] = sources
+    if actions_known:
+        result["unknown_action_count"] = unknown
+    return result
+
+
 def _diagnostic(
     model: ModelDescriptor,
     stage: Literal["SEARCH", "SYNTHESIS"],
@@ -54,6 +113,7 @@ def _diagnostic(
     status = envelope.get("status")
     incomplete = envelope.get("incomplete_details")
     reason = incomplete.get("reason") if isinstance(incomplete, dict) else None
+    search_counts = _search_counts(response)
     return ResearchDiagnostic(
         stage=stage,
         failure_class=failure_class,
@@ -76,6 +136,9 @@ def _diagnostic(
         incomplete_reason=reason
         if isinstance(reason, str) and reason in {"max_output_tokens", "content_filter"}
         else None,
+        provider_exposed_query_count=search_counts.get("provider_exposed_query_count"),
+        raw_source_record_count=search_counts.get("raw_source_record_count"),
+        unknown_action_count=search_counts.get("unknown_action_count"),
     )
 
 

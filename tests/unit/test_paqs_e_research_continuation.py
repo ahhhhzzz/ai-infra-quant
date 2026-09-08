@@ -138,7 +138,7 @@ def corrupt(response: dict[str, Any], case: str) -> object:
     elif case == "action-incomplete":
         response["output"][0]["status"] = "incomplete"
     elif case == "query-limit":
-        response["output"][0]["action"]["queries"] = ["actual"] * 5
+        response["output"][0]["action"]["queries"] = ["actual"] * 257
     elif case == "passback-limit":
         response["output"][0]["restore"] = "x" * 2_000_001
     elif case == "source-limit":

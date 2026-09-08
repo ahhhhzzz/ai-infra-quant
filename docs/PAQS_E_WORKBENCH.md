@@ -67,6 +67,9 @@ explicit cutoff-verification limitation; its prose URLs are not verified sources
 is never remembered across reloads or restored from history. Enabling research can add latency and
 API cost: it may issue up to two additional research requests before final analysis. A research
 failure may show bounded stage/class/request/action counts for review, never the raw provider body.
+R05 may also show numeric query, source-record and unknown-action counts. Query text and source
+URLs never appear in these failure diagnostics. Successful DeepSeek research evidence separately
+records total exposed query count and whether the bounded captured query prefix is complete.
 It retains the prior Narrative and does not retry. The primary history lists
 Narrative Results with a bounded preview. The collapsed **Legacy 结构化 Decision 历史（只读）** section
 retains old structured Decisions and their original structured details and frozen evidence. They are

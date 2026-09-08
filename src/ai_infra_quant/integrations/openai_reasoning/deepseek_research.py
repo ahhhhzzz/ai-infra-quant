@@ -81,8 +81,38 @@ def parse_native_search(
     texts: list[str] = []
     actions: list[str] = []
     queries: list[str] = []
+    query_count = query_characters = captured_characters = 0
+    query_capture_complete = True
     records: list[dict[str, Any]] = []
     calls: list[dict[str, Any]] = []
+
+    def capture_queries(values: object) -> None:
+        nonlocal query_count, query_characters, captured_characters, query_capture_complete
+        if not isinstance(values, list) or query_count + len(values) > 256:
+            raise ValueError("Structural query count bound")
+        for query in values:
+            if (
+                not isinstance(query, str)
+                or not query.strip()
+                or len(query) > 500
+                or re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]", query)
+            ):
+                raise ValueError("Query integrity bound")
+            query.encode("utf-8", errors="strict")
+            query_count += 1
+            query_characters += len(query)
+            if query_characters > 64_000:
+                raise ValueError("Structural query character bound")
+            # Capture a whole-query prefix only; validate/count even after capture stops.
+            if (
+                query_capture_complete
+                and len(queries) < 16
+                and captured_characters + len(query) <= 4000
+            ):
+                queries.append(query)
+                captured_characters += len(query)
+            else:
+                query_capture_complete = False
 
     def remember(values: object) -> None:
         if not isinstance(values, list) or any(not isinstance(v, dict) for v in values):
@@ -109,14 +139,12 @@ def parse_native_search(
                 raise ValueError("Action bound")
             calls.append(deepcopy(item))
             if action_type == "search":
-                values = action.get("queries", [action["query"]] if "query" in action else [])
-                if not isinstance(values, list) or any(
-                    not isinstance(q, str) or not q.strip() or len(q) > 500 for q in values
-                ):
-                    raise ValueError("Query bound")
-                queries.extend(values)
-                if len(queries) > 4:
-                    raise ValueError("Query count")
+                # Both native forms count when exposed; preserve their received order.
+                for field, value in action.items():
+                    if field == "queries":
+                        capture_queries(value)
+                    elif field == "query":
+                        capture_queries([value])
                 remember(action.get("sources", []))
             continue
         texts.append(final_memo(item))
@@ -196,6 +224,8 @@ def parse_native_search(
             "search_action_count": actions.count("search"),
             "action_types": actions,
             "queries": queries,
+            "provider_exposed_query_count": query_count,
+            "query_capture_complete": query_capture_complete,
             "sources": [source for url, source in sources.items() if url not in future],
             "excluded_future_source_count": len(future),
             "limitation": LIMITATION,

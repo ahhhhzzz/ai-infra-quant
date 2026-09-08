@@ -419,3 +419,14 @@ adds that safe projection to the existing precondition error. No failure Run/Res
 The UI discloses up to two additional research requests and shows only fixed diagnostic fields.
 Other providers, NarrativeGateway, ledger/lineage, strategy/prompt, validator, Markdown/raw views,
 default-OFF opt-in, credentials, source handshake and no-live-trading boundaries are unchanged.
+
+## TASK-007C1 Remediation 05: provider-owned DeepSeek multiplicity
+
+R05 removes DeepSeek's normal four-query acceptance cap while keeping R04's complete request
+state machine and request bodies unchanged. The parser validates every query with structural
+limits of 256 queries / 64,000 characters; provenance captures only an ordered whole-query prefix
+of 16 queries / 4,000 characters with total count and capture-completeness metadata. Native calls
+remain unchanged for transient stateless pass-back. Action/output/source bounds remain 64/128/64.
+The diagnostic projection adds three optional bounded numeric counts and no text/body fields.
+Other providers, NarrativeGateway, schemas/lineage/migrations, strategy/prompt/validator, Markdown,
+credentials, default-OFF intent and no-live-trading semantics remain unchanged.

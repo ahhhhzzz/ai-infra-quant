@@ -27,6 +27,9 @@ class ResearchDiagnostic:
     message_count: int = 0
     incomplete_reason: str | None = None
     detail_version: str = "paqs-e-research-diagnostic-v1"
+    provider_exposed_query_count: int | None = None
+    raw_source_record_count: int | None = None
+    unknown_action_count: int | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -52,6 +55,15 @@ class ResearchDiagnostic:
         for count in (self.web_search_call_count, self.search_action_count, self.message_count):
             if type(count) is not int or not 0 <= count <= 129:
                 raise ValueError("Unsafe research count")
+        for optional_count in (
+            self.provider_exposed_query_count,
+            self.raw_source_record_count,
+            self.unknown_action_count,
+        ):
+            if optional_count is not None and (
+                type(optional_count) is not int or not 0 <= optional_count <= 1024
+            ):
+                raise ValueError("Unsafe research diagnostic count")
 
     def as_dict(self) -> dict[str, object]:
         return {key: value for key, value in asdict(self).items() if value is not None}

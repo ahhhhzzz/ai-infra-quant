@@ -169,7 +169,7 @@ def test_native_memo_fails_closed_without_retry(case: str) -> None:
     elif case == "part-shape":
         response["output"][-1]["content"] = [None]
     elif case == "queries":
-        action["queries"] = ["q"] * 5
+        action["queries"] = ["q"] * 257
     elif case == "query-length":
         action["query"] = "q" * 501
     elif case == "url":

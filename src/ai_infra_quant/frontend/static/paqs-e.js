@@ -558,7 +558,10 @@
       || ![1, 2].includes(value.research_http_request_count)) return "";
     const fields = [value.web_search_call_count, value.search_action_count, value.message_count];
     if (!fields.every((count) => Number.isInteger(count) && count >= 0 && count <= 129)) return "";
-    return `研究诊断：${value.stage} / ${value.failure_class}；请求 ${value.research_http_request_count}，研究动作 ${fields[0]}，搜索 ${fields[1]}，消息 ${fields[2]}。`;
+    const additional = [["provider_exposed_query_count", "查询"], ["raw_source_record_count", "来源记录"], ["unknown_action_count", "未知动作"]];
+    const suffix = additional.filter(([key]) => Number.isInteger(value[key]) && value[key] >= 0 && value[key] <= 1024)
+      .map(([key, label]) => `${label} ${value[key]}`).join("，");
+    return `研究诊断：${value.stage} / ${value.failure_class}；请求 ${value.research_http_request_count}，研究动作 ${fields[0]}，搜索 ${fields[1]}，消息 ${fields[2]}。${suffix ? `${suffix}。` : ""}`;
   }
 
   function onSecurity(item) {

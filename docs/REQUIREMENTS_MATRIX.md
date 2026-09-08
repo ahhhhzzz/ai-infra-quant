@@ -305,3 +305,18 @@ It preserves other providers' research guarantees and all Narrative/legacy persi
 
 R04 supersedes only DeepSeek's one-request/final-message-in-first-response/ten-output-item
 assumptions. Accepted historical reports and reviews remain unchanged.
+
+## TASK-007C1 Remediation 05 (implemented; independent review pending)
+
+| Requirement | Implementation / evidence |
+|---|---|
+| DeepSeek >4 searches/queries accepted; live-like 20 calls / 6 searches / 0 messages | `test_paqs_e_search_multiplicity.py` direct/optional-synthesis regressions |
+| Validate all queries; 256 / 64,000 structural bounds; 16 / 4,000 ordered prefix capture | Query type/UTF-8/control/size, duplicate/order/boundary/after-capture tests |
+| Truthful query count and capture completeness | Unit and API tests covering six and 37 queries with full/truncated capture |
+| Safe numeric query/source/unknown-action failure diagnostics | Unit and browser tests for malformed/overflow/secret-tainted data and exact integer validation |
+| R04 request counts, pass-back, final tool-free Narrative and immutable hashes/rows/schema | R04 suites plus `test_paqs_e_search_multiplicity_api.py`; no migration or retry |
+| Protected OFF path, Markdown/default-OFF, registry/credentials/source/strategy/ledger | R05 report protected-file audit and full deterministic validation |
+| Final live gate | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one explicit DeepSeek V4 Flash Research-ON attempt on exact reviewed R05 SHA; no automatic retry or merge |
+
+R05 supersedes only normal DeepSeek four-query rejection and bounded query capture/diagnostics.
+It does not prove that query multiplicity was the only cause of the prior live failure.

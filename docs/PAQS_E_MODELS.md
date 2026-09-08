@@ -79,7 +79,8 @@ or a real connection failure. It neither aborts nor retries.
 
 Remediation 04 preserves DeepSeek's exact provider-native factual research memo and accepts up to
 64 completed native actions in at most 128 output items: `search`, `open_page`, and `find_in_page`, including
-at least one search. Exposed queries are retained (maximum four, each 500 characters); missing
+at least one search. R05 validates each exposed query (non-empty, UTF-8, control-safe, at most
+500 characters) with structural limits of 256 queries and 64,000 total query characters. Missing
 queries or native sources alone no longer prevent success. No JSON result or source-array output
 is requested. Memo text is capped at 24,000 Unicode characters, and memo + provenance + label
 together must fit the existing 24,000-character research budget; excess fails without truncation.
@@ -87,6 +88,15 @@ One item freezes the exact memo, a null memo publication timestamp, safe respons
 retrieval/intent/As-Of, ordered actions, actual queries, optional native sources and an explicit
 limitation: cutoff compliance was requested but cannot be independently verified for every statement;
 Snapshot market facts take precedence. No hidden reasoning or raw envelope is retained.
+
+More than four searches or exposed queries no longer causes DeepSeek acceptance failure. Query
+capture retains only an ordered prefix of at most 16 whole queries / 4,000 characters. The first
+query that cannot fit stops capture, even if a later shorter query could fit. All exposed queries
+are still validated and counted, including duplicates and entries after capture stops. Native
+`query` and `queries` fields, when both exposed, count in their received order. Provenance adds
+`provider_exposed_query_count` and `query_capture_complete`; omitted queries are never fabricated
+or silently presented as a complete list. The SEARCH instruction's four-query request is advisory,
+not a provider billing guarantee or a post-hoc success rule.
 
 SEARCH forces the sole native web-search tool with `reasoning.effort=none` and a 6,000-token cap.
 One valid final memo takes the direct path, using one research request. Only a completed valid
@@ -107,6 +117,11 @@ status/id, stage-local action/search/message counts (saturated at 129), synthesi
 HTTP request count, and only allowlisted incomplete reasons. No memo, raw body, hidden prompt,
 exception text, reasoning or credential is included. The UI shows only fixed stage/class/count
 fields, preserving the prior Narrative and never retrying. Diagnostics are not stored in the ledger.
+R05 adds optional `provider_exposed_query_count`, `raw_source_record_count` and
+`unknown_action_count`, exact integers saturated at 1024. Failure diagnostics count exposed query
+slots, including invalid individual values on rejected envelopes; successful provenance counts
+only valid queries. Unknown container shapes omit the affected totals. The client displays only
+validated numeric values, never queries, URLs, source titles, raw detail or diagnostic JSON.
 
 Optional native source/citation records are capped at 64 before deduplication. URLs must be explicit
 HTTP(S), at most 1,000 characters, with a hostname and no userinfo, whitespace/control characters or
@@ -117,8 +132,9 @@ their existing four-action, search-only source-normalized behavior and source-sp
 
 OpenAI also receives `max_tool_calls=4`. DeepSeek documents that this option is ignored and its
 server-side auto-continuation limit is ten rounds; Qwen does not document an equivalent request
-cap. For these providers four is an **acceptance bound on reported evidence**, not a guarantee of
-provider-internal billed searches. One HTTP attempt can contain multiple native searches. The
+cap. OpenAI/Alibaba retain their four-query acceptance bounds. DeepSeek's normal multiplicity is
+provider-owned; its 256-query anti-abuse limit is not a billing guarantee. One HTTP attempt can
+contain multiple native searches. The
 adapter rejects results exceeding the evidence bound and never continues with silent truncation.
 This provider-side cost-control limitation remains visible for independent review and live smoke.
 
@@ -186,6 +202,6 @@ network fixtures for business scenarios. Unit/integration tests inject synthetic
 No real-provider call is part of ordinary tests. The R03 Contract records successful research-OFF
 live acceptance at `74a19387adc408e9453c30fdbb30e6636ac4e695`; this remediation preserves that final
 provider/prompt/ledger path. After independent review, the mandatory remaining live check is one
-explicit DeepSeek V4 Flash research-ON attempt on the exact reviewed final R04 SHA using the user's locally
+explicit DeepSeek V4 Flash research-ON attempt on the exact reviewed final R05 SHA using the user's locally
 entered key. Record safe Run/Result identities, exact response/request hash verification, frozen
 memo/provenance and formatted/raw readability. This does not claim that live ON gate or integration.
