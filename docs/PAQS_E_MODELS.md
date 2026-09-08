@@ -78,8 +78,14 @@ research output limit is 6,000 tokens and each transport timeout is 120 seconds.
 or a real connection failure. It neither aborts nor retries.
 
 Remediation 04 preserves DeepSeek's exact provider-native factual research memo and accepts up to
-64 completed native actions in at most 128 output items: `search`, `open_page`, and `find_in_page`, including
-at least one search. R05 validates each exposed query (non-empty, UTF-8, control-safe, at most
+64 native actions in at most 128 output items: `search`, `open_page`, and `find_in_page`, including
+at least one completed search. R06 accepts item statuses `completed`, `in_progress`, `incomplete`,
+`failed`, and `cancelled` only inside a top-level completed SEARCH. Missing/null/unknown statuses,
+unknown action types, and malformed action objects fail closed. Only completed actions are
+successful evidence and enter stateless pass-back, unchanged and in original order. Recognized
+partial action queries/sources are ignored, never trusted, retained, or passed back. Zero completed
+searches fails `NO_COMPLETED_SEARCH`, even with a direct memo or completed page/find actions.
+R05 validates each exposed query from completed searches (non-empty, UTF-8, control-safe, at most
 500 characters) with structural limits of 256 queries and 64,000 total query characters. Missing
 queries or native sources alone no longer prevent success. No JSON result or source-array output
 is requested. Memo text is capped at 24,000 Unicode characters, and memo + provenance + label
@@ -91,7 +97,7 @@ Snapshot market facts take precedence. No hidden reasoning or raw envelope is re
 
 More than four searches or exposed queries no longer causes DeepSeek acceptance failure. Query
 capture retains only an ordered prefix of at most 16 whole queries / 4,000 characters. The first
-query that cannot fit stops capture, even if a later shorter query could fit. All exposed queries
+query that cannot fit stops capture, even if a later shorter query could fit. All completed-search queries
 are still validated and counted, including duplicates and entries after capture stops. Native
 `query` and `queries` fields, when both exposed, count in their received order. Provenance adds
 `provider_exposed_query_count` and `query_capture_complete`; omitted queries are never fabricated
@@ -108,7 +114,9 @@ no previous-response/conversation/background state. Serialized research requests
 are capped at 2 MB. An invalid SEARCH never triggers SYNTHESIS; neither stage retries.
 The final unchanged tool-free Narrative runs only after the exact accepted memo is frozen.
 Research-OFF uses zero research calls; ON uses one or two, thus two or three total provider calls.
-Safe provenance records SEARCH status/id/counts/actions, optional SYNTHESIS id, synthesis use,
+Safe provenance records total SEARCH action/search counts, per-status counts, completed/non-completed
+search counts, and completed-only `native_action_count`/ordered `action_types`, queries and sources.
+It also records SEARCH status/id, optional SYNTHESIS id, synthesis use,
 and research HTTP request count. Ten provider continuation rounds do not imply ten output items.
 
 Research precondition errors retain their existing API code and create no Run/Result. Optional
@@ -122,6 +130,19 @@ R05 adds optional `provider_exposed_query_count`, `raw_source_record_count` and
 slots, including invalid individual values on rejected envelopes; successful provenance counts
 only valid queries. Unknown container shapes omit the affected totals. The client displays only
 validated numeric values, never queries, URLs, source titles, raw detail or diagnostic JSON.
+
+R06 adds an allowlisted application `boundary_code` identifying the actual rejecting rule. Parser
+failures carry numeric observations from the bounded input plus the code raised at that rule;
+encoding and URL errors are classified at their own boundaries, never via exception strings.
+The new optional counts are `completed_action_count`, `in_progress_action_count`,
+`incomplete_action_count`, `failed_action_count`, `cancelled_action_count`, `completed_search_count`,
+`non_completed_search_count`, `missing_or_unknown_status_count`, `invalid_query_value_count`,
+`malformed_action_count`, and `unexpected_output_item_count`. Each is an exact integer 0–1024;
+unknown totals are omitted. Counts describe observations, not successful evidence. Query/source
+slot counts and invalid-query inspection exclude partial actions. A recognized status can be
+counted even when its action shape subsequently fails. Secret-tainted responses are not reparsed
+for detailed counts or boundary codes. The UI validates enums and numbers independently and
+never displays provider IDs, private strings or raw JSON. Diagnostics remain ephemeral.
 
 Optional native source/citation records are capped at 64 before deduplication. URLs must be explicit
 HTTP(S), at most 1,000 characters, with a hostname and no userinfo, whitespace/control characters or
@@ -202,6 +223,6 @@ network fixtures for business scenarios. Unit/integration tests inject synthetic
 No real-provider call is part of ordinary tests. The R03 Contract records successful research-OFF
 live acceptance at `74a19387adc408e9453c30fdbb30e6636ac4e695`; this remediation preserves that final
 provider/prompt/ledger path. After independent review, the mandatory remaining live check is one
-explicit DeepSeek V4 Flash research-ON attempt on the exact reviewed final R05 SHA using the user's locally
+explicit DeepSeek V4 Flash research-ON attempt on the exact reviewed final R06 SHA using the user's locally
 entered key. Record safe Run/Result identities, exact response/request hash verification, frozen
 memo/provenance and formatted/raw readability. This does not claim that live ON gate or integration.

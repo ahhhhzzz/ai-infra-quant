@@ -70,6 +70,11 @@ failure may show bounded stage/class/request/action counts for review, never the
 R05 may also show numeric query, source-record and unknown-action counts. Query text and source
 URLs never appear in these failure diagnostics. Successful DeepSeek research evidence separately
 records total exposed query count and whether the bounded captured query prefix is complete.
+R06 adds an exact safe boundary code, per-status action counts, completed/non-completed search
+counts, and bounded malformed/invalid counters. For example, `边界 ACTION_STATUS` identifies the
+application status check. Unknown codes and invalid numeric fields are omitted. Partial native
+actions contribute no trusted queries/sources and are never restored for synthesis; at least one
+completed search remains mandatory. Successful evidence counts only validated completed queries.
 It retains the prior Narrative and does not retry. The primary history lists
 Narrative Results with a bounded preview. The collapsed **Legacy 结构化 Decision 历史（只读）** section
 retains old structured Decisions and their original structured details and frozen evidence. They are

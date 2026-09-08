@@ -9,6 +9,32 @@ from ai_infra_quant.core.domain.paqs_e_reasoning import AuxiliaryContextItem
 from ai_infra_quant.core.domain.paqs_market_snapshot import PaqsMarketSnapshot
 from ai_infra_quant.core.ports.paqs_e_reasoning import ReasoningFailureKind
 
+RESEARCH_BOUNDARY_CODES = frozenset(
+    {
+        "SEARCH_ENVELOPE",
+        "SEARCH_OUTPUT_SHAPE",
+        "ACTION_SHAPE",
+        "ACTION_TYPE",
+        "ACTION_STATUS",
+        "ACTION_BOUND",
+        "NO_COMPLETED_SEARCH",
+        "QUERY_STRUCTURE",
+        "QUERY_INTEGRITY",
+        "QUERY_STRUCTURAL_BOUND",
+        "SOURCE_STRUCTURE",
+        "SOURCE_BOUND",
+        "SOURCE_URL",
+        "MESSAGE_SHAPE",
+        "MESSAGE_INTEGRITY",
+        "PASSBACK_BOUND",
+        "PROVENANCE_BOUND",
+        "SYNTHESIS_ENVELOPE",
+        "SYNTHESIS_OUTPUT_SHAPE",
+        "SYNTHESIS_MESSAGE",
+        "SYNTHESIS_MEMO_INTEGRITY",
+    }
+)
+
 
 @dataclass(frozen=True)
 class ResearchDiagnostic:
@@ -30,8 +56,25 @@ class ResearchDiagnostic:
     provider_exposed_query_count: int | None = None
     raw_source_record_count: int | None = None
     unknown_action_count: int | None = None
+    boundary_code: str | None = None
+    completed_action_count: int | None = None
+    in_progress_action_count: int | None = None
+    incomplete_action_count: int | None = None
+    failed_action_count: int | None = None
+    cancelled_action_count: int | None = None
+    completed_search_count: int | None = None
+    non_completed_search_count: int | None = None
+    missing_or_unknown_status_count: int | None = None
+    invalid_query_value_count: int | None = None
+    malformed_action_count: int | None = None
+    unexpected_output_item_count: int | None = None
 
     def __post_init__(self) -> None:
+        if self.boundary_code is not None and (
+            not isinstance(self.boundary_code, str)
+            or self.boundary_code not in RESEARCH_BOUNDARY_CODES
+        ):
+            raise ValueError("Unsafe research boundary")
         if (
             self.stage not in {"SEARCH", "SYNTHESIS"}
             or self.failure_class
@@ -59,6 +102,17 @@ class ResearchDiagnostic:
             self.provider_exposed_query_count,
             self.raw_source_record_count,
             self.unknown_action_count,
+            self.completed_action_count,
+            self.in_progress_action_count,
+            self.incomplete_action_count,
+            self.failed_action_count,
+            self.cancelled_action_count,
+            self.completed_search_count,
+            self.non_completed_search_count,
+            self.missing_or_unknown_status_count,
+            self.invalid_query_value_count,
+            self.malformed_action_count,
+            self.unexpected_output_item_count,
         ):
             if optional_count is not None and (
                 type(optional_count) is not int or not 0 <= optional_count <= 1024

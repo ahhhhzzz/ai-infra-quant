@@ -430,3 +430,20 @@ remain unchanged for transient stateless pass-back. Action/output/source bounds 
 The diagnostic projection adds three optional bounded numeric counts and no text/body fields.
 Other providers, NarrativeGateway, schemas/lineage/migrations, strategy/prompt/validator, Markdown,
 credentials, default-OFF intent and no-live-trading semantics remain unchanged.
+
+## TASK-007C1 Remediation 06: partial actions and exact parser boundaries
+
+DeepSeek SEARCH still requires a completed envelope and at least one completed native search.
+Within the same 64-action/128-output bounds, recognized non-completed search/page/find actions
+may coexist with completed evidence. Only completed actions contribute trusted queries/sources
+and enter the unchanged stateless SYNTHESIS input, deep-copied in order. Partial action payloads
+are never trusted, frozen, or restored. R05 completed-query validation/capture budgets remain.
+
+`deepseek_research_diagnostics.py` provides bounded numeric observations and an internal parse
+failure carrying the actual application-owned boundary code. The parser raises it at each rule;
+the adapter projects the safe code/counts through the existing immutable `ResearchDiagnostic`.
+Envelope, pass-back, provenance, and synthesis checks likewise identify their own boundaries.
+Unknown observations are omitted, secret-tainted bodies are not reparsed, and private provider
+text never enters diagnostics. The browser independently allowlists the codes and numeric fields.
+There is no diagnostic persistence or schema change. SEARCH/SYNTHESIS request bodies and
+instructions, final Narrative behavior, and the maximum two research requests remain unchanged.

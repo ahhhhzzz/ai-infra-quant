@@ -320,3 +320,20 @@ assumptions. Accepted historical reports and reviews remain unchanged.
 
 R05 supersedes only normal DeepSeek four-query rejection and bounded query capture/diagnostics.
 It does not prove that query multiplicity was the only cause of the prior live failure.
+
+## TASK-007C1 Remediation 06 (implemented; independent review pending)
+
+| Requirement | Implementation / evidence |
+|---|---|
+| Recognized partial native statuses without trusting failed payloads | `test_paqs_e_partial_actions.py`: all four partial statuses across search/open/find; malformed payload exclusion |
+| Completed-search quorum; unknown action/status/shape fails closed | Exact `NO_COMPLETED_SEARCH`, `ACTION_TYPE`, `ACTION_STATUS`, `ACTION_SHAPE` unit and API failures |
+| Live-like 16 calls / 7 searches / 24 queries / no message | Synthetic shared fixture: 13 completed actions, three partial; exactly one tool-free SYNTHESIS, unchanged completed-item pass-back |
+| R05 query and source safety/capture preserved | R04/R05 suites unchanged; R06 completed-query/source integrity and structural-bound tests |
+| Exact safe parser boundary and per-status/invalid counters | Parser-originated `NativeParseFailure`, strict `ResearchDiagnostic`, secret-tainted omission tests |
+| Safe browser projection and prior Narrative preservation | R06 browser tests: allowlisted code/counts, invalid fields omitted, one explicit POST, no retry, raw/formatted view retained |
+| Immutable Narrative hashes/rows/schema and OFF path | `test_paqs_e_partial_actions_api.py`: OFF/direct/tool-only, request/response SHA, failed precondition creates no rows, unchanged SQLite schema/head 0003 |
+| Protected components | R06 implementation report: diff/hash audit, full/focused/browser/static/startup validation |
+| Final live gate | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one explicit DeepSeek V4 Flash Research-ON attempt on exact reviewed R06 SHA; no retry or merge |
+
+R06 changes only partial-action compatibility and exact bounded diagnostics. It does not claim the
+previous live response failed solely because of partial status, or that live Research-ON now passes.

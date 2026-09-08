@@ -558,10 +558,12 @@
       || ![1, 2].includes(value.research_http_request_count)) return "";
     const fields = [value.web_search_call_count, value.search_action_count, value.message_count];
     if (!fields.every((count) => Number.isInteger(count) && count >= 0 && count <= 129)) return "";
-    const additional = [["provider_exposed_query_count", "查询"], ["raw_source_record_count", "来源记录"], ["unknown_action_count", "未知动作"]];
+    const boundaries = ["SEARCH_ENVELOPE", "SEARCH_OUTPUT_SHAPE", "ACTION_SHAPE", "ACTION_TYPE", "ACTION_STATUS", "ACTION_BOUND", "NO_COMPLETED_SEARCH", "QUERY_STRUCTURE", "QUERY_INTEGRITY", "QUERY_STRUCTURAL_BOUND", "SOURCE_STRUCTURE", "SOURCE_BOUND", "SOURCE_URL", "MESSAGE_SHAPE", "MESSAGE_INTEGRITY", "PASSBACK_BOUND", "PROVENANCE_BOUND", "SYNTHESIS_ENVELOPE", "SYNTHESIS_OUTPUT_SHAPE", "SYNTHESIS_MESSAGE", "SYNTHESIS_MEMO_INTEGRITY"];
+    const boundary = boundaries.includes(value.boundary_code) ? `边界 ${value.boundary_code}；` : "";
+    const additional = [["completed_action_count", "动作 completed"], ["in_progress_action_count", "动作 in_progress"], ["incomplete_action_count", "动作 incomplete"], ["failed_action_count", "动作 failed"], ["cancelled_action_count", "动作 cancelled"], ["completed_search_count", "完成搜索"], ["non_completed_search_count", "未完成搜索"], ["provider_exposed_query_count", "查询"], ["raw_source_record_count", "来源记录"], ["unknown_action_count", "未知动作"], ["missing_or_unknown_status_count", "未知状态"], ["invalid_query_value_count", "无效查询值"], ["malformed_action_count", "异常动作结构"], ["unexpected_output_item_count", "异常输出项"]];
     const suffix = additional.filter(([key]) => Number.isInteger(value[key]) && value[key] >= 0 && value[key] <= 1024)
       .map(([key, label]) => `${label} ${value[key]}`).join("，");
-    return `研究诊断：${value.stage} / ${value.failure_class}；请求 ${value.research_http_request_count}，研究动作 ${fields[0]}，搜索 ${fields[1]}，消息 ${fields[2]}。${suffix ? `${suffix}。` : ""}`;
+    return `研究诊断：${value.stage} / ${value.failure_class}；请求 ${value.research_http_request_count}，研究动作 ${fields[0]}，搜索 ${fields[1]}，消息 ${fields[2]}。${boundary}${suffix ? `${suffix}。` : ""}`;
   }
 
   function onSecurity(item) {

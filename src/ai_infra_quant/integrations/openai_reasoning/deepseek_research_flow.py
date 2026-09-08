@@ -19,6 +19,11 @@ from ai_infra_quant.integrations.openai_reasoning.deepseek_research import (
     memo_provenance,
     parse_native_search,
 )
+from ai_infra_quant.integrations.openai_reasoning.deepseek_research_diagnostics import (
+    NativeParseFailure,
+    boundary,
+    observed_counts,
+)
 
 MEMO_INSTRUCTION = (
     "Return one concise factual company/news/earnings/public-event research memo, at most "
@@ -40,71 +45,13 @@ def _safe_id(value: object) -> str | None:
     )
 
 
-def _search_counts(response: object) -> dict[str, int]:
-    """Count exposed slots, never copy their text. Omit totals with unknowable shapes."""
-    if not isinstance(response, dict) or not isinstance(response.get("output"), list):
-        return {}
-    output = response["output"]
-    if len(output) > 128 or any(not isinstance(item, dict) for item in output):
-        return {}
-    queries = sources = unknown = 0
-    queries_known = sources_known = actions_known = True
-    for item in output:
-        if item.get("type") == "web_search_call":
-            action = item.get("action")
-            if not isinstance(action, dict):
-                queries_known = sources_known = actions_known = False
-                continue
-            if action.get("type") not in ("search", "open_page", "find_in_page"):
-                unknown += 1
-            if action.get("type") == "search":
-                for field, value in action.items():
-                    if field == "queries":
-                        if isinstance(value, list):
-                            queries = min(1024, queries + len(value))
-                        else:
-                            queries_known = False
-                    elif field == "query":
-                        queries = min(1024, queries + 1)
-                records = action.get("sources", [])
-                if isinstance(records, list):
-                    sources = min(1024, sources + len(records))
-                else:
-                    sources_known = False
-        elif item.get("type") == "message":
-            parts = item.get("content")
-            if not isinstance(parts, list) or len(parts) > 1024:
-                sources_known = False
-                continue
-            for part in parts:
-                if not isinstance(part, dict):
-                    sources_known = False
-                    continue
-                annotations = part.get("annotations", [])
-                if not isinstance(annotations, list) or len(annotations) > 1024:
-                    sources_known = False
-                    continue
-                for annotation in annotations:
-                    if not isinstance(annotation, dict):
-                        sources_known = False
-                    elif annotation.get("type") == "url_citation":
-                        sources = min(1024, sources + 1)
-    result = {}
-    if queries_known:
-        result["provider_exposed_query_count"] = queries
-    if sources_known:
-        result["raw_source_record_count"] = sources
-    if actions_known:
-        result["unknown_action_count"] = unknown
-    return result
-
-
 def _diagnostic(
     model: ModelDescriptor,
     stage: Literal["SEARCH", "SYNTHESIS"],
     failure_class: Literal["TRANSPORT_ERROR", "INVALID_RESPONSE", "UNSAFE_RESPONSE", "REFUSAL"],
     response: object,
     count: int,
+    failure: NativeParseFailure | None = None,
 ) -> ResearchDiagnostic:
     # Tainted envelopes are never inspected here. Cap counts; omit unknown strings entirely.
     envelope = response if isinstance(response, dict) else {}
@@ -113,7 +60,9 @@ def _diagnostic(
     status = envelope.get("status")
     incomplete = envelope.get("incomplete_details")
     reason = incomplete.get("reason") if isinstance(incomplete, dict) else None
-    search_counts = _search_counts(response)
+    search_counts = (
+        failure.counts if failure is not None and failure.counts else observed_counts(response)
+    )
     return ResearchDiagnostic(
         stage=stage,
         failure_class=failure_class,
@@ -139,6 +88,18 @@ def _diagnostic(
         provider_exposed_query_count=search_counts.get("provider_exposed_query_count"),
         raw_source_record_count=search_counts.get("raw_source_record_count"),
         unknown_action_count=search_counts.get("unknown_action_count"),
+        boundary_code=failure.boundary_code if failure is not None else None,
+        completed_action_count=search_counts.get("completed_action_count"),
+        in_progress_action_count=search_counts.get("in_progress_action_count"),
+        incomplete_action_count=search_counts.get("incomplete_action_count"),
+        failed_action_count=search_counts.get("failed_action_count"),
+        cancelled_action_count=search_counts.get("cancelled_action_count"),
+        completed_search_count=search_counts.get("completed_search_count"),
+        non_completed_search_count=search_counts.get("non_completed_search_count"),
+        missing_or_unknown_status_count=search_counts.get("missing_or_unknown_status_count"),
+        invalid_query_value_count=search_counts.get("invalid_query_value_count"),
+        malformed_action_count=search_counts.get("malformed_action_count"),
+        unexpected_output_item_count=search_counts.get("unexpected_output_item_count"),
     )
 
 
@@ -160,8 +121,9 @@ def research_native(
     def request(body: dict[str, Any]) -> dict[str, Any]:
         nonlocal count, safe_response
         # Include original intent and instructions in the request-size bound too.
-        if len(json.dumps(body, ensure_ascii=False, allow_nan=False).encode()) > 2_000_000:
-            raise ValueError("Research request bound")
+        with boundary("PASSBACK_BOUND"):
+            if len(json.dumps(body, ensure_ascii=False, allow_nan=False).encode()) > 2_000_000:
+                raise NativeParseFailure("PASSBACK_BOUND")
         count += 1
         safe_response = None
         try:
@@ -184,11 +146,21 @@ def research_native(
             or value.get("model", model.model_id) != model.model_id
             or (value.get("id") is not None and _safe_id(value.get("id")) is None)
         ):
-            raise ValueError("Invalid research envelope")
+            raise NativeParseFailure(stage + "_ENVELOPE")
         if value.get("refusal"):
             raise PermissionError("Refusal")
-        if len(json.dumps(value, ensure_ascii=False, allow_nan=False).encode()) > 2_000_000:
-            raise ValueError("Research response bound")
+        with boundary(stage + "_ENVELOPE"):
+            # Surrogates are rejected at the exact trusted query/memo/pass-back rule.
+            # Partial action payload is not trusted UTF-8 evidence and is never restored.
+            if (
+                len(
+                    json.dumps(value, ensure_ascii=False, allow_nan=False).encode(
+                        errors="surrogatepass"
+                    )
+                )
+                > 2_000_000
+            ):
+                raise NativeParseFailure(stage + "_ENVELOPE")
         return value
 
     common: dict[str, Any] = {
@@ -213,7 +185,7 @@ def research_native(
             return freeze_native_memo(search, search.memo, synthesis_id=None, synthesis_used=False)
         # Invalid/oversized SEARCH provenance must fail before any further paid request.
         if len(memo_provenance(search, synthesis_id=None, synthesis_used=True)) + 32 >= 24_000:
-            raise ValueError("Search provenance bound")
+            raise NativeParseFailure("PROVENANCE_BOUND")
         # No malformed/empty/refused message can reach this branch: parser rejects it.
         stage = "SYNTHESIS"
         synthesis = request(
@@ -232,22 +204,40 @@ def research_native(
         )
         output = synthesis.get("output")
         if not isinstance(output, list) or len(output) > 128:
-            raise ValueError("Synthesis output bound")
+            raise NativeParseFailure("SYNTHESIS_OUTPUT_SHAPE")
         messages = []
         for item in output:
             if not isinstance(item, dict):
-                raise ValueError("Malformed synthesis")
+                raise NativeParseFailure("SYNTHESIS_OUTPUT_SHAPE")
             if item.get("type") == "reasoning":
                 continue
             # final_memo rejects any tool/unknown output, refusal, or malformed message.
-            messages.append(final_memo(item))
+            try:
+                messages.append(final_memo(item))
+            except NativeParseFailure as failure:
+                code = (
+                    "SYNTHESIS_MEMO_INTEGRITY"
+                    if failure.boundary_code == "MESSAGE_INTEGRITY"
+                    else "SYNTHESIS_MESSAGE"
+                )
+                raise NativeParseFailure(code) from None
         if len(messages) != 1:
-            raise ValueError("Expected one synthesis message")
+            raise NativeParseFailure("SYNTHESIS_MESSAGE")
         return freeze_native_memo(
             search, messages[0], synthesis_id=_safe_id(synthesis.get("id")), synthesis_used=True
         )
     except ResearchFailure:
         raise
+    except NativeParseFailure as failure:
+        # Request-size rejection occurs before SYNTHESIS is sent; identify SEARCH's
+        # pass-back boundary and report its evidence/counts, not an attempted call.
+        failure_stage = (
+            "SEARCH" if failure.boundary_code == "PASSBACK_BOUND" and count == 1 else stage
+        )
+        diagnostic = _diagnostic(
+            model, failure_stage, "INVALID_RESPONSE", safe_response, max(1, count), failure
+        )
+        raise ResearchFailure(Kind.INVALID_STRUCTURED_OUTPUT, diagnostic) from None
     except PermissionError:
         raise ResearchFailure(
             Kind.PROVIDER_REFUSAL, _diagnostic(model, stage, "REFUSAL", safe_response, count)
