@@ -37,7 +37,12 @@ _PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 _TEMPLATES = Jinja2Templates(directory=_PACKAGE_ROOT / "frontend" / "templates")
 
 
-def create_app(settings: Settings | None = None, engine: Engine | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None,
+    engine: Engine | None = None,
+    *,
+    legacy_analysis_enabled: bool = False,
+) -> FastAPI:
     configure_logging()
     app_settings = settings or Settings()
     source_revision = capture_source_revision()
@@ -68,6 +73,8 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
         redoc_url=None,
     )
     application.state.container = container
+    # Explicit in-process compatibility switch for legacy regression fixtures only.
+    application.state.legacy_analysis_enabled = legacy_analysis_enabled
     application.state.ready = False
     application.state.migration_revision = None
 

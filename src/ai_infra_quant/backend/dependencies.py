@@ -15,6 +15,7 @@ from ai_infra_quant.application.market_data_queries import (
 from ai_infra_quant.application.paqs_e_analysis import PaqsEAnalysisService
 from ai_infra_quant.application.paqs_e_configuration import PaqsEConfiguration, read_configuration
 from ai_infra_quant.application.paqs_e_models import ModelCredentials, ModelRegistry
+from ai_infra_quant.application.paqs_e_narrative import NarrativeAnalysisService
 from ai_infra_quant.application.paqs_e_runtime import PaqsEReasoningRuntime, RuntimePackageError
 from ai_infra_quant.application.paqs_input_queries import PaqsInputQueries
 from ai_infra_quant.application.paqs_market_snapshot_queries import PaqsMarketSnapshotQueries
@@ -29,11 +30,14 @@ from ai_infra_quant.core.domain.enums import CapabilityStatus, DataAvailabilityS
 from ai_infra_quant.core.domain.market_data import PROVIDER_FUTU_QUOTE
 from ai_infra_quant.core.domain.strategy import StrategyDefinition
 from ai_infra_quant.core.ports.paqs_e_ledger import PaqsELedger
+from ai_infra_quant.core.ports.paqs_e_narrative import NarrativeLedger
 from ai_infra_quant.core.strategy.registry import StrategyRegistry
 from ai_infra_quant.database.repositories.paqs_e_ledger import SQLAlchemyPaqsELedger
+from ai_infra_quant.database.repositories.paqs_e_narrative import SQLAlchemyNarrativeLedger
 from ai_infra_quant.database.repositories.unit_of_work import SQLAlchemyUnitOfWork
 from ai_infra_quant.integrations.futu_quote.adapter import FutuQuoteAdapter
 from ai_infra_quant.integrations.openai_reasoning.gateway import ModelGateway
+from ai_infra_quant.integrations.openai_reasoning.narrative import NarrativeGateway
 from ai_infra_quant.integrations.registry import Registries
 from ai_infra_quant.integrations.windows_credentials import WindowsCredentialStore
 
@@ -58,6 +62,8 @@ class AppContainer:
     paqs_e_analysis_service: PaqsEAnalysisService
     paqs_e_configuration: PaqsEConfiguration | None
     paqs_e_credentials: ModelCredentials
+    narrative_ledger: NarrativeLedger
+    narrative_analysis_service: NarrativeAnalysisService
 
 
 def build_container(
@@ -132,6 +138,7 @@ def build_container(
         openai_fallback=effective_key.strip() or None,
     )
     gateway = ModelGateway(models, credentials)
+    narrative_ledger = SQLAlchemyNarrativeLedger(session_factory)
     return AppContainer(
         settings=settings,
         engine=engine,
@@ -159,6 +166,14 @@ def build_container(
         paqs_e_ledger=paqs_e_ledger,
         paqs_e_configuration=configuration,
         paqs_e_credentials=credentials,
+        narrative_ledger=narrative_ledger,
+        narrative_analysis_service=NarrativeAnalysisService(
+            snapshot_queries,
+            NarrativeGateway(models, credentials),
+            narrative_ledger,
+            models,
+            gateway,
+        ),
         paqs_e_analysis_service=PaqsEAnalysisService(
             snapshot_queries,
             PaqsEReasoningRuntime(gateway),

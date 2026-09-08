@@ -26,17 +26,17 @@ provider model IDs; no prefix inference or provider `/models` discovery occurs.
 
 | Display name | Exact model key / provider model ID | Provider identity | Slot | Reasoning | Research |
 |---|---|---|---|---|---|
-| DeepSeek V4 Flash | `deepseek-v4-flash` | `deepseek` | `deepseek` | responses / json_schema | Responses web_search |
-| DeepSeek V4 Pro | `deepseek-v4-pro` | `deepseek` | `deepseek` | responses / json_schema | Responses web_search |
-| Qwen3.8 Flash | `qwen3.8-flash` | `alibaba` | `dashscope` | chat / json_schema | Responses web_search |
-| Qwen3.8 Max | `qwen3.8-max` | `alibaba` | `dashscope` | chat / json_schema | Responses web_search |
-| Qwen3.7 Plus | `qwen3.7-plus` | `alibaba` | `dashscope` | chat / json_schema | Responses web_search |
-| GLM-5.2 | `glm-5.2` | `bigmodel` | `bigmodel` | chat / json_object | Disabled |
-| Kimi K3 | `kimi-k3` | `kimi` | `moonshot` | chat / json_object | Disabled |
-| Hy4 Preview | `hy4-preview` | `tencent` | `tokenhub` | responses / json_schema | Disabled |
-| GPT-5.6 Luna | `gpt-5.6-luna` | `openai` | `openai` | responses / json_schema | Responses web_search |
-| GPT-5.6 Terra | `gpt-5.6-terra` | `openai` | `openai` | responses / json_schema | Responses web_search |
-| GPT-5.6 Sol | `gpt-5.6-sol` | `openai` | `openai` | responses / json_schema | Responses web_search |
+| DeepSeek V4 Flash | `deepseek-v4-flash` | `deepseek` | `deepseek` | responses / final text | Responses web_search |
+| DeepSeek V4 Pro | `deepseek-v4-pro` | `deepseek` | `deepseek` | responses / final text | Responses web_search |
+| Qwen3.8 Flash | `qwen3.8-flash` | `alibaba` | `dashscope` | chat / final text | Responses web_search |
+| Qwen3.8 Max | `qwen3.8-max` | `alibaba` | `dashscope` | chat / final text | Responses web_search |
+| Qwen3.7 Plus | `qwen3.7-plus` | `alibaba` | `dashscope` | chat / final text | Responses web_search |
+| GLM-5.2 | `glm-5.2` | `bigmodel` | `bigmodel` | chat / final text | Disabled |
+| Kimi K3 | `kimi-k3` | `kimi` | `moonshot` | chat / final text | Disabled |
+| Hy4 Preview | `hy4-preview` | `tencent` | `tokenhub` | responses / final text | Disabled |
+| GPT-5.6 Luna | `gpt-5.6-luna` | `openai` | `openai` | responses / final text | Responses web_search |
+| GPT-5.6 Terra | `gpt-5.6-terra` | `openai` | `openai` | responses / final text | Responses web_search |
+| GPT-5.6 Sol | `gpt-5.6-sol` | `openai` | `openai` | responses / final text | Responses web_search |
 
 Fixed official reasoning endpoints (not exposed as editable configuration):
 
@@ -48,10 +48,12 @@ Fixed official reasoning endpoints (not exposed as editable configuration):
 - OpenAI: `https://api.openai.com/v1/responses`
 
 Qwen research uses the same registered Qwen model and DashScope key at
-`https://dashscope.aliyuncs.com/compatible-mode/v1/responses`; reasoning uses Chat's explicitly
-documented JSON Schema mode. Other enabled research routes use their registered Responses endpoint.
-All routes enforce the existing strict Pydantic/domain result schema and deterministic validator.
-A malformed result, identity mismatch, refusal or network failure never becomes a strategy judgment.
+`https://dashscope.aliyuncs.com/compatible-mode/v1/responses`; narrative reasoning uses ordinary Chat assistant text. Other enabled research routes use their
+registered Responses endpoint. New final reasoning sends neither `response_format` nor `text.format`.
+It does not parse final text as JSON or call the legacy projector/semantic validator. Completed,
+non-empty final text (at most 100,000 Unicode characters) is preserved exactly; envelope integrity,
+model identity, refusal, incompleteness, tool invocation, credential echo and safe response-ID checks
+still fail closed. Provider reasoning traces are discarded.
 
 ## Explicit lifecycle and evidence
 
@@ -59,8 +61,8 @@ Only Analyze submits `{security_id, model_key, strategy_id, web_research}`. Mode
 credential, research-toggle, history and market-refresh changes never dispatch analysis.
 Each attempt freezes the current Snapshot, resolves its selected model, performs requested research,
 normalizes evidence, builds the canonical request, performs tool-free reasoning and commits the
-existing terminal Run/validated Decision. Actual provider/model remain immutable audit identities.
-Revisions stay keyed by Security + strategy across model changes. Current refresh cannot alter
+new terminal Narrative Run and exact-text Narrative Result atomically. Actual provider/model remain immutable audit identities.
+Narrative revisions are keyed by Security + strategy across model changes, independent of legacy revisions. Current refresh cannot alter
 persisted market or research evidence. Missing credentials disable the button for the selected model.
 
 Research sends one bounded native-search HTTP request, without retries or continuation calls.
@@ -102,7 +104,8 @@ returns a typed precondition failure without a fabricated Run ID. The system nev
 requested research. Failures after a complete reasoning capsule retain existing failed-Run semantics.
 Prior successful Decisions remain visibly historical. No retry or provider/model fallback occurs.
 
-After strict provider parsing, the provider-neutral runtime projects only current quote price,
+The following R01 behavior remains **legacy structured only**, outside new narrative analyses.
+After strict provider parsing, the legacy provider-neutral runtime projects only current quote price,
 timestamp, freshness and session from the immutable Snapshot before the unchanged validator.
 The same four factual echoes are projected for model-eligible executable entry references; the
 eligibility flag and policy text remain model-authored. Identity, support/input quality, semantic
@@ -134,7 +137,7 @@ found renamed or removed; no substitute or additional model was introduced.
 GLM, Kimi and Hy4 remain usable for reasoning with research disabled. Enabling their direct search
 requires separately verified native source normalization. Doubao, MiniMax and every unapproved
 model remain absent. No PAQS-Q, backtest, portfolio/PnL, broker, execution, voting, arbitrary URL,
-background research or automatic analysis is added. No database migration is added.
+background research or automatic analysis is added. Remediation 02 adds only the authorized narrative ledger migration 0003; migrations 0001/0002 are unchanged.
 
 ## Validation and separate live product acceptance
 
@@ -142,11 +145,11 @@ Install `.[dev]` under Python 3.12 and install Playwright Chromium if needed. Se
 `TASK007C_BROWSER_CHANNEL=chromium` when using that browser. Run full pytest, focused model/
 credential/research/API/browser tests, `ruff check .`, `ruff format --check .`, and `mypy src tests`.
 The browser suite runs actual Uvicorn against a fresh migrated SQLite DB through head
-`0002_task007b_paqs_e_ledger`, checks health/OpenAPI/page/configuration over HTTP and uses synthetic
+`0003_task007c1_narrative_ledger`, checks health/OpenAPI/page/configuration over HTTP and uses synthetic
 network fixtures for business scenarios. Unit/integration tests inject synthetic credential stores.
 
 No real-provider call is part of ordinary tests. A separate opt-in product acceptance should use a
 user key entered through this UI, one supported Security and DeepSeek V4 Flash with research off
 first; then explicitly try research if enabled and funded. Record exact code SHA, provider/model,
-result class and safe Run/Decision IDs only. This implementation report does not claim that live gate
+terminal status, safe Narrative Run/Result IDs, response hash and frozen-research presence only. This implementation report does not claim that live gate
 performed or the task integrated.

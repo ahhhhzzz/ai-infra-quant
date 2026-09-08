@@ -31,6 +31,7 @@ def test_task007a_runtime_remains_independent_of_task007b_api_and_persistence() 
     assert sorted(path.name for path in migrations) == [
         "0001_phase1_foundation.py",
         "0002_task007b_paqs_e_decision_ledger.py",
+        "0003_task007c1_narrative_ledger.py",
     ]
     runtime_imports = _imports(Path("src/ai_infra_quant/application/paqs_e_runtime.py"))
     assert not any(

@@ -366,3 +366,24 @@ and keeps long synchronous Analyze requests guarded past the 180-second informat
 After strict parsing, runtime code projects only Snapshot price/timestamp/freshness/session echoes
 for current price and model-eligible entry references. The existing validator function, semantic
 judgments, eligibility, structural numeric references and Decimal RR remain unchanged.
+
+## TASK-007C1 Remediation 02: new analyses are narrative-first
+
+This supersedes earlier descriptions of the normal strict-output path, without changing legacy
+structured runtime semantics. `NarrativeAnalysisService` freezes the accepted Snapshot, resolves the
+unchanged registry and performs requested bounded research through the existing gateway. It creates
+`paqs-e-narrative-request-v1` with `paqs-e-narrative-markdown-v1` and the new hash-bound
+`paqs-e-narrative-prompt-v1`. The provider-neutral `PaqsENarrativeProvider.reason_text` port returns
+final visible text or a fixed safe failure; `NarrativeGateway` owns provider transport. No final
+JSON schema, JSON parsing, factual projection or semantic validator gates this path.
+
+`SQLAlchemyNarrativeLedger` opens its transaction after the provider returns. It stores immutable
+runtime artifacts and a terminal Run; success atomically includes one exact-text Result. The UI
+uses only the narrative POST, inert text rendering and narrative history by default. Legacy GETs,
+structured validator and Decision history remain readable/testable. The old POST is hidden from
+OpenAPI and returns 410 by default; only an explicit in-process `legacy_analysis_enabled=True`
+construction is available to legacy regression tests, never a public/user configuration.
+
+Migration head is `0003_task007c1_narrative_ledger`, directly after untouched 0002. No model, endpoint,
+credential, research provenance, As-Of, source-handshake, long-running guard or no-live-trading
+boundary changes. No automatic retry/fallback, execution or prose-to-structured extraction exists.

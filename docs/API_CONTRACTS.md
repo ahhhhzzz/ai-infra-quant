@@ -440,3 +440,28 @@ Phase-relevant tests must prove:
 - score provenance exposes all four required time semantics;
 - paper records remain simulated;
 - no route or schema represents brokerage-account access or a broker write.
+
+### TASK-007C1 Remediation 02 normal narrative API (supersedes strict POST)
+
+New explicit Analyze is `POST /api/v1/paqs-e/narrative-analyses`, accepting exactly the existing
+four required fields: `security_id`, `model_key`, `strategy_id`, `web_research`. It returns 201 only
+following commit of one successful Narrative Run and Result. The response includes `status=SUCCEEDED`,
+`narrative_result_id`, `narrative_run_id`, full frozen model/strategy/Snapshot identity, narrative
+revision/predecessor, exact `response_text`, `response_text_sha256`, research flag and created time.
+Final prose is not JSON-schema-constrained or semantically validated.
+
+| Method/path | Behavior |
+|---|---|
+| GET `/api/v1/paqs-e/narrative-analyses/{run_id}` | Known immutable Run with full canonical request/hash and safe terminal evidence |
+| GET `/api/v1/paqs-e/narrative-results/{result_id}` | Exact persisted final text and audit identity |
+| GET `/api/v1/paqs-e/securities/{security_id}/narrative-results` | Newest first; `limit` 1..100, default 20; optional bounded strategy filter; metadata and first 160 Unicode characters as inert preview, no full text |
+
+Configuration/unavailable failures return 503; refusal/incomplete/invalid-final-text return 502.
+The problem includes `narrative_run_id`, `analysis_status=PROVIDER_FAILED` and `failure_kind`.
+Preconditions/research failure produce no fabricated Run or Result; ledger failure is a safe 500.
+No new narrative response uses `VALIDATION_FAILED` or `INVALID_STRUCTURED_OUTPUT`.
+
+Legacy structured `POST /api/v1/paqs-e/analyses` returns 410 by default and is absent from OpenAPI.
+Only explicit in-process legacy regression construction can enable it; no environment/API/UI switch
+exists. All original structured GET reads remain unchanged. Earlier strict-output lifecycle descriptions
+in this document now describe legacy evidence only. No PUT/PATCH/DELETE ledger mutations are added.

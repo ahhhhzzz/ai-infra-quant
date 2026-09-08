@@ -163,7 +163,8 @@ def analysis(
     migrated_engine: Engine,
     session_factory: sessionmaker[Session],
 ) -> Iterator[AnalysisHarness]:
-    app = create_app(settings, migrated_engine)
+    # Explicit in-process legacy regression only; normal composition keeps this disabled.
+    app = create_app(settings, migrated_engine, legacy_analysis_enabled=True)
     container = cast(AppContainer, app.state.container)
     market_provider = SnapshotFakeProvider()
     market_queries = MarketDataQueries(
@@ -644,7 +645,10 @@ def test_openapi_exposes_bounded_read_only_ledger_contract_without_secret_fields
     document = analysis.client.get("/openapi.json").json()
     paths = document["paths"]
     expected = {
-        ANALYSES: {"post"},
+        "/api/v1/paqs-e/narrative-analyses": {"post"},
+        "/api/v1/paqs-e/narrative-analyses/{run_id}": {"get"},
+        "/api/v1/paqs-e/narrative-results/{result_id}": {"get"},
+        "/api/v1/paqs-e/securities/{security_id}/narrative-results": {"get"},
         f"{ANALYSES}/{{analysis_run_id}}": {"get"},
         f"{DECISIONS}/{{decision_id}}": {"get"},
         "/api/v1/paqs-e/securities/{security_id}/decisions": {"get"},

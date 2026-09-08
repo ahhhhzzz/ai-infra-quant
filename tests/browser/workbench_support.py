@@ -167,6 +167,78 @@ def fixture_pair(
     return decision, run
 
 
+def narrative_pair(
+    revision: int = 1,
+    *,
+    market: str = "US",
+    strategy: str = STRATEGY,
+    prose: str = "  # 最终分析\n合成叙述：等待触发与延续分别确认。{自由文本}\n",
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Independent synthetic final text plus the existing factual chart fixture."""
+    legacy, old_run = fixture_pair(revision, market=market, strategy=strategy)
+    from ai_infra_quant.application.paqs_e_narrative import load_narrative_prompt
+
+    prompt = load_narrative_prompt()
+    payload = json.loads(old_run["request_payload_json"])
+    payload.pop("output_schema_version")
+    payload.update(
+        security_id=legacy["security_id"],
+        request_schema_version="paqs-e-narrative-request-v1",
+        output_format_version="paqs-e-narrative-markdown-v1",
+        prompt_version=prompt.prompt_version,
+        prompt_content_sha256=prompt.content_sha256,
+        web_research=False,
+    )
+    identity = {
+        key: value
+        for key, value in old_run.items()
+        if key
+        not in {
+            "analysis_run_id",
+            "validator_version",
+            "validation_issues",
+            "output_schema_version",
+            "status",
+            "request_payload_json",
+            "request_payload_sha256",
+            "provider_response_id",
+            "failure_kind",
+            "failure_reason",
+            "started_at",
+            "completed_at",
+        }
+    }
+    identity.update(
+        request_schema_version=payload["request_schema_version"],
+        output_format_version=payload["output_format_version"],
+        prompt_version=prompt.prompt_version,
+        prompt_content_sha256=prompt.content_sha256,
+        web_research=False,
+    )
+    run = {
+        **identity,
+        "narrative_run_id": old_run["analysis_run_id"],
+        "status": "SUCCEEDED",
+        "request_payload_json": canonical_json(payload),
+        "request_payload_sha256": hashlib.sha256(canonical_json(payload).encode()).hexdigest(),
+        "provider_response_id": "synthetic-narrative",
+        "failure_kind": None,
+        "failure_reason": None,
+        "started_at": old_run["started_at"],
+        "completed_at": old_run["completed_at"],
+    }
+    result = {
+        **identity,
+        "narrative_result_id": legacy["decision_id"],
+        "narrative_run_id": run["narrative_run_id"],
+        "revision_no": revision,
+        "supersedes_narrative_result_id": legacy["supersedes_decision_id"],
+        "response_text": prose,
+        "response_text_sha256": hashlib.sha256(prose.encode()).hexdigest(),
+    }
+    return result, run
+
+
 class Workbench:
     def __init__(
         self,
@@ -176,6 +248,7 @@ class Workbench:
         configured: bool = True,
         width: int = 1440,
         height: int = 900,
+        legacy_history: bool = True,
     ) -> None:
         self.context = browser.new_context(
             viewport={"width": width, "height": height}, timezone_id="Pacific/Honolulu"
@@ -192,6 +265,11 @@ class Workbench:
         self.post_mode = "json"
         self.run_mode = "json"
         self.configured = configured
+        self.legacy_history = legacy_history
+        pair, run = narrative_pair(2)
+        self.narratives = {pair["narrative_result_id"]: pair}
+        self.narrative_runs = {run["narrative_run_id"]: run}
+        self.narrative_history_ids: list[str] = []
         self.state_price = "111.123456789012345678"
         self.add_error = False
         self.securities = [
@@ -234,7 +312,7 @@ class Workbench:
         request = route.request
         parsed = urlparse(request.url)
         path = parsed.path
-        if request.method == "POST" and path.endswith("/paqs-e/analyses"):
+        if request.method == "POST" and path.endswith("/paqs-e/narrative-analyses"):
             payload = request.post_data_json
             assert isinstance(payload, dict)
             self.posts.append(payload)
@@ -278,18 +356,76 @@ class Workbench:
                     ],
                 },
             )
-        if path.endswith("/paqs-e/analyses"):
+        if path.endswith("/paqs-e/narrative-analyses"):
             if self.post_mode == "abort":
                 return route.abort("connectionfailed")
             if self.post_mode == "nonjson":
                 return route.fulfill(
                     status=502, content_type="text/plain", body="synthetic non-JSON failure"
                 )
+            if self.post_body is None:
+                selected = self.narratives["20000000-0000-4000-8000-000000000002"]
+                frozen = self.narrative_runs[selected["narrative_run_id"]]
+                capsule = json.loads(frozen["request_payload_json"])
+                captured = request.post_data_json
+                assert isinstance(captured, dict)
+                enabled = captured["web_research"]
+                capsule["web_research"] = selected["web_research"] = frozen["web_research"] = (
+                    enabled
+                )
+                capsule["auxiliary_context"] = (
+                    (
+                        capsule["auxiliary_context"]
+                        or [
+                            {
+                                "context_id": "synthetic-browser-research",
+                                "category": "web_research",
+                                "content": "Synthetic frozen source context",
+                                "provenance": "https://example.org/frozen",
+                            }
+                        ]
+                    )
+                    if enabled
+                    else []
+                )
+                frozen["request_payload_json"] = canonical_json(capsule)
+                frozen["request_payload_sha256"] = hashlib.sha256(
+                    canonical_json(capsule).encode()
+                ).hexdigest()
             body = self.post_body or {
-                **self.decisions["20000000-0000-4000-8000-000000000002"],
+                **self.narratives["20000000-0000-4000-8000-000000000002"],
                 "status": "SUCCEEDED",
             }
             return self.fulfill(route, body, self.post_status)
+        if "/paqs-e/narrative-analyses/" in path:
+            if self.run_mode == "unavailable":
+                return self.fulfill(route, {"detail": "synthetic evidence unavailable"}, 500)
+            return self.fulfill(route, self.narrative_runs[path.rsplit("/", 1)[1]])
+        if "/paqs-e/narrative-results/" in path:
+            return self.fulfill(route, self.narratives[path.rsplit("/", 1)[1]])
+        if path.endswith("/narrative-results"):
+            security_id = path.split("/")[-2]
+            strategy = parse_qs(parsed.query).get("strategy_id", [None])[0]
+            items = [self.narratives[key] for key in self.narrative_history_ids]
+            items = [
+                item
+                for item in items
+                if item["security_id"] == security_id
+                and (not strategy or item["strategy_id"] == strategy)
+            ]
+            items.sort(key=lambda item: item["created_at"], reverse=True)
+            return self.fulfill(
+                route,
+                {
+                    "items": [
+                        {
+                            **{key: value for key, value in item.items() if key != "response_text"},
+                            "preview": item["response_text"][:160],
+                        }
+                        for item in items[:20]
+                    ]
+                },
+            )
         if "/paqs-e/analyses/" in path:
             if self.run_mode == "unavailable":
                 return self.fulfill(route, {"detail": "synthetic evidence unavailable"}, 500)
@@ -418,6 +554,12 @@ class Workbench:
             }; return result;
           }};
         }""")
+        if self.legacy_history:
+            self.page.locator("#legacy-history-section > summary").click()
+            self.page.wait_for_function(
+                "document.querySelector('#legacy-history-status').textContent !== '读取成功历史…'"
+            )
+            self.page.locator("#known-run-kind").select_option("legacy", force=True)
         return self.page
 
     def select(self, revision: int = 1) -> None:

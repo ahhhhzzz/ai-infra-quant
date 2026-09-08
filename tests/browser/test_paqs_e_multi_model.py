@@ -147,7 +147,7 @@ def test_web_toggle_is_captured_before_await_and_advanced_identity_remains_visib
     page = app.open()
     page.locator("#model-id").select_option(MODEL)
     page.locator("#web-research").uncheck()
-    app.hold = "/paqs-e/analyses"
+    app.hold = "/paqs-e/narrative-analyses"
     page.locator("#analyze-button").click()
     page.locator("#web-research").check()
     page.locator("#model-id").select_option("qwen3.8-max")

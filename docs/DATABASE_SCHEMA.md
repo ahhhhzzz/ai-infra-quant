@@ -235,3 +235,24 @@ real-account matching, broker writes, real-order submission, or any phase after 
 - score provenance identifies daily/minute inputs and calculation time;
 - paper facts remain simulated;
 - no schema models a real brokerage account or external execution command.
+
+## TASK-007C1 Remediation 02 additive narrative evidence
+
+Current head: `0003_task007c1_narrative_ledger`; direct parent `0002_task007b_paqs_e_ledger`.
+0001/0002 and all existing table definitions/triggers are unchanged.
+
+- `paqs_e_narrative_runs`: terminal `SUCCEEDED` or `PROVIDER_FAILED`, full canonical frozen request
+  plus SHA-256, actual model/provider, Security/Snapshot/As-Of, request/output/runtime identities,
+  strategy/prompt IDs and hashes, immutable artifact foreign keys, research flag, safe optional
+  provider response ID, constant failure kind/reason, aware UTC start/completion/creation times.
+- `paqs_e_narrative_results`: unique successful Run binding and identical audit identities; exact
+  final response text plus SHA-256; `(security_id, strategy_id, revision_no)` uniqueness; direct
+  predecessor Result link. Revision allocation is serialized and spans models, independent of
+  structured Decision numbering. Text is neither a structured result nor a financial numeric column.
+
+SQLite UPDATE/DELETE triggers protect both tables, and the insertion trigger checks a matching
+successful parent, identical frozen identities and consecutive same-series lineage. Read verification
+checks canonical request/hash, artifact bodies/hash, response hash, parent and lineage. The application
+commits Run/Result atomically and rejects successful Runs without exactly one Result. Failure has none.
+No credentials or provider reasoning traces are stored. Downgrade removes only the two new tables and
+new triggers/indexes; old tables and historical runtime artifacts remain.

@@ -893,3 +893,5 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; fo
   .status-cell.wide { grid-column: span 2; }
   .watchlist-row { grid-template-columns: 1fr 1fr; gap: 8px; }
 }
+
+.narrative-text { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; line-height: 1.7; margin: 1rem 0; }

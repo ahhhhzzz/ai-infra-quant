@@ -43,6 +43,7 @@ from ai_infra_quant.core.domain.paqs_e_ledger import (
     LedgerIntegrityError,
     LedgerPersistenceError,
 )
+from ai_infra_quant.core.domain.paqs_e_narrative import NarrativeResult, NarrativeRun
 from ai_infra_quant.core.domain.paqs_market_snapshot import canonical_json
 from ai_infra_quant.core.ports.paqs_e_reasoning import ReasoningFailureKind
 
@@ -214,6 +215,7 @@ def _failed_analysis(request: Request, run: AnalysisRun) -> JSONResponse:
 
 @router.post(
     "/analyses",
+    include_in_schema=False,
     response_model=AnalyzeCreated,
     status_code=201,
     responses={
@@ -228,6 +230,17 @@ def _failed_analysis(request: Request, run: AnalysisRun) -> JSONResponse:
 def analyze(
     payload: AnalyzeCreate, request: Request, container: ContainerDep
 ) -> AnalyzeCreated | JSONResponse:
+    if not request.app.state.legacy_analysis_enabled:
+        return problem_response(
+            request,
+            status=410,
+            code="PAQS_E_STRUCTURED_ANALYZE_DISABLED",
+            title="Legacy analysis disabled",
+            detail=(
+                "Use the narrative analysis endpoint for new analyses. "
+                "Historical structured evidence remains readable."
+            ),
+        )
     try:
         persisted = container.paqs_e_analysis_service.analyze(
             security_id=str(payload.security_id),
@@ -283,6 +296,111 @@ def analyze(
     if persisted.run.status is not AnalysisStatus.SUCCEEDED:
         return _failed_analysis(request, persisted.run)
     return analyze_created(persisted)
+
+
+@router.post("/narrative-analyses", status_code=201, response_model=None)
+def analyze_narrative(
+    payload: AnalyzeCreate, request: Request, container: ContainerDep
+) -> JSONResponse:
+    try:
+        persisted = container.narrative_analysis_service.analyze(
+            security_id=str(payload.security_id),
+            model_key=payload.model_key,
+            strategy_id=payload.strategy_id,
+            web_research=payload.web_research,
+        )
+    except ResearchFailure as failure:
+        return problem_response(
+            request,
+            status=422,
+            code="PAQS_E_RESEARCH_PRECONDITION_FAILED",
+            title="Web research failed",
+            detail=str(failure),
+            extra={"failure_kind": failure.kind.value},
+        )
+    except MarketDataSecurityNotFound:
+        return _not_found(request, "SECURITY")
+    except MarketDataSecurityMetadataConflict:
+        return problem_response(
+            request,
+            status=409,
+            code="SECURITY_METADATA_CONFLICT",
+            title="Security conflict",
+            detail="Stored Security metadata conflicts with the market contract.",
+        )
+    except (MarketDataSecurityNotSupported, RuntimePackageError, ValueError) as error:
+        if isinstance(error, LedgerIntegrityError):
+            return _ledger_error(request)
+        return problem_response(
+            request,
+            status=422,
+            code="PAQS_E_NARRATIVE_PRECONDITION_FAILED",
+            title="Narrative precondition failed",
+            detail="A valid frozen narrative request could not be formed.",
+        )
+    except LedgerPersistenceError:
+        return _ledger_error(request)
+    if persisted.result is None:
+        run = persisted.run
+        status = 503 if run.failure_kind in {"CONFIGURATION_ERROR", "PROVIDER_UNAVAILABLE"} else 502
+        return problem_response(
+            request,
+            status=status,
+            code="PAQS_E_NARRATIVE_PROVIDER_FAILED",
+            title="Narrative provider failed",
+            detail=run.failure_reason or "Narrative provider failed",
+            extra={
+                "narrative_run_id": run.narrative_run_id,
+                "analysis_status": run.status,
+                "failure_kind": run.failure_kind,
+            },
+        )
+    return JSONResponse(
+        status_code=201,
+        content={**json.loads(canonical_json(persisted.result)), "status": "SUCCEEDED"},
+    )
+
+
+@router.get("/narrative-analyses/{run_id}", response_model=NarrativeRun)
+def get_narrative_run(
+    run_id: UUID, request: Request, container: ContainerDep
+) -> NarrativeRun | JSONResponse:
+    try:
+        run = container.narrative_ledger.get_run(str(run_id))
+        return run if run else _not_found(request, "NARRATIVE_RUN")
+    except (LedgerIntegrityError, LedgerPersistenceError, ValueError, TypeError, KeyError):
+        return _ledger_error(request)
+
+
+@router.get("/narrative-results/{result_id}", response_model=NarrativeResult)
+def get_narrative_result(
+    result_id: UUID, request: Request, container: ContainerDep
+) -> NarrativeResult | JSONResponse:
+    try:
+        result = container.narrative_ledger.get_result(str(result_id))
+        return result if result else _not_found(request, "NARRATIVE_RESULT")
+    except (LedgerIntegrityError, LedgerPersistenceError, ValueError, TypeError, KeyError):
+        return _ledger_error(request)
+
+
+@router.get("/securities/{security_id}/narrative-results", response_model=None)
+def narrative_history(
+    security_id: UUID,
+    request: Request,
+    container: ContainerDep,
+    strategy_id: str | None = Query(default=None, min_length=1, max_length=120),
+    limit: int = Query(default=20, ge=1, le=100),
+) -> JSONResponse:
+    try:
+        entries = container.narrative_ledger.history(str(security_id), strategy_id, limit)
+        items = []
+        for entry in entries:
+            item = json.loads(canonical_json(entry))
+            item["preview"] = item.pop("response_text")[:160]
+            items.append(item)
+        return JSONResponse(content={"items": items})
+    except (LedgerIntegrityError, LedgerPersistenceError, ValueError, TypeError, KeyError):
+        return _ledger_error(request)
 
 
 @router.get("/analyses/{analysis_run_id}", response_model=AnalysisRunRead)

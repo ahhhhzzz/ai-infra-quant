@@ -262,3 +262,17 @@ implemented by TASK-007B. Accepted Phase 1 evidence remains unchanged.
 | R2 DeepSeek native page actions | Search/page/find <=10 actions; <=4 queries; native source/citation authority | `test_paqs_e_remediation_01.py` provenance/bounds/tool-free capsule tests |
 | R3 long synchronous Analyze | Non-aborting 180-second notice; one-in-flight guard until terminal/network failure | `test_paqs_e_long_running.py`, retained unknown-outcome browser regression |
 | R4 deterministic factual projection | Four current/eligible-entry quote echoes before unchanged validator | All eleven model routes, direct mismatch rejection, market/availability mapping regression |
+
+## TASK-007C1 Remediation 02 (implemented; independent review pending)
+
+| Requirement | Implementation / evidence |
+|---|---|
+| Narrative-first exact final text, no semantic gate | Narrative port/service/gateway; all eleven routes in `test_paqs_e_narrative_provider.py` |
+| Only additive 0003; preserve historical structured evidence | `test_paqs_e_narrative_ledger_api.py`: upgrade/downgrade byte preservation, immutable rows, independent revisions, failure and rollback |
+| New normal API and primary prose/history UI | Narrative API and `test_paqs_e_narrative.py`; legacy POST disabled by default, legacy reads retained |
+| Frozen Snapshot/research, credentials and no automatic retry/fallback | New narrative lifecycle tests plus retained original/R01 provenance, credential, source and long-running tests |
+| Final live product gate | USER_EXECUTED_EVIDENCE_PENDING: DeepSeek V4 Flash, one explicit attempt OFF then ON on final implementation SHA |
+
+R02 supersedes earlier no-new-migration, normal structured-output/validator, and primary Decision UI
+requirements only. Legacy validator, master strategy, accepted evidence and no-live-trading boundaries
+remain unchanged. No independent acceptance or merge is claimed.

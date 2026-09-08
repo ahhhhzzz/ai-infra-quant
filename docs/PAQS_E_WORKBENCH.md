@@ -1,4 +1,4 @@
-# PAQS-E current-analysis workbench — TASK-007C
+# PAQS-E narrative-first workbench — TASK-007C1 Remediation 02
 
 Status: **implemented / pending independent review**. No merge or next-task approval is implied.
 
@@ -30,14 +30,14 @@ under a clearly historical/local disclosure; they are not actual holdings or PAQ
    evidence after the Snapshot cutoff is established; final reasoning has tools disabled.
    Unsupported requested research fails explicitly. There is no retry, queue, provider fallback,
    hidden prior context or idempotency fiction. See `PAQS_E_MODELS.md` for the catalog and limits.
-5. A confirmed 201 `SUCCEEDED` response displays its committed Decision and actual identity,
+5. A confirmed 201 `SUCCEEDED` response displays its committed Narrative Result and actual identity,
    then uses GET for successful history and the associated Run. Changing form values cannot relabel
    this result. An explicit history selection made while Analyze or another GET is pending remains
    selected when late responses arrive. List reload and list order never force a detail selection.
-6. Select a successful history row to read the exact Decision and its Run input capsule. History
+6. Select a successful history row to read the exact Narrative Result and its Narrative Run input capsule. History
    shows only the latest 20 successful records under the selected strategy filter. Revisions are
-   separate per `(Security, strategy_id)`; model changes do not create a new strategy series.
-   “View list latest” selects the first currently listed Decision and does not run analysis.
+   separate per `(Security, strategy_id)` across models and independent of legacy Decision revisions.
+   “View list latest” selects the first currently listed Narrative Result and does not run analysis.
 
 At desktop widths, watchlist, chart/history and analysis/results form three columns. At 900px,
 watchlist and explicit controls are placed above full-width chart and results. At 390px, the
@@ -46,21 +46,25 @@ Labels, focus outlines, real buttons, collapsible semantic sections and live req
 support keyboard use. Theme changes affect both charts and text; only the non-secret theme name
 is persisted locally.
 
-## Decision and evidence reading
+## Narrative and legacy evidence reading
 
-Structured sections retain support/quality reasons, W1/D1/M30 states and evidence, regime/trend/
-bias/avoid-long, key levels and location, Event/transition/impulse/channel, Setup family/direction/
-stage/why/missing/expiry/alternative, distinct Trigger and Follow-through, Entry/wait/chase and
-reference qualification, full Invalidation, T1/T2/nearest-obstacle, exact Risk/RR, conditional
-Holder basis/prior-ID/advisory, uncertainty/conflicts/limitations, next evidence, reasons and
-explanation. Canonical enums accompany Chinese labels. Holder output explicitly does not assert
-that the user owns the Security. No confidence score, win rate, valuation or financial result is
-invented. Audit disclosure retains all exact result, identity and associated Run request fields,
-hashes, versions, revision lineage, provider identity and original UTC timestamps.
+New Analyze calls `POST /api/v1/paqs-e/narrative-analyses`. The primary result is the exact
+persisted final model text, rendered with `textContent` and preserved whitespace. It is model-generated
+expert analysis, **not a machine-validated trading instruction**. No headings, Entry/Setup/RR values,
+prices or structured judgments are extracted from prose. No JSON result schema or structured semantic
+validator is required for a new narrative success. Snapshot facts remain separately auditable.
 
-Current market and frozen Decision evidence are separate modes and separate chart instances.
+The heading and audit show actual model, strategy, As-Of, narrative revision, Run/Result IDs and hashes.
+A separate disclosure shows the selected Run's frozen research capsule. The primary history lists
+Narrative Results with a bounded preview. The collapsed **Legacy 结构化 Decision 历史（只读）** section
+retains old structured Decisions and their original structured details and frozen evidence. They are
+clearly labeled legacy and are never promoted into the narrative revision series. The known-Run
+query explicitly distinguishes Narrative and Legacy Run IDs. Historical structured validator behavior
+and original records remain unchanged.
+
+Current market and frozen result evidence are separate modes and separate chart instances.
 Frozen W1/HTF, D1/STF and M30/TTF data come only from the selected Run's persisted
-`request_payload_json.market_snapshot`. The browser compares Decision, Run, request and snapshot
+`request_payload_json.market_snapshot`. The browser compares Result, Run, request and snapshot
 Security, hash/As-Of, model/strategy and version identities before association. Backend canonical
 hash validation remains authoritative. Failed/malformed/mismatched Run reads clear the frozen
 chart and overlays, retaining an independently loaded Decision with an unavailable-evidence label.
@@ -73,7 +77,8 @@ zero. Evidence disclosure retains exact OHLCV, source coverage, excluded partial
 missing-bucket counts, delays, warnings and current-adjustment provenance. These current snapshots
 do not claim strict point-in-time replay safety.
 
-Numeric lines use only executable entry price, invalidation calculation reference, and T1/T2
+Narrative evidence draws no model-derived price lines. In the legacy structured view only,
+numeric lines use executable entry price, invalidation calculation reference, and T1/T2
 calculation references. Labels preserve exact Decimal strings; finite JavaScript numbers are used
 only at the chart drawing boundary. Free-form Key Level/entry/target zones remain text; no regular
 expression extracts prices or constructs zone midpoints. Mode/Decision/Security changes and
@@ -81,16 +86,16 @@ evidence failures clear old lines. Current quote refresh cannot mutate frozen da
 
 ## Failure and uncertainty
 
-The numeric Problem `status` is distinct from `analysis_status` and nested `analysis_run.status`.
-The UI separately renders configuration error, provider unavailable, refusal, invalid structured
-output, and deterministic validation failure (including exact version/code/field/message).
+The numeric Problem `status` is distinct from `analysis_status`. Narrative failures are configuration
+error, provider unavailable, refusal, incomplete answer, or invalid final text. A formed failed attempt
+commits one safe failed Narrative Run and no Narrative Result; it never uses a semantic-validator gate.
 404/409/422 preconditions and 500 ledger/integrity failures do not invent a Run or Decision.
 A previous successful Decision stays visible with its own revision/time and an earlier-result
 label. Failures never become a new `NO_TRADE`, `UNCERTAIN`, revision or success row.
 
 After 180 seconds, a long-wait notice says the synchronous analysis is still running and must not
 be resubmitted. The request remains pending and the Analyze guard remains held. A later terminal
-success/provider failure/validation failure is rendered normally. Disconnect, a real network
+success/provider failure is rendered normally. Disconnect, a real network
 failure, non-JSON/malformed/unconfirmed response or identity anomaly is **unknown outcome**.
 The server may have committed after disconnection. No
 automatic POST retry occurs. Check successful history or a known Run ID before choosing another
@@ -116,8 +121,8 @@ python -m ruff format --check src tests
 python -m mypy src tests
 ```
 
-The browser fixture creates a fresh temporary SQLite DB, runs Alembic upgrade to the unchanged
-`0002_task007b_paqs_e_ledger`, launches the actual `ai_infra_quant.backend.main:app` via Uvicorn on
+The browser fixture creates a fresh temporary SQLite DB, runs Alembic upgrade to
+`0003_task007c1_narrative_ledger`, launches the actual `ai_infra_quant.backend.main:app` via Uvicorn on
 an ephemeral loopback port, unsets `OPENAI_API_KEY` and selects provider `none`. It checks real
 health/OpenAPI/configuration/page/static HTTP routes before browser scenarios. Only its own
 subprocess is terminated during cleanup. No existing user process or database is touched.
@@ -139,5 +144,7 @@ environment-dependent; a skip is not a performed PostgreSQL validation.
 
 See `THIRD_PARTY_WORKBENCH.md`. R20 is design-reference-only; vendor bytes/notices are retained.
 TASK-007C1 adds model resolution, secure credentials and a pre-reasoning research stage.
-The accepted strategy, Snapshot, deterministic validator, ledger schema, migrations, market-data
-provider, scheduler, PAQS-Q, portfolio and broker boundaries remain unchanged.
+Remediation 02 adds only migration 0003 and a distinct narrative prompt/provider/ledger path.
+Migrations 0001/0002, legacy validator, accepted strategy, Snapshot, market-data and no-live-trading
+boundaries remain unchanged. The source-revision launcher handshake and secure credentials remain
+in force. No paid smoke is automatic; final live acceptance is user-executed on the final SHA.
