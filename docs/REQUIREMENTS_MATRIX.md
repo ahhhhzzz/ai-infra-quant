@@ -276,3 +276,17 @@ implemented by TASK-007B. Accepted Phase 1 evidence remains unchanged.
 R02 supersedes earlier no-new-migration, normal structured-output/validator, and primary Decision UI
 requirements only. Legacy validator, master strategy, accepted evidence and no-live-trading boundaries
 remain unchanged. No independent acceptance or merge is claimed.
+
+## TASK-007C1 Remediation 03 (implemented; independent review pending)
+
+| Requirement | Implementation / evidence |
+|---|---|
+| DeepSeek native memo, optional truthful provenance, bounded failure without retry | `deepseek_research.py`; `test_paqs_e_native_research.py` |
+| Frozen memo before tool-free final reasoning; exact text/hash and failure atomicity | `test_paqs_e_native_memo_ledger.py`; unchanged Narrative provider/API/Ledger regression suites |
+| DOM-only Markdown default plus exact raw view, inert HTML/links/images, responsive tables/code | `narrative-markdown.js`; `test_paqs_e_safe_markdown.py` |
+| Research default OFF, explicit opt-in, reset on model change, no automatic POST | Safe-Markdown, model, Narrative, workbench and long-running browser suites |
+| Protected OFF path, migrations 0001/0002/0003, strategy, validator, registry and accepted evidence | R03 report protected hash/diff audit; no migration or ledger changes |
+| Remaining live acceptance | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one DeepSeek V4 Flash research-ON attempt on exact final R03 SHA; R03 Contract records successful OFF evidence at 74a19387adc408e9453c30fdbb30e6636ac4e695 |
+
+R03 supersedes strict DeepSeek source-array/JSON research and the old default-ON/raw-only UI.
+It preserves other providers' research guarantees and all Narrative/legacy persistence semantics.

@@ -32,8 +32,8 @@ def test_exact_flat_catalog_model_and_research_changes_are_not_analysis(
     for model in ModelRegistry().models:
         page.locator("#model-id").select_option(model.model_key)
         if model.web_research_supported:
-            expect(page.locator("#web-research")).to_be_checked()
-            page.locator("#web-research").uncheck()
+            expect(page.locator("#web-research")).not_to_be_checked()
+            expect(page.locator("#web-research")).to_be_enabled()
             page.locator("#web-research").check()
         else:
             expect(page.locator("#web-research")).not_to_be_checked()
@@ -177,7 +177,9 @@ def test_research_precondition_failure_preserves_prior_historical_decision(
         "detail": "Requested web research failed",
         "failure_kind": "PROVIDER_UNAVAILABLE",
     }
-    app.analyze()
+    page.locator("#model-id").select_option(MODEL)
+    page.locator("#web-research").check()
+    page.locator("#analyze-button").click()
     expect(page.locator("#analysis-state")).to_contain_text("PAQS_E_RESEARCH_PRECONDITION_FAILED")
     expect(page.locator("#decision-heading")).to_contain_text("历史")
     assert len(app.posts) == 1 and app.errors == []

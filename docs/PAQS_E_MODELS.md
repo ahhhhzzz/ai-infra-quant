@@ -65,8 +65,10 @@ new terminal Narrative Run and exact-text Narrative Result atomically. Actual pr
 Narrative revisions are keyed by Security + strategy across model changes, independent of legacy revisions. Current refresh cannot alter
 persisted market or research evidence. Missing credentials disable the button for the selected model.
 
-Research sends one bounded native-search HTTP request, without retries or continuation calls.
-The application accepts at most four reported search queries, 64 raw
+Research defaults OFF on initial load and every model change, and is never remembered across reloads.
+Enabling it is explicit and can increase latency and API cost. Research sends one bounded
+native-search HTTP request, without retries or continuation calls.
+For OpenAI and Alibaba, the application accepts at most four reported search queries, 64 raw
 source records and eight included items. Each source-specific summary is at most 1,600 Unicode
 characters; summary plus label/provenance is at most 4,000 per item and 24,000 total. Oversized,
 unattributed, malformed, empty or incomplete results fail closed. The HTTP response cap is 2 MB,
@@ -74,11 +76,23 @@ research output limit is 6,000 tokens and each transport timeout is 120 seconds.
 180-second notice leaves the synchronous request pending and guarded until its terminal response
 or a real connection failure. It neither aborts nor retries.
 
-DeepSeek alone accepts up to ten completed native action records: `search`, `open_page`, and
-`find_in_page`. At least one actual search is required; only searches supply query provenance.
-Page/find targets and contents are ignored for evidence construction: only native search sources
-and native URL citations can ground included summaries. Other providers retain the four-action,
-search-only acceptance shape. Action/query/source excess fails closed, without silent truncation.
+Remediation 03 changes DeepSeek alone to one exact provider-native factual research memo.
+It accepts up to ten completed native actions: `search`, `open_page`, and `find_in_page`, including
+at least one search. Exposed queries are retained (maximum four, each 500 characters); missing
+queries or native sources alone no longer prevent success. No JSON result or source-array output
+is requested. Memo text is capped at 24,000 Unicode characters, and memo + provenance + label
+together must fit the existing 24,000-character research budget; excess fails without truncation.
+One item freezes the exact memo, a null memo publication timestamp, safe response identity,
+retrieval/intent/As-Of, ordered actions, actual queries, optional native sources and an explicit
+limitation: cutoff compliance was requested but cannot be independently verified for every statement;
+Snapshot market facts take precedence. No hidden reasoning or raw envelope is retained.
+
+Optional native source/citation records are capped at 64 before deduplication. URLs must be explicit
+HTTP(S), at most 1,000 characters, with a hostname and no userinfo, whitespace/control characters or
+backslashes; titles are at most 500 characters. Only aware publication timestamps are retained.
+Known future URLs are excluded even if duplicated elsewhere; the memo remains with its limitation.
+Prose URLs and page/find targets are never promoted to trusted provenance. Other providers retain
+their existing four-action, search-only source-normalized behavior and source-specific bounds.
 
 OpenAI also receives `max_tool_calls=4`. DeepSeek documents that this option is ignored and its
 server-side auto-continuation limit is ten rounds; Qwen does not document an equivalent request
@@ -87,7 +101,7 @@ provider-internal billed searches. One HTTP attempt can contain multiple native 
 adapter rejects results exceeding the evidence bound and never continues with silent truncation.
 This provider-side cost-control limitation remains visible for independent review and live smoke.
 
-Each item retains native URL/citation identity, title when available (otherwise URL), query/intent,
+OpenAI/Alibaba items retain native URL/citation identity, title when available (otherwise URL), query/intent,
 retrieval time, publication timestamp when supplied, stable content ID and source-specific summary.
 Native reasoning traces and chain-of-thought are discarded. Native citation URLs are never fetched
 by this application. Generated summaries cannot invent new URLs or publication timestamps.
@@ -148,8 +162,9 @@ The browser suite runs actual Uvicorn against a fresh migrated SQLite DB through
 `0003_task007c1_narrative_ledger`, checks health/OpenAPI/page/configuration over HTTP and uses synthetic
 network fixtures for business scenarios. Unit/integration tests inject synthetic credential stores.
 
-No real-provider call is part of ordinary tests. A separate opt-in product acceptance should use a
-user key entered through this UI, one supported Security and DeepSeek V4 Flash with research off
-first; then explicitly try research if enabled and funded. Record exact code SHA, provider/model,
-terminal status, safe Narrative Run/Result IDs, response hash and frozen-research presence only. This implementation report does not claim that live gate
-performed or the task integrated.
+No real-provider call is part of ordinary tests. The R03 Contract records successful research-OFF
+live acceptance at `74a19387adc408e9453c30fdbb30e6636ac4e695`; this remediation preserves that final
+provider/prompt/ledger path. After independent review, the mandatory remaining live check is one
+explicit DeepSeek V4 Flash research-ON attempt on the exact final R03 SHA using the user's locally
+entered key. Record safe Run/Result identities, exact response/request hash verification, frozen
+memo/provenance and formatted/raw readability. This does not claim that live ON gate or integration.

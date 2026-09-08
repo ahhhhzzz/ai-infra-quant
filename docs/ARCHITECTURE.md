@@ -387,3 +387,19 @@ construction is available to legacy regression tests, never a public/user config
 Migration head is `0003_task007c1_narrative_ledger`, directly after untouched 0002. No model, endpoint,
 credential, research provenance, As-Of, source-handshake, long-running guard or no-live-trading
 boundary changes. No automatic retry/fallback, execution or prose-to-structured extraction exists.
+
+## TASK-007C1 Remediation 03: native research memo and safe presentation
+
+Only DeepSeek's optional research stage now requests and freezes one final native factual memo,
+without JSON/source-array compliance. The isolated `deepseek_research.py` normalizer checks a
+completed envelope, 1–10 completed search/page/find actions including a search, bounded actual
+queries and optional native URLs, and an exact bounded memo. It records honest provenance and
+cutoff limitations; prose URLs and hidden reasoning never become source evidence. OpenAI/Alibaba
+source normalization, final `NarrativeGateway`, Narrative service/prompt/ledger and hashes are unchanged.
+
+The local DOM-only `narrative-markdown.js` derives a safe formatted view from exact stored text.
+Raw text remains separately available. No HTML parser, remote renderer, executable model links/images,
+provider request or ledger mutation is involved in changing views. Research is unchecked initially
+and after every model change; explicit opt-in is never persisted. Migrations remain untouched at 0003.
+This implementation stops for independent review; the Contract's subsequent user-run DeepSeek
+research-ON live checkpoint on the exact final SHA is still required.

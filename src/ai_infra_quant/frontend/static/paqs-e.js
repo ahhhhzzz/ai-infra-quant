@@ -154,6 +154,7 @@
     $("evidence-empty").classList.add("visible");
     $("evidence-status").textContent = message;
   }
+  let narrativeView = "formatted";
   function renderDecision() {
     renderHeading();
     if (!decision) {
@@ -163,7 +164,20 @@
     }
     if (narrative(decision)) {
       const text = node("pre", decision.response_text, "narrative-text");
-      $("decision-result").replaceChildren(node("p", `模型生成的分析，未经过结构化语义校验。联网研究：${decision.web_research ? "已冻结辅助上下文" : "关闭"}`, "note"), text);
+      const formatted = window.PaqsNarrativeMarkdown.render(decision.response_text);
+      const controls = node("div", "", "narrative-view-controls");
+      const buttons = [["formatted", "格式化"], ["raw", "原文"]].map(([value, label]) => {
+        const button = node("button", label); button.type = "button";
+        button.dataset.narrativeView = value;
+        button.addEventListener("click", () => { narrativeView = value; updateView(); });
+        controls.append(button); return button;
+      });
+      function updateView() {
+        text.hidden = narrativeView !== "raw"; formatted.hidden = narrativeView !== "formatted";
+        for (const button of buttons) button.setAttribute("aria-pressed", String(button.dataset.narrativeView === narrativeView));
+      }
+      updateView();
+      $("decision-result").replaceChildren(node("p", `模型生成的分析，未经过结构化语义校验。联网研究：${decision.web_research ? "已冻结辅助上下文" : "关闭"}`, "note"), controls, formatted, text);
       $("decision-audit").textContent = JSON.stringify(decision, null, 2);
       return;
     }
@@ -585,10 +599,9 @@
   function modelChanged() {
     const item = selectedModel();
     $("web-research").disabled = !item?.web_research_supported;
-    $("web-research").checked = !!item?.web_research_supported;
-    $("research-status").textContent = item?.web_research_supported
-      ? ""
-      : "此模型当前未启用可审计联网研究；可关闭研究后分析。";
+    $("web-research").checked = false;
+    $("research-status").textContent = "联网研究默认关闭；开启会先进行额外的提供方联网研究请求，可能增加耗时和 API 成本。"
+      + (item?.web_research_supported ? "" : "此模型当前未启用可审计联网研究；可关闭研究后分析。");
     $("configuration-status").textContent = item?.credential_configured
       ? "凭据已存在（仅确认存在，未验证有效性、模型权限或连接）。"
       : "未配置此模型凭据。请配置 API Key；行情与历史仍可读取。";

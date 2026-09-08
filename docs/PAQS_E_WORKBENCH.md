@@ -1,4 +1,4 @@
-# PAQS-E narrative-first workbench — TASK-007C1 Remediation 02
+# PAQS-E narrative-first workbench — TASK-007C1 Remediation 03
 
 Status: **implemented / pending independent review**. No merge or next-task approval is implied.
 
@@ -23,10 +23,11 @@ under a clearly historical/local disclosure; they are not actual holdings or PAQ
    service share its credential status. Presence does not verify balance, entitlement or connectivity.
    OpenAI alone retains an optional read-only server environment fallback. No manual `.env` edit
    is needed for UI-managed credentials. Missing credentials disable Analyze for that model.
-4. Choose **联网研究**, enabled by default for supported model routes, then submit **Analyze**
+4. **联网研究** defaults OFF, including DeepSeek V4 Flash. Every model change resets it OFF;
+   unsupported models also disable the checkbox. Explicitly check it only when wanted, then submit **Analyze**
    explicitly. A synchronous page guard captures exactly `{security_id, model_key, strategy_id,
    web_research}` before any asynchronous step. Repeated Enter/click while pending creates no
-   extra request, even after changing selections. Research freezes source-specific auxiliary
+   extra request, even after changing selections. Research freezes bounded auxiliary
    evidence after the Snapshot cutoff is established; final reasoning has tools disabled.
    Unsupported requested research fails explicitly. There is no retry, queue, provider fallback,
    hidden prior context or idempotency fiction. See `PAQS_E_MODELS.md` for the catalog and limits.
@@ -49,13 +50,22 @@ is persisted locally.
 ## Narrative and legacy evidence reading
 
 New Analyze calls `POST /api/v1/paqs-e/narrative-analyses`. The primary result is the exact
-persisted final model text, rendered with `textContent` and preserved whitespace. It is model-generated
-expert analysis, **not a machine-validated trading instruction**. No headings, Entry/Setup/RR values,
+persisted final model text. **格式化** is the default local Markdown presentation; **原文** shows
+the exact persisted text with preserved whitespace. Toggling views makes no request and changes
+neither the selected Result nor its hash. Headings, lists, emphasis, code, rules, blockquotes and
+simple pipe tables use locally created DOM elements with text-only content. Raw HTML, links and
+images remain inert; no remote renderer is loaded. Malformed syntax remains readable text.
+Tables and code can scroll locally on narrow screens. It is model-generated
+expert analysis, **not a machine-validated trading instruction**. No Entry/Setup/RR values,
 prices or structured judgments are extracted from prose. No JSON result schema or structured semantic
 validator is required for a new narrative success. Snapshot facts remain separately auditable.
 
 The heading and audit show actual model, strategy, As-Of, narrative revision, Run/Result IDs and hashes.
-A separate disclosure shows the selected Run's frozen research capsule. The primary history lists
+A separate disclosure shows the selected Run's frozen research capsule. DeepSeek research is a
+provider-native memo with exposed provenance and an
+explicit cutoff-verification limitation; its prose URLs are not verified sources. Research opt-in
+is never remembered across reloads or restored from history. Enabling research can add latency and
+API cost before final analysis. The primary history lists
 Narrative Results with a bounded preview. The collapsed **Legacy 结构化 Decision 历史（只读）** section
 retains old structured Decisions and their original structured details and frozen evidence. They are
 clearly labeled legacy and are never promoted into the narrative revision series. The known-Run

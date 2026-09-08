@@ -166,8 +166,8 @@
             <label>模型<select id="model-id" name="model_key" required disabled></select></label>
             <label>主策略<select id="strategy-id" name="strategy_id" required disabled></select></label>
             <label class="research-toggle"><input id="web-research" type="checkbox"> 联网研究</label>
-            <p id="research-status" class="note"></p>
             <button id="configure-credential" type="button">配置此模型 API Key</button>
+            <p id="research-status" class="note"></p>
             <p id="configuration-status" class="note" role="status">读取服务器配置…</p>
             <button id="analyze-button" type="submit" disabled>Analyze · 分析当前快照</button>
             <p class="note">每次显式提交采集新快照。行情刷新不会运行分析。</p>
@@ -234,6 +234,7 @@
     </main>
     <script src="/static/vendor/lightweight-charts.standalone.production.js" defer></script>
     <script src="/static/app.js" defer></script>
+    <script src="/static/narrative-markdown.js" defer></script>
     <script src="/static/paqs-e.js" defer></script>
   </body>
 </html>

@@ -34,6 +34,7 @@ from ai_infra_quant.core.ports.paqs_e_reasoning import (
     ReasoningProviderOutcome,
     ReasoningProviderSuccess,
 )
+from ai_infra_quant.integrations.openai_reasoning.deepseek_research import normalize_native_memo
 from ai_infra_quant.integrations.openai_reasoning.schema import PaqsEReasoningResultSchemaV1
 
 
@@ -272,6 +273,14 @@ class ModelGateway:
         }
         if model.provider_id == "openai":
             body.update(max_tool_calls=4, include=["web_search_call.action.sources"])
+        if model.provider_id == "deepseek":
+            body["instructions"] = (
+                "Research only the supplied Security and Snapshot As-Of intent using at most "
+                "four search queries. Return one concise factual research memo, at most 24000 "
+                "characters. Do not provide a PAQS-E trading analysis or chain-of-thought. "
+                "Exclude sources published after the cutoff. Frozen Snapshot market facts "
+                "take precedence; web prices are not authoritative Snapshot facts."
+            )
         try:
             response = self.transport.post(model.research_endpoint, secret, body)
         except Exception:
@@ -281,6 +290,8 @@ class ModelGateway:
                 raise ValueError("Unsafe response")
             if response.get("model", model.model_id) != model.model_id:
                 raise ValueError("Model mismatch")
+            if model.provider_id == "deepseek":
+                return normalize_native_memo(response, model, snapshot, self.now(), intent)
             return normalize_research(response, model, snapshot, self.now(), intent)
         except PermissionError:
             raise ResearchFailure(Kind.PROVIDER_REFUSAL) from None

@@ -104,7 +104,7 @@ def test_explicit_capture_double_enter_guard_and_security_switch(
     page.locator("#analyze-form").dispatch_event("submit")
     expect(page.locator("#analysis-state")).to_contain_text(f"US.AVGO · {MODEL_NAME} · {STRATEGY}")
     assert app.posts == [
-        {"security_id": US, "model_key": MODEL, "strategy_id": STRATEGY, "web_research": True}
+        {"security_id": US, "model_key": MODEL, "strategy_id": STRATEGY, "web_research": False}
     ]
     app.hold = None
     app.respond(app.pending.pop())
@@ -112,7 +112,7 @@ def test_explicit_capture_double_enter_guard_and_security_switch(
     expect(page.locator("#decision-heading")).to_have_text("尚无选中的分析结果")
     expect(page.locator("#model-id")).to_have_value("glm-5.2")
     assert app.posts == [
-        {"security_id": US, "model_key": MODEL, "strategy_id": STRATEGY, "web_research": True}
+        {"security_id": US, "model_key": MODEL, "strategy_id": STRATEGY, "web_research": False}
     ]
     app.close()
 
@@ -124,6 +124,13 @@ def test_history_selection_survives_pending_analyze_and_refresh(
     page = app.open()
     app.hold = "/paqs-e/narrative-analyses"
     app.analyze()
+    # Click completion can precede interception on a busy browser. Keep the hold until
+    # this scenario actually has its one pending POST, before selecting history.
+    for _ in range(500):
+        if app.pending:
+            break
+        page.wait_for_timeout(10)
+    assert len(app.pending) == 1 and len(app.posts) == 1
     app.hold = None
     app.select(1)
     selected = page.locator("#decision-heading").inner_text()

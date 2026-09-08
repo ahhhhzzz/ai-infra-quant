@@ -181,7 +181,9 @@ def test_explicit_narrative_success_and_frozen_research_are_not_prose_extraction
     result["web_research"] = True
     page = app.open()
     app.hold = "/paqs-e/narrative-analyses"
-    app.analyze()
+    page.locator("#model-id").select_option(result["model_id"])
+    page.locator("#web-research").check()
+    page.locator("#analyze-button").click()
     page.clock.install()
     page.clock.run_for(180001)
     expect(page.locator("#analyze-button")).to_be_disabled()
