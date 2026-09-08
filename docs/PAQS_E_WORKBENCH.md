@@ -65,7 +65,9 @@ A separate disclosure shows the selected Run's frozen research capsule. DeepSeek
 provider-native memo with exposed provenance and an
 explicit cutoff-verification limitation; its prose URLs are not verified sources. Research opt-in
 is never remembered across reloads or restored from history. Enabling research can add latency and
-API cost before final analysis. The primary history lists
+API cost: it may issue up to two additional research requests before final analysis. A research
+failure may show bounded stage/class/request/action counts for review, never the raw provider body.
+It retains the prior Narrative and does not retry. The primary history lists
 Narrative Results with a bounded preview. The collapsed **Legacy 结构化 Decision 历史（只读）** section
 retains old structured Decisions and their original structured details and frozen evidence. They are
 clearly labeled legacy and are never promoted into the narrative revision series. The known-Run

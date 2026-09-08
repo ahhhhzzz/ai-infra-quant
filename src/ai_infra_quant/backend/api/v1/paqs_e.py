@@ -255,7 +255,14 @@ def analyze(
             code="PAQS_E_RESEARCH_PRECONDITION_FAILED",
             title="Web research failed",
             detail=str(failure),
-            extra={"failure_kind": failure.kind.value},
+            extra={
+                "failure_kind": failure.kind.value,
+                **(
+                    {"research_diagnostic": failure.diagnostic.as_dict()}
+                    if failure.diagnostic
+                    else {}
+                ),
+            },
         )
     except MarketDataSecurityNotFound:
         return _not_found(request, "SECURITY")
@@ -316,7 +323,14 @@ def analyze_narrative(
             code="PAQS_E_RESEARCH_PRECONDITION_FAILED",
             title="Web research failed",
             detail=str(failure),
-            extra={"failure_kind": failure.kind.value},
+            extra={
+                "failure_kind": failure.kind.value,
+                **(
+                    {"research_diagnostic": failure.diagnostic.as_dict()}
+                    if failure.diagnostic
+                    else {}
+                ),
+            },
         )
     except MarketDataSecurityNotFound:
         return _not_found(request, "SECURITY")

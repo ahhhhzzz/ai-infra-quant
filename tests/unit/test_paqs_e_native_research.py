@@ -67,7 +67,7 @@ def test_native_memo_without_sources_or_queries(actions: tuple[str, ...]) -> Non
     assert endpoint == MODEL.research_endpoint and secret == SENTINEL
     assert body["tools"] == [{"type": "web_search"}] and body["max_output_tokens"] == 6000
     assert body["store"] is False and body["stream"] is False
-    assert "JSON" not in body["instructions"] and "text" not in body
+    assert "Return only JSON" not in body["instructions"] and "text" not in body
     assert len(transport.calls) == 1
 
 
@@ -109,7 +109,6 @@ def test_native_optional_citations_queries_and_cutoff(timestamp: str | None) -> 
         "failed",
         "refusal",
         "empty",
-        "missing",
         "multiple",
         "oversize",
         "secret",
@@ -136,7 +135,7 @@ def test_native_memo_fails_closed_without_retry(case: str) -> None:
     action = response["output"][0]["action"]
     part = response["output"][-1]["content"][0]
     if case == "actions":
-        response = native(("search",) * 11)
+        response = native(("search",) * 65)
     elif case == "unknown":
         action["type"] = "execute"
     elif case == "no-search":
@@ -147,8 +146,6 @@ def test_native_memo_fails_closed_without_retry(case: str) -> None:
         part["type"] = "refusal"
     elif case == "empty":
         part["text"] = " \n"
-    elif case == "missing":
-        response["output"].pop()
     elif case == "multiple":
         response["output"].append(copy.deepcopy(response["output"][-1]))
     elif case == "oversize":

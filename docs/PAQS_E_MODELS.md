@@ -67,7 +67,8 @@ persisted market or research evidence. Missing credentials disable the button fo
 
 Research defaults OFF on initial load and every model change, and is never remembered across reloads.
 Enabling it is explicit and can increase latency and API cost. Research sends one bounded
-native-search HTTP request, without retries or continuation calls.
+native-search HTTP request. R04 permits one additional tool-free DeepSeek memo-synthesis request
+only for a valid completed tool-only SEARCH response; there are no retries.
 For OpenAI and Alibaba, the application accepts at most four reported search queries, 64 raw
 source records and eight included items. Each source-specific summary is at most 1,600 Unicode
 characters; summary plus label/provenance is at most 4,000 per item and 24,000 total. Oversized,
@@ -76,8 +77,8 @@ research output limit is 6,000 tokens and each transport timeout is 120 seconds.
 180-second notice leaves the synchronous request pending and guarded until its terminal response
 or a real connection failure. It neither aborts nor retries.
 
-Remediation 03 changes DeepSeek alone to one exact provider-native factual research memo.
-It accepts up to ten completed native actions: `search`, `open_page`, and `find_in_page`, including
+Remediation 04 preserves DeepSeek's exact provider-native factual research memo and accepts up to
+64 completed native actions in at most 128 output items: `search`, `open_page`, and `find_in_page`, including
 at least one search. Exposed queries are retained (maximum four, each 500 characters); missing
 queries or native sources alone no longer prevent success. No JSON result or source-array output
 is requested. Memo text is capped at 24,000 Unicode characters, and memo + provenance + label
@@ -86,6 +87,26 @@ One item freezes the exact memo, a null memo publication timestamp, safe respons
 retrieval/intent/As-Of, ordered actions, actual queries, optional native sources and an explicit
 limitation: cutoff compliance was requested but cannot be independently verified for every statement;
 Snapshot market facts take precedence. No hidden reasoning or raw envelope is retained.
+
+SEARCH forces the sole native web-search tool with `reasoning.effort=none` and a 6,000-token cap.
+One valid final memo takes the direct path, using one research request. Only a completed valid
+tool-only response enters SYNTHESIS: the original intent, accepted `web_search_call` items passed
+back unchanged in memory, and a final factual memo instruction form the stateless input.
+SYNTHESIS uses the same endpoint/model/credential, `reasoning.effort=none`, `tools=[]`,
+`tool_choice=none`, and a 4,000-token cap. Both requests use `store=false`, `stream=false` and
+no previous-response/conversation/background state. Serialized research requests and responses
+are capped at 2 MB. An invalid SEARCH never triggers SYNTHESIS; neither stage retries.
+The final unchanged tool-free Narrative runs only after the exact accepted memo is frozen.
+Research-OFF uses zero research calls; ON uses one or two, thus two or three total provider calls.
+Safe provenance records SEARCH status/id/counts/actions, optional SYNTHESIS id, synthesis use,
+and research HTTP request count. Ten provider continuation rounds do not imply ten output items.
+
+Research precondition errors retain their existing API code and create no Run/Result. Optional
+`research_diagnostic` metadata reports a fixed stage/failure class, registered route, safe response
+status/id, stage-local action/search/message counts (saturated at 129), synthesis-attempt flag,
+HTTP request count, and only allowlisted incomplete reasons. No memo, raw body, hidden prompt,
+exception text, reasoning or credential is included. The UI shows only fixed stage/class/count
+fields, preserving the prior Narrative and never retrying. Diagnostics are not stored in the ledger.
 
 Optional native source/citation records are capped at 64 before deduplication. URLs must be explicit
 HTTP(S), at most 1,000 characters, with a hostname and no userinfo, whitespace/control characters or
@@ -165,6 +186,6 @@ network fixtures for business scenarios. Unit/integration tests inject synthetic
 No real-provider call is part of ordinary tests. The R03 Contract records successful research-OFF
 live acceptance at `74a19387adc408e9453c30fdbb30e6636ac4e695`; this remediation preserves that final
 provider/prompt/ledger path. After independent review, the mandatory remaining live check is one
-explicit DeepSeek V4 Flash research-ON attempt on the exact final R03 SHA using the user's locally
+explicit DeepSeek V4 Flash research-ON attempt on the exact reviewed final R04 SHA using the user's locally
 entered key. Record safe Run/Result identities, exact response/request hash verification, frozen
 memo/provenance and formatted/raw readability. This does not claim that live ON gate or integration.

@@ -6,6 +6,8 @@ import hashlib
 import ipaddress
 import json
 import re
+from copy import deepcopy
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import urlsplit
@@ -21,13 +23,50 @@ LIMITATION = (
 )
 
 
-def normalize_native_memo(
+@dataclass(frozen=True)
+class NativeSearch:
+    memo: str | None
+    provenance: dict[str, Any]
+    calls: list[dict[str, Any]]  # Transient transport items; never part of frozen evidence.
+
+
+def final_memo(item: dict[str, Any]) -> str:
+    if item.get("refusal"):
+        raise PermissionError("Refusal")
+    if (
+        item.get("type") != "message"
+        or item.get("status", "completed") != "completed"
+        or item.get("role", "assistant") != "assistant"
+        or item.get("tool_calls")
+        or item.get("function_call")
+    ):
+        raise ValueError("Unexpected message")
+    parts = item.get("content")
+    if not isinstance(parts, list) or len(parts) != 1 or not isinstance(parts[0], dict):
+        raise ValueError("Expected one visible memo")
+    part = parts[0]
+    if part.get("type") == "refusal":
+        raise PermissionError("Refusal")
+    text = part.get("text")
+    if (
+        part.get("type") not in {"output_text", "text"}
+        or not isinstance(text, str)
+        or not text.strip()
+        or len(text) > 24_000
+        or re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]", text)
+    ):
+        raise ValueError("Memo integrity bound")
+    text.encode("utf-8", errors="strict")
+    return text
+
+
+def parse_native_search(
     response: dict[str, Any],
     model: ModelDescriptor,
     snapshot: PaqsMarketSnapshot,
     retrieved_at: datetime,
     intent: str,
-) -> tuple[AuxiliaryContextItem, ...]:
+) -> NativeSearch:
     if response.get("status") != "completed" or response.get("error"):
         raise ValueError("Incomplete research")
     response_id = response.get("id")
@@ -37,12 +76,13 @@ def normalize_native_memo(
     ):
         raise ValueError("Unsafe response identity")
     output = response.get("output")
-    if not isinstance(output, list):
+    if not isinstance(output, list) or len(output) > 128:
         raise ValueError("Malformed research")
     texts: list[str] = []
     actions: list[str] = []
     queries: list[str] = []
     records: list[dict[str, Any]] = []
+    calls: list[dict[str, Any]] = []
 
     def remember(values: object) -> None:
         if not isinstance(values, list) or any(not isinstance(v, dict) for v in values):
@@ -65,8 +105,9 @@ def normalize_native_memo(
             if action_type not in {"search", "open_page", "find_in_page"}:
                 raise ValueError("Unknown action")
             actions.append(action_type)
-            if len(actions) > 10:
+            if len(actions) > 64:
                 raise ValueError("Action bound")
+            calls.append(deepcopy(item))
             if action_type == "search":
                 values = action.get("queries", [action["query"]] if "query" in action else [])
                 if not isinstance(values, list) or any(
@@ -78,24 +119,8 @@ def normalize_native_memo(
                     raise ValueError("Query count")
                 remember(action.get("sources", []))
             continue
-        if kind != "message" or item.get("status", "completed") != "completed":
-            raise ValueError("Unexpected output")
-        if item.get("refusal"):
-            raise PermissionError("Refusal")
-        parts = item.get("content")
-        if not isinstance(parts, list):
-            raise ValueError("Malformed content")
-        for part in parts:
-            if not isinstance(part, dict):
-                raise ValueError("Malformed content")
-            if part.get("type") == "refusal":
-                raise PermissionError("Refusal")
-            if part.get("type") not in {"output_text", "text"}:
-                raise ValueError("Unexpected content")
-            text = part.get("text")
-            if not isinstance(text, str) or not text.strip() or len(text) > 24_000:
-                raise ValueError("Memo bound")
-            texts.append(text)
+        texts.append(final_memo(item))
+        for part in item["content"]:
             annotations = part.get("annotations", [])
             if not isinstance(annotations, list):
                 raise ValueError("Malformed annotations")
@@ -103,7 +128,7 @@ def normalize_native_memo(
                 if not isinstance(annotation, dict) or annotation.get("type") != "url_citation":
                     raise ValueError("Unexpected annotation")
                 remember([annotation])
-    if "search" not in actions or len(texts) != 1:
+    if "search" not in actions or len(texts) > 1:
         raise ValueError("Missing search or final memo")
     sources: dict[str, dict[str, str]] = {}
     future: set[str] = set()
@@ -154,8 +179,10 @@ def normalize_native_memo(
                 future.add(url)
             else:
                 source["publication_time"] = published.astimezone(UTC).isoformat()
-    provenance = json.dumps(
-        {
+    return NativeSearch(
+        memo=texts[0] if texts else None,
+        calls=calls,
+        provenance={
             "provider": model.provider_id,
             "model": model.model_id,
             "provider_response_id": response_id,
@@ -163,28 +190,49 @@ def normalize_native_memo(
             "intent": intent,
             "snapshot_as_of": snapshot.as_of_timestamp.isoformat(),
             "native_action_count": len(actions),
+            "search_response_status": "completed",
+            "search_provider_response_id": response_id,
+            "web_search_call_count": len(actions),
+            "search_action_count": actions.count("search"),
             "action_types": actions,
             "queries": queries,
             "sources": [source for url, source in sources.items() if url not in future],
             "excluded_future_source_count": len(future),
             "limitation": LIMITATION,
         },
+    )
+
+
+def memo_provenance(search: NativeSearch, *, synthesis_id: str | None, synthesis_used: bool) -> str:
+    return json.dumps(
+        {
+            **search.provenance,
+            "synthesis_used": synthesis_used,
+            "synthesis_provider_response_id": synthesis_id,
+            "research_http_request_count": 2 if synthesis_used else 1,
+        },
         ensure_ascii=False,
         sort_keys=True,
         separators=(",", ":"),
     )
+
+
+def freeze_native_memo(
+    search: NativeSearch, memo: str, *, synthesis_id: str | None, synthesis_used: bool
+) -> tuple[AuxiliaryContextItem, ...]:
+    provenance = memo_provenance(search, synthesis_id=synthesis_id, synthesis_used=synthesis_used)
     # The old research capsule budget includes memo + provenance + label; never truncate.
     label = "DeepSeek native web research memo"
-    if len(texts[0]) + len(provenance) + len(label) > 24_000:
+    if len(memo) + len(provenance) + len(label) > 24_000:
         raise ValueError("Auxiliary capsule bound")
     return (
         AuxiliaryContextItem(
-            context_id="web-" + hashlib.sha256((texts[0] + provenance).encode()).hexdigest()[:24],
+            context_id="web-" + hashlib.sha256((memo + provenance).encode()).hexdigest()[:24],
             category="web_research",
             source_label=label,
             source_timestamp=None,
             provenance=provenance,
             as_of_compatible=True,
-            content=texts[0],
+            content=memo,
         ),
     )

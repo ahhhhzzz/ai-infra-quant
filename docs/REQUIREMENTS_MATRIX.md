@@ -290,3 +290,18 @@ remain unchanged. No independent acceptance or merge is claimed.
 
 R03 supersedes strict DeepSeek source-array/JSON research and the old default-ON/raw-only UI.
 It preserves other providers' research guarantees and all Narrative/legacy persistence semantics.
+
+## TASK-007C1 Remediation 04 (implemented; independent review pending)
+
+| Requirement | Implementation / regression evidence |
+|---|---|
+| One SEARCH; direct memo or exactly one tool-free SYNTHESIS; no retry | `deepseek_research_flow.py`; `test_paqs_e_research_continuation.py` |
+| 11-call tool-only compatibility; exact stateless pass-back; effort none; 64/128 limits | Continuation unit and API tests; native memo bounds tests |
+| Safe stage diagnostics, no raw provider or reasoning persistence | Immutable `ResearchDiagnostic`; API failure projection; continuation API and browser diagnostic tests |
+| OFF zero research; ON at most two research + one unchanged final Narrative | API integration cases with exact text/request hashes, unchanged rows/schema after failure |
+| Default OFF, up-to-two request/cost disclosure, safe Markdown/raw and no automatic Analyze | `test_paqs_e_research_diagnostic.py` plus all retained R03 and browser regressions |
+| Protected migration head 0003, strategy/prompt/validator/ledger/registry/credentials/source guard | R04 implementation report protected audit and required validation |
+| Final live gate | USER_EXECUTED_AFTER_INDEPENDENT_REVIEW: one explicit DeepSeek V4 Flash Research-ON attempt on exact reviewed R04 SHA; no automatic retry or merge |
+
+R04 supersedes only DeepSeek's one-request/final-message-in-first-response/ten-output-item
+assumptions. Accepted historical reports and reviews remain unchanged.

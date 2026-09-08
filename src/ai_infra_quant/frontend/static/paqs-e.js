@@ -538,7 +538,9 @@
             strategy_id: payload.strategy_id, status: body.analysis_status }, false);
         }
       } else if ([404, 409, 422, 500].includes(response.status) && body.status === response.status && typeof body.code === "string") {
-        state(`${target}：${response.status === 500 ? "账本证据无法提交或验证" : "分析前提失败"} · ${body.code} · ${body.detail || ""}。没有确认新的 Narrative。`);
+        const researchFailure = body.code === "PAQS_E_RESEARCH_PRECONDITION_FAILED";
+        const detail = researchFailure ? "联网研究未完成" : (body.detail || "");
+        state(`${target}：${response.status === 500 ? "账本证据无法提交或验证" : "分析前提失败"} · ${body.code} · ${detail}。没有确认新的 Narrative。${researchFailure ? researchDiagnostic(body.research_diagnostic) : ""}`);
       } else throw new Error("未确认响应");
     } catch (_error) {
       state(`${target}：结果未知，响应未能确认（可能断连、超时、格式或身份异常）。服务端可能已保存结果。请检查成功历史或已知 Run，再决定是否显式发起新尝试；不会自动重试。`);
@@ -548,6 +550,16 @@
       updateButton();
     }
   });
+
+  function researchDiagnostic(value) {
+    if (!value || value.detail_version !== "paqs-e-research-diagnostic-v1"
+      || !["SEARCH", "SYNTHESIS"].includes(value.stage)
+      || !["TRANSPORT_ERROR", "INVALID_RESPONSE", "UNSAFE_RESPONSE", "REFUSAL"].includes(value.failure_class)
+      || ![1, 2].includes(value.research_http_request_count)) return "";
+    const fields = [value.web_search_call_count, value.search_action_count, value.message_count];
+    if (!fields.every((count) => Number.isInteger(count) && count >= 0 && count <= 129)) return "";
+    return `研究诊断：${value.stage} / ${value.failure_class}；请求 ${value.research_http_request_count}，研究动作 ${fields[0]}，搜索 ${fields[1]}，消息 ${fields[2]}。`;
+  }
 
   function onSecurity(item) {
     security = item;
@@ -600,7 +612,7 @@
     const item = selectedModel();
     $("web-research").disabled = !item?.web_research_supported;
     $("web-research").checked = false;
-    $("research-status").textContent = "联网研究默认关闭；开启会先进行额外的提供方联网研究请求，可能增加耗时和 API 成本。"
+    $("research-status").textContent = "联网研究默认关闭；开启可能在最终分析前增加最多 2 次研究请求，增加耗时和 API 成本。"
       + (item?.web_research_supported ? "" : "此模型当前未启用可审计联网研究；可关闭研究后分析。");
     $("configuration-status").textContent = item?.credential_configured
       ? "凭据已存在（仅确认存在，未验证有效性、模型权限或连接）。"

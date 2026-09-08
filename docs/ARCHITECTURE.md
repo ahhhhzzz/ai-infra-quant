@@ -403,3 +403,19 @@ provider request or ledger mutation is involved in changing views. Research is u
 and after every model change; explicit opt-in is never persisted. Migrations remain untouched at 0003.
 This implementation stops for independent review; the Contract's subsequent user-run DeepSeek
 research-ON live checkpoint on the exact final SHA is still required.
+
+## TASK-007C1 Remediation 04: bounded stateless DeepSeek research
+
+`deepseek_research_flow.py` owns one SEARCH and optional tool-free SYNTHESIS, selected only for
+valid completed tool-only SEARCH output. Both disable thinking with Responses effort `none`.
+The parser accepts up to 64 native calls / 128 output items; the provider's ten continuation rounds
+are not an output-item limit. Continuation reconstructs the original intent, exact accepted native
+call items, and a factual memo instruction without previous-response/conversation state. Native
+items remain transient transport material; only the exact final memo and bounded safe provenance
+enter the unchanged Narrative request. No retry, fallback, second SEARCH, schema or migration exists.
+
+The application research failure carries an optional immutable allowlisted diagnostic; the API
+adds that safe projection to the existing precondition error. No failure Run/Result is invented.
+The UI discloses up to two additional research requests and shows only fixed diagnostic fields.
+Other providers, NarrativeGateway, ledger/lineage, strategy/prompt, validator, Markdown/raw views,
+default-OFF opt-in, credentials, source handshake and no-live-trading boundaries are unchanged.
