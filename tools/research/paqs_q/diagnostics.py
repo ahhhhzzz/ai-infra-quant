@@ -5,7 +5,8 @@ from datetime import datetime
 from decimal import Decimal, localcontext
 from typing import Any
 
-from .engine import calculate_window, evaluate, prepare
+from .engine import calculate_window, evaluate, failure, prepare
+from .temporal import availability_check, information_change
 from .types import CONTEXT, Bar, Dataset, Parameters, Result, digest, q
 
 
@@ -43,24 +44,58 @@ def classify(old: Any, right: Any, left: Any, both: Any) -> str:
 def boundary(data: Dataset, bars: tuple[Bar, ...], params: Parameters) -> dict[str, Any]:
     if len(bars) != params.total + 1:
         raise ValueError("BOUNDARY_REQUIRES_N_PLUS_ONE")
-    data = replace(data, bars=bars)
+    old_cutoff, new_cutoff = bars[-2].completed_at, bars[-1].completed_at
+    # bars identifies the requested transition only; raw data retains every version.
+    selected_old = prepare(data, old_cutoff)
+    selected_new = prepare(data, new_cutoff)
+    if bars != selected_new[-params.total - 1 :]:
+        raise ValueError("BOUNDARY_TRANSITION_NOT_SELECTED_FROM_SOURCE")
+    old_bars = selected_old[-params.total :]
+    both_bars = selected_new[-params.total :]
+    left_edge = min(old_bars[0].start, bars[0].start) if old_bars else bars[0].start
+    change = information_change(selected_old, selected_new, old_cutoff, left_edge)
+    right_bars = tuple(b for b in selected_new if old_bars and b.start >= old_bars[0].start)
+    left_bars = old_bars[1:]
+    arm_bars = {"OLD": old_bars, "RIGHT": right_bars, "LEFT": left_bars, "BOTH": both_bars}
+    checks = {
+        name: availability_check(items, data, old_cutoff if name in {"OLD", "LEFT"} else new_cutoff)
+        for name, items in arm_bars.items()
+    }
     with localcontext(CONTEXT):
-        old = calculate_window(data, bars[:-1], bars[-2].completed_at, params, params.warm)
-        right = calculate_window(
-            data, bars, bars[-1].completed_at, params, params.warm, diagnostic=True
+        old = evaluate(data, old_cutoff, params)
+        both = evaluate(data, new_cutoff, params)
+
+        def diagnostic_arm(name: str, expected: int, cutoff: datetime) -> Result:
+            items = arm_bars[name]
+            if len(items) != expected or len(old_bars) != params.total:
+                return failure(data, cutoff, params, "BOUNDARY_HORIZON_UNAVAILABLE")
+            try:
+                return calculate_window(data, items, cutoff, params, params.warm, diagnostic=True)
+            except (ValueError, TypeError, ArithmeticError) as exc:
+                return failure(data, cutoff, params, str(exc))
+
+        right = diagnostic_arm("RIGHT", params.total + 1, new_cutoff)
+        left = diagnostic_arm("LEFT", params.total - 1, old_cutoff)
+        results = dict(zip(("OLD", "RIGHT", "LEFT", "BOTH"), (old, right, left, both), strict=True))
+        projections = [structural(r) for r in results.values()]
+        confounded = any(change.values())
+        horizon_unavailable = len(old_bars) != params.total or len(right_bars) != params.total + 1
+        invalid_arm = any(
+            r.document()["decision"]["input_status"] == "INVALID" for r in results.values()
         )
-        left = calculate_window(
-            data, bars[1:-1], bars[-2].completed_at, params, params.warm, diagnostic=True
+        label = (
+            "REVISION_CONFOUNDED"
+            if confounded
+            else "COMBINED_OR_UNRESOLVED"
+            if horizon_unavailable or invalid_arm
+            else classify(*projections)
         )
-        both = calculate_window(data, bars[1:], bars[-1].completed_at, params, params.warm)
-        projections = [structural(r) for r in (old, right, left, both)]
-        label = classify(*projections)
         directional = {projections[0]["regime"], projections[3]["regime"]} == {
             "BULL_TREND",
             "BEAR_TREND",
         }
         replaced = projections[0]["pivots"][-1:] != projections[3]["pivots"][-1:]
-        atr = both.document()["decision"]["atr"]
+        atr = both.document()["decision"].get("atr")
         geometry = []
         for role in ("SUPPORT", "RESISTANCE"):
             a = [z for z in projections[0]["zones"] if z[0] == role]
@@ -109,17 +144,25 @@ def boundary(data: Dataset, bars: tuple[Bar, ...], params: Parameters) -> dict[s
         )
         return {
             "classification": label,
+            "diagnostic_version": "availability-2",
+            "information_change": change,
+            "horizon_unavailable": horizon_unavailable,
+            "availability_checks": checks,
+            "arm_decision_hashes": {name: r.semantic_hash for name, r in results.items()},
+            "arm_input_statuses": {
+                name: r.document()["decision"]["input_status"] for name, r in results.items()
+            },
             "direct_directional_flip": directional,
             "latest_pivot_replaced": replaced,
             "material": material,
             "geometry": geometry,
             "arms": dict(zip(("OLD", "RIGHT", "LEFT", "BOTH"), projections, strict=True)),
-            "review_required": label == "LEFT_ONLY" and material,
+            "review_required": confounded or invalid_arm or (label == "LEFT_ONLY" and material),
             "intervals": {
-                "OLD": len(bars) - 1,
-                "RIGHT": len(bars),
-                "LEFT": len(bars) - 2,
-                "BOTH": len(bars) - 1,
+                "OLD": len(old_bars),
+                "RIGHT": len(right_bars),
+                "LEFT": len(left_bars),
+                "BOTH": len(both_bars),
             },
         }
 
@@ -252,16 +295,15 @@ def audit(data: Dataset, limit: int = 100, *, ceiling: datetime | None = None) -
             continue
         trimmed = evaluate(replace(data, bars=legitimate[-params.total :]), cutoff, params)
         origin_violations += current.semantic_hash != trimmed.semantic_hash
-        refs = {b.ref: b for b in legitimate[-params.total :]}
-        future_refs += sum(
-            refs[p["confirmed_ref"]].completed_at > cutoff for p in d["active_pivots"]
-        )
+        current_check = availability_check(legitimate[-params.total :], data, cutoff)
+        future_refs += current_check["violation_count"]
         if previous_index is not None and index == previous_index + 1:
             transitions += 1
             changes += d["regime"] != previous_regime
         previous_index, previous_regime = index, d["regime"]
         baseline = old_engine(data, legitimate[-params.total :])
         compact: dict[str, Any] = {
+            "availability_check": current_check,
             "old_bounded_regime": baseline["regime"],
             "old_bounded_pivots": baseline["major_pivot_count"],
             "cutoff": cutoff.isoformat(),
@@ -314,7 +356,12 @@ def audit(data: Dataset, limit: int = 100, *, ceiling: datetime | None = None) -
         if len(legitimate) >= params.total + 1:
             ablation = boundary(data, legitimate[-params.total - 1 :], params)
             compact["boundary_class"] = ablation["classification"]
-            if ablation["material"]:
+            compact["boundary_availability_checks"] = ablation["availability_checks"]
+            compact["boundary_information_change"] = ablation["information_change"]
+            future_refs += sum(
+                check["violation_count"] for check in ablation["availability_checks"].values()
+            )
+            if ablation["material"] or ablation["review_required"]:
                 issues.append(
                     {"kind": "BOUNDARY_MATERIAL", "cutoff": cutoff.isoformat(), **ablation}
                 )
@@ -354,6 +401,10 @@ def audit(data: Dataset, limit: int = 100, *, ceiling: datetime | None = None) -
         "d1_churn_review": data.timeframe == "D1" and churn is not None and Decimal(churn) > 20,
         "origin_violations": origin_violations,
         "future_references": future_refs,
+        "future_reference_scope": (
+            "all CURRENT/OLD/RIGHT/LEFT/BOTH input completion and availability; "
+            "unknown observational time is not certified"
+        ),
         "sensitivity": comparisons,
         "range_state_runs": run_lengths(
             ["RANGE" if r.get("regime") == "RANGE" else None for r in rows]

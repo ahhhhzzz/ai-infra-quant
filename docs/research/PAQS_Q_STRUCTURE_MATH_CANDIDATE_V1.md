@@ -273,3 +273,70 @@ weekly bars, D1 411 and M30 299 to supply 100 eligible terminal evaluations.
 The report separates engineering execution, real-market gate and semantic adoption. Incomplete
 real-universe coverage or unexplained material boundary effects prohibit semantic PASS even if
 every synthetic correctness invariant passes. Predictive/trading performance is not evaluated.
+
+## 14. Boundary clarification 1.2 — F01/F02 remediation
+
+Authority: [focused remediation contract](../evidence/TASK_006B_Q/remediation-01/CONTRACT.md).
+This supersedes the incomplete quality/availability handling of section 13.2 and its diagnostic
+implementation. ATR/Pivot/Zone/Range/Regime formulas, numerical profile, W/A/N, frozen universe
+and calculation rule ID `QSTR-CANDIDATE-1.1` remain unchanged. Valid unchanged observations keep
+their decision identity; the versioned availability diagnostic is labelled `availability-2`.
+
+### 14.1 Per-observation coverage and aggregate quality
+
+Bar `coverage` has exactly three legal strings: COMPLETE, PARTIAL, UNKNOWN. INVALID, other strings,
+nulls and other types are schema errors. Dataset quality still permits COMPLETE/PARTIAL/UNKNOWN/INVALID.
+For records entering the bounded calculation, use the certainty ordering COMPLETE < PARTIAL < UNKNOWN:
+aggregate quality must be at least as conservative as each used record. COMPLETE with a PARTIAL or
+UNKNOWN bar, or PARTIAL with an UNKNOWN bar, is contradictory and returns INVALID/UNCERTAIN with
+`AGGREGATE_BAR_QUALITY_CONFLICT`. Invalid coverage returns `BAR_COVERAGE_INVALID`. Aggregate INVALID
+always fails. All-COMPLETE bars may have a legitimate PARTIAL/UNKNOWN aggregate (e.g. incomplete source
+coverage); the aggregate is retained, never promoted. Legitimate D1 PARTIAL/UNKNOWN may be calculated
+only with the corresponding conservative aggregate; this is not clean-market certification.
+
+Temporal completion/availability filtering precedes payload interpretation. Select the newest
+available version for a source key before derived-coverage eligibility: a newer legitimate PARTIAL
+W1/M30 version excludes that key, rather than resurrecting its older COMPLETE version. Only legitimate,
+aggregate-consistent PARTIAL/UNKNOWN W1/M30 records are excluded as non-eligible. Invalid/contradictory
+records remain visible to bounded validation, preventing them from being silently discarded into a
+COMPLETE result. Excluded leading history is outside the N-bar calculation. Unavailable/future versions
+do not affect fixed-cutoff quality validation. JSON decoding preserves source quality and delegates
+semantic validation to the same public evaluator; it never rewrites flags.
+
+### 14.2 Availability-aware boundary ablation
+
+The boundary interface's N+1 sequence identifies the requested transition; it is checked against the
+raw dataset selected at the new cutoff. The raw versioned dataset is retained. Let old/new cutoff be
+the completion instants of the sequence's preceding/final terminal. Each arm selects by its own
+information cutoff; completion AND explicit availability must be no later than that cutoff.
+
+| Arm | Version set and interval | Information cutoff |
+|---|---|---|
+| OLD | Independent public evaluate over raw versions, normal last N | old cutoff |
+| LEFT | Remove first observation from OLD's selected N, keep warm index W | old cutoff |
+| RIGHT | Select new-cutoff versions from OLD's first source key through new terminal; require N+1 | new cutoff |
+| BOTH | Independent public evaluate over raw versions, normal last N | new cutoff |
+
+For ordinary no-revision input these are the original N/N-1/N+1/N arms and exact active intervals
+in section 13.4. LEFT never receives later versions from RIGHT. OLD and BOTH decision hashes match
+independent normal evaluations. No low-level `calculate_window` may consume incomplete/future or
+explicitly later-available observations; AS_OF also forbids unknown availability there.
+
+Compare old-cutoff vs new-cutoff historical keys within the experiment, excluding the genuinely new
+right terminal: changed content/availability, newly available historical keys, or disappeared keys
+are counted separately. Any such change is `REVISION_CONFOUNDED`, even if structure happens to agree;
+it can never be LEFT_ONLY. Missing earlier versions remain missing at OLD, not reconstructed from a
+later payload. Insufficient OLD or a RIGHT interval other than N+1 yields an explicitly unavailable
+diagnostic horizon; do not invent bars or silently alter strategy horizons. The confounded record
+retains independent OLD/BOTH outcomes and the reason attribution is unavailable.
+
+Every CURRENT and OLD/RIGHT/LEFT/BOTH observation is audited for completion, availability and missing
+AS_OF metadata, with arm cutoff, record count, violation counts and a hash of ordered source-reference/
+completion/availability tuples. This includes all ATR warm-up inputs, not only Pivot references.
+OBSERVATIONAL null availability is counted as `OBSERVATIONAL_UNKNOWN`, not historical As-Of proof.
+The existing `future_references` field now counts these input temporal violations, with an explicit
+scope label; the prior zero-current-Pivot counter is preserved only in original historical evidence.
+
+Original diagnostics, reports and freeze manifests remain immutable. Corrected same-input evidence
+and limitations belong solely under `remediation-01/`. Real-market coverage stays INCOMPLETE and the
+known structural seed/left-boundary sensitivity remains unaccepted; no numerical tuning is authorized.

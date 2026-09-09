@@ -22,6 +22,16 @@ from .types import (
 from .zones import build_zones, ranges, select_zones
 
 
+def quality_error(bar: Bar, data: Dataset) -> str | None:
+    """Aggregate quality may be more conservative, never more certain, than a used bar."""
+    ranks = {"COMPLETE": 0, "PARTIAL": 1, "UNKNOWN": 2}
+    if not isinstance(bar.coverage, str) or bar.coverage not in ranks:
+        return "BAR_COVERAGE_INVALID"
+    if data.quality in ranks and ranks[data.quality] < ranks[bar.coverage]:
+        return "AGGREGATE_BAR_QUALITY_CONFLICT"
+    return None
+
+
 def prepare(data: Dataset, cutoff: datetime) -> tuple[Bar, ...]:
     """Select versions before price validation, so unavailable future payloads cannot leak."""
     utc(cutoff)
@@ -46,8 +56,6 @@ def prepare(data: Dataset, cutoff: datetime) -> tuple[Bar, ...]:
             continue
         if bar.available_at is None and data.mode == "AS_OF":
             continue
-        if bar.timeframe in {"W1", "M30"} and bar.coverage != "COMPLETE":
-            continue
         versions.setdefault(utc(bar.start), []).append(bar)
     selected: list[Bar] = []
     minimum = datetime.min.replace(tzinfo=UTC)
@@ -67,13 +75,24 @@ def prepare(data: Dataset, cutoff: datetime) -> tuple[Bar, ...]:
             and len({canonical(b.observation()) for b in group}) != 1
         ):
             raise ValueError("UNORDERABLE_UNKNOWN_VERSION")
-        selected.append(finalists[0])
+        bar = finalists[0]
+        # Exclude only legitimate partial derived bars, after selecting the current version.
+        # Invalid or contradictory quality remains visible for bounded fail-closed validation.
+        if (
+            bar.timeframe in {"W1", "M30"}
+            and bar.coverage != "COMPLETE"
+            and not quality_error(bar, data)
+        ):
+            continue
+        selected.append(bar)
     return tuple(selected)
 
 
 def validate_window(bars: tuple[Bar, ...], data: Dataset) -> None:
     previous: Bar | None = None
     for bar in bars:
+        if error := quality_error(bar, data):
+            raise ValueError(error)
         if type(bar.completed) is not bool:
             raise ValueError("COMPLETION_FLAG_NOT_BOOLEAN")
         if (bar.security, bar.timeframe) != (data.security, data.timeframe):
@@ -327,6 +346,13 @@ def calculate_window(
     with localcontext(CONTEXT):
         if params.timeframe != data.timeframe:
             raise ValueError("CONFIG_TIMEFRAME_MISMATCH")
+        for bar in bars:
+            if not bar.completed or utc(bar.completed_at) > utc(cutoff):
+                raise ValueError("WINDOW_COMPLETION_AFTER_CUTOFF")
+            if bar.available_at is not None and utc(bar.available_at) > utc(cutoff):
+                raise ValueError("WINDOW_AVAILABILITY_AFTER_CUTOFF")
+            if bar.available_at is None and data.mode == "AS_OF":
+                raise ValueError("WINDOW_AVAILABILITY_UNKNOWN")
         validate_window(bars, data)
         if data.quality == "INVALID":
             return failure(data, cutoff, params, "SOURCE_QUALITY_INVALID")
