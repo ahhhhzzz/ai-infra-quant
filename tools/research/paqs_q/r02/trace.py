@@ -12,6 +12,7 @@ def trace(
     params: Parameters,
     *,
     seed_start: int = 0,
+    eligible_seed: bool = False,
 ) -> list[dict[str, Any]]:
     """Mirror baseline state transitions, recording all operands rather than relabelling."""
     if len(bars) != len(atrs):
@@ -26,9 +27,18 @@ def trace(
             if i < seed_start or atr is None or atr <= 0:
                 continue
             before = state
-            if state in {"UNSEEDED", "SEEK_HIGH"} and (high is None or bar.high > bars[high].high):
+            admissible = not eligible_seed or previous is None or i - previous >= 2
+            if (
+                admissible
+                and state in {"UNSEEDED", "SEEK_HIGH"}
+                and (high is None or bar.high > bars[high].high)
+            ):
                 high = i
-            if state in {"UNSEEDED", "SEEK_LOW"} and (low is None or bar.low < bars[low].low):
+            if (
+                admissible
+                and state in {"UNSEEDED", "SEEK_LOW"}
+                and (low is None or bar.low < bars[low].low)
+            ):
                 low = i
             threshold = params.pivot_lambda * atr
             down = high is not None and high < i and bars[high].high - bar.close >= threshold
@@ -40,9 +50,14 @@ def trace(
             elif state == "SEEK_HIGH" and down and high is not None and previous is not None:
                 if high - previous >= 2:
                     kind, extreme = "HIGH", high
-            elif state == "SEEK_LOW" and up and low is not None and previous is not None:
-                if low - previous >= 2:
-                    kind, extreme = "LOW", low
+            elif (
+                state == "SEEK_LOW"
+                and up
+                and low is not None
+                and previous is not None
+                and low - previous >= 2
+            ):
+                kind, extreme = "LOW", low
             row = {
                 "index": i,
                 "ref": bar.ref,
@@ -75,9 +90,9 @@ def trace(
                 previous = extreme
                 state = "SEEK_LOW" if kind == "HIGH" else "SEEK_HIGH"
                 if kind == "HIGH":
-                    low = i
+                    low = i if not eligible_seed or i - extreme >= 2 else None
                 else:
-                    high = i
+                    high = i if not eligible_seed or i - extreme >= 2 else None
             row["state_after"] = state
             rows.append(row)
     return rows

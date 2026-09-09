@@ -75,16 +75,24 @@ def census(data: Dataset, cutoffs: list[datetime]) -> dict[str, Any]:
     }
 
 
-def case(data: Dataset, cutoff: datetime) -> dict[str, Any]:
+def case(data: Dataset, cutoff: datetime, *, candidate: bool = False) -> dict[str, Any]:
     params = Parameters.default(data.timeframe)
     seq = prepare(data, cutoff)[-params.total - 1 :]
-    ablation = boundary(data, seq, params)
+    from . import engine as h1
+    from .boundary import boundary as h1_boundary
+
+    evaluate_case = h1.evaluate if candidate else evaluate
+    pivot_case = h1.pivots if candidate else pivots
+    ablation = (h1_boundary if candidate else boundary)(data, seq, params)
     old, left = seq[:-1], seq[1:-1]
     a, b = atr_series(old), atr_series(left)
-    ta, tb = trace(old, a, params), trace(left, b, params)
+    ta, tb = (
+        trace(old, a, params, eligible_seed=candidate),
+        trace(left, b, params, eligible_seed=candidate),
+    )
     # Independently assert instrumentation reproduces the retained baseline events.
     for bars, atrs, traced in ((old, a, ta), (left, b, tb)):
-        expected, _ = pivots(bars, atrs, params)
+        expected, _ = pivot_case(bars, atrs, params)
         assert events(traced, {bar.ref for bar in bars}) == [
             (p.kind, p.extreme_ref, p.confirmed_ref) for p in expected
         ]
@@ -114,17 +122,27 @@ def case(data: Dataset, cutoff: datetime) -> dict[str, Any]:
     # old index 13 retains old ATR for the ATR-only intervention. Never a normal output.
     aligned = tuple(a[i] if i < 14 else b[i - 1] for i in range(len(old)))
     controls = {
-        "old_seed_old_atr": events(trace(old, a, params), common),
-        "new_seed_old_atr": events(trace(old, a, params, seed_start=14), common),
-        "old_seed_new_common_atr": events(trace(old, aligned, params), common),
-        "new_seed_new_common_atr": events(trace(old, aligned, params, seed_start=14), common),
+        "old_seed_old_atr": events(trace(old, a, params, eligible_seed=candidate), common),
+        "new_seed_old_atr": events(
+            trace(old, a, params, seed_start=14, eligible_seed=candidate), common
+        ),
+        "old_seed_new_common_atr": events(
+            trace(old, aligned, params, eligible_seed=candidate), common
+        ),
+        "new_seed_new_common_atr": events(
+            trace(old, aligned, params, seed_start=14, eligible_seed=candidate), common
+        ),
     }
     assert controls["old_seed_old_atr"] == old_events
     assert controls["new_seed_new_common_atr"] == left_events
     seed_changes = controls["new_seed_old_atr"] != old_events
     atr_changes = controls["old_seed_new_common_atr"] != old_events
     cause = (
-        "LEGITIMATE_ACTIVE_EXPIRY"
+        (
+            "LEGITIMATE_ACTIVE_EXPIRY"
+            if events(ta, {bar.ref for bar in old[params.warm :]}) != old_events
+            else "NO_COMMON_EVENT_CHANGE_GEOMETRY_REQUIRES_DIAGNOSIS"
+        )
         if old_events == left_events
         else "SEED_PATH"
         if seed_changes and not atr_changes and controls["new_seed_old_atr"] == left_events
@@ -178,8 +196,10 @@ def case(data: Dataset, cutoff: datetime) -> dict[str, Any]:
             "OLD": [{k: r[k] for k in ("index", "state_after", "dual", "emitted")} for r in ta],
             "LEFT": [{k: r[k] for k in ("index", "state_after", "dual", "emitted")} for r in tb],
         },
-        "old_consequences": evaluate(data, seq[-2].completed_at).document()["decision"]["evidence"],
-        "both_consequences": evaluate(data, cutoff).document()["decision"]["evidence"],
+        "old_consequences": evaluate_case(data, seq[-2].completed_at).document()["decision"][
+            "evidence"
+        ],
+        "both_consequences": evaluate_case(data, cutoff).document()["decision"]["evidence"],
     }
 
 
