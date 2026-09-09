@@ -69,7 +69,7 @@ def test_partial_actions_freeze_before_narrative_and_fail_without_ledger_mutatio
         schema = connection.execute(schema_sql).all()
         assert (
             connection.execute(text("SELECT version_num FROM alembic_version")).scalar()
-            == "0003_task007c1_narrative_ledger"
+            == "0004_task006b1_market_archive"
         )
     response = analysis.client.post(
         "/api/v1/paqs-e/narrative-analyses",

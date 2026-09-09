@@ -1,6 +1,7 @@
 # Database Schema
 
-This is the implemented schema at `722936984deac652b443eba132c69650653345e1`.
+This is the integrated 006B1 schema at accepted implementation `2e9889ae9d2587fcfac6d715923f8a791b2333d8`.
+006B1/0004 is reviewed, user-accepted and closed; [closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md).
 Runtime is SQLite with SQLAlchemy repositories and explicit Alembic migrations. PostgreSQL
 compatibility is a portability/test concern, not a current deployment requirement.
 For request orchestration and provenance, see [ARCHITECTURE](ARCHITECTURE.md).
@@ -11,7 +12,8 @@ For request orchestration and provenance, see [ARCHITECTURE](ARCHITECTURE.md).
 |---|---|
 | `0001_phase1_foundation` | Canonical identity/watchlist, strategy configuration, historical paper descriptors/opening accounting and settings |
 | `0002_task007b_paqs_e_ledger` | Immutable runtime artifacts and Legacy structured Analysis Runs/Decisions |
-| `0003_task007c1_narrative_ledger` | Additive Narrative Runs and exact-text Results; current head |
+| `0003_task007c1_narrative_ledger` | Additive Narrative Runs and exact-text Results; retained unchanged |
+| `0004_task006b1_market_archive` | Explicit immutable market captures, bar versions and memberships; integrated head |
 
 Source: [0001](../src/ai_infra_quant/database/migrations/versions/0001_phase1_foundation.py),
 [0002](../src/ai_infra_quant/database/migrations/versions/0002_task007b_paqs_e_decision_ledger.py),
@@ -20,8 +22,8 @@ The 0002 filename differs from its revision identifier. Normal startup checks th
 and performs the accepted idempotent foundation bootstrap; it does not create schema from current
 ORM metadata or delete databases. All three migration files remain unchanged by ADC.
 
-No 0004 exists. TASK-006B1 archive/replay is the next authorized task under its updated post-ADC
-exact-baseline handoff. Planned archive tables must not be described as current persistence.
+006B1 adds [0004](../src/ai_infra_quant/database/migrations/versions/0004_task006b1_market_archive.py)
+as the integrated schema head; no earlier migration or ledger definition changes.
 
 ## 2. Foundation tables retained from 0001
 
@@ -105,7 +107,7 @@ retain explicit cutoff limitations. `as_of_compatible` does not prove independen
 
 Frozen W1/D1/M30/quote evidence inside a request is not a generic local market archive. Current
 QFQ provider reads do not establish strict arbitrary historical As-Of replay, GoldSet or backtesting.
-No market archive, PaperOrder/PaperFill, live position/order or new performance table is introduced.
+The separate 0004 archive does not introduce PaperOrder/PaperFill, live positions/orders or performance tables.
 
 ## 6. Verification references
 
@@ -115,3 +117,37 @@ readback corruption and default Legacy POST behavior. Existing
 [partial-action API tests](../tests/integration/test_paqs_e_partial_actions_api.py) cover frozen
 research before reasoning and no ledger mutation on failed research. These are implementation
 source references; ADC performs docs-only audits, not a new database migration/test run.
+
+## 7. Local market archive (0004)
+
+| Table | Meaning and constraints |
+|---|---|
+| `market_archive_captures` | Immutable UUID, canonical Security FK, UTC recorded time, canonical JSON/hash. Frozen symbol/market/currency/timezone, requested bounds, batch status/retrieval/delay/counts/observed ranges/gaps, bounded calendar, adjustment uncertainty and server start/completion/recorded times. Index `(security_id, recorded_at, capture_id)` supports descending keyset lists. |
+| `market_archive_bar_versions` | SHA-256 content PK, identity SHA-256, Security FK, D1/M1, temporal sort key, canonical JSON, exact OHLCV columns. Same content deduplicates; changed content remains a distinct version. |
+| `market_archive_memberships` | PK `(capture_id,timeframe,ordinal)`, unique capture/timeframe/version. Composite FKs enforce capture Security and version Security/timeframe. Retrieval time belongs to this observation. No first/last-seen proxy or mutable latest version. |
+
+All three tables reject UPDATE/DELETE in SQLite and PostgreSQL. Insert ordinal must be below the
+capture's frozen per-frame count; once every member is committed, PK/unique constraints and this
+bound prevent subsequent additions. Network calls precede one atomic database transaction. SQLite
+serializes writers with BEGIN IMMEDIATE; PostgreSQL locks the existing Security row. Short reads
+verify capture/content hashes and exact financial values; detail also checks membership counts.
+
+Canonical format `market-archive-v1` sorts JSON keys, uses compact separators/UTF-8, canonical
+non-exponent Decimal strings and UTC microsecond timestamps. Identity includes canonical Security,
+provider, timeframe, market/timezone/currency, QFQ basis/unknown epoch, D1 session date or M1 UTC
+start/end. Version content additionally includes original D1 provider time, local minute date,
+OHLCV and completion. Retrieval is excluded from version identity and retained per membership;
+identical repeats within one batch choose earliest retrieval deterministically and report their
+raw/duplicate counts. D1/M1/calendar batch retrieval remains independently frozen.
+
+Capture status is conservatively PARTIAL when real bars exist: current provider/calendar responses
+do not certify complete historical coverage. Successful nonempty bar batches retain provider
+AVAILABLE while application status is PARTIAL; `missing_count` is the gap against returned known
+regular calendar segments, not proof of every trading date or extended session. Unknown calendar
+leaves missing count null. ERROR/UNAVAILABLE batches contain no invented members; no valid D1/M1
+batch means 503 and no capture. Provider errors and database failures have distinct safe outcomes.
+
+No W1/M30 authority tables, history stitching, historical Analyze or strictly point-in-time QFQ
+claim is added. [Migration test](../tests/integration/test_market_archive_migration.py) upgrades a
+real temporary SQLite 0003 database containing Legacy Decision, Narrative Result and watchlist
+rows and compares all old table definitions/rows before/after, then reads both ledgers normally.

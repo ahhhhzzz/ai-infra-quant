@@ -8,6 +8,7 @@ from fastapi import Depends, Request
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from ai_infra_quant.application.market_data_archive import MarketDataArchiveService
 from ai_infra_quant.application.market_data_queries import (
     MarketDataProviderFactory,
     MarketDataQueries,
@@ -32,6 +33,7 @@ from ai_infra_quant.core.domain.strategy import StrategyDefinition
 from ai_infra_quant.core.ports.paqs_e_ledger import PaqsELedger
 from ai_infra_quant.core.ports.paqs_e_narrative import NarrativeLedger
 from ai_infra_quant.core.strategy.registry import StrategyRegistry
+from ai_infra_quant.database.repositories.market_data_archive import SQLAlchemyMarketDataArchive
 from ai_infra_quant.database.repositories.paqs_e_ledger import SQLAlchemyPaqsELedger
 from ai_infra_quant.database.repositories.paqs_e_narrative import SQLAlchemyNarrativeLedger
 from ai_infra_quant.database.repositories.unit_of_work import SQLAlchemyUnitOfWork
@@ -53,6 +55,7 @@ class AppContainer:
     security_service: SecurityService
     watchlist_service: WatchlistService
     status_queries: StatusQueries
+    market_data_archive: MarketDataArchiveService
     market_data_queries: MarketDataQueries
     supported_security_service: SupportedSecurityService
     paqs_input_queries: PaqsInputQueries
@@ -153,6 +156,12 @@ def build_container(
             registries.market_data,
             registries.fundamental_data,
             registries.event_data,
+        ),
+        market_data_archive=MarketDataArchiveService(
+            market_data_queries,
+            SQLAlchemyMarketDataArchive(session_factory),
+            provider_name=provider_name,
+            provider_factory=provider_factory,
         ),
         market_data_queries=market_data_queries,
         supported_security_service=SupportedSecurityService(

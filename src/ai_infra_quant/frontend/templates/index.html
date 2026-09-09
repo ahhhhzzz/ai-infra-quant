@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
     <title>PAQS-E · 决策工作台</title>
     <link rel="stylesheet" href="/static/app.css">
   </head>
@@ -201,8 +202,35 @@
         </aside>
       </section>
 
+
+      <details id="market-archive" class="market-archive">
+        <summary>本地行情存档</summary>
+        <p class="note">本地存档；当前观察到的复权数据；不等于严格历史时点回测。各批次独立获取，不是原子行情快照。</p>
+        <p id="archive-security">请选择证券；也可离线按 Capture ID 查询。</p>
+        <div class="archive-actions">
+          <button id="archive-save" type="button" disabled>保存当前行情</button>
+          <button id="archive-refresh" type="button" disabled>读取本地列表</button>
+          <button id="archive-list-next" type="button" disabled>下一页存档</button>
+        </div>
+        <p id="archive-status" role="status" aria-live="polite"></p>
+        <div id="archive-list"></div>
+        <form id="archive-known-form">
+          <label>Capture ID（离线）<input id="archive-known-id" required maxlength="36" autocomplete="off"></label>
+          <button type="submit">读取本地存档</button>
+        </form>
+        <div id="archive-detail"></div>
+        <div class="archive-actions">
+          <label>数据周期<select id="archive-timeframe"><option value="D1">D1</option><option value="M1">M1</option></select></label>
+          <button id="archive-bars-next" type="button" disabled>下一页行情</button>
+        </div>
+        <p class="note">表格可横向滚动查看完整精度；聚焦表格区域后可用方向键滚动。</p>
+        <div class="archive-table-scroll" tabindex="0" role="region" aria-label="存档精确 OHLCV 分页表">
+          <table id="archive-bars"><thead><tr><th>日期 / UTC 起始</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Volume</th></tr></thead><tbody></tbody></table>
+        </div>
+      </details>
     </main>
     <script src="/static/vendor/lightweight-charts.standalone.production.js" defer></script>
+    <script src="/static/market-data-archive.js" defer></script>
     <script src="/static/app.js" defer></script>
     <script src="/static/narrative-markdown.js" defer></script>
     <script src="/static/paqs-e.js" defer></script>

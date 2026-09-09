@@ -92,7 +92,13 @@ def test_upgrade_from_0002_preserves_legacy_bytes_and_downgrade_removes_only_nar
     before = legacy_evidence(migrated_engine)
     tables = set(inspect(migrated_engine).get_table_names())
     command.upgrade(config, "head")
-    assert set(inspect(migrated_engine).get_table_names()) - tables == {runs.name, results.name}
+    assert set(inspect(migrated_engine).get_table_names()) - tables == {
+        runs.name,
+        results.name,
+        "market_archive_captures",
+        "market_archive_bar_versions",
+        "market_archive_memberships",
+    }
     assert legacy_evidence(migrated_engine) == before
     assert ledger.get_decision(legacy.decision.id) == legacy.decision
     store = SQLAlchemyNarrativeLedger(session_factory)

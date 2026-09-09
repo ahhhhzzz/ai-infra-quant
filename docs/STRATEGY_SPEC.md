@@ -3,8 +3,8 @@
 ## Current delivery status — 2026-09-09
 
 C1/C2 and ADC-001 are accepted and integrated. ADC-001 passed focused re-review at
-`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; all runtime code remains unchanged.
-TASK-006B1 is the next authorized implementation under its original scope and updated handoff.
+`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; ADC itself changed no runtime code.
+TASK-006B1 is independently reviewed PASS, user-accepted, closed and integrated at accepted implementation `2e9889ae9d2587fcfac6d715923f8a791b2333d8`. F01 is closed; no successor task is started.
 Exact SHAs, current sequence and evidence attribution are in [ROADMAP](ROADMAP.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
@@ -394,4 +394,12 @@ Quality/Ranking, broker write, or optional Phase 3/4 capability is implemented b
 
 TASK-006B2 and TASK-007A/B/C are accepted/integrated. TASK-007C1 is user-accepted and
 integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`; TASK-007C2 is independently reviewed and integrated. ADC-001 docs-only consolidation is reviewed and integrated;
-006B1 is next under its updated exact-baseline handoff. Later R20 capabilities remain bounded by separate approved contracts.
+006B1 is independently reviewed, user-accepted, closed and integrated. Later R20 capabilities remain bounded by separate approved contracts.
+
+### Local archive strategy boundary
+
+006B1 stores observations and permits exact local reads by Capture ID. Its D1/M1/calendar
+membership does not replace current Snapshot preparation, strategy inputs, Narrative runtime
+prompts or the Legacy validator. Current-provider QFQ is an observation at retrieval, not a strict
+historical information cutoff. No historical Analyze, PAQS-Q, GoldSet or performance claim follows
+from storing those facts. See [006B1 report](reports/TASK_006B1_IMPLEMENTATION_REPORT.md).

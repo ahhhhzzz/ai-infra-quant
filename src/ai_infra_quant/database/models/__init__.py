@@ -7,6 +7,9 @@ from ai_infra_quant.database.models.accounting import (
     PortfolioSnapshotModel,
     UnitTransactionModel,
 )
+from ai_infra_quant.database.models.market_data_archive import captures as archive_captures
+from ai_infra_quant.database.models.market_data_archive import memberships as archive_memberships
+from ai_infra_quant.database.models.market_data_archive import versions as archive_versions
 from ai_infra_quant.database.models.paqs_e_ledger import (
     PaqsEAnalysisRunModel,
     PaqsEDecisionModel,
@@ -54,6 +57,9 @@ __all__ = [
     "UnitTransactionModel",
     "WatchlistItemModel",
     "WatchlistModel",
+    "archive_captures",
+    "archive_memberships",
+    "archive_versions",
     "narrative_results",
     "narrative_runs",
 ]

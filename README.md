@@ -7,9 +7,10 @@ reasoning is tool-free. Exact text and frozen evidence are retained in the Narra
 Legacy structured history kept separately. The app never observes/imports brokerage accounts,
 positions or trades, or sends orders. Real trading is manual in the broker's official client.
 
-C1 and C2 are accepted and integrated; current runtime code is
-`d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`. ADC-001 documentation consolidation is reviewed and integrated.
-006B1 may start under its original bounded scope and the new post-ADC exact-baseline handoff.
+C1/C2 and ADC-001 are accepted and integrated in authoritative baseline
+`02326a3bb19c2a89352d765f5331670b5f3f466d`. 006B1 explicit local market
+archives are independently reviewed, user-accepted, closed and integrated at accepted implementation
+`2e9889ae9d2587fcfac6d715923f8a791b2333d8`; see [closeout](docs/decisions/TASK_006B1_CLOSEOUT_2026_09_09.md).
 See [current architecture](docs/ARCHITECTURE.md), [roadmap/status](docs/ROADMAP.md),
 [workbench guide](docs/PAQS_E_WORKBENCH.md) and [model/credential guide](docs/PAQS_E_MODELS.md).
 
@@ -22,6 +23,8 @@ as Windows that do not provide it to Python's `zoneinfo` module.
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 .\.venv\Scripts\python.exe -m alembic upgrade head
+$env:PYTHONPATH = "$PWD\src"
+$env:AI_INFRA_SOURCE_REVISION = (git rev-parse HEAD).Trim()
 .\.venv\Scripts\python.exe -m uvicorn ai_infra_quant.backend.main:app --host 127.0.0.1 --port 8000
 ```
 
@@ -47,6 +50,8 @@ To run the optional quote-only Futu backend against an already configured local 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -e ".[dev,futu]"
 $env:MARKET_DATA_PROVIDER = "futu"
+$env:PYTHONPATH = "$PWD\src"
+$env:AI_INFRA_SOURCE_REVISION = (git rev-parse HEAD).Trim()
 .\.venv\Scripts\python.exe -m uvicorn ai_infra_quant.backend.main:app --host 127.0.0.1 --port 8000
 ```
 
@@ -99,7 +104,8 @@ Alembic selects its database URL in this order: an explicit
 `-x database_url=...` override, `DATABASE_URL` from application settings or `.env`, then the
 application's default SQLite URL. PostgreSQL overrides are for migration verification only;
 application runtime remains SQLite-only. Current migration head is
-`0003_task007c1_narrative_ledger`; this is not a local market archive or strict historical replay.
+`0004_task006b1_market_archive`. Narrative evidence remains separate from the new local archive;
+neither provides strict historical As-Of replay.
 
 ## Validation
 
@@ -130,3 +136,32 @@ No Paper/PnL, backtest, PAQS-Q successor, broker or automatic analysis is activa
 
 C1 user acceptance and C2 review/closeout attribution are linked from [ROADMAP](docs/ROADMAP.md).
 The C2 user's screenshot showed C1 branch without SHA; it is not independent exact-C2 runtime proof.
+
+## Explicit local market archive (006B1)
+
+Expand **本地行情存档** and explicitly choose **保存当前行情** for a supported, enabled canonical US/HK equity.
+Normal seeds and provider-validated additions retain their original unverified metadata; no status upgrade is required.
+This captures bounded completed D1/M1 and calendar observations; it never runs Analyze or a model.
+List, known Capture ID, detail and paginated exact-price table reads work from the local database
+without Futu/OpenD. Repeated content reuses bar versions; revisions retain older capture membership.
+The current QFQ observation is not strict historical As-Of data. See the
+[workbench guide](docs/PAQS_E_WORKBENCH.md#local-market-archive-006b1),
+[API](docs/API_CONTRACTS.md#11-local-market-archive-006b1) and
+[implementation report](docs/reports/TASK_006B1_IMPLEMENTATION_REPORT.md).
+
+### Read a saved capture without OpenD
+
+Copy the Capture ID, stop the running Dashboard server with Ctrl+C, then run from the same
+repository and existing database configuration:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+$env:AI_INFRA_SOURCE_REVISION = (git rev-parse HEAD).Trim()
+$env:MARKET_DATA_PROVIDER = "none"
+.\.venv\Scripts\python.exe -m uvicorn ai_infra_quant.backend.main:app --host 127.0.0.1 --port 8000
+```
+
+Reload the page and read the known Capture ID in the archive section. The Windows batch launcher
+intentionally starts/reuses OpenD and selects Futu, so do not use it for this offline check.
+Main charts and Analyze still use current provider data; archive-backed charts/Analyze are a deferred
+manual-replay idea, not an implemented feature or a new authorized task.

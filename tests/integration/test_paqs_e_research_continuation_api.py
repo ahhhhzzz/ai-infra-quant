@@ -99,7 +99,7 @@ def test_lifecycle_hashes_no_failure_rows_or_schema_changes(
         ).all()
         assert (
             connection.execute(text("SELECT version_num FROM alembic_version")).scalar()
-            == "0003_task007c1_narrative_ledger"
+            == "0004_task006b1_market_archive"
         )
     response = analysis.client.post(
         "/api/v1/paqs-e/narrative-analyses",

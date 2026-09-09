@@ -3,7 +3,7 @@
 ## Current delivery status — 2026-09-09
 
 TASK-007A/B/C and user-accepted C1 are integrated. C2 is independently reviewed, user-closed and
-integrated; current runtime code is `d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`, included in
+integrated; accepted C2 runtime code is `d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`, included in
 `f78894bceb2900eff6e134bdf61f673309426355`. The earlier ADC sequencing baseline was
 `722936984deac652b443eba132c69650653345e1`; the current handoff follows the ADC closeout below.
 See [C2 review](reviews/TASK_007C2_INDEPENDENT_REVIEW.md),
@@ -16,9 +16,14 @@ ADC-001 is **REVIEWED PASS / CLOSED / INTEGRATED** at accepted implementation
 `66a3ca7bbff258665b25e5ab17231138bf3cc49f`; its F01 is closed with zero outstanding findings.
 See [focused review](reviews/TASK_ADC_001_F01_FOCUSED_RE_REVIEW.md) and
 [closeout/resumption decision](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md).
-Current authorized next task: **006B1**, original bounded scope plus the updated exact-baseline
-handoff on its task branch. The startup hold is lifted for that handoff only. Archive/replay
-is not yet implemented; PAQS-Q successors, Paper/PnL and Phase 3/4 remain dormant.
+Latest completed task: **006B1 — REVIEWED PASS / USER-ACCEPTED / CLOSED / INTEGRATED**.
+Accepted implementation: `2e9889ae9d2587fcfac6d715923f8a791b2333d8`; F01 is closed.
+See [focused PASS](reviews/TASK_006B1_F01_FOCUSED_RE_REVIEW.md) and
+[closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md). No successor task is started.
+The task started at `bed9059fd6ce6c0a7cd750376c972070db0a39dd`, with authoritative baseline
+`02326a3bb19c2a89352d765f5331670b5f3f466d`, under the updated handoff. Explicit archive/replay
+and additive 0004 are implemented; PAQS-Q successors, Paper/PnL and Phase 3/4 remain dormant.
+See [006B1 implementation report](reports/TASK_006B1_IMPLEMENTATION_REPORT.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
 Status: **AUTHORITATIVE — local read-only PAQS-E prioritized MVP, parallel PAQS-Q reference branch, and optional Phase 3/4 extensions**
@@ -128,7 +133,7 @@ Existing Phase 2 capabilities include:
 - Futu `Session.ALL` for US minute history;
 - normal HK provider sessions;
 - explicit missing/unavailable/error semantics;
-- no production market-data persistence.
+- explicit immutable local market archives under 006B1; current chart refresh/Analyze remain read-through.
 
 The initial PoC symbols were:
 
@@ -369,13 +374,15 @@ Final accepted/integrated SHA: `5f996aebb012cc0884d912f6f3eb71c32e9fd627`.
 
 Independent final review verdict: `PASS`.
 
-#### TASK-006B1 — Local Market Data Store & Replay Foundation — APPROVED NEXT / UPDATED POST-ADC HANDOFF REQUIRED
+#### TASK-006B1 — Local Market Data Store & Replay Foundation — REVIEWED / USER-ACCEPTED / CLOSED / INTEGRATED
 
 Original contract commit: `d2bc397612a32adb2b5f78fec3ec894b3eacdb38`. Its bounded scope remains
 valid. The [new closeout/resumption decision](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md)
-lifts the earlier startup hold after ADC review/integration. Use the task branch addendum
-`prompts/tasks/TASK-006B1_POST_ADC_HANDOFF_2026_09_09.md` and its exact baseline; do not reuse
-the old start prompt or merge old 006B1 drafts.
+lifted the earlier startup hold after ADC review/integration. The task used the addendum
+`prompts/tasks/TASK-006B1_POST_ADC_HANDOFF_2026_09_09.md`; that startup sequence is now fulfilled.
+Accepted implementation `2e9889ae9d2587fcfac6d715923f8a791b2333d8` includes F01 remediation;
+[focused review](reviews/TASK_006B1_F01_FOCUSED_RE_REVIEW.md) closes F01 and
+[user closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md) authorizes integration.
 
 Retained shared scope direction:
 
@@ -389,7 +396,8 @@ local deterministic replay
 offline stored-capture reads consume no OpenD calls; live refresh behavior remains unchanged
 ```
 
-TASK-006B1 becomes required before the product claims strict arbitrary historical As-Of replay/evaluation. It must not implement strategy logic.
+006B1 supplies observation storage, not strict arbitrary historical As-Of replay/evaluation.
+It adds no strategy logic or archive-backed chart/Analyze capability.
 
 ### PAQS-E prioritized workstream
 
@@ -415,7 +423,7 @@ The review verdict is PASS and this implementation is included in the integrated
 Historical contribution: explicit Snapshot-on-Demand structured Analyze, immutable runtime
 artifacts, terminal Analysis Runs and validated Decision revisions. Provider/validation failures
 create no Decision. These records and GETs remain retained Legacy evidence; old POST is normally
-410 and hidden from OpenAPI. Current Narrative persistence is separate, with head 0003.
+410 and hidden from OpenAPI. Narrative persistence was added separately in 0003; current overall schema head is 0004.
 
 #### TASK-007C — PAQS-E User Dashboard — ACCEPTED / INTEGRATED
 
@@ -470,12 +478,21 @@ PAQS-Q concrete semantics still require explicit approval before implementation.
   → 007C1 user-accepted and integrated
   → 007C2 reviewed, user-closed and integrated
   → ADC-001 docs-only consolidation [reviewed, closed and integrated]
-  → 006B1 updated exact-baseline handoff [authorized next; not implemented]
-  → later approved strict historical As-Of / GoldSet work
+  → 006B1 bounded archive/replay [reviewed, user-accepted, closed and integrated]
+  → no successor task started; later work requires a separate approved contract
 ```
 
 PAQS-Q successors remain separately governed; 007D follows usable Q-side output.
 The old 006B1 functional scope remains valid; its old starting SHA/prompt is not current authority.
+
+### Deferred user request after 006B1 closeout
+
+The user prefers occasional explicit archive-to-K-line display and Analyze using a selected
+Capture when OpenD is offline. This is backlog only, not started or assigned a new task ID.
+Local chart reading could be offline; model API analysis would still need its provider connection.
+Any later contract must expose capture identity/time, prevent historical/current confusion and
+control research cutoff. Automatic cache acceleration, monitoring and background synchronization
+are not requested as the next workstream. Current chart refresh and Analyze remain unchanged.
 
 ### R20 product adoption after the first usable workbench
 
@@ -486,7 +503,7 @@ not an executable instruction or a replacement for current contracts.
 TASK-007C delivers the bounded current-analysis workbench first. Later task contracts stage
 prompt/model configuration, strategy-version inspection, research critique/council, reviewable
 improvement proposals, sourced news context, simulated bookkeeping and local operational tooling
-as assigned by the adoption record. TASK-007C1 has delivered its separately approved model/credential/research scope; C2 and ADC-001 are integrated; 006B1 is authorized next under its updated handoff;
+as assigned by the adoption record. TASK-007C1 has delivered its separately approved model/credential/research scope; C2 and ADC-001 are integrated; 006B1 is reviewed, user-accepted, closed and integrated;
 paper/NAV remains dormant Phase 3 work. None authorizes extra Analyze fields beyond the current four-field Narrative request.
 PAQS-E doctrine/guardrails, explicit Analyze, immutable evidence, Futu quote-only access and no real
 account/execution boundary remain authoritative. No R20 online Python execution, OKX execution,
@@ -611,7 +628,7 @@ Unnecessary infrastructure remains excluded: microservices, Kafka, distributed w
 - Codex receives only a short prompt pointing to repository, task branch, exact authoritative base SHA and Task Contract path.
 - Codex stops after its approved task and pushes only that task branch.
 - Independent GitHub review is required before remediation/integration.
-- One task passing does not approve the next task. The user explicitly authorized the ADC integration/006B1 handoff; 006B1 must follow that exact updated baseline and stop for its own review.
+- One task passing does not approve the next task. The user authorized 006B1 closeout after independent PASS and local acceptance; no successor implementation is authorized by that closeout.
 - Research memos/doctrines/amendments do not automatically authorize code changes; each Task Contract must state which research semantics it adopts.
 - Documentation and requirements must preserve data freshness, strict As-Of/no-lookahead, non-fabrication and read-only safety rules.
 - Provider behavior is bounded by accepted C1 contracts; the current model registry, endpoints and research lifecycle are not expanded by ADC.

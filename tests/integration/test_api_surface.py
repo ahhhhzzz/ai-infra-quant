@@ -29,6 +29,10 @@ EXPECTED_PATHS = {
     "/api/v1/market-data/securities/{security_id}/state",
     "/api/v1/market-data/securities/{security_id}/daily-bars",
     "/api/v1/market-data/securities/{security_id}/minute-bars",
+    "/api/v1/market-data/archive/captures",
+    "/api/v1/market-data/archive/securities/{security_id}/captures",
+    "/api/v1/market-data/archive/captures/{capture_id}",
+    "/api/v1/market-data/archive/captures/{capture_id}/bars",
     "/api/v1/fundamental-data/providers",
     "/api/v1/event-data/providers",
 }
