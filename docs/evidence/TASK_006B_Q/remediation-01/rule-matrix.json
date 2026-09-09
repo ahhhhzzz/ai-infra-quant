@@ -1,0 +1,32 @@
+{
+  "F01": {
+    "functions": [
+      "engine.quality_error",
+      "engine.prepare",
+      "engine.validate_window"
+    ],
+    "tests": "tests/research/paqs_q/test_remediation_quality.py",
+    "rules": [
+      "QSTR-002",
+      "QSTR-004",
+      "QSTR-008"
+    ]
+  },
+  "F02": {
+    "functions": [
+      "diagnostics.boundary",
+      "diagnostics.audit",
+      "engine.calculate_window",
+      "temporal.availability_check",
+      "temporal.information_change"
+    ],
+    "tests": "tests/research/paqs_q/test_remediation_temporal.py",
+    "rules": [
+      "QSTR-002",
+      "QSTR-009",
+      "QSTR-011"
+    ]
+  },
+  "semantic_adoption": "NOT_ACCEPTED",
+  "real_market_gate": "INCOMPLETE"
+}

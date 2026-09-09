@@ -1,0 +1,76 @@
+{
+  "source_sha": "9de7381d7440215e729fbf67103eb2ac55f44181",
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "pytest": "8.4.1",
+    "ruff": "0.12.9",
+    "mypy": "1.17.1",
+    "platform": "win32"
+  },
+  "checks": [
+    {
+      "command": "python -m pytest tests/research/paqs_q -ra",
+      "exit_code": 0,
+      "summary": "97 passed, 1 warning in 19.79s",
+      "captured_output": "============================= test session starts =============================\nplatform win32 -- Python 3.12.14, pytest-8.4.1, pluggy-1.6.0\nrootdir: D:\\AI_Infra_Quant_Codex_v1\\task006b-q-worktree\nconfigfile: pyproject.toml\nplugins: anyio-4.15.1, cov-6.2.1\ncollected 97 items\n\ntests\\research\\paqs_q\\test_diagnostics.py ..........                     [ 10%]\ntests\\research\\paqs_q\\test_engine.py ....................                [ 30%]\ntests\\research\\paqs_q\\test_inputs.py ........                            [ 39%]\ntests\\research\\paqs_q\\test_remediation_quality.py ...................... [ 61%]\n.............                                                            [ 75%]\ntests\\research\\paqs_q\\test_remediation_temporal.py ..........            [ 85%]\ntests\\research\\paqs_q\\test_scope.py ..                                   [ 87%]\ntests\\research\\paqs_q\\test_zones.py ............                         [100%]\n\n============================== warnings summary ===============================\n..\\task007c1-env\\Lib\\site-packages\\starlette\\testclient.py:51\n  D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Lib\\site-packages\\starlette\\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================= 97 passed, 1 warning in 19.79s ========================\n"
+    },
+    {
+      "command": "python -m pytest tests/unit/test_paqs_structure.py tests/unit/test_paqs_input.py tests/integration/test_paqs_structure_api.py tests/integration/test_paqs_input_api.py tests/architecture/test_task006a_boundaries.py tests/architecture/test_task006b_boundaries.py -ra",
+      "exit_code": 0,
+      "summary": "59 passed, 1 warning in 14.53s",
+      "captured_output": "============================= test session starts =============================\nplatform win32 -- Python 3.12.14, pytest-8.4.1, pluggy-1.6.0\nrootdir: D:\\AI_Infra_Quant_Codex_v1\\task006b-q-worktree\nconfigfile: pyproject.toml\nplugins: anyio-4.15.1, cov-6.2.1\ncollected 59 items\n\ntests\\unit\\test_paqs_structure.py .................................      [ 55%]\ntests\\unit\\test_paqs_input.py ..........                                 [ 72%]\ntests\\integration\\test_paqs_structure_api.py ......                      [ 83%]\ntests\\integration\\test_paqs_input_api.py ....                            [ 89%]\ntests\\architecture\\test_task006a_boundaries.py ...                       [ 94%]\ntests\\architecture\\test_task006b_boundaries.py ...                       [100%]\n\n============================== warnings summary ===============================\n..\\task007c1-env\\Lib\\site-packages\\starlette\\testclient.py:51\n  D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Lib\\site-packages\\starlette\\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================= 59 passed, 1 warning in 14.53s ========================\n"
+    },
+    {
+      "command": "python -m ruff check tools/research/paqs_q tests/research/paqs_q",
+      "exit_code": 0,
+      "output": "All checks passed!\n"
+    },
+    {
+      "command": "python -m ruff format --check tools/research/paqs_q tests/research/paqs_q",
+      "exit_code": 0,
+      "output": "20 files already formatted\n"
+    },
+    {
+      "command": "python -m mypy --strict --explicit-package-bases tools/research/paqs_q tests/research/paqs_q",
+      "exit_code": 0,
+      "output": "Success: no issues found in 20 source files\n"
+    },
+    {
+      "command": "python -m mypy --strict --explicit-package-bases --platform win32 tools/research/paqs_q tests/research/paqs_q",
+      "exit_code": 0,
+      "output": "Success: no issues found in 20 source files\n"
+    },
+    {
+      "command": "python -m tools.research.paqs_q.verify --output ../task006b-q-remediation-final-base-protection.json",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": "git diff --cached --check",
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "study": {
+    "command": "python -m tools.research.paqs_q.study --data-dir ../task006b-q-data --output-dir docs/evidence/TASK_006B_Q/remediation-01/corrected-study",
+    "exit_code": 0,
+    "source_and_summary_method": "Core calculations at cfa0dd13579c2e934b866681ba6aebb0d5d8b51f; final 9de7381d7440215e729fbf67103eb2ac55f44181 boundary_case_lists applied to saved outliers. See real-before-after.json.",
+    "valid_cutoffs": {
+      "W1": 100,
+      "D1": 100,
+      "M30": 74
+    }
+  },
+  "limitations": [
+    "Real-market gate INCOMPLETE: one of frozen 40 securities available; M30 only 74 valid cutoffs.",
+    "Historical availability unknown; observational data is not AS_OF certification.",
+    "No browser, unrelated full-business suite or Uvicorn run required by focused research scope.",
+    "No OpenD calls, new sample or database writes."
+  ],
+  "status": "FOCUSED_CHECKS_PASS_PENDING_INDEPENDENT_REVIEW"
+}

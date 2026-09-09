@@ -1,0 +1,110 @@
+{
+  "review_commit": "e4bf4cb6092e48c98732bd7d355d31affbf8a332",
+  "before_execution_sha": "a29d2d6e0195ed4509cfa8daa9223a41c3d6fcf0",
+  "before": [
+    {
+      "id": "006B-Q-F01",
+      "source_bar_coverage": "INVALID for every D1 bar",
+      "input_status": "COMPLETE",
+      "structure_status": "DIRECTIONAL_EVIDENCE",
+      "regime": "BULL_TREND",
+      "warnings": []
+    },
+    {
+      "id": "006B-Q-F02",
+      "old_cutoff": "2010-11-12T00:00:00+00:00",
+      "revision_available_at": "2010-11-13T00:00:00+00:00",
+      "normal_old_evaluation_unchanged": true,
+      "boundary_old_matches_normal_old": false,
+      "actual_old_pivot_count": 21,
+      "boundary_old_pivot_count": 19,
+      "audit_future_references": 0,
+      "classification": "LEFT_ONLY"
+    }
+  ],
+  "corrected_F01": {
+    "active_pivots": [],
+    "config_hash": "a317a770a91ba47035be10369c1847b63cbb11cb84f7b22ae2b17c078c60fc19",
+    "cutoff": "2011-03-20T00:00:00.000000Z",
+    "input_status": "INVALID",
+    "range": null,
+    "reasons": [
+      "BAR_COVERAGE_INVALID"
+    ],
+    "regime": "UNCERTAIN",
+    "rule": "QSTR-CANDIDATE-1.1",
+    "security": "US.AVGO",
+    "structure_status": "INVALID_INPUT",
+    "timeframe": "D1",
+    "zones": []
+  },
+  "corrected_F02": {
+    "old_cutoff": "2010-11-12T00:00:00.000000Z",
+    "new_cutoff": "2010-11-13T00:00:00.000000Z",
+    "boundary_old_matches_normal_old": true,
+    "actual_old_pivot_count": 21,
+    "boundary_old_pivot_count": 21,
+    "classification": "REVISION_CONFOUNDED",
+    "information_change": {
+      "revised_historical_count": 1,
+      "newly_available_historical_count": 0,
+      "missing_at_new_cutoff_count": 0
+    },
+    "arm_availability_checks": {
+      "OLD": {
+        "cutoff": "2010-11-12T00:00:00+00:00",
+        "observation_count": 312,
+        "completion_violations": 0,
+        "availability_violations": 0,
+        "unknown_availability_count": 0,
+        "as_of_unknown_violations": 0,
+        "violation_count": 0,
+        "availability_status": "EXPLICIT_AS_OF",
+        "evidence_time_hash": "159ebe5ae456d29c326ae91a1d48a79303192382cccd599b33a4c2ed3fe7bfea"
+      },
+      "RIGHT": {
+        "cutoff": "2010-11-13T00:00:00+00:00",
+        "observation_count": 313,
+        "completion_violations": 0,
+        "availability_violations": 0,
+        "unknown_availability_count": 0,
+        "as_of_unknown_violations": 0,
+        "violation_count": 0,
+        "availability_status": "EXPLICIT_AS_OF",
+        "evidence_time_hash": "deb74d83016f732a7e60fcff114baa3d365d5bf62acce3e5b59c7bc8afa46a71"
+      },
+      "LEFT": {
+        "cutoff": "2010-11-12T00:00:00+00:00",
+        "observation_count": 311,
+        "completion_violations": 0,
+        "availability_violations": 0,
+        "unknown_availability_count": 0,
+        "as_of_unknown_violations": 0,
+        "violation_count": 0,
+        "availability_status": "EXPLICIT_AS_OF",
+        "evidence_time_hash": "b1fe13acdcebc663c262d118dee94e6bfc764e608a0a604152b752b84c725477"
+      },
+      "BOTH": {
+        "cutoff": "2010-11-13T00:00:00+00:00",
+        "observation_count": 312,
+        "completion_violations": 0,
+        "availability_violations": 0,
+        "unknown_availability_count": 0,
+        "as_of_unknown_violations": 0,
+        "violation_count": 0,
+        "availability_status": "EXPLICIT_AS_OF",
+        "evidence_time_hash": "5d5e10ceba1054b83d747623f284e40786bd8eeb936868b33e946f1b349e9714"
+      }
+    },
+    "arm_decision_hashes": {
+      "OLD": "8a00799b8b8062e50cdc74f0c689f9895f187bb54bad6b1b39822217d50e0ed4",
+      "RIGHT": "87727c9262c58b35ba31079229b1aa2bf7ba33085cfbd39e8b1e562294fd6545",
+      "LEFT": "402dda76dd8356ad9c1f1160eedc51d91c988a1dcdb6039d3d683992da691f4d",
+      "BOTH": "97ed5a05be33f20413e14de64603a0077893489cddd0c9e6d7697f36483098a5"
+    },
+    "audit_future_references": 0
+  },
+  "expected": "F01 INVALID/UNCERTAIN; F02 OLD equals independent OLD, revision marked confounded, all used explicit availability <= arm cutoff",
+  "original_reproducer_preserved": true,
+  "source": "Exact review script executed on start before changes; corrected results from identical synthetic constructions via public functions"
+}

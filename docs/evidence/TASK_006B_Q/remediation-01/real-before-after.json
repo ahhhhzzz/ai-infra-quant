@@ -1,0 +1,51 @@
+{
+  "original_evidence_start": "a29d2d6e0195ed4509cfa8daa9223a41c3d6fcf0",
+  "core_fix_commit": "cfa0dd13579c2e934b866681ba6aebb0d5d8b51f",
+  "final_summary_commit": "9de7381d7440215e729fbf67103eb2ac55f44181",
+  "method": "Core fixed study into new directory; final boundary_case_lists summary applied to stored corrected outliers; no recalculation or alteration of original evidence",
+  "rows": [
+    {
+      "timeframe": "W1",
+      "valid_cutoffs": 100,
+      "scheduled_cutoffs": 100,
+      "decision_status_hash_and_classification_differences": [],
+      "material_arm_projection_differences": [],
+      "material_cases": 9,
+      "checked_arm_or_current_sets": 500,
+      "checked_observation_uses": 65000,
+      "temporal_violations": 0,
+      "unknown_observational_availability_uses": 65000,
+      "revision_confounded_cutoffs": [],
+      "same_inputs_sha256": "682aaebb059adb3ed8299b8b145b88b6d3d79ad6203c43716540b7035fa599ba"
+    },
+    {
+      "timeframe": "D1",
+      "valid_cutoffs": 100,
+      "scheduled_cutoffs": 100,
+      "decision_status_hash_and_classification_differences": [],
+      "material_arm_projection_differences": [],
+      "material_cases": 1,
+      "checked_arm_or_current_sets": 500,
+      "checked_observation_uses": 156000,
+      "temporal_violations": 0,
+      "unknown_observational_availability_uses": 156000,
+      "revision_confounded_cutoffs": [],
+      "same_inputs_sha256": "d060a2abc82dceb957c49e607f8308ef6a57bdf0dd291110c8d29a8256435160"
+    },
+    {
+      "timeframe": "M30",
+      "valid_cutoffs": 74,
+      "scheduled_cutoffs": 100,
+      "decision_status_hash_and_classification_differences": [],
+      "material_arm_projection_differences": [],
+      "material_cases": 17,
+      "checked_arm_or_current_sets": 366,
+      "checked_observation_uses": 73200,
+      "temporal_violations": 0,
+      "unknown_observational_availability_uses": 73200,
+      "revision_confounded_cutoffs": [],
+      "same_inputs_sha256": "87f8d630d2e3a321ee2093bc9ba064c426909609b2dd1607b837de1fe768fb09"
+    }
+  ],
+  "conclusion": "Unversioned AVGO numerical decisions/hashes/classification/material projections unchanged; expanded availability diagnostics explicitly count unknown time. INCOMPLETE real gate; robustness not accepted."
+}

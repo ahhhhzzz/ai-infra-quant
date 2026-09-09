@@ -1,0 +1,200 @@
+{
+  "start": "a29d2d6e0195ed4509cfa8daa9223a41c3d6fcf0",
+  "source_sha": "9de7381d7440215e729fbf67103eb2ac55f44181",
+  "protected_start_mode_type_blob_count": 408,
+  "protected_failures": [],
+  "unchanged_strategy_function_ast_sha256": {
+    "atr_series": "9977e3ea4a509fd2c2c201b32c615acd9299cfd89e8b54ef6d75927d33982a0d",
+    "pivots": "3c25d59c6de449af8a6693dff54ba2f871ee441d7d0b79210388ae7d0f5d3f8f",
+    "labels": "34fb89e98c918803023c4a669b54210e92b76d4522915e80066fb9513525ea7b",
+    "regime": "ef0c6f6d2e22daca15529d923f8b44d36900433b68a0979619edd76abd552995"
+  },
+  "zones_types_fixtures_profile_universe_original_evidence": "unchanged Git mode/type/blob",
+  "authority": "8bf55f1ea5e7b3e9e65517ca9b5a505086bb761f",
+  "review": "e4bf4cb6092e48c98732bd7d355d31affbf8a332",
+  "review_not_merged": true,
+  "status": "PASS",
+  "base_verifier": {
+    "base": "8bf55f1ea5e7b3e9e65517ca9b5a505086bb761f",
+    "start": "3e547189fa446bb04913e5fecc73720e424cc240",
+    "protected_mode_type_blob_count": 377,
+    "issued_contract_blob": "726e6bfa130361e18e6440519094a759ba6cf727",
+    "matrix_rules": 12,
+    "local_document_links": 27,
+    "changed_paths": [
+      "docs/evidence/TASK_006B_Q/README.md",
+      "docs/evidence/TASK_006B_Q/US.AVGO.D1.diagnostics.json",
+      "docs/evidence/TASK_006B_Q/US.AVGO.M30.diagnostics.json",
+      "docs/evidence/TASK_006B_Q/US.AVGO.W1.diagnostics.json",
+      "docs/evidence/TASK_006B_Q/boundary-case-review.json",
+      "docs/evidence/TASK_006B_Q/coverage.json",
+      "docs/evidence/TASK_006B_Q/performance.json",
+      "docs/evidence/TASK_006B_Q/profile.json",
+      "docs/evidence/TASK_006B_Q/protected-base-tree.txt",
+      "docs/evidence/TASK_006B_Q/protection.json",
+      "docs/evidence/TASK_006B_Q/remediation-01/CONTRACT.md",
+      "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+      "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/US.AVGO.D1.diagnostics.json",
+      "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/US.AVGO.M30.diagnostics.json",
+      "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/US.AVGO.W1.diagnostics.json",
+      "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/coverage.json",
+      "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/performance.json",
+      "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/synthetic-cases.json",
+      "docs/evidence/TASK_006B_Q/remediation-01/protection.json",
+      "docs/evidence/TASK_006B_Q/remediation-01/real-before-after.json",
+      "docs/evidence/TASK_006B_Q/remediation-01/reproducer-before-after.json",
+      "docs/evidence/TASK_006B_Q/remediation-01/rule-matrix.json",
+      "docs/evidence/TASK_006B_Q/rule-matrix.json",
+      "docs/evidence/TASK_006B_Q/source-manifest.json",
+      "docs/evidence/TASK_006B_Q/synthetic-cases.json",
+      "docs/evidence/TASK_006B_Q/universe.json",
+      "docs/evidence/TASK_006B_Q/validation.json",
+      "docs/reports/TASK_006B_Q_IMPLEMENTATION_REPORT.md",
+      "docs/research/PAQS_Q_STRUCTURE_MATH_CANDIDATE_V1.md",
+      "prompts/tasks/TASK-006B-Q_STRUCTURE_FORMALIZATION_AND_STABILITY.md",
+      "tests/research/paqs_q/test_diagnostics.py",
+      "tests/research/paqs_q/test_engine.py",
+      "tests/research/paqs_q/test_inputs.py",
+      "tests/research/paqs_q/test_remediation_quality.py",
+      "tests/research/paqs_q/test_remediation_temporal.py",
+      "tests/research/paqs_q/test_scope.py",
+      "tests/research/paqs_q/test_zones.py",
+      "tools/research/paqs_q/__init__.py",
+      "tools/research/paqs_q/__main__.py",
+      "tools/research/paqs_q/diagnostics.py",
+      "tools/research/paqs_q/engine.py",
+      "tools/research/paqs_q/fixtures.py",
+      "tools/research/paqs_q/integrations/__init__.py",
+      "tools/research/paqs_q/integrations/local_archive.py",
+      "tools/research/paqs_q/io.py",
+      "tools/research/paqs_q/study.py",
+      "tools/research/paqs_q/temporal.py",
+      "tools/research/paqs_q/types.py",
+      "tools/research/paqs_q/verify.py",
+      "tools/research/paqs_q/zones.py"
+    ],
+    "status": "PASS",
+    "note": "Git index mode/type/blob plus working-tree diff; no network or mutation"
+  },
+  "remediation_changed_paths": [
+    "docs/evidence/TASK_006B_Q/remediation-01/CONTRACT.md",
+    "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+    "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+    "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/US.AVGO.D1.diagnostics.json",
+    "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/US.AVGO.M30.diagnostics.json",
+    "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/US.AVGO.W1.diagnostics.json",
+    "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/coverage.json",
+    "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/performance.json",
+    "docs/evidence/TASK_006B_Q/remediation-01/corrected-study/synthetic-cases.json",
+    "docs/evidence/TASK_006B_Q/remediation-01/protection.json",
+    "docs/evidence/TASK_006B_Q/remediation-01/real-before-after.json",
+    "docs/evidence/TASK_006B_Q/remediation-01/reproducer-before-after.json",
+    "docs/evidence/TASK_006B_Q/remediation-01/rule-matrix.json",
+    "docs/evidence/TASK_006B_Q/remediation-01/validation.json",
+    "docs/research/PAQS_Q_STRUCTURE_MATH_CANDIDATE_V1.md",
+    "tests/research/paqs_q/test_remediation_quality.py",
+    "tests/research/paqs_q/test_remediation_temporal.py",
+    "tools/research/paqs_q/diagnostics.py",
+    "tools/research/paqs_q/engine.py",
+    "tools/research/paqs_q/study.py",
+    "tools/research/paqs_q/temporal.py"
+  ],
+  "changed_paths_allowlist": "PASS",
+  "new_document_local_links": [
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "REPORT.md"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "CONTRACT.md"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "rule-matrix.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "reproducer-before-after.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "real-before-after.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "corrected-study/coverage.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "corrected-study/US.AVGO.W1.diagnostics.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "corrected-study/US.AVGO.D1.diagnostics.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "corrected-study/US.AVGO.M30.diagnostics.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "validation.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "protection.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "../../../reports/TASK_006B_Q_IMPLEMENTATION_REPORT.md"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "../profile.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/README.md",
+      "target": "../universe.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+      "target": "CONTRACT.md"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+      "target": "../../../../tests/research/paqs_q/test_remediation_quality.py"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+      "target": "../../../research/PAQS_Q_STRUCTURE_MATH_CANDIDATE_V1.md#14-boundary-clarification-12--f01f02-remediation"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+      "target": "reproducer-before-after.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+      "target": "../../../../tests/research/paqs_q/test_remediation_temporal.py"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+      "target": "real-before-after.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+      "target": "validation.json"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+      "target": "README.md"
+    },
+    {
+      "document": "docs/evidence/TASK_006B_Q/remediation-01/REPORT.md",
+      "target": "protection.json"
+    }
+  ],
+  "working_tree_tracked_diff": "empty",
+  "database_sha256": "81b32a5f0f74e5549e99414456f189d5111435e3601b00bcd3e43c41ee2f1034"
+}
