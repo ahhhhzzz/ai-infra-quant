@@ -1,5 +1,9 @@
 # PAQS-Q Structure — Mathematical Candidate v1
 
+Executable clarification version: **QSTR-CANDIDATE-1.1**. Sections 1–12 retain the issued
+candidate; section 13 freezes serialization, observation policy and diagnostic ablations before
+execution. This is still a research candidate, not semantic adoption.
+
 Status: **RESEARCH CANDIDATE FOR TASK-006B-Q; not production strategy authority.**
 
 Task: [006B-Q contract](../../prompts/tasks/TASK-006B-Q_STRUCTURE_FORMALIZATION_AND_STABILITY.md).
@@ -165,3 +169,107 @@ Zero unexplained future references, origin violations, expired decision zones, h
 The candidate is mathematically explicit but unvalidated. The prototype/report must evaluate: initial dual-reversal ambiguity; warm-extreme exclusion; rolling ATR/pivot seed sensitivity; sufficiency of two active high/low comparisons; zone recency and cap; range sensitivity; missing-session/partial-input handling; observational adjustment limitations; useful coverage for newly listed equities. Any material rule revision gets a new candidate version with before/after same-input diagnostics.
 
 The final research recommendation must separate **engineering correctness**, **structural robustness**, and **not evaluated: predictive/trading performance**. Do not claim semantic adoption, production integration or PAQS-Q completion from this task alone.
+
+## 13. Executable clarification 1.1 — frozen before diagnostics
+
+Rationale: version 1 left wire identity, missing historical availability and exact boundary
+ablation intervals unresolved. This clarification fixes those contracts without changing the
+candidate numerical profile. See [profile](../evidence/TASK_006B_Q/profile.json) and
+[fixed universe](../evidence/TASK_006B_Q/universe.json). No outcome-based parameter choice is allowed.
+
+### 13.1 Canonical schema and identity
+
+The offline observation envelope is `qstr-observations-v1`: security (`US.<symbol>` or canonical
+five-digit `HK.<symbol>`), timeframe, market timezone, quality (`COMPLETE`, `PARTIAL`, `UNKNOWN`,
+`INVALID`), observation mode (`AS_OF` or `OBSERVATIONAL`), source/provenance text and bars.
+Each bar retains start/end, completed_at, available_at (nullable), retrieved_at, source reference,
+OHLCV, completed flag, coverage, adjustment basis and session classification. Decimal input must
+be exact numeric text; JSON binary floats are rejected. Financial magnitudes are bounded to the
+project 38,18 range. Metadata does not become verified because input can be computed.
+
+Canonical encoding recursively maps Decimal to plain canonical strings (no exponent/trailing
+fractional zeros; signed zero becomes `0`), aware datetime to UTC with six fractional digits and
+`Z`, tuples to arrays; dictionary keys are sorted, separators comma/colon, UTF-8, no NaN.
+Hashes are SHA256 of `domain + NUL + canonical_bytes`. Bar identity includes security/timeframe,
+source time/content and adjustment basis; local ordinal, retrieval time and incidental provenance
+are excluded. Pivot/zone/range evidence IDs include rule/config and stable source IDs, not absolute
+provider indices. Raw source-envelope hash and provenance remain separate from decision identity.
+
+The semantic projection contains bounded canonical observations, cutoff, rule/config, window,
+input/structure statuses, ATR, active pivots/labels, decision zones/range, deterministic reasons and
+operand/comparator evidence. Excluded leading/future observations, source-envelope hash, execution
+clock/platform/performance and acquisition provenance are outside that projection. Diagnostics
+retain all bounded warm/active pivots, candidate/expired zones and competing ranges separately.
+All returned domain objects are frozen; serialized output is immutable text/bytes.
+
+### 13.2 Observation versions and legitimate bars
+
+At fixed cutoff, exclude records completed after cutoff, unfinished records and versions whose
+explicit available_at exceeds cutoff before considering OHLC. For a source time key, select the
+latest available version; identical duplicates deduplicate, conflicting versions at the same
+availability timestamp fail closed. No revision overwrites an earlier evaluation.
+
+`AS_OF` excludes unknown availability. `OBSERVATIONAL` permits null available_at for retrospective
+calculation but emits `HISTORICAL_AVAILABILITY_UNKNOWN`; it never invents a publication timestamp.
+Retrieval can be later than historical cutoff in this mode and is retained as provenance. The local
+AVGO archive is such an observation, with current QFQ and unknown adjustment epoch. Computational
+cutoff isolation is not point-in-time information-set validation.
+
+Only completed D1 and explicitly COMPLETE W1/M30 are eligible. M30 must be REGULAR and a complete
+30-minute bucket; archive normalization uses the unchanged 006A derivation with supplied market
+sessions (including breaks/half-days), not vendor M30 substitution. W1 completion uses source
+calendar closing evidence; the nominal week end may follow a Friday completion. Calendar source
+coverage is not upgraded. Mixed adjustment bases, invalid OHLC, conflicting keys/overlapping
+intervals, identity/timezone conflicts and invalid numeric inputs produce typed INVALID/UNCERTAIN.
+Insufficient legitimate N bars produces INSUFFICIENT_FOR_Q_HORIZON, no active structure.
+
+Within an evaluation, the exact N-bar window exclusively seeds ATR/Pivot. Partial aggregate
+coverage remains PARTIAL even when enough legitimate complete bars permit calculation. Unknown
+aggregate coverage remains UNKNOWN. These are separate from structural sufficiency and Regime.
+
+### 13.3 Numerical and evidence clarifications
+
+Use a fresh explicit Decimal Context(50, ROUND_HALF_EVEN), including normalization, not the
+caller's precision or traps. Inherited median helpers round their result to 1e-18; TR, ATR
+recurrences, ratios, label tolerance, zone clamps/endpoints and exported ratios round there too.
+Pivot distance and lambda*rounded_ATR comparison retain the context-50 product without quantum
+rounding; evidence records that exact threshold. One engine is implemented independently; the
+old engine is only an optional comparison inside the diagnostics harness.
+
+Example with ATR=2, lambda=1.8: a prior high 110 confirms on close 106.4 (distance=3.6),
+not 106.400000000000000001; a current-bar high cannot confirm immediately. Equal highs retain
+the earlier extreme. Two support pivots at 100/100.2, ATR=2, at indices 10/15 have center=100.1,
+MAD=0.1, clamped halfwidth=0.3, bounds=99.8/100.4. At t=141 the latest-touch age is 126 and
+eligible; at t=142 it is expired. These examples are synthetic hand oracles, not market samples.
+
+### 13.4 Exact ablation and diagnostic projection
+
+For consecutive eligible terminals t,t+1, define:
+
+| Arm | Calculation interval | Active interval |
+|---|---|---|
+| OLD | [t-N+1,t] | [t-A+1,t] |
+| RIGHT | [t-N+1,t+1] | [t-A+1,t+1] |
+| LEFT | [t-N+2,t] | [t-A+2,t] |
+| BOTH (normal next decision) | [t-N+2,t+1] | [t-A+2,t+1] |
+
+RIGHT and LEFT use explicitly modified N+1/N-1 diagnostic horizons. They never replace normal
+decisions. Compare Regime, pivot type/price/stable extreme+confirmation refs, role/geometry/touch
+refs and range geometry, excluding config-hash-driven IDs and advancing cutoff. If BOTH differs
+from OLD, only RIGHT differs and matches BOTH, classify RIGHT_ONLY; analogous LEFT_ONLY;
+otherwise COMBINED_OR_UNRESOLVED. All-equal is UNCHANGED. This is operational attribution,
+not proof of economic causality; every direct directional flip and material left-only case is
+retained for inspection. No automatic smoothing is applied.
+
+### 13.5 Data freeze and verdicts
+
+The 40-member universe (24 US/16 HK), sector sampling labels, cutoff ceiling and last-100
+sequential-terminal schedule are frozen before diagnostics. Sector labels are sampling rationale,
+not a newly verified live listing census. Missing symbols stay in the denominator. No network
+acquisition is part of this run; use the user-authorized existing AVGO archive read-only. It is
+one real observation dataset, not a substitute for the other 39 members. W1 needs 229 eligible
+weekly bars, D1 411 and M30 299 to supply 100 eligible terminal evaluations.
+
+The report separates engineering execution, real-market gate and semantic adoption. Incomplete
+real-universe coverage or unexplained material boundary effects prohibit semantic PASS even if
+every synthetic correctness invariant passes. Predictive/trading performance is not evaluated.

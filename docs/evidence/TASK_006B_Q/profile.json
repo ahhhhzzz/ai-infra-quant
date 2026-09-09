@@ -1,0 +1,66 @@
+{
+  "rule_version": "QSTR-CANDIDATE-1.1",
+  "schema": "qstr-observations-v1",
+  "precision": 50,
+  "rounding": "ROUND_HALF_EVEN",
+  "quantum": "0.000000000000000001",
+  "atr_period": 14,
+  "smoothing": "EMA_TR_14",
+  "timeframes": {
+    "W1": {
+      "warm": 26,
+      "active": 104,
+      "pivot_lambda": "1.8"
+    },
+    "D1": {
+      "warm": 60,
+      "active": 252,
+      "pivot_lambda": "1.8"
+    },
+    "M30": {
+      "warm": 40,
+      "active": 160,
+      "pivot_lambda": "1"
+    }
+  },
+  "separation": 2,
+  "equality_atr": "0.25",
+  "zone_epsilon": "0.5",
+  "touch_separation": 5,
+  "width_min": "0.15",
+  "width_max": "0.75",
+  "merge_iou": "0.5",
+  "zone_age": 126,
+  "per_role_cap": 2,
+  "range_length": 40,
+  "inside_ratio": "0.7",
+  "range_width_min": "2",
+  "range_width_max": "12",
+  "sensitivity": {
+    "W1_lambda": [
+      "1.7",
+      "1.9"
+    ],
+    "D1_lambda": [
+      "1.7",
+      "1.9"
+    ],
+    "M30_lambda": [
+      "0.9",
+      "1.1"
+    ],
+    "zone_epsilon": [
+      "0.45",
+      "0.55"
+    ],
+    "zone_age": [
+      100,
+      160
+    ],
+    "range_length": [
+      30,
+      60
+    ]
+  },
+  "ablation": "For consecutive eligible terminal indices t,t+1: O=[t-N+1,t], active=[t-A+1,t]; RIGHT=[t-N+1,t+1], same active left as O; LEFT=[t-N+2,t], active=[t-A+2,t]; BOTH=[t-N+2,t+1], active=[t-A+2,t+1]. RIGHT/LEFT are diagnostic horizons N+1/N-1, not decisions. Compare config-independent structural projections. If BOTH matches only RIGHT: RIGHT_ONLY; only LEFT: LEFT_ONLY; otherwise COMBINED_OR_UNRESOLVED; unchanged if all match O."
+}

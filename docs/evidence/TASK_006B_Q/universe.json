@@ -1,0 +1,301 @@
+{
+  "schema": "qstr-universe-v1",
+  "frozen_before_diagnostics": true,
+  "task_start": "3e547189fa446bb04913e5fecc73720e424cc240",
+  "base": "8bf55f1ea5e7b3e9e65517ca9b5a505086bb761f",
+  "sample_rationale": "Fixed sector-diverse research cohort, not a survivor or return-ranked portfolio. Not a verified current listing/liquidity census. Unavailable/delisted members remain in denominator.",
+  "members": [
+    {
+      "security": "US.AVGO",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "AVGO",
+      "sector_sampling_label": "semiconductors"
+    },
+    {
+      "security": "US.VRT",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "VRT",
+      "sector_sampling_label": "electrical infrastructure"
+    },
+    {
+      "security": "US.NVDA",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "NVDA",
+      "sector_sampling_label": "semiconductors"
+    },
+    {
+      "security": "US.MSFT",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "MSFT",
+      "sector_sampling_label": "software"
+    },
+    {
+      "security": "US.AAPL",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "AAPL",
+      "sector_sampling_label": "hardware"
+    },
+    {
+      "security": "US.GOOGL",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "GOOGL",
+      "sector_sampling_label": "internet"
+    },
+    {
+      "security": "US.AMZN",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "AMZN",
+      "sector_sampling_label": "retail/cloud"
+    },
+    {
+      "security": "US.META",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "META",
+      "sector_sampling_label": "internet"
+    },
+    {
+      "security": "US.TSLA",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "TSLA",
+      "sector_sampling_label": "automotive"
+    },
+    {
+      "security": "US.AMD",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "AMD",
+      "sector_sampling_label": "semiconductors"
+    },
+    {
+      "security": "US.JPM",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "JPM",
+      "sector_sampling_label": "banks"
+    },
+    {
+      "security": "US.BAC",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "BAC",
+      "sector_sampling_label": "banks"
+    },
+    {
+      "security": "US.V",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "V",
+      "sector_sampling_label": "payments"
+    },
+    {
+      "security": "US.WMT",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "WMT",
+      "sector_sampling_label": "retail"
+    },
+    {
+      "security": "US.KO",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "KO",
+      "sector_sampling_label": "consumer staples"
+    },
+    {
+      "security": "US.COST",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "COST",
+      "sector_sampling_label": "retail"
+    },
+    {
+      "security": "US.UNH",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "UNH",
+      "sector_sampling_label": "healthcare"
+    },
+    {
+      "security": "US.JNJ",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "JNJ",
+      "sector_sampling_label": "healthcare"
+    },
+    {
+      "security": "US.XOM",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "XOM",
+      "sector_sampling_label": "energy"
+    },
+    {
+      "security": "US.CVX",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "CVX",
+      "sector_sampling_label": "energy"
+    },
+    {
+      "security": "US.CAT",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "CAT",
+      "sector_sampling_label": "industrials"
+    },
+    {
+      "security": "US.GE",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "GE",
+      "sector_sampling_label": "aerospace"
+    },
+    {
+      "security": "US.NEE",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "NEE",
+      "sector_sampling_label": "utilities"
+    },
+    {
+      "security": "US.PLD",
+      "market": "US",
+      "exchange_mapping": "US listing; venue from supplied source, not inferred",
+      "external_symbol": "PLD",
+      "sector_sampling_label": "real estate"
+    },
+    {
+      "security": "HK.09698",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "9698.HK",
+      "sector_sampling_label": "cloud"
+    },
+    {
+      "security": "HK.00700",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "0700.HK",
+      "sector_sampling_label": "internet"
+    },
+    {
+      "security": "HK.09988",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "9988.HK",
+      "sector_sampling_label": "retail/cloud"
+    },
+    {
+      "security": "HK.03690",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "3690.HK",
+      "sector_sampling_label": "consumer internet"
+    },
+    {
+      "security": "HK.01810",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "1810.HK",
+      "sector_sampling_label": "hardware"
+    },
+    {
+      "security": "HK.01211",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "1211.HK",
+      "sector_sampling_label": "automotive"
+    },
+    {
+      "security": "HK.00941",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "0941.HK",
+      "sector_sampling_label": "telecom"
+    },
+    {
+      "security": "HK.00005",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "0005.HK",
+      "sector_sampling_label": "banks"
+    },
+    {
+      "security": "HK.00939",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "0939.HK",
+      "sector_sampling_label": "banks"
+    },
+    {
+      "security": "HK.02318",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "2318.HK",
+      "sector_sampling_label": "insurance"
+    },
+    {
+      "security": "HK.00388",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "0388.HK",
+      "sector_sampling_label": "exchange"
+    },
+    {
+      "security": "HK.00883",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "0883.HK",
+      "sector_sampling_label": "energy"
+    },
+    {
+      "security": "HK.00857",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "0857.HK",
+      "sector_sampling_label": "energy"
+    },
+    {
+      "security": "HK.00002",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "0002.HK",
+      "sector_sampling_label": "utilities"
+    },
+    {
+      "security": "HK.00016",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "0016.HK",
+      "sector_sampling_label": "real estate"
+    },
+    {
+      "security": "HK.01093",
+      "market": "HK",
+      "exchange_mapping": "HKEX",
+      "external_symbol": "1093.HK",
+      "sector_sampling_label": "healthcare"
+    }
+  ],
+  "cutoffs": {
+    "not_after": "2026-09-09T08:29:35.187519Z",
+    "schedule": "Last 100 sequential completed terminal bars ending no later than not_after, per symbol/timeframe; exclude unfinished bars, retain missing/invalid cutoffs as segment breaks; no selecting favorable dates.",
+    "target_per_symbol_timeframe": 100,
+    "required_bars_for_100": {
+      "W1": 229,
+      "D1": 411,
+      "M30": 299
+    }
+  },
+  "exclusion_policy": "No replacements. Report 40-member and 24-US/16-HK denominators per timeframe, valid/insufficient/unavailable. Supplied AVGO archive is one observational case, not broad semantic acceptance.",
+  "data_policy": "Local supplied files/archive only in this run; zero OpenD history calls; no network acquisition. Current-QFQ is not historical information-set-safe."
+}
