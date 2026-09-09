@@ -31,6 +31,11 @@ Current documentation is synchronized to this decision. Original contracts, impl
 reviews and earlier decisions retain their historical wording, including the prior “pending review”
 and 006B1 hold statements. This decision supersedes those current-status/sequence instructions only.
 
+The initial review is retained byte-for-byte, including its original relative contract link.
+For the working contract link, use [ADC-001 contract](../../prompts/tasks/TASK-ADC-001_ARCHITECTURE_DOCUMENTATION_CONSOLIDATION.md).
+The old review link's path-resolution error is a historical navigation typo, not a new implementation
+finding; this explicit pointer corrects navigation without rewriting signed-off evidence.
+
 ## Runtime and evidence limits
 
 ADC-001 is Architecture / Documentation Consolidation, not runtime refactoring. No runtime,
