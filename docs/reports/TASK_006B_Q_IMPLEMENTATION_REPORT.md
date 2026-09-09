@@ -202,3 +202,17 @@ Narrative/Legacy、行情刷新/Analyze、原报告和历史审查证据未变�
 工程执行：**PASS（限定本报告验证范围）**。真实行情门槛：**INCOMPLETE**。
 结构鲁棒性：**有已记录的左边界敏感性，等待语义审查；不建议直接产品采纳**。
 预测/交易表现：**未评估**。停止于独立审查；不合并、不接产品、不启动 006C-Q。
+
+
+## 8. Delivery transport blocked
+
+本地最终内容已提交，但本次正常推送尚未成功。普通 HTTPS push 和仅单次生效的 HTTP/1.1 push
+均失败，错误为：`Failed to connect to github.com:443 after 21095 ms: Could not connect to server`
+（第二次 21093 ms）。再次只读 `ls-remote` 也出现 curl 28 连接超时。
+这不是自动审批拒绝，没有改 Git 配置、重建远程提交、强推或覆盖引用。
+
+通过独立 GitHub connector 读回，远程任务分支仍为
+`3e547189fa446bb04913e5fecc73720e424cc240`，权威分支仍为
+`8bf55f1ea5e7b3e9e65517ca9b5a505086bb761f`。尚不能提供包含本实现的有效 GitHub 报告链接，
+也不能声称最终 SHA 已在 GitHub 核验。需恢复这台机器对 GitHub 的连接后完成已授权的正常推送和读回；
+本地提交、证据、数据库及其他工作区均保留。交付传输状态：**BLOCKED_BY_NETWORK**。

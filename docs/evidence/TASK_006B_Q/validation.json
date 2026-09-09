@@ -64,5 +64,15 @@
     "CIM hardware queries: Access denied; CPU registry identifier available; no invented RAM measurement",
     "No 39 other symbols; AVGO M30 lacks 26 eligible bars for 100 terminals",
     "Unknown historical source availability and current-QFQ adjustment epoch"
-  ]
+  ],
+  "delivery": {
+    "status": "BLOCKED_BY_NETWORK",
+    "attempts": 2,
+    "git_error": "Failed to connect to github.com:443 after 21095 ms: Could not connect to server",
+    "github_task_ref_readback": "3e547189fa446bb04913e5fecc73720e424cc240",
+    "github_authority_ref_readback": "8bf55f1ea5e7b3e9e65517ca9b5a505086bb761f",
+    "local_evidence_commit_before_transport_record": "ea127e52d732a9af7e321845bdcb8501fa537f50",
+    "force_push": false,
+    "approval_rejection": false
+  }
 }
