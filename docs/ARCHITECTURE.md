@@ -1,8 +1,8 @@
 # Current Architecture
 
 This describes authoritative baseline `722936984deac652b443eba132c69650653345e1`, whose runtime
-code is accepted C2 implementation `d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`. ADC-001 changes
-only documentation and awaits independent review. See [ROADMAP](ROADMAP.md) for delivery status.
+code is accepted C2 implementation `d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`. ADC-001 changed
+only documentation, passed focused review at `66a3ca7bbff258665b25e5ab17231138bf3cc49f` and is integrated. See [ROADMAP](ROADMAP.md) for delivery status.
 
 ## 1. Product and runtime shape
 
@@ -234,10 +234,12 @@ No conversion rewrites old records or fabricates structured fields from prose.
 |---|---|
 | Current user capabilities | Market/watchlist workbench, current Snapshot, selected-model Narrative, secure credentials, explicit research, immutable evidence/history |
 | Retained non-default | Legacy structured runtime/validator/ledger; original deterministic 006B with `STRUCTURE_CONCERNS_FOUND`; Phase 1 opening accounting/descriptors and compatibility reads |
-| Deferred | 006B1 market archive/replay and planned 0004; strict historical As-Of/GoldSet; PAQS-Q successors; 007D comparison; Paper Broker/PaperFill/NAV/performance and Phase 3/4 extensions |
+| Authorized next, not implemented | 006B1 market archive/replay and planned 0004, under its updated exact-baseline handoff |
+| Deferred | Strict historical As-Of/GoldSet; PAQS-Q successors; 007D comparison; Paper Broker/PaperFill/NAV/performance and Phase 3/4 extensions |
 | Permanently excluded | Real-account observation/import/positions, broker writes/orders, autonomous execution |
 
-006B1 stays on hold until ADC independent review/integration and a new exact-baseline handoff.
+ADC is reviewed/integrated; 006B1 may start only from the updated post-ADC handoff.
+The original capture/versioning/offline-read scope remains unchanged.
 Skeletons and route names do not activate deferred behavior.
 
 ## 9. Historical evolution and evidence
@@ -257,4 +259,4 @@ not require reading successive remediation overrides.
 | R06 | Partial actions/diagnostics; [contract](../prompts/tasks/TASK-007C1_REMEDIATION_06_DEEPSEEK_PARTIAL_ACTION_COMPATIBILITY_EXACT_DIAGNOSTICS.md), [report](TASK_007C1_REMEDIATION_06_IMPLEMENTATION_REPORT.md), [review](reviews/TASK_007C1_REMEDIATION_06_INDEPENDENT_REVIEW.md) |
 | C1 closeout | [User acceptance](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md), not independent recomputation of local hashes or all-model paid testing |
 | C2 closeout | [Review](reviews/TASK_007C2_INDEPENDENT_REVIEW.md), [user closeout](decisions/TASK_007C2_CLOSEOUT_AND_006B1_HANDOFF_2026_09_08.md); user screenshot showed C1 branch without SHA, not verified exact-C2 runtime |
-| ADC sequencing | [Decision](decisions/ARCHITECTURE_DOCUMENTATION_CONSOLIDATION_BEFORE_006B1_2026_09_09.md), [report](reports/TASK_ADC_001_IMPLEMENTATION_REPORT.md); docs-only, pending independent review |
+| ADC sequencing | [Decision](decisions/ARCHITECTURE_DOCUMENTATION_CONSOLIDATION_BEFORE_006B1_2026_09_09.md), [report](reports/TASK_ADC_001_IMPLEMENTATION_REPORT.md); historical sequencing/implementation records; now [reviewed](reviews/TASK_ADC_001_F01_FOCUSED_RE_REVIEW.md) and [closed/integrated](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md) |

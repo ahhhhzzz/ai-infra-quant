@@ -2,10 +2,10 @@
 
 ## Current delivery status — 2026-09-09
 
-C1/C2 are accepted and integrated at the current authoritative baseline
-`722936984deac652b443eba132c69650653345e1`. ADC-001 is docs-only, **pending independent review**;
-006B1 startup is on hold until the new post-review/integration handoff. Exact SHAs, sequence and
-separate user/reviewer evidence attribution are in [ROADMAP](ROADMAP.md).
+C1/C2 and ADC-001 are accepted and integrated. ADC-001 passed focused re-review at
+`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; all runtime code remains unchanged.
+TASK-006B1 is the next authorized implementation under its original scope and updated handoff.
+Exact SHAs, current sequence and evidence attribution are in [ROADMAP](ROADMAP.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
 Status: Phase 1 accepted after independent post-remediation review — PASS; reviewed commit: `f6decf2fbe171c1b9eb46340a9174bc21f293ede`; reviewed tree: `f03d23ededaef37096b508a3040c87ae69d89e32`; GitHub Actions run: `33458517601`; job: `99703528272`; artifact: `9782355130`; result: `119 passed`
@@ -130,7 +130,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | PAQS-016 | Latest quote is reference-only, preserves nullable provider delay, and cannot confirm completed-bar structural evidence | RETAINED | 2 | IMPLEMENTED | TASK-006B2 final independent review at `5f996a...` |
 | PAQS-019 | Shared W1/D1/M30 evidence exposes machine-readable source status, authoritative counts, W1 exclusions and M30 missing elapsed-bucket provenance | RETAINED | 2 | IMPLEMENTED | TASK-006B2 Amendment 01; final independent review at `5f996a...` |
 | PAQS-017 | PAQS branches remain runtime-independent; one provider/branch may fail without disabling the other or ordinary market-data viewing | RETAINED | 2 | DOCUMENTED | Dual-branch architecture decision/review |
-| PAQS-018 | TASK-006B1 Local Market Data Store & Replay Foundation original contract scope retained; startup on hold until ADC review/integration and new handoff | RETAINED | 2 | PLANNED_TASK | Roadmap 7; 2026-09-09 sequencing decision |
+| PAQS-018 | TASK-006B1 Local Market Data Store & Replay Foundation original scope retained; authorized next under updated post-ADC handoff, not yet implemented | RETAINED | 2 | APPROVED_TASK | Roadmap 7; [ADC closeout](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md) |
 
 ### 5.2 PAQS-E requirements
 
@@ -279,7 +279,7 @@ below are inspected evidence, not ADC execution results. C1 and C2 acceptance ar
 | UI-WAIT-001 | IMPLEMENTED: long-wait guard and unknown outcome, source-SHA handshake | [long-running tests](../tests/browser/test_paqs_e_long_running.py); [runtime revision tests](../tests/integration/test_runtime_source_revision.py) |
 | LEG-001 | RETAINED: immutable structured history/validator; default POST 410, internal fixture switch | [paqs_e routes](../src/ai_infra_quant/backend/api/v1/paqs_e.py); [Narrative/Legacy tests](../tests/integration/test_paqs_e_narrative_ledger_api.py) |
 | C2-001 | IMPLEMENTED / REVIEWED / INTEGRATED: credential layout, old UI/read cleanup, active watchlist preserved | [template](../src/ai_infra_quant/frontend/templates/index.html); [C2 browser tests](../tests/browser/test_paqs_e_ui_cleanup.py); C2 review/closeout above |
-| ADC-001 | PENDING INDEPENDENT REVIEW: docs-only architecture/status/traceability consolidation | [Contract](../prompts/tasks/TASK-ADC-001_ARCHITECTURE_DOCUMENTATION_CONSOLIDATION.md); [report](reports/TASK_ADC_001_IMPLEMENTATION_REPORT.md) |
+| ADC-001 | REVIEWED PASS / INTEGRATED: docs-only architecture/status/traceability consolidation; F01 closed | [Contract](../prompts/tasks/TASK-ADC-001_ARCHITECTURE_DOCUMENTATION_CONSOLIDATION.md); [report](reports/TASK_ADC_001_IMPLEMENTATION_REPORT.md); [focused review](reviews/TASK_ADC_001_F01_FOCUSED_RE_REVIEW.md); [closeout](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md) |
 
 006B1 archive/replay/0004 is not implemented here. PAQS-Q successors, strict historical As-Of/GoldSet,
 007D comparison and Paper/PnL/Phase 3/4 remain deferred. Real-account/trading behavior is forbidden.

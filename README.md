@@ -8,8 +8,8 @@ Legacy structured history kept separately. The app never observes/imports broker
 positions or trades, or sends orders. Real trading is manual in the broker's official client.
 
 C1 and C2 are accepted and integrated; current runtime code is
-`d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`. ADC-001 consolidates docs only and awaits independent
-review. 006B1 startup is on hold until a new exact-baseline handoff after ADC review/integration.
+`d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`. ADC-001 documentation consolidation is reviewed and integrated.
+006B1 may start under its original bounded scope and the new post-ADC exact-baseline handoff.
 See [current architecture](docs/ARCHITECTURE.md), [roadmap/status](docs/ROADMAP.md),
 [workbench guide](docs/PAQS_E_WORKBENCH.md) and [model/credential guide](docs/PAQS_E_MODELS.md).
 

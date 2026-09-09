@@ -2,7 +2,8 @@
 
 C1 and C2 are accepted and integrated. See [ROADMAP](ROADMAP.md) for exact status and acceptance
 attribution, and [ARCHITECTURE](ARCHITECTURE.md) for current components and provider boundaries.
-ADC-001 is docs-only and awaits independent review; 006B1 startup remains on hold.
+ADC-001 documentation consolidation is reviewed and integrated. 006B1 is next under its updated
+exact-baseline handoff; its archive/replay behavior is not implemented yet.
 
 The existing FastAPI application serves the workbench at `/`. No frontend build server or Node
 production runtime is required. Use the existing documented migration and Uvicorn/Windows launcher

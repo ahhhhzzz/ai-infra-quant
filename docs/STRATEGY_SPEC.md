@@ -2,10 +2,10 @@
 
 ## Current delivery status — 2026-09-09
 
-C1/C2 are accepted and integrated at the current authoritative baseline
-`722936984deac652b443eba132c69650653345e1`. ADC-001 is docs-only, **pending independent review**;
-006B1 startup is on hold until the new post-review/integration handoff. Exact SHAs, sequence and
-separate user/reviewer evidence attribution are in [ROADMAP](ROADMAP.md).
+C1/C2 and ADC-001 are accepted and integrated. ADC-001 passed focused re-review at
+`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; all runtime code remains unchanged.
+TASK-006B1 is the next authorized implementation under its original scope and updated handoff.
+Exact SHAs, current sequence and evidence attribution are in [ROADMAP](ROADMAP.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
 Status: **CURRENT STRATEGY GOVERNANCE + HISTORICAL RESEARCH REFERENCE**; implementation only through approved bounded Task Contracts
@@ -393,5 +393,5 @@ No TASK-006C Event/Transition/Trigger behavior, Setup/Risk/Advisory behavior, nu
 Quality/Ranking, broker write, or optional Phase 3/4 capability is implemented by TASK-006B.
 
 TASK-006B2 and TASK-007A/B/C are accepted/integrated. TASK-007C1 is user-accepted and
-integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`; TASK-007C2 is independently reviewed and integrated. ADC-001 is docs-only and awaits
-independent review; 006B1 startup is on hold pending a new post-integration handoff. Later R20 capabilities remain bounded by separate approved contracts.
+integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`; TASK-007C2 is independently reviewed and integrated. ADC-001 docs-only consolidation is reviewed and integrated;
+006B1 is next under its updated exact-baseline handoff. Later R20 capabilities remain bounded by separate approved contracts.

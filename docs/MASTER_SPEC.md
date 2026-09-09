@@ -2,13 +2,13 @@
 
 ## Current delivery status — 2026-09-09
 
-C1/C2 are accepted and integrated at the current authoritative baseline
-`722936984deac652b443eba132c69650653345e1`. ADC-001 is docs-only, **pending independent review**;
-006B1 startup is on hold until the new post-review/integration handoff. Exact SHAs, sequence and
-separate user/reviewer evidence attribution are in [ROADMAP](ROADMAP.md).
+C1/C2 and ADC-001 are accepted and integrated. ADC-001 passed focused re-review at
+`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; all runtime code remains unchanged.
+TASK-006B1 is the next authorized implementation under its original scope and updated handoff.
+Exact SHAs, current sequence and evidence attribution are in [ROADMAP](ROADMAP.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
-Status: **AUTHORITATIVE — PAQS-E Snapshot-on-Demand MVP; TASK-007A/B/C integrated; TASK-007C1 user-accepted/integrated; TASK-007C2 integrated; ADC-001 pending independent review**
+Status: **AUTHORITATIVE — PAQS-E Snapshot-on-Demand MVP; TASK-007A/B/C integrated; TASK-007C1 user-accepted/integrated; TASK-007C2 integrated; ADC-001 reviewed/integrated; 006B1 authorized next**
 
 Superseding future-scope decisions:
 
@@ -250,9 +250,9 @@ The authoritative phases remain 0 through 4: historical definition, accepted fou
 Phase 2 decision terminal, and optional Phase 3/4 extensions as assigned by the Roadmap/adoption record.
 Phase 4 is the final possible phase; no execution phase exists.
 
-Current sequence: accepted C2 integration → ADC-001 docs-only → independent review/integration
-→ new exact-baseline 006B1 handoff. The original 006B1 contract scope is retained while startup
-is on hold; the old starting prompt is not reusable. See [ROADMAP](ROADMAP.md).
+Current sequence: accepted C2 → ADC-001 reviewed/integrated → updated exact-baseline 006B1
+handoff and bounded implementation. The original 006B1 scope remains unchanged; the old
+starting prompt is not reusable. See [ROADMAP](ROADMAP.md).
 
 TASK-006A is integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B deterministic
 implementation is integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`; its real-market

@@ -8,8 +8,8 @@ This is an existing, accepted local application, not a new Phase 0 bootstrap pac
 4. Before repository work, read [AGENTS](AGENTS.md), [ROADMAP](docs/ROADMAP.md), the authoritative
    specifications and the exact approved Task Contract. Verify GitHub references first.
 
-C1/C2 are accepted and integrated. ADC-001 is documentation-only and awaits independent review;
-006B1 startup is on hold until ADC review/integration and a new exact-baseline handoff. Do not reuse
+C1/C2 and docs-only ADC-001 are reviewed and integrated. 006B1 is next under its updated
+post-ADC exact-baseline handoff and retained original scope. Do not reuse
 old bootstrap/start prompts or merge a task without authorization. Preserve databases, existing
 worktrees and unrelated untracked files. The application remains read-only decision support;
 all real trading is manual outside it.

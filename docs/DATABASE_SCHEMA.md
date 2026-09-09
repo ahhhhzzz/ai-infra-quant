@@ -20,7 +20,7 @@ The 0002 filename differs from its revision identifier. Normal startup checks th
 and performs the accepted idempotent foundation bootstrap; it does not create schema from current
 ORM metadata or delete databases. All three migration files remain unchanged by ADC.
 
-No 0004 exists. TASK-006B1 archive/replay is on hold pending the ADC review/integration and a new
+No 0004 exists. TASK-006B1 archive/replay is the next authorized task under its updated post-ADC
 exact-baseline handoff. Planned archive tables must not be described as current persistence.
 
 ## 2. Foundation tables retained from 0001
