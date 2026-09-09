@@ -257,28 +257,18 @@ def test_hk_half_day_lunch_calendar_and_unknown_quality(archive: Any, client: Te
     assert unknown_capture["batches"]["M1"]["missing_count"] is None
 
 
-def test_unverified_conflicting_metadata_and_context_failure(archive: Any) -> None:
+def test_conflicting_metadata_and_context_failure(archive: Any) -> None:
     from ai_infra_quant.application.market_data_queries import MarketDataSecurityMetadataConflict
     from ai_infra_quant.database.models.security import SecurityModel
 
     service, provider, security_id, container = archive
     with container.session_factory.begin() as session:
         session.execute(
-            sa.update(SecurityModel)
-            .where(SecurityModel.id == security_id)
-            .values(verification_status="SYSTEM_SEED_UNVERIFIED")
+            sa.update(SecurityModel).where(SecurityModel.id == security_id).values(currency="HKD")
         )
     with pytest.raises(MarketDataSecurityMetadataConflict):
         service.capture(security_id)
     assert provider.calls == []
-    with container.session_factory.begin() as session:
-        session.execute(
-            sa.update(SecurityModel)
-            .where(SecurityModel.id == security_id)
-            .values(verification_status="VERIFIED", currency="HKD")
-        )
-    with pytest.raises(MarketDataSecurityMetadataConflict):
-        service.capture(security_id)
     with container.session_factory.begin() as session:
         session.execute(
             sa.update(SecurityModel).where(SecurityModel.id == security_id).values(currency="USD")

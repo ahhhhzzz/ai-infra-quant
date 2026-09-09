@@ -78,12 +78,30 @@ def configure(server: str, **kwargs: Any) -> None:
         assert client.post("/_fixture/configure", json=kwargs).status_code == 200
 
 
+def normal_seed_details(server: str) -> dict[str, Any]:
+    with httpx.Client(base_url=server, trust_env=False) as client:
+        details = {
+            item["security"]["display_symbol"]: client.get(
+                f"/api/v1/securities/{item['security']['id']}"
+            ).json()
+            for item in client.get("/api/v1/watchlist").json()["items"]
+        }
+    assert set(details) == {"US.AVGO", "US.VRT", "HK.09698"}
+    for security in details.values():
+        assert security["verification_status"] == "SYSTEM_SEED_UNVERIFIED"
+        assert security["tradability_status"] == "UNVERIFIED"
+        assert security["metadata_status"] == "UNAVAILABLE"
+    return details
+
+
 @pytest.mark.parametrize("width", [390, 900, 1440])
 @pytest.mark.parametrize("theme", ["dark", "light"])
 def test_real_capture_offline_pages_layout_keyboard(
     browser: Any, archive_server: str, width: int, theme: str
 ) -> None:
+    before = normal_seed_details(archive_server)
     configure(archive_server)
+    assert normal_seed_details(archive_server) == before
     context = browser.new_context(viewport={"width": width, "height": 1000})
     page = context.new_page()
     errors: list[str] = []
@@ -157,6 +175,7 @@ def test_real_capture_offline_pages_layout_keyboard(
     assert not [url for method, url in calls if method == "POST" and "analyses" in url]
     with httpx.Client(base_url=archive_server, trust_env=False) as client:
         assert client.get("/_fixture/calls").json()["calls"] == []
+    assert normal_seed_details(archive_server) == before
     assert errors == []
     context.close()
 

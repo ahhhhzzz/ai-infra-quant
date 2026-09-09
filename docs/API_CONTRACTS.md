@@ -342,6 +342,12 @@ existing executable specifications. ADC inspects these sources without claiming 
 
 Base: `/api/v1/market-data/archive`. UUIDs are canonical internal identifiers, not account IDs.
 
+Capture uses the existing read-only identity checks for enabled US/HK equities, canonical
+symbols and consistent currency/timezone. Normal seed and supported-security additions can
+be saved without changing verification, tradability or metadata statuses. Legacy `VERIFIED`
+is not an archive prerequisite; returned bar identity/completion/time/Decimal checks still apply.
+006B1-F01 status: 整改完成，等待聚焦复核; [evidence](reports/TASK_006B1_F01_REMEDIATION_REPORT.md).
+
 | Method/path | Request and result |
 |---|---|
 | POST `/captures` | JSON `{"security_id":"<uuid>"}` only; extra fields rejected. Loopback peer/host, exact same Origin, same-origin fetch and application/json required; no query parameters and body ≤1024 bytes. One explicit synchronous attempt; 201 only after atomic persistence of real bars. |
@@ -365,7 +371,7 @@ strict historical cutoff. `recorded_at` is assigned immediately before the short
 retrieval and membership retrieval are separate from the server capture envelope.
 
 Statuses: malformed UUID/timeframe/limit/cursor or extra body 422; unknown Security/capture 404;
-unverified/conflicting canonical metadata 409; unsupported mapping/provider 422; mutation boundary
+conflicting currency/timezone metadata 409; disabled/non-equity or unsupported mapping/provider 422; mutation boundary
 403; excessive body/query 400; no valid bar batch 503 `ARCHIVE_UNAVAILABLE` with safe batch codes;
 local persistence/integrity failure 503 and write rollback. No raw SDK exception is returned.
 A partially populated capture is 201 with PARTIAL, never a false empty success. If a connection

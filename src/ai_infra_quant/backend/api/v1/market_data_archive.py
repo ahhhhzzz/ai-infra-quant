@@ -43,7 +43,7 @@ def _problem(exc: Exception) -> HTTPException:
     if isinstance(exc, ArchiveNotFound | MarketDataSecurityNotFound):
         return HTTPException(404, "Archive capture or Security not found")
     if isinstance(exc, MarketDataSecurityMetadataConflict):
-        return HTTPException(409, "Archive requires consistent verified Security metadata")
+        return HTTPException(409, "Archive requires consistent market-data Security identity")
     if isinstance(exc, MarketDataSecurityNotSupported):
         return HTTPException(422, "Archive Security or provider unavailable")
     if isinstance(exc, ArchivePersistenceError):

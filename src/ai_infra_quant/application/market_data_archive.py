@@ -12,11 +12,10 @@ from zoneinfo import ZoneInfo
 from ai_infra_quant.application.market_data_queries import (
     MarketDataProviderFactory,
     MarketDataQueries,
-    MarketDataSecurityMetadataConflict,
     MarketDataSecurityNotSupported,
 )
 from ai_infra_quant.core.domain.common import utc_now
-from ai_infra_quant.core.domain.enums import DataAvailabilityStatus, VerificationStatus
+from ai_infra_quant.core.domain.enums import DataAvailabilityStatus
 from ai_infra_quant.core.domain.market_data import (
     PROVIDER_FUTU_QUOTE,
     DailyBar,
@@ -237,9 +236,8 @@ class MarketDataArchiveService:
         self.now = now
 
     def capture(self, security_id: str) -> dict[str, Any]:
+        # Read-only market identity validation is distinct from legacy trading verification.
         security, market_security = self.queries.resolve_research_security(security_id)
-        if security.verification_status != VerificationStatus.VERIFIED:
-            raise MarketDataSecurityMetadataConflict("Archive requires verified canonical Security")
         if self.provider_name != PROVIDER_FUTU_QUOTE or self.provider_factory is None:
             raise MarketDataSecurityNotSupported("Archive provider is unavailable")
         started = self.now()

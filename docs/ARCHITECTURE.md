@@ -265,7 +265,12 @@ not require reading successive remediation overrides.
 ## 10. Explicit local market archive
 
 [MarketDataArchiveService](../src/ai_infra_quant/application/market_data_archive.py) resolves an
-existing verified canonical Security through the read-only identity service. One request-scoped
+existing canonical Security through the read-only identity service: enabled equity, supported
+US/HK market, consistent currency/timezone and valid canonical provider identity. This does not
+require or upgrade legacy `verification_status`, `tradability_status` or `metadata_status`.
+Normal seeds and provider-validated user additions retain their unverified/non-tradable metadata.
+006B1-F01 status: 整改完成，等待聚焦复核; see the [remediation report](reports/TASK_006B1_F01_REMEDIATION_REPORT.md).
+One request-scoped
 provider context performs one D1, one M1 and one bounded calendar capability call. External reads
 finish before any archive write transaction. Validation freezes exact Decimal strings, source and
 completion/time semantics; invalid/conflicting batches are rejected and unavailable batches are

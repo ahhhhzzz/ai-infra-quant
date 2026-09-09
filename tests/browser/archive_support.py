@@ -7,8 +7,6 @@ from decimal import Decimal
 from typing import Any, cast
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import update
-
 from ai_infra_quant.application.market_data_archive import MarketDataArchiveService
 from ai_infra_quant.backend.dependencies import AppContainer
 from ai_infra_quant.core.domain.enums import DataAvailabilityStatus
@@ -23,7 +21,6 @@ from ai_infra_quant.core.domain.market_data import (
     TradingSessionSegment,
 )
 from ai_infra_quant.core.ports.market_data import ReadOnlyMarketDataProvider
-from ai_infra_quant.database.models.security import SecurityModel
 from ai_infra_quant.database.repositories.market_data_archive import SQLAlchemyMarketDataArchive
 
 NOW = datetime(2026, 9, 8, 22, tzinfo=UTC)
@@ -138,8 +135,6 @@ class SyntheticArchiveProvider:
 def install(
     container: AppContainer, provider: SyntheticArchiveProvider
 ) -> MarketDataArchiveService:
-    with container.session_factory.begin() as session:
-        session.execute(update(SecurityModel).values(verification_status="VERIFIED"))
     service = MarketDataArchiveService(
         container.market_data_queries,
         SQLAlchemyMarketDataArchive(container.session_factory),
