@@ -1,0 +1,177 @@
+[
+  {
+    "id": "QSTR-001",
+    "functions": [
+      "tools/research/paqs_q/types.py::canonical",
+      "tools/research/paqs_q/engine.py::evaluate"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_engine.py::test_repeated_cross_process_and_decimal_context_bytes"
+    ],
+    "evidence": "Repeated/process/context byte identity; immutable result",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "NOT_IMPLIED_BY_SYNTHETIC_TESTS"
+  },
+  {
+    "id": "QSTR-002",
+    "functions": [
+      "tools/research/paqs_q/engine.py::prepare"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_engine.py::test_future_versions_incomplete_and_invalid_future_isolation",
+      "tests/research/paqs_q/test_engine.py::test_availability_order_conflict_and_unknown_are_explicit",
+      "tests/research/paqs_q/test_inputs.py::test_archive_normalization_us_dst_completion"
+    ],
+    "evidence": "Completed/available cutoff filtering; unknown availability remains observational",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "NOT_IMPLIED_BY_SYNTHETIC_TESTS"
+  },
+  {
+    "id": "QSTR-003",
+    "functions": [
+      "tools/research/paqs_q/engine.py::evaluate"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_engine.py::test_origin_invariance_three_prefixes_and_adversarial_extremes"
+    ],
+    "evidence": "Three extra prefix lengths and adversarial extremes per timeframe",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "NOT_IMPLIED_BY_SYNTHETIC_TESTS"
+  },
+  {
+    "id": "QSTR-004",
+    "functions": [
+      "tools/research/paqs_q/engine.py::calculate_window",
+      "tools/research/paqs_q/engine.py::labels"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_engine.py::test_flat_partial_insufficient_and_warm_only_are_honest",
+      "tests/research/paqs_q/test_engine.py::test_invalid_data_conservative"
+    ],
+    "evidence": "Warm anchors never directional; invalid/insufficient/nonpositive typed UNCERTAIN",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "NOT_IMPLIED_BY_SYNTHETIC_TESTS"
+  },
+  {
+    "id": "QSTR-005",
+    "functions": [
+      "tools/research/paqs_q/engine.py::pivots",
+      "tools/research/paqs_q/engine.py::atr_series"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_engine.py::test_atr_hand_oracle_first_tr_seed_and_ema",
+      "tests/research/paqs_q/test_engine.py::test_pivot_threshold_exact",
+      "tests/research/paqs_q/test_engine.py::test_pivot_tie_update_first_same_bar_gap_and_reverse_sequence",
+      "tests/research/paqs_q/test_engine.py::test_unseeded_both_thresholds_ambiguous_never_forces_pivot"
+    ],
+    "evidence": "Hand-computed references and exact quantum boundary",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "NOT_IMPLIED_BY_SYNTHETIC_TESTS"
+  },
+  {
+    "id": "QSTR-006",
+    "functions": [
+      "tools/research/paqs_q/zones.py::build_zones",
+      "tools/research/paqs_q/zones.py::select_zones"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_zones.py::test_touch_independence_dedup_and_exact_geometry",
+      "tests/research/paqs_q/test_zones.py::test_complete_link_does_not_transitively_chain_and_order_is_deterministic",
+      "tests/research/paqs_q/test_zones.py::test_iou_half_is_inclusive_and_age_counts_extreme_not_confirmation",
+      "tests/research/paqs_q/test_zones.py::test_role_cap_and_candidate_rejection",
+      "tests/research/paqs_q/test_zones.py::test_no_non_d1_decision_zones_or_ranges"
+    ],
+    "evidence": "Active geometry, complete link, age126/127, cap and role",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "NOT_IMPLIED_BY_SYNTHETIC_TESTS"
+  },
+  {
+    "id": "QSTR-007",
+    "functions": [
+      "tools/research/paqs_q/zones.py::ranges",
+      "tools/research/paqs_q/diagnostics.py::run_lengths"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_zones.py::test_range_recent_reactions_alternation_and_old_touches_rejected",
+      "tests/research/paqs_q/test_zones.py::test_range_inside_ratio_exact_70_percent",
+      "tests/research/paqs_q/test_zones.py::test_range_latest_close_width_and_atr_guards",
+      "tests/research/paqs_q/test_zones.py::test_range_id_changes_do_not_imply_semantic_range_exit"
+    ],
+    "evidence": "One recent window, alternation and range-state vs version persistence",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "NOT_IMPLIED_BY_SYNTHETIC_TESTS"
+  },
+  {
+    "id": "QSTR-008",
+    "functions": [
+      "tools/research/paqs_q/engine.py::regime"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_engine.py::test_direction_requires_latest_two_sided_active_evidence_and_close",
+      "tests/research/paqs_q/test_zones.py::test_full_engine_range_precedence_and_all_touch_lineage_active"
+    ],
+    "evidence": "Conservative latest evidence plus D1 range precedence",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "NOT_IMPLIED_BY_SYNTHETIC_TESTS"
+  },
+  {
+    "id": "QSTR-009",
+    "functions": [
+      "tools/research/paqs_q/diagnostics.py::boundary",
+      "tools/research/paqs_q/diagnostics.py::classify"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_diagnostics.py::test_boundary_counterfactual_classification",
+      "tests/research/paqs_q/test_diagnostics.py::test_boundary_real_calculation_uses_four_distinct_windows"
+    ],
+    "evidence": "Four explicit arms; preserve material cases and no economic causality claim",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "INCOMPLETE"
+  },
+  {
+    "id": "QSTR-010",
+    "functions": [
+      "tools/research/paqs_q/diagnostics.py::audit",
+      "tools/research/paqs_q/study.py::coverage",
+      "tools/research/paqs_q/diagnostics.py::old_engine"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_scope.py::test_fixed_universe_coverage_denominators_and_unavailable_members",
+      "tests/research/paqs_q/test_diagnostics.py::test_one_parameter_at_a_time_and_separate_state_version_runs",
+      "tests/research/paqs_q/test_diagnostics.py::test_old_path_lock_comparison_and_new_origin_bound",
+      "tests/research/paqs_q/test_diagnostics.py::test_audit_keeps_shortfall_and_does_not_promote_synthetic_to_market_pass"
+    ],
+    "evidence": "Fixed 40 denominator, old/new same input, OFAT, INCOMPLETE real gate",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "INCOMPLETE"
+  },
+  {
+    "id": "QSTR-011",
+    "functions": [
+      "tools/research/paqs_q/types.py::digest",
+      "tools/research/paqs_q/io.py::read_dataset"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_engine.py::test_canonical_decimal_and_provenance_separation",
+      "tests/research/paqs_q/test_inputs.py::test_json_roundtrip_decimal_required_and_cli"
+    ],
+    "evidence": "Canonical financial decimal strings, source envelope separated",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "NOT_IMPLIED_BY_SYNTHETIC_TESTS"
+  },
+  {
+    "id": "QSTR-012",
+    "functions": [
+      "tools/research/paqs_q/verify.py::verify",
+      "tools/research/paqs_q/integrations/local_archive.py::load_capture"
+    ],
+    "tests": [
+      "tests/research/paqs_q/test_scope.py::test_product_never_imports_prototype_and_engine_is_independent",
+      "tests/research/paqs_q/test_inputs.py::test_ordinary_calculation_never_opens_socket",
+      "tests/research/paqs_q/test_inputs.py::test_archive_connection_is_read_only_even_when_schema_is_missing"
+    ],
+    "evidence": "Git protected identities; no runtime/network/database mutation",
+    "engineering_status": "PASS",
+    "real_market_semantic_gate": "NOT_IMPLIED_BY_SYNTHETIC_TESTS"
+  }
+]

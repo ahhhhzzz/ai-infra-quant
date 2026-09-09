@@ -1,0 +1,68 @@
+{
+  "source_commit": "e67575f3de064f9badb2fd06791e7fc803251bb9",
+  "python": "3.12.14",
+  "pytest": "8.4.1",
+  "ruff": "0.12.9",
+  "mypy": "1.17.1",
+  "environment": {
+    "PYTHONPATH": "<worktree>/src;<worktree>",
+    "MYPYPATH": "<worktree>/src"
+  },
+  "checks": [
+    {
+      "command": "python -m pytest tests/research/paqs_q -ra",
+      "result": "52 passed, 1 warning in 1.81s",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m pytest tests/unit/test_paqs_structure.py tests/unit/test_paqs_input.py tests/integration/test_paqs_structure_api.py tests/integration/test_paqs_input_api.py tests/architecture/test_task006a_boundaries.py tests/architecture/test_task006b_boundaries.py -ra",
+      "result": "59 passed, 1 warning in 15.37s",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m ruff check tools/research/paqs_q tests/research/paqs_q",
+      "result": "All checks passed!",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m ruff format --check tools/research/paqs_q tests/research/paqs_q",
+      "result": "17 files already formatted",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m mypy --explicit-package-bases tools/research/paqs_q tests/research/paqs_q",
+      "result": "Success: no issues found in 17 source files",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m mypy --explicit-package-bases --platform win32 tools/research/paqs_q tests/research/paqs_q",
+      "result": "Success: no issues found in 17 source files",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "result": "no output",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m tools.research.paqs_q.study --data-dir ../task006b-q-data --output-dir docs/evidence/TASK_006B_Q",
+      "result": "W1 100/100; D1 100/100; M30 74/100; fixed universe real gate INCOMPLETE",
+      "exit_code": 0,
+      "source_commit": "e67575f3de064f9badb2fd06791e7fc803251bb9"
+    },
+    {
+      "command": "python -m tools.research.paqs_q.verify --output docs/evidence/TASK_006B_Q/protection.json",
+      "result": "377 protected mode/type/blob identities; issued contract blob; 12 rule mappings; 26 local links verified",
+      "exit_code": 0
+    }
+  ],
+  "warning": "Existing Starlette anyio.abc.BlockingPortal alias deprecated",
+  "not_run": "Unrelated full business/browser/Uvicorn suites: expressly not required by contract section 5; no runtime edits",
+  "historical_quota_calls": 0,
+  "network_market_acquisition_calls": 0,
+  "environment_limits": [
+    "CIM hardware queries: Access denied; CPU registry identifier available; no invented RAM measurement",
+    "No 39 other symbols; AVGO M30 lacks 26 eligible bars for 100 terminals",
+    "Unknown historical source availability and current-QFQ adjustment epoch"
+  ]
+}

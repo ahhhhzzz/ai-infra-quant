@@ -1,0 +1,49 @@
+{
+  "hardware": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.14",
+  "timing_includes_tracemalloc": true,
+  "scope": "full bounded evaluate including canonical serialization and hashing",
+  "complexity": "ATR/pivots O(N); complete-link O(P^2); repeated merge worst O(P^3); range O(Z^2*(L+P)); no unbounded calculation history",
+  "cases": [
+    {
+      "timeframe": "W1",
+      "bars": 130,
+      "repeats": 10,
+      "fixture": "SYNTHETIC triangular period 24, no return optimization",
+      "p50_ms": "234.5106",
+      "p95_ms_nearest_rank": "303.8223",
+      "tracemalloc_peak_bytes": 236877,
+      "pivot_count": 10,
+      "zone_candidates": 0,
+      "comparisons": {}
+    },
+    {
+      "timeframe": "D1",
+      "bars": 312,
+      "repeats": 10,
+      "fixture": "SYNTHETIC triangular period 24, no return optimization",
+      "p50_ms": "641.3839499999999",
+      "p95_ms_nearest_rank": "738.7547",
+      "tracemalloc_peak_bytes": 558347,
+      "pivot_count": 25,
+      "zone_candidates": 2,
+      "comparisons": {
+        "pair_distance": 100,
+        "range_pairs": 2
+      }
+    },
+    {
+      "timeframe": "M30",
+      "bars": 200,
+      "repeats": 10,
+      "fixture": "SYNTHETIC triangular period 24, no return optimization",
+      "p50_ms": "381.7842",
+      "p95_ms_nearest_rank": "449.236",
+      "tracemalloc_peak_bytes": 360734,
+      "pivot_count": 16,
+      "zone_candidates": 0,
+      "comparisons": {}
+    }
+  ]
+}

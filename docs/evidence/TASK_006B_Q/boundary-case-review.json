@@ -1,0 +1,188 @@
+{
+  "real_scope": "one observational AVGO capture; not broad market acceptance",
+  "material_left_only_count": 12,
+  "direct_bull_bear_flips": 0,
+  "cases": [
+    {
+      "timeframe": "W1",
+      "cutoff": "2025-05-30T20:00:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "UNCERTAIN",
+      "both_regime": "UNCERTAIN",
+      "old_latest": {
+        "kind": "HIGH",
+        "price": "88.441074928",
+        "extreme_end": "2023-06-02T20:00:00.000000Z",
+        "confirmation_end": "2023-06-09T20:00:00.000000Z"
+      },
+      "both_latest": null,
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "W1",
+      "cutoff": "2025-08-15T20:00:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "UNCERTAIN",
+      "both_regime": "UNCERTAIN",
+      "old_latest": null,
+      "both_latest": {
+        "kind": "LOW",
+        "price": "136.773560962",
+        "extreme_end": "2025-04-11T20:00:00.000000Z",
+        "confirmation_end": "2025-04-25T20:00:00.000000Z"
+      },
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "W1",
+      "cutoff": "2025-08-22T20:00:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "UNCERTAIN",
+      "both_regime": "UNCERTAIN",
+      "old_latest": {
+        "kind": "LOW",
+        "price": "136.773560962",
+        "extreme_end": "2025-04-11T20:00:00.000000Z",
+        "confirmation_end": "2025-04-25T20:00:00.000000Z"
+      },
+      "both_latest": null,
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "W1",
+      "cutoff": "2025-08-29T20:00:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "UNCERTAIN",
+      "both_regime": "UNCERTAIN",
+      "old_latest": null,
+      "both_latest": {
+        "kind": "LOW",
+        "price": "136.773560962",
+        "extreme_end": "2025-04-11T20:00:00.000000Z",
+        "confirmation_end": "2025-04-25T20:00:00.000000Z"
+      },
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "D1",
+      "cutoff": "2026-08-03T20:00:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "UNCERTAIN",
+      "both_regime": "UNCERTAIN",
+      "old_latest": {
+        "kind": "HIGH",
+        "price": "304.716304848",
+        "extreme_end": "2025-07-31T20:00:00.000000Z",
+        "confirmation_end": "2025-08-01T20:00:00.000000Z"
+      },
+      "both_latest": null,
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "M30",
+      "cutoff": "2026-09-01T16:00:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "UNCERTAIN",
+      "both_regime": "BEAR_TREND",
+      "old_latest": null,
+      "both_latest": {
+        "kind": "LOW",
+        "price": "362",
+        "extreme_end": "2026-09-01T14:00:00.000000Z",
+        "confirmation_end": "2026-09-01T15:00:00.000000Z"
+      },
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "M30",
+      "cutoff": "2026-09-01T16:30:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "BEAR_TREND",
+      "both_regime": "UNCERTAIN",
+      "old_latest": {
+        "kind": "LOW",
+        "price": "362",
+        "extreme_end": "2026-09-01T14:00:00.000000Z",
+        "confirmation_end": "2026-09-01T15:00:00.000000Z"
+      },
+      "both_latest": null,
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "M30",
+      "cutoff": "2026-09-02T17:00:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "UNCERTAIN",
+      "both_regime": "UNCERTAIN",
+      "old_latest": null,
+      "both_latest": {
+        "kind": "LOW",
+        "price": "367.78",
+        "extreme_end": "2026-09-01T19:00:00.000000Z",
+        "confirmation_end": "2026-09-01T19:30:00.000000Z"
+      },
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "M30",
+      "cutoff": "2026-09-04T18:00:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "BULL_TREND",
+      "both_regime": "UNCERTAIN",
+      "old_latest": {
+        "kind": "HIGH",
+        "price": "360.3",
+        "extreme_end": "2026-09-04T14:00:00.000000Z",
+        "confirmation_end": "2026-09-04T15:30:00.000000Z"
+      },
+      "both_latest": null,
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "M30",
+      "cutoff": "2026-09-04T18:30:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "UNCERTAIN",
+      "both_regime": "BULL_TREND",
+      "old_latest": null,
+      "both_latest": {
+        "kind": "HIGH",
+        "price": "360.3",
+        "extreme_end": "2026-09-04T14:00:00.000000Z",
+        "confirmation_end": "2026-09-04T15:30:00.000000Z"
+      },
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "M30",
+      "cutoff": "2026-09-08T17:00:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "BULL_TREND",
+      "both_regime": "UNCERTAIN",
+      "old_latest": {
+        "kind": "HIGH",
+        "price": "372.6999",
+        "extreme_end": "2026-09-08T15:30:00.000000Z",
+        "confirmation_end": "2026-09-08T16:30:00.000000Z"
+      },
+      "both_latest": null,
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    },
+    {
+      "timeframe": "M30",
+      "cutoff": "2026-09-08T18:00:00+00:00",
+      "classification": "LEFT_ONLY",
+      "old_regime": "UNCERTAIN",
+      "both_regime": "BULL_TREND",
+      "old_latest": null,
+      "both_latest": {
+        "kind": "HIGH",
+        "price": "372.6999",
+        "extreme_end": "2026-09-08T15:30:00.000000Z",
+        "confirmation_end": "2026-09-08T16:30:00.000000Z"
+      },
+      "review": "Confirmed OLD=RIGHT and LEFT=BOTH; left seed/eligibility change suffices to replace last pivot. Operational attribution only; no smoothing or parameter tuning; semantic adoption pending."
+    }
+  ],
+  "semantic_adoption": "NOT_RECOMMENDED_PENDING_BROADER_DATA_AND_OWNER_REVIEW"
+}
