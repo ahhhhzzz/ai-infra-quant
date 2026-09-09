@@ -1,6 +1,7 @@
 # API Contracts
 
-Status: **AUTHORITATIVE — TASK-007A integrated; TASK-007B Analyze/Decision Ledger independently accepted**
+Status: current API at `722936984deac652b443eba132c69650653345e1`; Narrative-first default.
+Architecture and lifecycle: [ARCHITECTURE](ARCHITECTURE.md).
 
 Decision: `MTF-001` in `docs/ROADMAP.md`
 
@@ -12,8 +13,8 @@ Base path: `/api/v1`
 
 Phase 1 routes remain accepted exactly as implemented. This document describes the implemented
 read-only market-data routes, Dashboard client, TASK-006A supported-security/input workflow, and
-the TASK-006B structure snapshot, and independently accepted TASK-007B on-demand PAQS-E
-analysis/evidence APIs, plus later separately approved directions.
+the retained TASK-006B structure snapshot, current Narrative APIs and Legacy structured reads.
+C2 UI cleanup does not delete foundation compatibility routes.
 
 No API may connect to a brokerage account; read/import real-account cash, positions, orders, or
 trades; match real-account state; or transmit a broker operation.
@@ -23,7 +24,7 @@ trades; match real-account state; or transmit a broker operation.
 - `/api/v1` remains the compatibility boundary.
 - Schemas are independent of ORM and provider SDK types.
 - UUIDs are lowercase canonical strings.
-- Instants are UTC `Z` strings; sessions also carry market-local date/timezone/calendar.
+- Instants are aware UTC strings (`Z` or `+00:00` as serialized by the route); sessions also carry market-local date/timezone/calendar.
 - Financial Decimal values serialize as strings; JSON floats are rejected.
 - Missing numeric facts are `null` plus explicit status/reason, never fabricated zero.
 - Responses distinguish source event time, retrieval time, polling cadence, and source latency.
@@ -35,25 +36,10 @@ trades; match real-account state; or transmit a broker operation.
 
 ## 2. Common market-time model
 
-Future market/score responses distinguish at minimum:
-
-```json
-{
-  "latest_quote_at": "2026-09-01T14:35:12Z",
-  "latest_completed_minute_bar_at": "2026-09-01T14:35:00Z",
-  "latest_completed_daily_session": "2026-08-31",
-  "score_calculated_at": "2026-09-01T14:35:15Z",
-  "polling_interval_seconds": 60,
-  "provider_delay_seconds": 900,
-  "data_status": "DELAYED"
-}
-```
-
-`polling_interval_seconds` is local cadence; `provider_delay_seconds` describes source latency.
-They are not interchangeable.
-
-Availability/status values include explicit `AVAILABLE`, `DELAYED`, `STALE`, `MISSING`,
-`UNAVAILABLE`, `NOT_ENTITLED`, `PROVIDER_ERROR`, `NOT_SUPPORTED`, and `INVALID` semantics.
+Market responses distinguish quote time, latest completed minute, latest completed daily session,
+retrieval time, polling cadence and provider delay; consult each route's schema rather than assuming
+one aggregate payload. `polling_interval_seconds` and `provider_delay_seconds` are not interchangeable.
+Scores/rankings remain deferred and no current `score_calculated_at` endpoint is implied.
 
 ## 3. Phase availability
 
@@ -65,7 +51,8 @@ Defining a future direction does not expose a route.
 | TASK-004 market state and daily/minute bars | 2 | Available from TASK-004 |
 | TASK-006A supported-security add and PAQS input diagnostics | 2 | Available from TASK-006A |
 | TASK-006B current PAQS structure snapshot | 2 | Available from TASK-006B |
-| TASK-007B explicit PAQS-E Analyze and immutable analysis/Decision reads | 2 | Independently accepted at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3` |
+| Current Narrative Analyze/history and model/credential configuration | 2 | Registered by C1; see below |
+| Legacy structured reads / old POST | 2 | Reads retained; POST normally 410, hidden from OpenAPI |
 | Aggregate dashboard refresh and first approved score/ranking/risk state | 2 | Ordinary 404 |
 | Expanded research and simulated paper tracking | 3 | Ordinary 404 |
 | Backtest and analytics | 4 | Ordinary 404 |
@@ -123,9 +110,9 @@ responses. All responses use `Cache-Control: no-store`.
 
 ### 5.1 Independent Market Data Provider status
 
-A provider-status response must report configuration/capability, entitlement, US/HK coverage,
-source delay, last success, last error, and freshness without exposing secrets. Market-data status
-contains no brokerage-account concept.
+Provider descriptor reads report implemented capability/configuration status without connecting.
+Per-security market responses carry actual availability/delay/provenance. A descriptor does not
+prove entitlement or connectivity and contains no brokerage-account state.
 
 TASK-003 selected Futu OpenD quote-market-data APIs. TASK-004 makes provider modes `none` and
 `futu` available at the application composition boundary; `none` is the safe default.
@@ -237,231 +224,115 @@ calculation and returns explicit `UNCERTAIN` structure rather than fabricated nu
 The route contains no event, setup, risk/reward, advisory, score, ranking, persistence, account, or
 execution behavior.
 
-### 5.8 Composite Quant Score
+### 5.8 Current Snapshot
 
-The response architecture is:
+`GET /api/v1/paqs/securities/{security_id}/market-snapshot` returns the current
+TASK-006B2 Snapshot with canonical hash, cutoff, completed W1/D1/M30 and truthful source quality.
+It is not an arbitrary historical As-Of query. See the actual
+[PAQS routes](../src/ai_infra_quant/backend/api/v1/paqs_market_snapshot.py) and Snapshot schemas.
 
-```json
-{
-  "security_id": "uuid",
-  "daily_base_score": null,
-  "intraday_minute_adjustment": null,
-  "composite_quant_score": null,
-  "latest_completed_daily_session": "2026-08-31",
-  "latest_completed_minute_bar_at": "2026-09-01T14:35:00Z",
-  "score_calculated_at": "2026-09-01T14:35:15Z",
-  "coverage_status": "UNAVAILABLE",
-  "missing_components": [],
-  "explanation": null,
-  "risk_flags": [],
-  "dataset_hash": null
-}
-```
+## 6. PAQS-E Narrative API
 
-Nulls above demonstrate truthful unavailability and are not an implemented payload. Formulae,
-weights, thresholds, bands, normalization, sizing, and classification vocabulary require a
-separate strategy Task Contract. No output indicates whether the user traded.
+Source authority: [paqs_e.py](../src/ai_infra_quant/backend/api/v1/paqs_e.py) `analyze_narrative`,
+`get_narrative_run`, `get_narrative_result`, `narrative_history`, and
+[AnalyzeCreate](../src/ai_infra_quant/backend/schemas/paqs_e.py).
 
-### 5.9 TASK-007A is not an API contract
-
-TASK-007A adds a provider-neutral internal PAQS-E request/result contract, registered strategy and
-runtime-prompt resources, deterministic result validation, and one OpenAI Responses API adapter.
-It intentionally registers no Analyze route and changes no OpenAPI operation. The API key remains
-server-side environment configuration and cannot be accepted from or returned to a client.
-
-TASK-007B separately adopts this runtime for the public contract below. Dashboard Analyze workflow
-and model/strategy selector widgets remain TASK-007C work. Provider failures in the internal port
-are typed as configuration error, provider
-unavailable, provider refusal, or invalid structured output; TASK-007A does not fabricate an API
-response or strategy answer around those failures.
-
-### 5.10 TASK-007B current Analyze and immutable Decision Ledger
-
-Implementation status: **independent review PASS** at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`. These APIs support TASK-007C; no
-Dashboard Analyze UI is added.
-
-```text
-POST /api/v1/paqs-e/analyses
-GET  /api/v1/paqs-e/analyses/{analysis_run_id}
-GET  /api/v1/paqs-e/decisions/{decision_id}
-GET  /api/v1/paqs-e/securities/{security_id}/decisions
-```
-
-TASK-007C1 supersedes the old three-field input. The POST body has exactly
-`security_id` (canonical Security UUID), `model_key` (enabled repository registry entry),
-`strategy_id` (registered primary strategy), and `web_research` (required strict boolean).
-Unknown fields, arbitrary `model_id`, provider, URL, credentials, prompt overrides and caller
-As-Of cutoffs are rejected. The server resolves the actual provider/model identity and freezes
-research evidence when requested; those identities and evidence enter the existing capsule.
-
-Each explicit POST acquires one fresh current TASK-006B2 immutable snapshot through the application
-query boundary and makes one TASK-007A reasoning attempt. Repeated identical selections and
-snapshot hashes are never deduplicated. The POST returns success only after runtime artifacts,
-one `SUCCEEDED` Analysis Run and its Decision commit atomically. The response includes
-`analysis_run_id`, `decision_id`, `revision_no`, `snapshot_hash`, `snapshot_as_of_timestamp`,
-`model_id`, `strategy_id`, `strategy_content_sha256`, `status=SUCCEEDED`, and the full structured
-`result`.
-
-A complete request that encounters provider/configuration failure first commits one
-`PROVIDER_FAILED` Analysis Run, then returns a non-2xx problem containing its `analysis_run_id`,
-status, and exact typed `failure_kind`: `CONFIGURATION_ERROR`, `PROVIDER_UNAVAILABLE`,
-`PROVIDER_REFUSAL`, or `INVALID_STRUCTURED_OUTPUT`. Deterministic rejection similarly commits one
-`VALIDATION_FAILED` run and returns a non-2xx problem with run identity, validator version and
-exact validation issues. Neither failure creates or returns a Decision. Security/snapshot
-precondition failure before a complete request exists preserves existing truthful error semantics
-and creates no fabricated run. A failed success transaction rolls back and returns a persistence
-error without a successful run/Decision pair.
-
-The problem envelope retains integer HTTP `status`. Ledger status is available as
-`analysis_status` and as `analysis_run.status`; the nested `analysis_run` also carries the safe
-run ID, typed failure kind, validator version and validation issues.
-
-| HTTP | Code | Condition |
-|---:|---|---|
-| 503 | `PAQS_E_PROVIDER_FAILED` | `CONFIGURATION_ERROR` or `PROVIDER_UNAVAILABLE` |
-| 502 | `PAQS_E_PROVIDER_FAILED` | `PROVIDER_REFUSAL` or `INVALID_STRUCTURED_OUTPUT` |
-| 502 | `PAQS_E_VALIDATION_FAILED` | Deterministic TASK-007A validation rejection |
-| 422 | `PAQS_E_RUNTIME_PACKAGE_UNAVAILABLE` | Unregistered/unloadable strategy or prompt package |
-| 422 | `PAQS_E_ANALYSIS_PRECONDITION_FAILED` | Complete reasoning request cannot be constructed |
-| 500 | `PAQS_E_LEDGER_ERROR` | Persistence failure or corrupt stored audit evidence |
-
-Security/snapshot errors retain `404 SECURITY_NOT_FOUND`, `409 SECURITY_METADATA_CONFLICT`, and
-`422 PAQS_MARKET_SNAPSHOT_SECURITY_NOT_SUPPORTED` where applicable. Schema-invalid request input
-returns the project's validation error response before analysis dispatch.
-
-Analysis Run reads expose terminal status, Security/snapshot identity, model/strategy/prompt/runtime
-and available validator metadata, exact canonical request evidence and SHA-256, safe provider
-response identity, typed failure/validation evidence, and aware-UTC timestamps. Decision reads
-expose revision/supersedes identity, Security/snapshot/As-Of and runtime metadata, the full
-structured result and its SHA-256, and creation time. Missing IDs return 404.
-
-Security Decision history is newest first, accepts `limit` in 1..100 (default 20), and optionally
-filters `strategy_id`. Summary fields are direct copies of the validated result. Revision series
-are keyed by `(security_id, strategy_id)`: revision 1 has no predecessor, and each later successful
-Analyze supersedes the immediately preceding revision. Model or strategy-content-hash changes
-continue the same strategy series; a different strategy ID starts its own series.
-
-Request/result hashes bind exact canonical UTF-8 JSON text, preserving Decimal strings and aware
-UTC. Readback verifies hashes and result summary consistency before exposing evidence. No API
-returns credentials, environment dumps, raw exception traces, or request headers. Ledger records
-have no UPDATE/DELETE API. History never supplies hidden model memory, and market-data/Dashboard
-refresh never triggers Analyze.
-
-### 5.11 TASK-007C1 model catalog and local credentials
-
-`GET /api/v1/paqs-e/configuration` returns `default_model_key`, the flat `models` array,
-`default_strategy_id` and actual registered `strategies`. Each model has exactly `model_key`,
-`display_name`, `credential_label`, `credential_configured`, and `web_research_supported`.
-The service label appears only in the credential dialog. No endpoint, secret fragment, path,
-prompt or strategy body is exposed. Model entries come from the single repository JSON registry.
-Strategy metadata still uses the accepted loader. GET makes zero provider calls and application
-writes. Credential presence is dynamic; strategy metadata remains restart-scoped.
-
-Model-centric credential endpoints:
-
-- `GET /api/v1/paqs-e/credentials/{model_key}`: status only.
-- `PUT /api/v1/paqs-e/credentials/{model_key}`: JSON `{ "secret": "<user-entered key>" }`.
-- `DELETE /api/v1/paqs-e/credentials/{model_key}`: JSON `{}`.
-
-All return only `credential_configured`, `credential_source` (`secure_store`,
-`server_environment_read_only`, or `missing`) and `secure_storage_available`. Keys are write-only.
-Mutations require the literal same Origin as the loopback request, JSON content type, and absent
-or same-origin Fetch Metadata. Host and peer must be loopback; query parameters are rejected.
-The secret is bounded to 1–1024 non-whitespace ASCII characters, represented as `SecretStr` at the
-API boundary. Unknown keys/fields cannot create arbitrary credential slots. Windows Credential
-Manager is the only production store; unavailable storage returns safe 503. An optional existing
-OpenAI server environment fallback is read-only; deleting a stored key does not remove that fallback.
-
-Requested research that cannot form a complete auditable capsule returns 422
-`PAQS_E_RESEARCH_PRECONDITION_FAILED` with one of the accepted typed `failure_kind` values,
-without a Run ID or Decision. Reasoning failures after capsule construction retain section 5.10
-persistence semantics. No automatic retries, provider/model substitutions, hidden follow-up searches,
-or automatic analysis are performed. See `PAQS_E_MODELS.md` for exact routes, bounds and limitations.
-
-## 6. Phase 3 research and simulated paper direction
-
-Later approved APIs may expose richer factor/risk analytics, signal history, simulated portfolios,
-PaperOrder/PaperFill research records, and paper performance. Every paper record is labelled
-simulated, has no external account/order identifier, and cannot contact a broker. Paper positions
-update only from confirmed PaperFill facts.
-
-## 7. Phase 4 backtest and analytics direction
-
-Future backtest requests/results may select historical daily data, strategy/parameter version,
-transaction-cost assumptions, calendar, benchmark, and date range. Results expose reproducibility
-hashes, before/after-cost return, drawdown, volatility, turnover, attribution, exposure,
-diagnostics, strategy comparison, parameter analysis, and warnings.
-
-Daily-bar backtesting is baseline. Current-session minute display does not make historical minute
-replay or tick-level simulation an API requirement.
-
-## 8. Permanent endpoint exclusions
-
-Forbidden endpoint concepts include:
-
-- brokerage-account discovery, cash, positions, orders, trades, imports, synchronization, or
-  matching/discrepancy workflows;
-- any `/live` or real-order submission route;
-- endpoints mapped to `place_order`, `cancel_order`, or `modify_order`;
-- trade-password unlock, buying-power reservation, execution retry/recovery/worker/kill-switch;
-- autonomous or unattended trading;
-- recommendation acknowledgement that triggers another operation.
-
-Read-only minute market data and intraday score recalculation are allowed analysis endpoints when
-separately implemented; they are not execution.
-
-## 9. Error semantics
-
-Representative future stable codes may include:
-
-| HTTP | Codes | Meaning |
-|---:|---|---|
-| 400 | `MALFORMED_REQUEST` | Invalid protocol |
-| 404 | `RESOURCE_NOT_FOUND`, `ROUTE_NOT_AVAILABLE` | Missing resource or unregistered phase route |
-| 409 | `IDEMPOTENCY_CONFLICT`, `STALE_VERSION` | State/provenance conflict |
-| 422 | `INVALID_DECIMAL`, `INVALID_SESSION`, `INCOMPLETE_MINUTE_BAR`, `SECURITY_NOT_VERIFIED`, `UNSUPPORTED_OPERATION` | Invalid or unsupported input |
-| 502 | `PROVIDER_ERROR` | Independent market-data source failure/invalid response |
-| 503 | `DATABASE_NOT_READY`, `PROVIDER_UNAVAILABLE`, `MARKET_DATA_STALE` | Required local/read-only input unavailable |
-
-Provider-read retry is bounded and read-only. No uncertainty can create an external write.
-
-## 10. Contract-test direction
-
-Phase-relevant tests must prove:
-
-- the OpenAPI allowlist expands only through approved task routes;
-- future routes are absent before approval;
-- Decimal strings, UTC, explicit missing states, and stable errors;
-- daily and minute series remain separate;
-- only completed minute bars inside the requested bounded window are returned;
-- latest quote and daily close cannot be conflated;
-- polling cadence and provider latency are distinct;
-- no overlapping client polling, hidden-page pause, visible-page refresh, manual refresh/countdown;
-- score provenance exposes all four required time semantics;
-- paper records remain simulated;
-- no route or schema represents brokerage-account access or a broker write.
-
-### TASK-007C1 Remediation 02 normal narrative API (supersedes strict POST)
-
-New explicit Analyze is `POST /api/v1/paqs-e/narrative-analyses`, accepting exactly the existing
-four required fields: `security_id`, `model_key`, `strategy_id`, `web_research`. It returns 201 only
-following commit of one successful Narrative Run and Result. The response includes `status=SUCCEEDED`,
-`narrative_result_id`, `narrative_run_id`, full frozen model/strategy/Snapshot identity, narrative
-revision/predecessor, exact `response_text`, `response_text_sha256`, research flag and created time.
-Final prose is not JSON-schema-constrained or semantically validated.
-
-| Method/path | Behavior |
+| Method/path under `/api/v1/paqs-e` | Current behavior |
 |---|---|
-| GET `/api/v1/paqs-e/narrative-analyses/{run_id}` | Known immutable Run with full canonical request/hash and safe terminal evidence |
-| GET `/api/v1/paqs-e/narrative-results/{result_id}` | Exact persisted final text and audit identity |
-| GET `/api/v1/paqs-e/securities/{security_id}/narrative-results` | Newest first; `limit` 1..100, default 20; optional bounded strategy filter; metadata and first 160 Unicode characters as inert preview, no full text |
+| POST `/narrative-analyses` | Explicit current Analyze; 201 only after successful Run/Result commit |
+| GET `/narrative-analyses/{run_id}` | Immutable terminal Run, canonical request/hash, frozen identity and safe outcome |
+| GET `/narrative-results/{result_id}` | Exact persisted text/hash, identity, revision and predecessor |
+| GET `/securities/{security_id}/narrative-results` | Newest-first successful history, limit 1..100 default 20, optional strategy filter; metadata plus first 160 Unicode characters as preview |
 
-Configuration/unavailable failures return 503; refusal/incomplete/invalid-final-text return 502.
-The problem includes `narrative_run_id`, `analysis_status=PROVIDER_FAILED` and `failure_kind`.
-Preconditions/research failure produce no fabricated Run or Result; ledger failure is a safe 500.
-No new narrative response uses `VALIDATION_FAILED` or `INVALID_STRUCTURED_OUTPUT`.
+The POST body has exactly four required fields: canonical `security_id`, registered `model_key`,
+registered `strategy_id`, strict boolean `web_research`. Unknown fields and caller-supplied provider,
+URL, secret, arbitrary model ID, prompt or As-Of override are rejected. Research defaults OFF in
+the UI; the API requires an explicit boolean. A fresh Snapshot and optional accepted research form
+the canonical request. No prior history is hidden input and no automatic POST retry occurs.
 
-Legacy structured `POST /api/v1/paqs-e/analyses` returns 410 by default and is absent from OpenAPI.
-Only explicit in-process legacy regression construction can enable it; no environment/API/UI switch
-exists. All original structured GET reads remain unchanged. Earlier strict-output lifecycle descriptions
-in this document now describe legacy evidence only. No PUT/PATCH/DELETE ledger mutations are added.
+201 includes `status=SUCCEEDED` and the complete Narrative Result: Run/Result IDs, exact
+`response_text`/hash, provider/model, Security/Snapshot/As-Of, strategy/prompt artifact identities,
+versions, revision/predecessor, research boolean and creation time. No schema-derived PAQS-E result
+fields or semantic validator success are implied. Run identity fields are defined in
+[NarrativeIdentity](../src/ai_infra_quant/core/domain/paqs_e_narrative.py).
+
+| HTTP / code | Meaning / evidence |
+|---|---|
+| 404 `SECURITY_NOT_FOUND` | Missing Security before reasoning; no fabricated Run |
+| 409 `SECURITY_METADATA_CONFLICT` | Stored identity conflict before reasoning |
+| 422 `PAQS_E_NARRATIVE_PRECONDITION_FAILED` | Unsupported Security/package/model/request cannot form a valid request |
+| 422 `PAQS_E_RESEARCH_PRECONDITION_FAILED` | Requested research failed; no final Narrative call or Run/Result; typed research failure and optional safe diagnostic |
+| 503 `PAQS_E_NARRATIVE_PROVIDER_FAILED` | Complete request recorded as failed Run: `CONFIGURATION_ERROR` or `PROVIDER_UNAVAILABLE` |
+| 502 `PAQS_E_NARRATIVE_PROVIDER_FAILED` | Complete request recorded as failed Run: `PROVIDER_REFUSAL`, `PROVIDER_INCOMPLETE`, `INVALID_FINAL_TEXT` |
+| 500 `PAQS_E_LEDGER_ERROR` | Evidence cannot commit or verify; no claimed success |
+
+Provider-failure problems include `narrative_run_id`, `analysis_status=PROVIDER_FAILED`,
+`failure_kind`; Problem `status` stays numeric HTTP status. Research retains its existing
+research failure taxonomy (including `INVALID_STRUCTURED_OUTPUT`), distinct from final Narrative
+failure kinds. Invalid request schemas are rejected before dispatch. Missing read IDs return
+`NARRATIVE_RUN_NOT_FOUND` / `NARRATIVE_RESULT_NOT_FOUND`; corrupt evidence returns safe ledger error.
+No ledger UPDATE/DELETE, failed-run search, background job, cancel or retry endpoint exists.
+
+DeepSeek's optional `research_diagnostic` is allowlisted by
+[ResearchDiagnostic](../src/ai_infra_quant/application/paqs_e_research.py): stage/class, registered
+route, safe response identity/status, request count, action/search/message and bounded optional
+counts, plus parser boundary code. It contains no provider body, query/source text, memo, secret or
+reasoning and is not persisted. See [research architecture](ARCHITECTURE.md#5-optional-research-and-provenance).
+
+## 7. Configuration and local credentials
+
+`GET /api/v1/paqs-e/configuration` returns `default_model_key`, flat `models`,
+`default_strategy_id`, registered `strategies`. Each model exposes only `model_key`, `display_name`,
+`credential_label`, `credential_configured`, `web_research_supported`. No secret or editable endpoint
+is returned. GET performs no provider call/application write; credential presence is dynamic,
+strategy configuration is restart-scoped. Unavailable configuration returns safe 503.
+
+| Method/path | Body / response |
+|---|---|
+| GET `/api/v1/paqs-e/credentials/{model_key}` | Status only |
+| PUT same path | JSON object with write-only `secret` |
+| DELETE same path | Empty JSON object `{}` |
+
+Responses contain only `credential_configured`, `credential_source` (`secure_store`,
+`server_environment_read_only`, `missing`), `secure_storage_available`. Registered models sharing
+a slot share status. Presence is not a connection/balance/permission test. The password form does
+submit the secret; reads never echo it. Windows Credential Manager is the only production store.
+Stored credentials take precedence over OpenAI's optional read-only environment fallback;
+deleting the slot leaves that fallback intact. Unavailable OS storage has no plaintext fallback.
+
+Host and peer must be loopback; query parameters are rejected. Mutations require literal matching
+Origin, JSON content type, absent/same-origin Fetch Metadata and a bounded request body. The secret
+is a `SecretStr`, 1–1024 non-whitespace ASCII characters. Invalid model/value yields safe 422;
+store failure safe 503. Boundary violations retain 400/403/413 behavior. No database/ledger/log or
+browser-storage secret persistence. See [model guide](PAQS_E_MODELS.md).
+
+## 8. Legacy structured compatibility
+
+| Method/path under `/api/v1/paqs-e` | Behavior |
+|---|---|
+| POST `/analyses` | Normally 410 `PAQS_E_STRUCTURED_ANALYZE_DISABLED`; absent from OpenAPI |
+| GET `/analyses/{analysis_run_id}` | Original terminal structured Run and validator evidence |
+| GET `/decisions/{decision_id}` | Original validated structured result and immutable identity |
+| GET `/securities/{security_id}/decisions` | Original bounded newest-first Decision history, limit 1..100 default 20, optional strategy filter |
+
+The explicit `create_app(legacy_analysis_enabled=True)` switch is for in-process regression
+fixtures only, with no user/env/API setting. Legacy success/`VALIDATION_FAILED`/provider-failure
+semantics and the validator are retained. Legacy and Narrative revisions do not share counters;
+no historical records are rewritten. See [Legacy review](reviews/TASK_007B_INDEPENDENT_REVIEW.md)
+for that implementation's original contract, and [DATABASE_SCHEMA](DATABASE_SCHEMA.md) for storage.
+
+## 9. Deferred and forbidden routes
+
+No current market archive/replay/006B1, strict historical As-Of/GoldSet, score/ranking, PAQS-Q
+successor, 007D comparison, PaperOrder/PaperFill/performance or backtest endpoint is introduced.
+Future scope requires its own approved contract. Broker accounts, real cash/positions/trades,
+import/synchronization, order submission/cancellation/modification and autonomous execution are
+permanently excluded. Inert foundation descriptors are not broker connectivity.
+
+## 10. Verification references
+
+[API surface tests](../tests/integration/test_api_surface.py),
+[Narrative ledger/API tests](../tests/integration/test_paqs_e_narrative_ledger_api.py),
+[model/credential API tests](../tests/integration/test_paqs_e_multi_model.py) and
+[partial-action API tests](../tests/integration/test_paqs_e_partial_actions_api.py) provide
+existing executable specifications. ADC inspects these sources without claiming a new runtime run.

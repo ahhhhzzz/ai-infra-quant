@@ -1,37 +1,14 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
-## Current delivery status — 2026-09-08
+## Current delivery status — 2026-09-09
 
-TASK-007A, TASK-007B and TASK-007C are accepted and integrated. TASK-007C1 is
-**USER_ACCEPTED / FUNCTIONALLY_CLOSED**, including the user's Research-ON confirmation.
-The authorized ordinary fast-forward of `roadmap/no-live-trading` from
-`0c1713d4409c69a45f8ce5e37951bba72d73d819` to
-`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4` has been executed and read back from GitHub.
-The integrated application is the reviewed `3e98d8c5f9948dcaefe59eb3b7b847bd99ba8908` tree,
-plus the independent review and user closeout documents. See the immutable
-[R06 review](reviews/TASK_007C1_REMEDIATION_06_INDEPENDENT_REVIEW.md) and
-[user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md) for evidence attribution.
-User acceptance is not a claim that the C2 implementer repeated paid provider tests or
-independently recomputed the user's local Run hashes. Historical pending/not-merged statements
-in original contracts, reports and reviews describe their original checkpoints and remain unchanged.
+C1/C2 and ADC-001 are accepted and integrated. ADC-001 passed focused re-review at
+`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; all runtime code remains unchanged.
+TASK-006B1 is the next authorized implementation under its original scope and updated handoff.
+Exact SHAs, current sequence and evidence attribution are in [ROADMAP](ROADMAP.md).
+[ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
-TASK-007C2 is **implemented / pending independent review** on its task branch; it is not
-independently passed or integrated. Its bounded change repairs the credential dialog and removes
-the old opening portfolio cards and duplicate administration UI. The main watchlist, market
-quality/provenance, history and frozen evidence remain available. Backend compatibility APIs,
-existing databases, opening seed values and migrations 0001/0002/0003 are preserved; head remains
-`0003_task007c1_narrative_ledger`. See the [C2 report](reports/TASK_007C2_IMPLEMENTATION_REPORT.md).
-
-The normal explicit Analyze path is Narrative-first: one immutable Snapshot, optional bounded
-research, tool-free final reasoning, and exact final text persisted in the Narrative Ledger.
-Saving complete prose does not certify strategy semantics, Entry/Holder judgments or RR by machine.
-The legacy structured validator is unchanged and historical structured Runs/Decisions remain readable.
-Research defaults OFF and resets OFF on model changes. Refresh, credentials and history never Analyze.
-The product remains a read-only market and decision-support terminal, without initial asset cards
-in its normal UI. Paper/PaperFill, performance statistics, TASK-006B1, PAQS-Q successors, TASK-007D,
-and Phase 3/4 are not activated by this work; broker/account/trading capabilities remain forbidden.
-
-Status: **AUTHORITATIVE — PAQS-E Snapshot-on-Demand MVP; TASK-007A/B/C integrated; TASK-007C1 user-accepted/integrated; TASK-007C2 pending review**
+Status: **AUTHORITATIVE — PAQS-E Snapshot-on-Demand MVP; TASK-007A/B/C integrated; TASK-007C1 user-accepted/integrated; TASK-007C2 integrated; ADC-001 reviewed/integrated; 006B1 authorized next**
 
 Superseding future-scope decisions:
 
@@ -69,7 +46,7 @@ The committed MVP should let the user:
 - read model-generated Narrative analysis and separately retained legacy structured context/levels/RR;
 - retain the historical deterministic PAQS structure implementation as PAQS-Q reference work;
 - receive conditional Entry and Holder advisory;
-- review immutable analysis evidence and Decision revisions;
+- review immutable Narrative evidence/revisions and Legacy Decisions;
 - add later product capabilities only through the R20 adoption record and bounded contracts.
 
 All real trading is performed manually in the broker's official client.
@@ -117,10 +94,10 @@ Ordinary HTTP/REST remains sufficient for the local MVP; no streaming execution 
 - accepted TASK-006B2 factual snapshots and TASK-007A structured PAQS-E runtime;
 - accepted/integrated TASK-007B immutable structured evidence and TASK-007C workbench;
 - accepted/integrated TASK-007C1 Narrative-first analysis, secure models and optional research;
-- implemented TASK-007C2 credential layout and administration cleanup, pending independent review;
+- accepted/integrated TASK-007C2 credential layout and administration cleanup;
 - conditional Entry/Holder advisory;
 - lightweight explanation/reason codes;
-- immutable Decision history; optional Quality/Ranking only under a separate approved contract;
+- immutable Narrative history and Legacy Decision reads; optional Quality/Ranking only under a separate approved contract;
 - user/engineering documentation for PAQS.
 
 ### Optional future extensions, not committed MVP work
@@ -168,47 +145,21 @@ Read-only market analysis and conditional advisory are research capabilities, no
 10. Every implementation task is separately approved, tested, reviewed and stopped.
 11. Product-scope reduction must not justify coupling PAQS to one provider or hard-coded symbol set.
 
-## 5. Target architecture
+## 5. Current architecture
 
-```text
-Browser
-  -> local FastAPI presentation
-      -> application use cases
-          -> market-data queries
-          -> supported-security/watchlist administration
-          -> PAQS input/session/calendar preparation
-          -> explicit PAQS-E Analyze -> optional research -> tool-free Narrative provider
-          -> immutable Narrative Run / exact-text Result and user-requested history
-          -> legacy structured Run / Decision reads with unchanged historical validator
-          -> separately scoped PAQS-Q reference work
-              -> SQLite only where approved persistence exists
-
-Independent read-only Market Data Provider
-  -> provider adapter under integrations/
-      -> canonical quotes, Daily bars, completed minute bars,
-         market status and approved calendar/security metadata
-
-Human boundary
-  advisory display -> user -> broker official client
-```
-
-There is no brokerage-account path and no path from an advisory result to an external command.
+The current component table, dependency direction and Analyze diagram are maintained in
+[ARCHITECTURE](ARCHITECTURE.md). The modular monolith composes read-only market queries,
+registered-model/credential policy, optional research, tool-free Narrative reasoning and evidence
+repositories. There is no broker/account path or external command from an advisory.
 
 ## 6. Module boundaries
 
-| Module/port | Owns | Must not own or call |
-|---|---|---|
-| Dashboard | Market views, watchlist UI, polling, later PAQS presentation | Provider SDK objects, real account/execution concepts |
-| Market-data port | Canonical quote, Daily/minute bars, market status and approved calendar/security metadata | Brokerage account access or execution |
-| PAQS input foundation | W1/D1/30m derivation, session/calendar/coverage/adjustment metadata | Provider SDK models, broker/account state |
-| PAQS-E Strategy | Snapshot-bound expert reasoning through accepted runtime/port plus deterministic guardrails | Provider SDKs in core, hidden history, automatic reruns, broker/accounting mutation |
-| PAQS-Q | Separate deterministic/reference work under its own bounded contracts | Redefining PAQS-E semantics or blocking the current PAQS-E MVP |
-| Decision Ledger | Immutable runtime artifacts, terminal Analysis Runs and validated Decision revisions | Strategy editing, hidden model memory, market-data store or execution facts |
-| Quality/Ranking | Optional derived prioritization of already-defined PAQS state | Creating setups, bypassing PAQS hard gates |
-| Portfolio/Accounting | Accepted Phase 1 historical foundation; optional later paper work only if reactivated | Real-account state, PAQS score mutation |
-| Performance/Backtest | Dormant optional future extensions only if reactivated | Production mutation, fabricated historical data |
-
-Only the composition root selects a provider. Core modules do not read environment variables, import provider SDKs or branch on provider names.
+API/UI present current and frozen facts. Application services coordinate provider-neutral ports;
+integrations adapt registered providers and OS credentials; repositories commit/verify evidence.
+Core does not import provider SDKs or persistence/presentation frameworks. Final text integrity
+checks are distinct from retained Legacy structured semantic validation. PAQS-Q is separately
+governed reference work; opening accounting is retained historical foundation, not an active
+portfolio/PnL product. Detailed ownership and code paths are in the architecture responsibility table.
 
 ## 7. Market-data, time and PAQS input contract
 
@@ -266,8 +217,8 @@ workflow and exact-text Narrative results, with safe local Markdown and raw view
 repairs the credential dialog and retires old initial-account cards/duplicate administration.
 The normal view preserves Narrative/Legacy history, known Runs, identity and frozen evidence.
 
-Chart refresh must not relabel an old Decision as current. Entry and conditional Holder advisory
-remain separate; invalidation, targets, RR, uncertainty and alternative evidence remain visible.
+Chart refresh must not relabel an old Decision as current. Entry and conditional Holder questions remain strategy concepts. Narrative presents the model's
+text without manufacturing structured fields or certifying its targets/RR; Legacy keeps its original fields.
 There is no real-order control and no claim the user executed an advisory.
 
 The adopted longer-term product scope is `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`. Prompt/model workspaces, council critique,
@@ -276,7 +227,9 @@ bounded contracts, not hidden additions to TASK-007C. `docs/research/R20_ADOPTIO
 
 ## 10. Validation and backtesting boundary
 
-Current PAQS work prioritizes deterministic semantics, synthetic golden fixtures, no-lookahead tests and current read-only smoke evidence.
+Validation is specific to the accepted path: current Narrative transport/text/lineage and safety
+checks, retained deterministic Legacy/structure tests, and explicitly attributed user smoke evidence.
+Exact text persistence is not semantic or predictive validation. ADC does not rerun runtime tests.
 
 A broad real-market historical backtesting platform is not a current committed MVP requirement.
 
@@ -284,16 +237,12 @@ If Phase 4 is explicitly reactivated later, it must use legitimate point-in-time
 
 ## 11. Infrastructure and secrets
 
-Sufficient topology remains:
-
-```text
-Browser -> 127.0.0.1 FastAPI -> SQLite
-                            -> independent read-only Market Data Provider
-```
-
-PostgreSQL compatibility remains portability, not a deployment requirement.
-
-Never commit credentials, external/private account IDs, passwords, tokens, databases, logs or private broker exports.
+The local FastAPI monolith uses SQLite plus separate read-only market-data and selected LLM
+provider connections. PostgreSQL compatibility is portability, not a runtime deployment requirement.
+Users may submit model keys through the loopback password form; reads never echo secrets.
+Windows Credential Manager stores registered service slots; OpenAI's existing environment fallback
+is read-only. See [credential boundaries](PAQS_E_MODELS.md). Never commit keys, private IDs,
+databases, logs or broker exports. No secret belongs in the business ledger.
 
 ## 12. Authoritative phases and bounded workstreams
 
@@ -301,10 +250,9 @@ The authoritative phases remain 0 through 4: historical definition, accepted fou
 Phase 2 decision terminal, and optional Phase 3/4 extensions as assigned by the Roadmap/adoption record.
 Phase 4 is the final possible phase; no execution phase exists.
 
-Current sequence: TASK-006B2 -> TASK-007A/B/C accepted and integrated -> TASK-007C1
-user-accepted and integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4` -> TASK-007C2
-implemented, awaiting independent review. The evidence attribution and preserved historical
-records are linked in the current delivery status above. No next task is authorized.
+Current sequence: accepted C2 → ADC-001 reviewed/integrated → updated exact-baseline 006B1
+handoff and bounded implementation. The original 006B1 scope remains unchanged; the old
+starting prompt is not reusable. See [ROADMAP](ROADMAP.md).
 
 TASK-006A is integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B deterministic
 implementation is integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`; its real-market

@@ -1,9 +1,9 @@
-# TASK-007C1 model, credential and research guide
+# Model and credential guide
 
-TASK-007C1 is user-accepted and integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`.
-See [user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md) for evidence attribution.
-TASK-007C2 repairs credential layout and awaits independent review. The launcher and workbench remain local-only and
-read-only decision support; real trades remain manual in the broker's own client.
+C1 and C2 are accepted and integrated. Current architecture/lifecycle is documented in
+[ARCHITECTURE](ARCHITECTURE.md); status and acceptance attribution are in [ROADMAP](ROADMAP.md).
+This catalog describes repository configuration at `722936984deac652b443eba132c69650653345e1`,
+not a new live verification of provider availability.
 
 ## Select a model and configure its key
 
@@ -17,13 +17,14 @@ The form clears after successful save or closing; reopening/refresh never reads 
 Presence is not a balance, entitlement or connectivity check. Configuration/status GETs do not
 contact providers or write application state. Models in the same service share one slot. Delete
 removes that slot. OpenAI alone can use an existing server environment key as a read-only fallback;
-deleting a local OpenAI credential does not remove it. Unavailable secure storage fails safely.
+deleting a local OpenAI credential does not remove it. Unavailable secure storage fails safely for mutations; a configured OpenAI read-only environment
+fallback can still provide a key. No plaintext fallback is created.
 Never share a screenshot containing a key, and do not put keys in chat, URLs or source files.
 
 ## Exact catalog and transports
 
 Default: **DeepSeek V4 Flash**. The selector is flat, with no provider grouping. The single source
-is `src/ai_infra_quant/resources/paqs_e/model_registry.json`. Model keys currently equal the exact
+is [model_registry.json](../src/ai_infra_quant/resources/paqs_e/model_registry.json). Model keys currently equal the exact
 provider model IDs; no prefix inference or provider `/models` discovery occurs.
 
 | Display name | Exact model key / provider model ID | Provider identity | Slot | Reasoning | Research |
@@ -59,172 +60,62 @@ still fail closed. Provider reasoning traces are discarded.
 
 ## Explicit lifecycle and evidence
 
-Only Analyze submits `{security_id, model_key, strategy_id, web_research}`. Model, strategy,
-credential, research-toggle, history and market-refresh changes never dispatch analysis.
-Each attempt freezes the current Snapshot, resolves its selected model, performs requested research,
-normalizes evidence, builds the canonical request, performs tool-free reasoning and commits the
-new terminal Narrative Run and exact-text Narrative Result atomically. Actual provider/model remain immutable audit identities.
-Narrative revisions are keyed by Security + strategy across model changes, independent of legacy revisions. Current refresh cannot alter
-persisted market or research evidence. Missing credentials disable the button for the selected model.
+Only Analyze submits the four required fields: Security, registered model key, registered strategy
+and research boolean. Changing model/strategy, saving a key, refreshing charts or reading history
+never submits an analysis. The selected model is used once for final tool-free Narrative reasoning;
+there is no voting, fallback or automatic retry. Final accepted text and its frozen evidence are
+recorded in a separate Narrative Ledger. Prior structured Decisions remain Legacy read-only evidence.
 
-Research defaults OFF on initial load and every model change, and is never remembered across reloads.
-Enabling it is explicit and can increase latency and API cost. Research sends one bounded
-native-search HTTP request. R04 permits one additional tool-free DeepSeek memo-synthesis request
-only for a valid completed tool-only SEARCH response; there are no retries.
-For OpenAI and Alibaba, the application accepts at most four reported search queries, 64 raw
-source records and eight included items. Each source-specific summary is at most 1,600 Unicode
-characters; summary plus label/provenance is at most 4,000 per item and 24,000 total. Oversized,
-unattributed, malformed, empty or incomplete results fail closed. The HTTP response cap is 2 MB,
-research output limit is 6,000 tokens and each transport timeout is 120 seconds. The browser's
-180-second notice leaves the synchronous request pending and guarded until its terminal response
-or a real connection failure. It neither aborts nor retries.
+Research defaults OFF at load and after every model change, is not remembered across reloads and
+is not restored from history. Unsupported models disable the checkbox; forcing an unsupported ON
+request fails explicitly. Presence of a stored key does not establish provider availability.
 
-Remediation 04 preserves DeepSeek's exact provider-native factual research memo and accepts up to
-64 native actions in at most 128 output items: `search`, `open_page`, and `find_in_page`, including
-at least one completed search. R06 accepts item statuses `completed`, `in_progress`, `incomplete`,
-`failed`, and `cancelled` only inside a top-level completed SEARCH. Missing/null/unknown statuses,
-unknown action types, and malformed action objects fail closed. Only completed actions are
-successful evidence and enter stateless pass-back, unchanged and in original order. Recognized
-partial action queries/sources are ignored, never trusted, retained, or passed back. Zero completed
-searches fails `NO_COMPLETED_SEARCH`, even with a direct memo or completed page/find actions.
-R05 validates each exposed query from completed searches (non-empty, UTF-8, control-safe, at most
-500 characters) with structural limits of 256 queries and 64,000 total query characters. Missing
-queries or native sources alone no longer prevent success. No JSON result or source-array output
-is requested. Memo text is capped at 24,000 Unicode characters, and memo + provenance + label
-together must fit the existing 24,000-character research budget; excess fails without truncation.
-One item freezes the exact memo, a null memo publication timestamp, safe response identity,
-retrieval/intent/As-Of, ordered actions, actual queries, optional native sources and an explicit
-limitation: cutoff compliance was requested but cannot be independently verified for every statement;
-Snapshot market facts take precedence. No hidden reasoning or raw envelope is retained.
+| Research choice | Behavior before final Narrative |
+|---|---|
+| OFF | Zero research calls; unchanged Snapshot-bound final-text path |
+| DeepSeek ON | One native SEARCH; direct valid factual memo, or exactly one tool-free SYNTHESIS for valid completed tool-only SEARCH |
+| OpenAI / Alibaba ON | One native search request, source-specific summary normalization; no DeepSeek synthesis flow |
+| GLM / Kimi / Hy4 | Research disabled; ordinary Narrative remains available with configured credentials |
 
-More than four searches or exposed queries no longer causes DeepSeek acceptance failure. Query
-capture retains only an ordered prefix of at most 16 whole queries / 4,000 characters. The first
-query that cannot fit stops capture, even if a later shorter query could fit. All completed-search queries
-are still validated and counted, including duplicates and entries after capture stops. Native
-`query` and `queries` fields, when both exposed, count in their received order. Provenance adds
-`provider_exposed_query_count` and `query_capture_complete`; omitted queries are never fabricated
-or silently presented as a complete list. The SEARCH instruction's four-query request is advisory,
-not a provider billing guarantee or a post-hoc success rule.
+DeepSeek accepts recognized partial native actions alongside completed evidence, but requires at
+least one completed search. Only accepted completed calls enter stateless pass-back, unchanged;
+partial queries/sources never become trusted evidence. Its advisory four-query instruction is not
+a four-query acceptance cap. Capture stores only a bounded ordered prefix with total exposed query
+count and completeness flag. See [research bounds and diagnostics](ARCHITECTURE.md#5-optional-research-and-provenance)
+for the source-verified acceptance/capture limits, provider differences and request counts.
 
-SEARCH forces the sole native web-search tool with `reasoning.effort=none` and a 6,000-token cap.
-One valid final memo takes the direct path, using one research request. Only a completed valid
-tool-only response enters SYNTHESIS: the original intent, accepted `web_search_call` items passed
-back unchanged in memory, and a final factual memo instruction form the stateless input.
-SYNTHESIS uses the same endpoint/model/credential, `reasoning.effort=none`, `tools=[]`,
-`tool_choice=none`, and a 4,000-token cap. Both requests use `store=false`, `stream=false` and
-no previous-response/conversation/background state. Serialized research requests and responses
-are capped at 2 MB. An invalid SEARCH never triggers SYNTHESIS; neither stage retries.
-The final unchanged tool-free Narrative runs only after the exact accepted memo is frozen.
-Research-OFF uses zero research calls; ON uses one or two, thus two or three total provider calls.
-Safe provenance records total SEARCH action/search counts, per-status counts, completed/non-completed
-search counts, and completed-only `native_action_count`/ordered `action_types`, queries and sources.
-It also records SEARCH status/id, optional SYNTHESIS id, synthesis use,
-and research HTTP request count. Ten provider continuation rounds do not imply ten output items.
+ON can add latency/API cost: DeepSeek uses at most two additional research HTTP requests, final
+Narrative is separate. Native search actions/queries are not the number of HTTP attempts or a billing
+guarantee. The transport uses a 120-second HTTPX timeout and 2 MB response bound. The browser's
+180-second notice leaves the synchronous request guarded; it does not cancel or retry it.
 
-Research precondition errors retain their existing API code and create no Run/Result. Optional
-`research_diagnostic` metadata reports a fixed stage/failure class, registered route, safe response
-status/id, stage-local action/search/message counts (saturated at 129), synthesis-attempt flag,
-HTTP request count, and only allowlisted incomplete reasons. No memo, raw body, hidden prompt,
-exception text, reasoning or credential is included. The UI shows only fixed stage/class/count
-fields, preserving the prior Narrative and never retrying. Diagnostics are not stored in the ledger.
-R05 adds optional `provider_exposed_query_count`, `raw_source_record_count` and
-`unknown_action_count`, exact integers saturated at 1024. Failure diagnostics count exposed query
-slots, including invalid individual values on rejected envelopes; successful provenance counts
-only valid queries. Unknown container shapes omit the affected totals. The client displays only
-validated numeric values, never queries, URLs, source titles, raw detail or diagnostic JSON.
+Frozen research is factual auxiliary context, not a strategy answer. Web prices cannot overwrite
+Snapshot market facts. Native citations and provider summaries/memos have explicit publication-time
+and cutoff limitations; absence of known future timestamps does not prove all statements are
+point-in-time safe. Raw native responses and provider reasoning are not persisted. A failed requested
+research stage stops before final Narrative and creates no fabricated Run/Result. A terminal final
+provider failure after a complete request records a failed Narrative Run without a Result.
 
-R06 adds an allowlisted application `boundary_code` identifying the actual rejecting rule. Parser
-failures carry numeric observations from the bounded input plus the code raised at that rule;
-encoding and URL errors are classified at their own boundaries, never via exception strings.
-The new optional counts are `completed_action_count`, `in_progress_action_count`,
-`incomplete_action_count`, `failed_action_count`, `cancelled_action_count`, `completed_search_count`,
-`non_completed_search_count`, `missing_or_unknown_status_count`, `invalid_query_value_count`,
-`malformed_action_count`, and `unexpected_output_item_count`. Each is an exact integer 0–1024;
-unknown totals are omitted. Counts describe observations, not successful evidence. Query/source
-slot counts and invalid-query inspection exclude partial actions. A recognized status can be
-counted even when its action shape subsequently fails. Secret-tainted responses are not reparsed
-for detailed counts or boundary codes. The UI validates enums and numbers independently and
-never displays provider IDs, private strings or raw JSON. Diagnostics remain ephemeral.
+## API and storage details
 
-Optional native source/citation records are capped at 64 before deduplication. URLs must be explicit
-HTTP(S), at most 1,000 characters, with a hostname and no userinfo, whitespace/control characters or
-backslashes; titles are at most 500 characters. Only aware publication timestamps are retained.
-Known future URLs are excluded even if duplicated elsewhere; the memo remains with its limitation.
-Prose URLs and page/find targets are never promoted to trusted provenance. Other providers retain
-their existing four-action, search-only source-normalized behavior and source-specific bounds.
+[ModelCredentials](../src/ai_infra_quant/application/paqs_e_models.py) owns registered-slot resolution
+and priority; [CredentialStore](../src/ai_infra_quant/core/ports/credentials.py) is provider-neutral.
+[WindowsCredentialStore](../src/ai_infra_quant/integrations/windows_credentials.py) is the production
+implementation. Users do submit keys through the local password input. Read APIs return only status,
+never the key. Model endpoint/API surface/slot are repository-owned, not arbitrary client parameters.
+The registry's `structured_output_mode` remains Legacy metadata and does not impose structured
+output on `NarrativeGateway`. See [API contracts](API_CONTRACTS.md#7-configuration-and-local-credentials)
+for same-origin/loopback/JSON constraints and errors.
 
-OpenAI also receives `max_tool_calls=4`. DeepSeek documents that this option is ignored and its
-server-side auto-continuation limit is ten rounds; Qwen does not document an equivalent request
-cap. OpenAI/Alibaba retain their four-query acceptance bounds. DeepSeek's normal multiplicity is
-provider-owned; its 256-query anti-abuse limit is not a billing guarantee. One HTTP attempt can
-contain multiple native searches. The
-adapter rejects results exceeding the evidence bound and never continues with silent truncation.
-This provider-side cost-control limitation remains visible for independent review and live smoke.
+## Evidence and limitations
 
-OpenAI/Alibaba items retain native URL/citation identity, title when available (otherwise URL), query/intent,
-retrieval time, publication timestamp when supplied, stable content ID and source-specific summary.
-Native reasoning traces and chain-of-thought are discarded. Native citation URLs are never fetched
-by this application. Generated summaries cannot invent new URLs or publication timestamps.
-
-Known publication timestamps must be timezone-aware and are normalized to UTC. Any included
-source explicitly later than the frozen Snapshot As-Of is excluded; retrieval after freeze is
-provenance, not publication time. Missing publication time stays `unknown`, with an explicit
-limitation that cutoff compatibility cannot be independently confirmed. The unchanged domain
-request validation rejects future auxiliary timestamps. Snapshot prices, bars, sessions and
-arithmetic facts take precedence over web text; research never writes Snapshot fields.
-
-An unsupported requested route, missing research credentials or incomplete research capsule
-returns a typed precondition failure without a fabricated Run ID. The system never proceeds without
-requested research. Failures after a complete reasoning capsule retain existing failed-Run semantics.
-Prior successful Decisions remain visibly historical. No retry or provider/model fallback occurs.
-
-The following R01 behavior remains **legacy structured only**, outside new narrative analyses.
-After strict provider parsing, the legacy provider-neutral runtime projects only current quote price,
-timestamp, freshness and session from the immutable Snapshot before the unchanged validator.
-The same four factual echoes are projected for model-eligible executable entry references; the
-eligibility flag and policy text remain model-authored. Identity, support/input quality, semantic
-assessments, invalidation, targets, RR and explanation fields are not corrected. Market-open,
-freshness, session, RR and semantic rules can still reject the result.
-
-## Official API evidence and limitations
-
-These primary documents were checked during implementation on 2026-09-07. No required model was
-found renamed or removed; no substitute or additional model was introduced.
-
-- [DeepSeek Responses compatibility](https://api-docs.deepseek.com/guides/responses_api/):
-  Responses, full `text.format`, native search and stateless behavior; ignored tool-count/include controls.
-- [Qwen structured output](https://help.aliyun.com/zh/model-studio/qwen-structured-output):
-  Chat JSON Schema for the three required families.
-- [Qwen Responses](https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-responses) and
-  [web search](https://help.aliyun.com/zh/model-studio/web-search): native query/source records.
-- [GLM structured output](https://docs.bigmodel.cn/cn/guide/capabilities/struct-output) and
-  [GLM-5.2](https://docs.bigmodel.cn/cn/guide/models/text/glm-5.2).
-- [Kimi web workflow](https://platform.kimi.ai/docs/guide/use-web-search): the direct workflow
-  requires provider-specific tool continuation; that audit path is not enabled by this increment.
-- [TokenHub language API overview](https://cloud.tencent.com/document/product/1823/130079):
-  Hy4 reasoning route. Auditable native source research is not enabled.
-- [OpenAI web search](https://developers.openai.com/api/docs/guides/tools-web-search) and
-  [Terra model](https://developers.openai.com/api/docs/models/gpt-5.6-terra).
-- [Windows CredWrite](https://learn.microsoft.com/en-us/windows/win32/api/wincred/nf-wincred-credwritew):
-  current-user credential set and failure behavior.
-
-GLM, Kimi and Hy4 remain usable for reasoning with research disabled. Enabling their direct search
-requires separately verified native source normalization. Doubao, MiniMax and every unapproved
-model remain absent. No PAQS-Q, backtest, portfolio/PnL, broker, execution, voting, arbitrary URL,
-background research or automatic analysis is added. Remediation 02 adds only the authorized narrative ledger migration 0003; migrations 0001/0002 are unchanged.
-
-## Validation and separate live product acceptance
-
-Install `.[dev]` under Python 3.12 and install Playwright Chromium if needed. Set
-`TASK007C_BROWSER_CHANNEL=chromium` when using that browser. Run full pytest, focused model/
-credential/research/API/browser tests, `ruff check .`, `ruff format --check .`, and `mypy src tests`.
-The browser suite runs actual Uvicorn against a fresh migrated SQLite DB through head
-`0003_task007c1_narrative_ledger`, checks health/OpenAPI/page/configuration over HTTP and uses synthetic
-network fixtures for business scenarios. Unit/integration tests inject synthetic credential stores.
-
-No real-provider call is part of ordinary tests. The R03 Contract records successful research-OFF
-live acceptance at `74a19387adc408e9453c30fdbb30e6636ac4e695`. Final R06 code review and the user's
-Research-ON acceptance are attributed in the immutable [user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md).
-C1 is functionally closed and integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`.
-The C2 UI change preserves that provider/prompt/ledger path and does not repeat paid acceptance,
-reopen the user gate, or claim independent verification of the user's local hashes.
+[Catalog and credential tests](../tests/unit/test_paqs_e_model_gateway.py),
+[all-model Narrative tests](../tests/unit/test_paqs_e_narrative_provider.py),
+[research continuation tests](../tests/unit/test_paqs_e_research_continuation.py),
+[partial action tests](../tests/unit/test_paqs_e_partial_actions.py) and
+[browser credential tests](../tests/browser/test_paqs_e_multi_model.py) use synthetic provider/store
+fixtures. They are not paid live verification of every model, account permission or OS installation.
+Historical provider-document investigations and test executions remain in the immutable
+[C1/R01–R06 reports linked by architecture](ARCHITECTURE.md#9-historical-evolution-and-evidence).
+The [C1 closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md) records user acceptance separately
+from independent exact-SHA code review. ADC does not repeat paid calls or recompute user-local hashes.

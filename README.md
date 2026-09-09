@@ -1,24 +1,17 @@
 # AI Infra Quant
 
-AI Infra Quant is a local-first, single-user, read-only quantitative research and investment
-decision-support tool. Its authoritative future direction is defined in `docs/ROADMAP.md`: daily
-plus recent completed 1-minute market data, a market Dashboard, dynamic supported US/HK equities,
-and an incremental PAQS decision-terminal workstream. Daily and 1-minute charts remain separate.
+AI Infra Quant is a local-first, single-user research and decision-support workbench. It provides
+read-only current US/HK market data, active watchlist management and explicit Snapshot-on-Demand
+PAQS-E Narrative analysis using one registered model. Optional web research defaults OFF; final
+reasoning is tool-free. Exact text and frozen evidence are retained in the Narrative Ledger, with
+Legacy structured history kept separately. The app never observes/imports brokerage accounts,
+positions or trades, or sends orders. Real trading is manual in the broker's official client.
 
-TASK-003 established a bounded Futu OpenD proof of concept using quote-market-data APIs only.
-TASK-004 exposes that provider through three provider-neutral, read-through FastAPI endpoints for
-market state, completed daily bars, and completed 1-minute bars. TASK-005 adds the local,
-market-first Dashboard on top of those endpoints. TASK-005B expands its bounded chart history to
-approximately five trading years of Daily K and 30 market-local calendar days of minute K. It does
-not connect to brokerage-account state. TASK-006A adds provider-validated US/HK equity addition,
-trading-calendar mapping, and provider-agnostic completed W1/D1/regular-session M30 input
-preparation. It adds no PAQS structure or advisory logic. The application never reads real-account
-facts, imports or reconciles real trades, or sends a broker command. The user performs every real
-trade manually in the broker's official client.
-
-The accepted Phase 1 implementation is the local FastAPI/SQLite foundation. It exposes opening
-portfolio facts, identity/watchlist administration, and truthful provider capability descriptors;
-it does not fetch external data or implement later-phase portfolio behavior.
+C1 and C2 are accepted and integrated; current runtime code is
+`d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`. ADC-001 documentation consolidation is reviewed and integrated.
+006B1 may start under its original bounded scope and the new post-ADC exact-baseline handoff.
+See [current architecture](docs/ARCHITECTURE.md), [roadmap/status](docs/ROADMAP.md),
+[workbench guide](docs/PAQS_E_WORKBENCH.md) and [model/credential guide](docs/PAQS_E_MODELS.md).
 
 ## Local setup
 
@@ -105,7 +98,8 @@ warnings only. It contains no structure, setup, advisory, target, risk/reward, o
 Alembic selects its database URL in this order: an explicit
 `-x database_url=...` override, `DATABASE_URL` from application settings or `.env`, then the
 application's default SQLite URL. PostgreSQL overrides are for migration verification only;
-Phase 1 application runtime remains SQLite-only.
+application runtime remains SQLite-only. Current migration head is
+`0003_task007c1_narrative_ledger`; this is not a local market archive or strict historical replay.
 
 ## Validation
 
@@ -116,43 +110,23 @@ Phase 1 application runtime remains SQLite-only.
 .\.venv\Scripts\python.exe -m mypy src tests
 ```
 
-Phase 1 implementation evidence is recorded in `docs/REQUIREMENTS_MATRIX.md` after the final
-validation run.
+These commands are the runtime validation workflow, not ADC execution evidence. Historical test
+runs and screenshots remain in their original reports; ADC performs docs-only scope/link checks.
+See [requirements traceability](docs/REQUIREMENTS_MATRIX.md) and
+[architecture history](docs/ARCHITECTURE.md#9-historical-evolution-and-evidence).
 
-## Phase 1 evidence
+## Models, credentials and analysis history
 
-Local validation on 2026-08-31 used CPython 3.12.13 and the exact dependencies pinned in
-`pyproject.toml`.
+Select a model and open **配置此模型 API Key**. The local password form submits its key to Windows
+Credential Manager; status reads never return it. UI-managed keys require no `.env` write.
+Stored service slots are shared by models using that service; OpenAI alone has an optional existing
+read-only environment fallback. Presence is not connectivity, balance or permission verification.
 
-- Alembic upgraded a fresh SQLite database and reported `0001_phase1_foundation (head)`.
-- Uvicorn started on `127.0.0.1`; `/health`, `/openapi.json`, and `/` returned 200.
-- The complete Phase 1 remediation suite passed: `111 passed`.
-- `ruff check .`, `ruff format --check .`, and `mypy src tests` passed.
-- SQLite returned the three required Decimal vectors with identical tuples and
-  `typeof(value) = 'text'`; PostgreSQL compilation returned `NUMERIC(38,18)`.
-- Architecture tests prove core/application dependency boundaries and the absence of future
-  route modules.
-- Migration isolation, security-identity, UTC, signed-zero, seed-drift, database uniqueness,
-  trigger, race-conflict, and frontend injection-safety adversarial tests passed.
+Research must be explicitly enabled and resets OFF on model changes. Successful Narrative text
+has safe formatted and exact raw views; text/hash/lineage do not machine-certify strategy or RR.
+C2 repairs the dialog and removes old opening-capital/NAV cards and duplicate administration from
+the normal UI. Historical data, seed, compatibility APIs and migrations 0001/0002/0003 remain.
+No Paper/PnL, backtest, PAQS-Q successor, broker or automatic analysis is activated.
 
-Revision `0001_phase1_foundation` is an explicit historical schema: it does not consult current
-ORM metadata. A local development database created by the earlier metadata-driven draft must be
-recreated before running this remediated revision. The application never deletes a database.
-
-Phase 1 remains intentionally limited and has passed independent review. TASK-004 adds the first
-Phase 2 market-data backend, TASK-005 adds its read-only Dashboard client, TASK-005B adds bounded
-paged chart history/incremental refresh, and TASK-006A adds only the dynamic-security and PAQS input
-foundation. No derived-input persistence, PAQS structure/advisory, PaperBroker, paper fill/order,
-backtest, brokerage-account access, or real-order route was added.
-
-
-TASK-007C1 adds a flat eleven-model selector and local **配置此模型 API Key** dialog.
-Use the existing Windows launcher, open the loopback workbench, select a model, securely save its
-key and explicitly Analyze. UI-managed keys need no `.env` edit. See
-[model and credential guide](docs/PAQS_E_MODELS.md) for supported routes, research limits and
-the user acceptance recorded in [C1 closeout](docs/decisions/TASK_007C1_CLOSEOUT_2026_09_08.md).
-TASK-007A/B/C and user-accepted TASK-007C1 are integrated; the authoritative integration is
-`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`. TASK-007C2 repairs this dialog and removes obsolete
-initial-account administration from the normal UI, preserving data and all accepted analysis behavior.
-C2 is implemented pending independent review, with no C2 merge. See the
-[implementation report](docs/reports/TASK_007C2_IMPLEMENTATION_REPORT.md).
+C1 user acceptance and C2 review/closeout attribution are linked from [ROADMAP](docs/ROADMAP.md).
+The C2 user's screenshot showed C1 branch without SHA; it is not independent exact-C2 runtime proof.

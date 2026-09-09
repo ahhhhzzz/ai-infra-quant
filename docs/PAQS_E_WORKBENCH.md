@@ -1,9 +1,9 @@
 # PAQS-E narrative-first workbench
 
-Status: TASK-007A/B/C accepted/integrated; TASK-007C1 user-accepted/integrated at
-`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`. See the immutable
-[user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md).
-TASK-007C2 UI cleanup is **implemented / pending independent review**, without C2 merge or next-task approval.
+C1 and C2 are accepted and integrated. See [ROADMAP](ROADMAP.md) for exact status and acceptance
+attribution, and [ARCHITECTURE](ARCHITECTURE.md) for current components and provider boundaries.
+ADC-001 documentation consolidation is reviewed and integrated. 006B1 is next under its updated
+exact-baseline handoff; its archive/replay behavior is not implemented yet.
 
 The existing FastAPI application serves the workbench at `/`. No frontend build server or Node
 production runtime is required. Use the existing documented migration and Uvicorn/Windows launcher
@@ -72,16 +72,11 @@ provider-native memo with exposed provenance and an
 explicit cutoff-verification limitation; its prose URLs are not verified sources. Research opt-in
 is never remembered across reloads or restored from history. Enabling research can add latency and
 API cost: it may issue up to two additional research requests before final analysis. A research
-failure may show bounded stage/class/request/action counts for review, never the raw provider body.
-R05 may also show numeric query, source-record and unknown-action counts. Query text and source
-URLs never appear in these failure diagnostics. Successful DeepSeek research evidence separately
-records total exposed query count and whether the bounded captured query prefix is complete.
-R06 adds an exact safe boundary code, per-status action counts, completed/non-completed search
-counts, and bounded malformed/invalid counters. For example, `边界 ACTION_STATUS` identifies the
-application status check. Unknown codes and invalid numeric fields are omitted. Partial native
-actions contribute no trusted queries/sources and are never restored for synthesis; at least one
-completed search remains mandatory. Successful evidence counts only validated completed queries.
-It retains the prior Narrative and does not retry. The primary history lists
+failure may show fixed stage/class, application boundary code and bounded counts, never raw provider
+text, queries, source URLs or diagnostic JSON. Unknown codes/invalid counts are omitted. The existing
+result is retained and there is no retry. Safe diagnostics and completed-only research evidence
+are explained in [architecture](ARCHITECTURE.md#5-optional-research-and-provenance).
+The primary history lists
 Narrative Results with a bounded preview. The collapsed **Legacy 结构化 Decision 历史（只读）** section
 retains old structured Decisions and their original structured details and frozen evidence. They are
 clearly labeled legacy and are never promoted into the narrative revision series. The known-Run
@@ -115,8 +110,9 @@ evidence failures clear old lines. Current quote refresh cannot mutate frozen da
 The numeric Problem `status` is distinct from `analysis_status`. Narrative failures are configuration
 error, provider unavailable, refusal, incomplete answer, or invalid final text. A formed failed attempt
 commits one safe failed Narrative Run and no Narrative Result; it never uses a semantic-validator gate.
-404/409/422 preconditions and 500 ledger/integrity failures do not invent a Run or Decision.
-A previous successful Decision stays visible with its own revision/time and an earlier-result
+404/409/422 preconditions create no fabricated Run/Result. A 500 ledger/integrity response does not
+confirm successful new evidence; existing records remain governed by their own verified identity.
+A previous successful result stays visible with its own revision/time and an earlier-result
 label. Failures never become a new `NO_TRADE`, `UNCERTAIN`, revision or success row.
 
 After 180 seconds, a long-wait notice says the synchronous analysis is still running and must not
@@ -132,7 +128,7 @@ This is not a failed-run list/search endpoint. Without a known ID, a successful-
 prove that no failed run was recorded. No pagination/cursor/exhaustiveness or cancellation API is
 invented.
 
-## Reproducible validation
+## Reproducible runtime validation (not rerun by ADC)
 
 Install the repository's pinned `.[dev]` extra in a Python 3.12 development environment. Playwright
 is dev-only and normal application startup does not import it. Browser tests default to an
@@ -147,7 +143,7 @@ python -m ruff format --check src tests
 python -m mypy src tests
 ```
 
-The browser fixture creates a fresh temporary SQLite DB, runs Alembic upgrade to
+The existing browser fixture creates a fresh temporary SQLite DB, runs Alembic upgrade to
 `0003_task007c1_narrative_ledger`, launches the actual `ai_infra_quant.backend.main:app` via Uvicorn on
 an ephemeral loopback port, unsets `OPENAI_API_KEY` and selects provider `none`. It checks real
 health/OpenAPI/configuration/page/static HTTP routes before browser scenarios. Only its own
@@ -173,8 +169,10 @@ TASK-007C1 adds model resolution, secure credentials and a pre-reasoning researc
 Remediation 02 adds only migration 0003 and a distinct narrative prompt/provider/ledger path.
 Migrations 0001/0002, legacy validator, accepted strategy, Snapshot, market-data and no-live-trading
 boundaries remain unchanged. The source-revision launcher handshake and secure credentials remain
-in force. No paid smoke is automatic. C1 user live acceptance is recorded in its immutable closeout; C2
-does not reopen that acceptance or run paid providers.
+in force. No paid smoke is automatic. C1 user live acceptance is recorded in its immutable closeout; C2 acceptance is separately recorded in its
+[review](reviews/TASK_007C2_INDEPENDENT_REVIEW.md) and
+[closeout](decisions/TASK_007C2_CLOSEOUT_AND_006B1_HANDOFF_2026_09_08.md). The user screenshot
+showed a C1 branch without a SHA; it does not independently verify exact-C2 runtime identity.
 
 
 TASK-007C2 screenshots are separately generated with `TASK007C2_SCREENSHOT_DIR` pointing at

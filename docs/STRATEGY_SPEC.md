@@ -1,35 +1,12 @@
 # PAQS-E / PAQS-Q Strategy Governance and Historical Research Specification
 
-## Current delivery status — 2026-09-08
+## Current delivery status — 2026-09-09
 
-TASK-007A, TASK-007B and TASK-007C are accepted and integrated. TASK-007C1 is
-**USER_ACCEPTED / FUNCTIONALLY_CLOSED**, including the user's Research-ON confirmation.
-The authorized ordinary fast-forward of `roadmap/no-live-trading` from
-`0c1713d4409c69a45f8ce5e37951bba72d73d819` to
-`2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4` has been executed and read back from GitHub.
-The integrated application is the reviewed `3e98d8c5f9948dcaefe59eb3b7b847bd99ba8908` tree,
-plus the independent review and user closeout documents. See the immutable
-[R06 review](reviews/TASK_007C1_REMEDIATION_06_INDEPENDENT_REVIEW.md) and
-[user closeout](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md) for evidence attribution.
-User acceptance is not a claim that the C2 implementer repeated paid provider tests or
-independently recomputed the user's local Run hashes. Historical pending/not-merged statements
-in original contracts, reports and reviews describe their original checkpoints and remain unchanged.
-
-TASK-007C2 is **implemented / pending independent review** on its task branch; it is not
-independently passed or integrated. Its bounded change repairs the credential dialog and removes
-the old opening portfolio cards and duplicate administration UI. The main watchlist, market
-quality/provenance, history and frozen evidence remain available. Backend compatibility APIs,
-existing databases, opening seed values and migrations 0001/0002/0003 are preserved; head remains
-`0003_task007c1_narrative_ledger`. See the [C2 report](reports/TASK_007C2_IMPLEMENTATION_REPORT.md).
-
-The normal explicit Analyze path is Narrative-first: one immutable Snapshot, optional bounded
-research, tool-free final reasoning, and exact final text persisted in the Narrative Ledger.
-Saving complete prose does not certify strategy semantics, Entry/Holder judgments or RR by machine.
-The legacy structured validator is unchanged and historical structured Runs/Decisions remain readable.
-Research defaults OFF and resets OFF on model changes. Refresh, credentials and history never Analyze.
-The product remains a read-only market and decision-support terminal, without initial asset cards
-in its normal UI. Paper/PaperFill, performance statistics, TASK-006B1, PAQS-Q successors, TASK-007D,
-and Phase 3/4 are not activated by this work; broker/account/trading capabilities remain forbidden.
+C1/C2 and ADC-001 are accepted and integrated. ADC-001 passed focused re-review at
+`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; all runtime code remains unchanged.
+TASK-006B1 is the next authorized implementation under its original scope and updated handoff.
+Exact SHAs, current sequence and evidence attribution are in [ROADMAP](ROADMAP.md).
+[ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
 Status: **CURRENT STRATEGY GOVERNANCE + HISTORICAL RESEARCH REFERENCE**; implementation only through approved bounded Task Contracts
 
@@ -60,11 +37,10 @@ The former completed-daily-only `AIInfraStrategy v1` formula proposal remains wi
 `PAQS_V0.2_CORE_DEFINITION_LOCK.md` remains research history. The v0.3.1 Completeness Lock plus Review Amendment A remain deterministic/formalization research references; they do not replace PAQS-E semantic strategy authority.
 
 `PAQS-DUAL-001` prioritizes the PAQS-E current-analysis MVP and separates PAQS-Q reference work.
-TASK-007A adopts the registered `docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md`; its exact
-strategy/prompt hashes and deterministic guardrails remain authoritative. TASK-007B at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`
+TASK-007A adopts the registered `docs/research/PAQS_E_CONTEXT_FREE_MASTER_SPEC_ZH.md`; the primary strategy bytes remain unchanged. The current Narrative prompt is separately
+versioned/hashed; Legacy deterministic guardrails apply to structured evidence only. TASK-007B at `7785cdeeacb14f0762f6104ed99f01b5e76d1dd3`
 has independent review PASS (`docs/reviews/TASK_007B_INDEPENDENT_REVIEW.md`) and is integrated.
-TASK-007C and TASK-007C1 are also accepted/integrated; TASK-007C2 is presentation-only and
-awaits review. Narrative-first changes the result contract, not the PAQS-E master strategy.
+TASK-007C and TASK-007C1 are also accepted/integrated; TASK-007C2 presentation cleanup is reviewed and integrated. Narrative-first changes the result contract, not the PAQS-E master strategy.
 The legacy validator is retained unchanged; normal prose success is not semantic certification.
 
 R20 product capability adoption is governed by `docs/decisions/R20_PRODUCT_ADOPTION_2026_09_07.md`. `docs/research/R20_ADOPTION_PLAN_AND_CODEX_PROMPT_ZH.md` is historical planning context.
@@ -73,6 +49,16 @@ not adopted into PAQS-E. Council/evolution/news capabilities, if later contracte
 research context/review proposals, not hidden memory or automatic changes to frozen doctrine.
 
 No rule, fixture, score or example in these research documents is a profitability or predictive-validity claim.
+
+
+Current engineering consumption is `NarrativeAnalysisService` loading the registered primary
+strategy and `runtime_prompt_narrative_v1.md`, freezing current Snapshot facts plus optional
+accepted research, then invoking `PaqsENarrativeProvider.reason_text`. Complete final text is
+stored without the Legacy schema/projector/semantic validator. This changes the result contract,
+not the strategy's meaning. Hashes and lineage identify the consumed artifacts and saved text;
+they do not machine-certify Entry/Holder conclusions, price targets or RR. Optional research is
+factual context, never authority to overwrite Snapshot prices or silently change doctrine.
+See [architecture and source responsibility table](ARCHITECTURE.md) for the current implementation.
 
 ## 2. Product and safety boundary
 
@@ -407,5 +393,5 @@ No TASK-006C Event/Transition/Trigger behavior, Setup/Risk/Advisory behavior, nu
 Quality/Ranking, broker write, or optional Phase 3/4 capability is implemented by TASK-006B.
 
 TASK-006B2 and TASK-007A/B/C are accepted/integrated. TASK-007C1 is user-accepted and
-integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`; TASK-007C2 is implemented pending
-independent review. Later R20 capabilities remain bounded by separate approved contracts.
+integrated at `2cc4eeea3cc31d4fd1f1a4e9c1fbec237f82a2c4`; TASK-007C2 is independently reviewed and integrated. ADC-001 docs-only consolidation is reviewed and integrated;
+006B1 is next under its updated exact-baseline handoff. Later R20 capabilities remain bounded by separate approved contracts.
