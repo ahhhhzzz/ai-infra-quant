@@ -3,7 +3,7 @@
 ## Current delivery status — 2026-09-09
 
 TASK-007A/B/C and user-accepted C1 are integrated. C2 is independently reviewed, user-closed and
-integrated; current runtime code is `d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`, included in
+integrated; accepted C2 runtime code is `d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`, included in
 `f78894bceb2900eff6e134bdf61f673309426355`. The earlier ADC sequencing baseline was
 `722936984deac652b443eba132c69650653345e1`; the current handoff follows the ADC closeout below.
 See [C2 review](reviews/TASK_007C2_INDEPENDENT_REVIEW.md),
@@ -16,9 +16,11 @@ ADC-001 is **REVIEWED PASS / CLOSED / INTEGRATED** at accepted implementation
 `66a3ca7bbff258665b25e5ab17231138bf3cc49f`; its F01 is closed with zero outstanding findings.
 See [focused review](reviews/TASK_ADC_001_F01_FOCUSED_RE_REVIEW.md) and
 [closeout/resumption decision](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md).
-Current authorized next task: **006B1**, original bounded scope plus the updated exact-baseline
-handoff on its task branch. The startup hold is lifted for that handoff only. Archive/replay
-is not yet implemented; PAQS-Q successors, Paper/PnL and Phase 3/4 remain dormant.
+Current task: **006B1 — IMPLEMENTED / PENDING INDEPENDENT REVIEW**, not integrated.
+The task started at `bed9059fd6ce6c0a7cd750376c972070db0a39dd`, with authoritative baseline
+`02326a3bb19c2a89352d765f5331670b5f3f466d`, under the updated handoff. Explicit archive/replay
+and additive 0004 are implemented; PAQS-Q successors, Paper/PnL and Phase 3/4 remain dormant.
+See [006B1 implementation report](reports/TASK_006B1_IMPLEMENTATION_REPORT.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
 Status: **AUTHORITATIVE — local read-only PAQS-E prioritized MVP, parallel PAQS-Q reference branch, and optional Phase 3/4 extensions**
@@ -369,7 +371,7 @@ Final accepted/integrated SHA: `5f996aebb012cc0884d912f6f3eb71c32e9fd627`.
 
 Independent final review verdict: `PASS`.
 
-#### TASK-006B1 — Local Market Data Store & Replay Foundation — APPROVED NEXT / UPDATED POST-ADC HANDOFF REQUIRED
+#### TASK-006B1 — Local Market Data Store & Replay Foundation — IMPLEMENTED / PENDING INDEPENDENT REVIEW
 
 Original contract commit: `d2bc397612a32adb2b5f78fec3ec894b3eacdb38`. Its bounded scope remains
 valid. The [new closeout/resumption decision](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md)
@@ -470,7 +472,7 @@ PAQS-Q concrete semantics still require explicit approval before implementation.
   → 007C1 user-accepted and integrated
   → 007C2 reviewed, user-closed and integrated
   → ADC-001 docs-only consolidation [reviewed, closed and integrated]
-  → 006B1 updated exact-baseline handoff [authorized next; not implemented]
+  → 006B1 bounded archive/replay [implemented; pending independent review; not integrated]
   → later approved strict historical As-Of / GoldSet work
 ```
 

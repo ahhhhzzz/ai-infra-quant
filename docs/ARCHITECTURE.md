@@ -1,8 +1,9 @@
 # Current Architecture
 
-This describes authoritative baseline `722936984deac652b443eba132c69650653345e1`, whose runtime
-code is accepted C2 implementation `d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`. ADC-001 changed
-only documentation, passed focused review at `66a3ca7bbff258665b25e5ab17231138bf3cc49f` and is integrated. See [ROADMAP](ROADMAP.md) for delivery status.
+This describes the 006B1 task implementation over authoritative baseline
+`02326a3bb19c2a89352d765f5331670b5f3f466d`. C1/C2/ADC remain reviewed and integrated;
+006B1 is implemented on its task branch, pending independent review and not integrated.
+See [ROADMAP](ROADMAP.md) and [006B1 report](reports/TASK_006B1_IMPLEMENTATION_REPORT.md).
 
 ## 1. Product and runtime shape
 
@@ -203,7 +204,7 @@ The request freezes Snapshot, model/provider, strategy/prompt hashes/versions, r
 research flag and auxiliary context. Run start/completion surround final reasoning; research
 precedes `started_at` and has its own retrieval timestamp. UTC instants and local sessions remain
 distinct. Decimal facts remain exact canonical strings; chart number conversion is drawing only.
-Head is `0003_task007c1_narrative_ledger`; 0001/0002 are retained. See [DATABASE_SCHEMA](DATABASE_SCHEMA.md).
+Head is `0004_task006b1_market_archive`; 0001/0002/0003 are retained. See [DATABASE_SCHEMA](DATABASE_SCHEMA.md).
 
 This ledger is not a generic market archive. Current provider read-through/QFQ and frozen
 W1/D1/M30 evidence do not provide arbitrary strict historical As-Of replay. Hashes prove stored
@@ -234,11 +235,11 @@ No conversion rewrites old records or fabricates structured fields from prose.
 |---|---|
 | Current user capabilities | Market/watchlist workbench, current Snapshot, selected-model Narrative, secure credentials, explicit research, immutable evidence/history |
 | Retained non-default | Legacy structured runtime/validator/ledger; original deterministic 006B with `STRUCTURE_CONCERNS_FOUND`; Phase 1 opening accounting/descriptors and compatibility reads |
-| Authorized next, not implemented | 006B1 market archive/replay and planned 0004, under its updated exact-baseline handoff |
+| Implemented, pending review | 006B1 explicit local market archive/replay and additive 0004; separate from Analyze |
 | Deferred | Strict historical As-Of/GoldSet; PAQS-Q successors; 007D comparison; Paper Broker/PaperFill/NAV/performance and Phase 3/4 extensions |
 | Permanently excluded | Real-account observation/import/positions, broker writes/orders, autonomous execution |
 
-ADC is reviewed/integrated; 006B1 may start only from the updated post-ADC handoff.
+ADC is reviewed/integrated; 006B1 uses the verified updated post-ADC handoff.
 The original capture/versioning/offline-read scope remains unchanged.
 Skeletons and route names do not activate deferred behavior.
 
@@ -260,3 +261,26 @@ not require reading successive remediation overrides.
 | C1 closeout | [User acceptance](decisions/TASK_007C1_CLOSEOUT_2026_09_08.md), not independent recomputation of local hashes or all-model paid testing |
 | C2 closeout | [Review](reviews/TASK_007C2_INDEPENDENT_REVIEW.md), [user closeout](decisions/TASK_007C2_CLOSEOUT_AND_006B1_HANDOFF_2026_09_08.md); user screenshot showed C1 branch without SHA, not verified exact-C2 runtime |
 | ADC sequencing | [Decision](decisions/ARCHITECTURE_DOCUMENTATION_CONSOLIDATION_BEFORE_006B1_2026_09_09.md), [report](reports/TASK_ADC_001_IMPLEMENTATION_REPORT.md); historical sequencing/implementation records; now [reviewed](reviews/TASK_ADC_001_F01_FOCUSED_RE_REVIEW.md) and [closed/integrated](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md) |
+
+## 10. Explicit local market archive
+
+[MarketDataArchiveService](../src/ai_infra_quant/application/market_data_archive.py) resolves an
+existing verified canonical Security through the read-only identity service. One request-scoped
+provider context performs one D1, one M1 and one bounded calendar capability call. External reads
+finish before any archive write transaction. Validation freezes exact Decimal strings, source and
+completion/time semantics; invalid/conflicting batches are rejected and unavailable batches are
+explicit. The result is observational, not an atomic provider Snapshot or certified full coverage.
+
+[SQLAlchemyMarketDataArchive](../src/ai_infra_quant/database/repositories/market_data_archive.py)
+atomically stores a capture, new content versions and ordered memberships. SQLite BEGIN IMMEDIATE
+and PostgreSQL per-Security locking plus unique keys prevent concurrent duplicate versions.
+Update/delete triggers protect all three tables; ordinal bounds and filled membership keys seal a
+committed capture against later additions. Calendar and batch facts live in hashed capture JSON.
+Financial columns use the existing ExactDecimal type; retrieval belongs to the membership rather
+than the shared content hash. GETs have no provider dependency and use bounded keyset pagination.
+
+The [archive UI](../src/ai_infra_quant/frontend/static/market-data-archive.js) listens to the existing
+`security-selected` event. It owns only its folded section, explicit POST guard, local list/detail
+and table. Epoch/request guards discard late responses. Known-ID reading works without market
+initialization. No archive read enters Snapshot, NarrativeGateway, Research/Synthesis or Legacy.
+See [API](API_CONTRACTS.md#11-local-market-archive-006b1) and [schema](DATABASE_SCHEMA.md#7-local-market-archive-0004).

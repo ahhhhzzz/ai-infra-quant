@@ -107,6 +107,7 @@ def test_task007b_adds_only_analysis_evidence_tables() -> None:
     assert model_names == {
         "__init__.py",
         "accounting.py",
+        "market_data_archive.py",
         "paqs_e_ledger.py",
         "paqs_e_narrative.py",
         "portfolio.py",

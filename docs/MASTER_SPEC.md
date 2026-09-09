@@ -3,12 +3,12 @@
 ## Current delivery status — 2026-09-09
 
 C1/C2 and ADC-001 are accepted and integrated. ADC-001 passed focused re-review at
-`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; all runtime code remains unchanged.
-TASK-006B1 is the next authorized implementation under its original scope and updated handoff.
+`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; ADC itself changed no runtime code.
+TASK-006B1 archive/replay is implemented on its task branch, pending independent review; it is not integrated.
 Exact SHAs, current sequence and evidence attribution are in [ROADMAP](ROADMAP.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
-Status: **AUTHORITATIVE — PAQS-E Snapshot-on-Demand MVP; TASK-007A/B/C integrated; TASK-007C1 user-accepted/integrated; TASK-007C2 integrated; ADC-001 reviewed/integrated; 006B1 authorized next**
+Status: **AUTHORITATIVE — PAQS-E Snapshot-on-Demand MVP; TASK-007A/B/C integrated; TASK-007C1 user-accepted/integrated; TASK-007C2 integrated; ADC-001 reviewed/integrated; 006B1 implemented / pending independent review**
 
 Superseding future-scope decisions:
 
@@ -258,8 +258,8 @@ TASK-006A is integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B
 implementation is integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`; its real-market
 semantic checkpoint remains `STRUCTURE_CONCERNS_FOUND`. Earlier 006C/006D/006E single-engine plans
 are superseded by separately planned 006B-Q/006C-Q/006D-Q/006E-Q work and the 007A/B/C/D workstream.
-TASK-006B1 historical storage/replay and TASK-007D Q/E comparison are later bounded work, not
-prerequisites for the current usable 007C interface. `TASK-006` and `TASK-007` remain umbrellas only.
+TASK-006B1 explicit observation archive/replay is implemented on its task branch pending review.
+It is isolated from current Snapshot/Analyze; TASK-007D Q/E comparison remains deferred. `TASK-006` and `TASK-007` remain umbrellas only.
 
 ## 13. Quality and change control
 
@@ -274,3 +274,14 @@ Documentation requirements become part of PAQS Definition of Done. TASK-006A est
 Phase 1 remains the reviewed foundation: packaging/configuration/logging; deterministic migration 0001; exact Decimal and UTC invariants; canonical Security identity; Watchlist; opening HKD 20,000, 200 units and NAV 100 facts; accepted read APIs/frontend; inert capability descriptors; tests and reviews.
 
 `PAQS-MVP-001` changes none of that implementation or evidence.
+
+## 14. Local observation archive — TASK-006B1
+
+Explicit collection freezes at most 1500 completed D1 and 50,000 completed M1 rows from the recent
+30-day minute window, with bounded calendar/provenance. Immutable capture membership selects
+exact content versions; duplicates reuse versions and revisions never replace prior observations.
+Additive 0004 preserves 0001/0002/0003 and all existing analysis/accounting/watchlist records.
+GET list/detail/page reads are local only. A failed or partial provider batch never becomes invented
+continuous data. See [database design](DATABASE_SCHEMA.md#7-local-market-archive-0004).
+No collection scheduler, archive-backed Analyze, historical As-Of claim, backtest return or broker
+account behavior is introduced. Current live refresh and Narrative-first Analyze remain unchanged.

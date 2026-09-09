@@ -3,8 +3,8 @@
 ## Current delivery status — 2026-09-09
 
 C1/C2 and ADC-001 are accepted and integrated. ADC-001 passed focused re-review at
-`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; all runtime code remains unchanged.
-TASK-006B1 is the next authorized implementation under its original scope and updated handoff.
+`66a3ca7bbff258665b25e5ab17231138bf3cc49f`; ADC itself changed no runtime code.
+TASK-006B1 archive/replay is implemented on its task branch, pending independent review; it is not integrated.
 Exact SHAs, current sequence and evidence attribution are in [ROADMAP](ROADMAP.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
@@ -130,7 +130,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | PAQS-016 | Latest quote is reference-only, preserves nullable provider delay, and cannot confirm completed-bar structural evidence | RETAINED | 2 | IMPLEMENTED | TASK-006B2 final independent review at `5f996a...` |
 | PAQS-019 | Shared W1/D1/M30 evidence exposes machine-readable source status, authoritative counts, W1 exclusions and M30 missing elapsed-bucket provenance | RETAINED | 2 | IMPLEMENTED | TASK-006B2 Amendment 01; final independent review at `5f996a...` |
 | PAQS-017 | PAQS branches remain runtime-independent; one provider/branch may fail without disabling the other or ordinary market-data viewing | RETAINED | 2 | DOCUMENTED | Dual-branch architecture decision/review |
-| PAQS-018 | TASK-006B1 Local Market Data Store & Replay Foundation original scope retained; authorized next under updated post-ADC handoff, not yet implemented | RETAINED | 2 | APPROVED_TASK | Roadmap 7; [ADC closeout](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md) |
+| PAQS-018 | TASK-006B1 explicit bounded archive and offline capture replay; current QFQ is not strict historical As-Of | ACTIVE | 2 | IMPLEMENTED_PENDING_REVIEW | [Archive tests](../tests/integration/test_market_data_archive_api.py); [report](reports/TASK_006B1_IMPLEMENTATION_REPORT.md) |
 
 ### 5.2 PAQS-E requirements
 
@@ -281,5 +281,19 @@ below are inspected evidence, not ADC execution results. C1 and C2 acceptance ar
 | C2-001 | IMPLEMENTED / REVIEWED / INTEGRATED: credential layout, old UI/read cleanup, active watchlist preserved | [template](../src/ai_infra_quant/frontend/templates/index.html); [C2 browser tests](../tests/browser/test_paqs_e_ui_cleanup.py); C2 review/closeout above |
 | ADC-001 | REVIEWED PASS / INTEGRATED: docs-only architecture/status/traceability consolidation; F01 closed | [Contract](../prompts/tasks/TASK-ADC-001_ARCHITECTURE_DOCUMENTATION_CONSOLIDATION.md); [report](reports/TASK_ADC_001_IMPLEMENTATION_REPORT.md); [focused review](reviews/TASK_ADC_001_F01_FOCUSED_RE_REVIEW.md); [closeout](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md) |
 
-006B1 archive/replay/0004 is not implemented here. PAQS-Q successors, strict historical As-Of/GoldSet,
+006B1 archive/replay/0004 is implemented on the task branch pending independent review.
+PAQS-Q successors, strict historical As-Of/GoldSet,
 007D comparison and Paper/PnL/Phase 3/4 remain deferred. Real-account/trading behavior is forbidden.
+
+## TASK-006B1 acceptance traceability (implementation, pending review)
+
+| ID | Requirement | Executable evidence |
+|---|---|---|
+| ARC-001 | Explicit completed D1/M1, canonical verified Security, bounded calendar/quality | [API/service tests](../tests/integration/test_market_data_archive_api.py) |
+| ARC-002 | Immutable membership, content dedup, revisions including A→B→A, restart/offline | [Dedup/restart/concurrency tests](../tests/integration/test_market_data_archive_api.py) |
+| ARC-003 | Exact Decimal, UTC/DST/cross-date, HK lunch/half-day, invalid bar rejection | [Domain tests](../tests/unit/test_market_data_archive.py); [calendar tests](../tests/integration/test_market_data_archive_api.py) |
+| ARC-004 | Safe additive 0004, prior ledger/watchlist bytes retained, dialect exact types | [Migration test](../tests/integration/test_market_archive_migration.py); [DDL tests](../tests/architecture/test_task006b1_boundaries.py) |
+| ARC-005 | Partial/total failure truth, transaction rollback, membership sealing | [Integration tests](../tests/integration/test_market_data_archive_api.py) |
+| ARC-006 | Bounded stable offline pages, 4xx validation, no read-side provider calls | [API/pagination tests](../tests/integration/test_market_data_archive_api.py) |
+| ARC-007 | Default-folded UI, explicit save guard, stale selection, exact local table, both themes | [Real Uvicorn browser tests](../tests/browser/test_market_archive_browser.py); [screenshots](evidence/TASK_006B1/README.md) |
+| ARC-008 | No Analyze/research/trading coupling; protected paths unchanged | [Boundary tests](../tests/architecture/test_task006b1_boundaries.py); [implementation report](reports/TASK_006B1_IMPLEMENTATION_REPORT.md) |

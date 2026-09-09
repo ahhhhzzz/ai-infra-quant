@@ -2,8 +2,8 @@
 
 C1 and C2 are accepted and integrated. See [ROADMAP](ROADMAP.md) for exact status and acceptance
 attribution, and [ARCHITECTURE](ARCHITECTURE.md) for current components and provider boundaries.
-ADC-001 documentation consolidation is reviewed and integrated. 006B1 is next under its updated
-exact-baseline handoff; its archive/replay behavior is not implemented yet.
+ADC-001 documentation consolidation is reviewed and integrated. This branch implements 006B1
+explicit local archive/replay, pending independent review and not integrated.
 
 The existing FastAPI application serves the workbench at `/`. No frontend build server or Node
 production runtime is required. Use the existing documented migration and Uvicorn/Windows launcher
@@ -144,7 +144,7 @@ python -m mypy src tests
 ```
 
 The existing browser fixture creates a fresh temporary SQLite DB, runs Alembic upgrade to
-`0003_task007c1_narrative_ledger`, launches the actual `ai_infra_quant.backend.main:app` via Uvicorn on
+`0004_task006b1_market_archive`, launches the actual `ai_infra_quant.backend.main:app` via Uvicorn on
 an ephemeral loopback port, unsets `OPENAI_API_KEY` and selects provider `none`. It checks real
 health/OpenAPI/configuration/page/static HTTP routes before browser scenarios. Only its own
 subprocess is terminated during cleanup. No existing user process or database is touched.
@@ -179,3 +179,26 @@ TASK-007C2 screenshots are separately generated with `TASK007C2_SCREENSHOT_DIR` 
 `docs/evidence/TASK_007C2/` and `python -m pytest tests/browser/test_paqs_e_ui_cleanup.py -ra`.
 The [scenario index](evidence/TASK_007C2/README.md) distinguishes full-page captures from viewport
 size and records the equivalent 200% text-enlargement method. All data and errors are synthetic.
+
+## Local market archive (006B1)
+
+1. Expand the default-folded **本地行情存档** section. This only reads the current Security's local list.
+2. With Futu configured and a verified canonical US/HK Security selected, explicitly press
+   **保存当前行情**. The button is guarded for the entire request; it never calls Analyze/research.
+3. Read the PARTIAL status, batch counts, actual ranges and known/unknown gaps. Expand frozen
+   calendar/source details for retrieval timestamps, raw day types, session segments and limits.
+4. Choose an existing capture, select D1/M1 and page through the exact OHLCV table (500 rows/page).
+   Its horizontal scroll area preserves full precision on narrow screens; it does not drive charts.
+5. Without OpenD/network, use **读取本地列表** or enter a known **Capture ID** and press
+   **读取本地存档**. These controls remain usable independently of current market initialization.
+
+The disclaimer is explicit: 本地存档；当前观察到的复权数据；不等于严格历史时点回测.
+Archived Security identity and timestamps are always displayed. Selection/removal clears prior
+archive views; late responses cannot attach the prior Security's archive to a new selection.
+A submitted save may finish server-side after navigation; an unknown outcome requires local-list
+inspection before another explicit save. Errors recover without automatic retry.
+
+Current live charts/refresh, Narrative history/Markdown/raw text, API Key dialog, default research
+OFF and current Snapshot Analyze remain unchanged. No historical Analyze button is provided.
+[Browser evidence](evidence/TASK_006B1/README.md) uses synthetic data through real Uvicorn/SQLite
+and Chromium at 390/900/1440 px in both themes; it is not a real Futu market-data acceptance claim.

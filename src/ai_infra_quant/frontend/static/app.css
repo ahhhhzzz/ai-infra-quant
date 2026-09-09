@@ -834,3 +834,20 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; fo
 .narrative-markdown th, .narrative-markdown td { border: 1px solid currentColor; padding: .4rem .6rem; text-align: left; }
 .narrative-view-controls { display: flex; gap: .5rem; margin-bottom: .75rem; }
 .narrative-view-controls [aria-pressed="true"] { outline: 2px solid currentColor; }
+
+/* Local archive controls and bounded table; independent of current charts and Analyze. */
+.market-archive { margin: 16px 0; padding: 16px; border: 1px solid var(--border); background: var(--surface); border-radius: 10px; min-width: 0; overflow-wrap: anywhere; }
+.market-archive > summary { font-size: 1.1rem; cursor: pointer; }
+.market-archive button, .market-archive input, .market-archive select { max-width: 100%; min-width: 0; }
+.market-archive label { display: grid; gap: 6px; min-width: 0; }
+.archive-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin: 12px 0; }
+#archive-known-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; margin: 12px 0; }
+#archive-list { display: grid; gap: 8px; }
+#archive-list button { text-align: left; white-space: normal; overflow-wrap: anywhere; }
+#archive-detail pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 20rem; overflow: auto; }
+.archive-table-scroll { overflow-x: auto; max-height: 28rem; }
+#archive-bars { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+#archive-bars td, #archive-bars th { padding: 8px; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border); }
+@media (max-width: 600px) { #archive-known-form { grid-template-columns: minmax(0, 1fr); } }
+
+.market-archive p { margin: 8px 0; }

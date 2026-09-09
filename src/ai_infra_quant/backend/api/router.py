@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from ai_infra_quant.backend.api.v1 import (
     brokers,
     market_data,
+    market_data_archive,
     paqs_e,
     paqs_market_snapshot,
     performance,
@@ -26,3 +27,5 @@ api_router.include_router(providers.router)
 api_router.include_router(market_data.router)
 api_router.include_router(paqs_market_snapshot.router)
 api_router.include_router(paqs_e.router)
+
+api_router.include_router(market_data_archive.router)

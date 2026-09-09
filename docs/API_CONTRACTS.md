@@ -1,6 +1,7 @@
 # API Contracts
 
-Status: current API at `722936984deac652b443eba132c69650653345e1`; Narrative-first default.
+Status: 006B1 task-branch API over `02326a3bb19c2a89352d765f5331670b5f3f466d`; pending review,
+not integrated. Narrative-first remains the default Analyze path.
 Architecture and lifecycle: [ARCHITECTURE](ARCHITECTURE.md).
 
 Decision: `MTF-001` in `docs/ROADMAP.md`
@@ -323,8 +324,8 @@ for that implementation's original contract, and [DATABASE_SCHEMA](DATABASE_SCHE
 
 ## 9. Deferred and forbidden routes
 
-No current market archive/replay/006B1, strict historical As-Of/GoldSet, score/ranking, PAQS-Q
-successor, 007D comparison, PaperOrder/PaperFill/performance or backtest endpoint is introduced.
+The 006B1 archive routes below are separate local observations. No strict historical As-Of/GoldSet,
+score/ranking, PAQS-Q successor, 007D comparison, PaperOrder/PaperFill/performance or backtest endpoint is introduced.
 Future scope requires its own approved contract. Broker accounts, real cash/positions/trades,
 import/synchronization, order submission/cancellation/modification and autonomous execution are
 permanently excluded. Inert foundation descriptors are not broker connectivity.
@@ -336,3 +337,43 @@ permanently excluded. Inert foundation descriptors are not broker connectivity.
 [model/credential API tests](../tests/integration/test_paqs_e_multi_model.py) and
 [partial-action API tests](../tests/integration/test_paqs_e_partial_actions_api.py) provide
 existing executable specifications. ADC inspects these sources without claiming a new runtime run.
+
+## 11. Local market archive (006B1)
+
+Base: `/api/v1/market-data/archive`. UUIDs are canonical internal identifiers, not account IDs.
+
+| Method/path | Request and result |
+|---|---|
+| POST `/captures` | JSON `{"security_id":"<uuid>"}` only; extra fields rejected. Loopback peer/host, exact same Origin, same-origin fetch and application/json required; no query parameters and body ≤1024 bytes. One explicit synchronous attempt; 201 only after atomic persistence of real bars. |
+| GET `/securities/{security_id}/captures` | Default limit 20, max 50; descending `(recorded_at,capture_id)` keyset page. Returns `items` metadata without calendar and `next_cursor` or null. |
+| GET `/captures/{capture_id}` | Frozen capture including calendar, per-batch observations/quality and disclaimer. Entirely local. |
+| GET `/captures/{capture_id}/bars?timeframe=D1` | D1/M1 only; default limit 500, max 1000. Ascending immutable membership ordinal, exact Decimal strings, version hash and observation retrieval. Returns `items`, `capture_id`, `timeframe`, `next_cursor`. |
+
+Limits are server-owned: D1 1500 rows with the existing provider's 3000-calendar-day lookback;
+M1 recent 30 market-local calendar days, at most 50,000 completed one-minute intervals. Calendar
+covers the returned bar dates and minute window, bounded to 3001 inclusive dates/records.
+Exactly one call per capability is attempted within one provider context (no archive retry,
+fallback or automatic collection). These are capability calls, not a claim about SDK-internal
+history pagination or its existing daily-completion market-state check. Counts are frozen in
+`provider_capability_calls`. Context failures and invalid batches are explicit.
+
+Capture response fields include schema/capture/Security identity, market/currency/timezone/provider,
+server timestamps, request envelope, D1/M1/calendar status/counts/quality/actual ranges/retrieval,
+calendar session facts, unknown adjustment epoch, `historical_as_of_safe=false`,
+`atomic_provider_snapshot=false`, disclaimer and capability counts. Current QFQ never becomes a
+strict historical cutoff. `recorded_at` is assigned immediately before the short write; batch
+retrieval and membership retrieval are separate from the server capture envelope.
+
+Statuses: malformed UUID/timeframe/limit/cursor or extra body 422; unknown Security/capture 404;
+unverified/conflicting canonical metadata 409; unsupported mapping/provider 422; mutation boundary
+403; excessive body/query 400; no valid bar batch 503 `ARCHIVE_UNAVAILABLE` with safe batch codes;
+local persistence/integrity failure 503 and write rollback. No raw SDK exception is returned.
+A partially populated capture is 201 with PARTIAL, never a false empty success. If a connection
+is lost, outcome is unknown: inspect local list before another explicit save; no automatic retry.
+
+Opaque base64url cursors contain a version, scope and position. They are bounded to 512 characters,
+validated against Security or capture/timeframe, and do not expose filesystem/SQL/provider details.
+They are pagination tokens, not credentials. List anchors must exist; bar anchors must be in the
+frozen membership range. No offset-based mutable history, gap-filling or cross-capture stitching.
+All GETs operate even when provider construction fails; they do not verify current provider state
+or invoke Snapshot, Analyze, credentials, model or research services.
