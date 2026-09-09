@@ -1,0 +1,74 @@
+{
+  "base_decision_hash_match": {
+    "D1": 100,
+    "M30": 74,
+    "W1": 100
+  },
+  "candidate_config_hashes": {
+    "D1": "fabf759488298f896a28f77b3caee6dd45b1ab6827ff6cf7c18bd1955e320b91",
+    "M30": "6082ec9616be6c9ae43e9fb81ac11d6411f2127e86328fe73a1cda7aa90ad71c",
+    "W1": "313f9b65a386d71883cdf672b9e07d902f8729d9023eaa9bcf1ba6a3ad17c2b8"
+  },
+  "candidate_hypothesis": "QSTR-R02-ELIGIBLE-SEED-1",
+  "checks": [
+    {
+      "command": "python -m pytest tests/unit/test_paqs_structure.py tests/unit/test_paqs_input.py tests/integration/test_paqs_structure_api.py tests/integration/test_paqs_input_api.py tests/architecture/test_task006a_boundaries.py tests/architecture/test_task006b_boundaries.py -ra",
+      "exit_code": 0,
+      "summary": "59 passed, 1 warning in 10.48s"
+    },
+    {
+      "command": "python -m pytest tests/research/paqs_q -ra",
+      "exit_code": 0,
+      "summary": "132 passed, 1 warning in 8.77s"
+    },
+    {
+      "command": "python -m ruff check tools/research/paqs_q/r02 tests/research/paqs_q/r02",
+      "exit_code": 0,
+      "summary": "All checks passed!"
+    },
+    {
+      "command": "python -m ruff format --check tools/research/paqs_q/r02 tests/research/paqs_q/r02",
+      "exit_code": 0,
+      "summary": "12 files already formatted"
+    },
+    {
+      "command": "python -m mypy --strict --explicit-package-bases tools/research/paqs_q/r02 tests/research/paqs_q/r02",
+      "exit_code": 0,
+      "summary": "Success: no issues found in 12 source files"
+    },
+    {
+      "command": "python -m mypy --strict --explicit-package-bases --platform win32 tools/research/paqs_q/r02 tests/research/paqs_q/r02",
+      "exit_code": 0,
+      "summary": "Success: no issues found in 12 source files"
+    },
+    {
+      "command": "git diff 47e7020609e5655927c6aac11a3b1f35b03c96aa --check",
+      "exit_code": 0,
+      "summary": "No whitespace errors (pre-final staging; repeated at delivery)."
+    }
+  ],
+  "hypothesis_freeze_sha": "251f2a2ea9609ddd875c5aff03f5758c81914c84",
+  "research_test_breakdown": {
+    "new": 35,
+    "original": 97,
+    "passed": 132
+  },
+  "skips": 0,
+  "source_sha": "36357c99809f44756c27035060edc3801d94ef67",
+  "study_execution": {
+    "compare_exit_code": 0,
+    "explain_exit_code": 0,
+    "normal_candidate_unchanged_since_comparison": true,
+    "phase_a_exit_code": 0,
+    "refinement": "Case event-only equality label was narrowed; refined-causes is final geometry interpretation. Original comparison artifacts retained."
+  },
+  "test_boundary": "No unrelated browser/full-business/Uvicorn requested or claimed.",
+  "verdicts": {
+    "engineering": "LOCAL_VALIDATION_PASS_PENDING_INDEPENDENT_REVIEW",
+    "market_completeness": "INCOMPLETE",
+    "product_adoption": "NOT_AUTHORIZED",
+    "structural_robustness": "REJECT_H1_AS_STABLE_REPLACEMENT"
+  },
+  "warning": "Existing Starlette anyio.abc.BlockingPortal alias deprecation only.",
+  "xfails": 0
+}

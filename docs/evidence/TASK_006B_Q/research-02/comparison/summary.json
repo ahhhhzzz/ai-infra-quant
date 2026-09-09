@@ -1,0 +1,313 @@
+[
+  {
+    "BASELINE": {
+      "adjacent_transitions": 99,
+      "ambiguous_evaluations": 0,
+      "direct_flips": 0,
+      "expired_events": 7,
+      "geometry_over_half_atr": 0,
+      "lost_events": 9,
+      "material_left_only": 4,
+      "mean_active_pivots": "5.710000000000000000",
+      "new_confirmations": 5,
+      "opportunities": 556,
+      "origin_violations": 0,
+      "reasons": {
+        "ACTIVE_TWO_SIDED_HISTORY_INSUFFICIENT": 45,
+        "CLOSE_BELOW_HL": 6,
+        "DIRECTIONAL_EVIDENCE": 13,
+        "EQUAL_OR_CONFLICTING_LABELS": 36
+      },
+      "rediscovered_events": 18,
+      "regimes": {
+        "BULL_TREND": 13,
+        "UNCERTAIN": 87
+      },
+      "state_changes": 6,
+      "time_violations": 0
+    },
+    "H1": {
+      "adjacent_transitions": 99,
+      "ambiguous_evaluations": 0,
+      "direct_flips": 0,
+      "expired_events": 9,
+      "geometry_over_half_atr": 0,
+      "lost_events": 0,
+      "material_left_only": 0,
+      "mean_active_pivots": "10.040000000000000000",
+      "new_confirmations": 7,
+      "opportunities": 987,
+      "origin_violations": 0,
+      "reasons": {
+        "CLOSE_BELOW_HL": 6,
+        "DIRECTIONAL_EVIDENCE": 21,
+        "EQUAL_OR_CONFLICTING_LABELS": 73
+      },
+      "rediscovered_events": 0,
+      "regimes": {
+        "BULL_TREND": 21,
+        "UNCERTAIN": 79
+      },
+      "state_changes": 8,
+      "time_violations": 0
+    },
+    "scheduled": 100,
+    "security": "US.AVGO",
+    "sensitivity": {
+      "BASELINE": {
+        "lambda=1.7": {
+          "pairs": 100,
+          "regime_disagreements": 4,
+          "structure_disagreements": 57
+        },
+        "lambda=1.9": {
+          "pairs": 100,
+          "regime_disagreements": 35,
+          "structure_disagreements": 55
+        }
+      },
+      "H1": {
+        "lambda=1.7": {
+          "pairs": 100,
+          "regime_disagreements": 18,
+          "structure_disagreements": 100
+        },
+        "lambda=1.9": {
+          "pairs": 100,
+          "regime_disagreements": 35,
+          "structure_disagreements": 100
+        }
+      }
+    },
+    "timeframe": "W1",
+    "valid": 100
+  },
+  {
+    "BASELINE": {
+      "adjacent_transitions": 99,
+      "ambiguous_evaluations": 0,
+      "direct_flips": 0,
+      "expired_events": 4,
+      "geometry_over_half_atr": 0,
+      "lost_events": 0,
+      "material_left_only": 1,
+      "mean_active_pivots": "1.510000000000000000",
+      "new_confirmations": 0,
+      "opportunities": 147,
+      "origin_violations": 0,
+      "reasons": {
+        "ACTIVE_TWO_SIDED_HISTORY_INSUFFICIENT": 96,
+        "DIRECTIONAL_EVIDENCE": 4
+      },
+      "rediscovered_events": 0,
+      "regimes": {
+        "BULL_TREND": 4,
+        "UNCERTAIN": 96
+      },
+      "state_changes": 1,
+      "time_violations": 0
+    },
+    "H1": {
+      "adjacent_transitions": 99,
+      "ambiguous_evaluations": 0,
+      "direct_flips": 0,
+      "expired_events": 7,
+      "geometry_over_half_atr": 11,
+      "lost_events": 0,
+      "material_left_only": 6,
+      "mean_active_pivots": "24.890000000000000000",
+      "new_confirmations": 14,
+      "opportunities": 2454,
+      "origin_violations": 0,
+      "reasons": {
+        "CLOSE_BELOW_HL": 19,
+        "CURRENT_RANGE": 12,
+        "DIRECTIONAL_EVIDENCE": 45,
+        "EQUAL_OR_CONFLICTING_LABELS": 24
+      },
+      "rediscovered_events": 0,
+      "regimes": {
+        "BEAR_TREND": 17,
+        "BULL_TREND": 28,
+        "RANGE": 12,
+        "UNCERTAIN": 43
+      },
+      "state_changes": 12,
+      "time_violations": 0
+    },
+    "scheduled": 100,
+    "security": "US.AVGO",
+    "sensitivity": {
+      "BASELINE": {
+        "age=100": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 0
+        },
+        "age=160": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 0
+        },
+        "epsilon=0.45": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 0
+        },
+        "epsilon=0.55": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 0
+        },
+        "lambda=1.7": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 0
+        },
+        "lambda=1.9": {
+          "pairs": 100,
+          "regime_disagreements": 4,
+          "structure_disagreements": 38
+        },
+        "range=30": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 0
+        },
+        "range=60": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 0
+        }
+      },
+      "H1": {
+        "age=100": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 32
+        },
+        "age=160": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 32
+        },
+        "epsilon=0.45": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 0
+        },
+        "epsilon=0.55": {
+          "pairs": 100,
+          "regime_disagreements": 0,
+          "structure_disagreements": 1
+        },
+        "lambda=1.7": {
+          "pairs": 100,
+          "regime_disagreements": 3,
+          "structure_disagreements": 100
+        },
+        "lambda=1.9": {
+          "pairs": 100,
+          "regime_disagreements": 31,
+          "structure_disagreements": 100
+        },
+        "range=30": {
+          "pairs": 100,
+          "regime_disagreements": 2,
+          "structure_disagreements": 2
+        },
+        "range=60": {
+          "pairs": 100,
+          "regime_disagreements": 22,
+          "structure_disagreements": 22
+        }
+      }
+    },
+    "timeframe": "D1",
+    "valid": 100
+  },
+  {
+    "BASELINE": {
+      "adjacent_transitions": 73,
+      "ambiguous_evaluations": 1,
+      "direct_flips": 0,
+      "expired_events": 8,
+      "geometry_over_half_atr": 0,
+      "lost_events": 58,
+      "material_left_only": 7,
+      "mean_active_pivots": "12.135135135135135135",
+      "new_confirmations": 10,
+      "opportunities": 870,
+      "origin_violations": 0,
+      "reasons": {
+        "ACTIVE_TWO_SIDED_HISTORY_INSUFFICIENT": 30,
+        "DIRECTIONAL_EVIDENCE": 23,
+        "EQUAL_OR_CONFLICTING_LABELS": 21
+      },
+      "rediscovered_events": 76,
+      "regimes": {
+        "BEAR_TREND": 3,
+        "BULL_TREND": 20,
+        "UNCERTAIN": 51
+      },
+      "state_changes": 9,
+      "time_violations": 0
+    },
+    "H1": {
+      "adjacent_transitions": 73,
+      "ambiguous_evaluations": 1,
+      "direct_flips": 0,
+      "expired_events": 10,
+      "geometry_over_half_atr": 0,
+      "lost_events": 0,
+      "material_left_only": 0,
+      "mean_active_pivots": "28.459459459459459459",
+      "new_confirmations": 17,
+      "opportunities": 2066,
+      "origin_violations": 0,
+      "reasons": {
+        "CLOSE_ABOVE_LH": 1,
+        "DIRECTIONAL_EVIDENCE": 37,
+        "EQUAL_OR_CONFLICTING_LABELS": 36
+      },
+      "rediscovered_events": 0,
+      "regimes": {
+        "BEAR_TREND": 14,
+        "BULL_TREND": 23,
+        "UNCERTAIN": 37
+      },
+      "state_changes": 10,
+      "time_violations": 0
+    },
+    "scheduled": 100,
+    "security": "US.AVGO",
+    "sensitivity": {
+      "BASELINE": {
+        "lambda=0.9": {
+          "pairs": 74,
+          "regime_disagreements": 2,
+          "structure_disagreements": 44
+        },
+        "lambda=1.1": {
+          "pairs": 74,
+          "regime_disagreements": 1,
+          "structure_disagreements": 45
+        }
+      },
+      "H1": {
+        "lambda=0.9": {
+          "pairs": 74,
+          "regime_disagreements": 4,
+          "structure_disagreements": 74
+        },
+        "lambda=1.1": {
+          "pairs": 74,
+          "regime_disagreements": 4,
+          "structure_disagreements": 74
+        }
+      }
+    },
+    "timeframe": "M30",
+    "valid": 74
+  }
+]

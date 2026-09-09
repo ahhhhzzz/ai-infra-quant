@@ -1,0 +1,218 @@
+{
+  "OpenD_history_requests": 0,
+  "additional": {
+    "denominators": [
+      {
+        "denominator": 40,
+        "insufficient": 0,
+        "market": "ALL",
+        "target_cutoffs": 4000,
+        "timeframe": "W1",
+        "unavailable": 40,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      },
+      {
+        "denominator": 24,
+        "insufficient": 0,
+        "market": "US",
+        "target_cutoffs": 2400,
+        "timeframe": "W1",
+        "unavailable": 24,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      },
+      {
+        "denominator": 16,
+        "insufficient": 0,
+        "market": "HK",
+        "target_cutoffs": 1600,
+        "timeframe": "W1",
+        "unavailable": 16,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      },
+      {
+        "denominator": 40,
+        "insufficient": 0,
+        "market": "ALL",
+        "target_cutoffs": 4000,
+        "timeframe": "D1",
+        "unavailable": 40,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      },
+      {
+        "denominator": 24,
+        "insufficient": 0,
+        "market": "US",
+        "target_cutoffs": 2400,
+        "timeframe": "D1",
+        "unavailable": 24,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      },
+      {
+        "denominator": 16,
+        "insufficient": 0,
+        "market": "HK",
+        "target_cutoffs": 1600,
+        "timeframe": "D1",
+        "unavailable": 16,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      },
+      {
+        "denominator": 40,
+        "insufficient": 0,
+        "market": "ALL",
+        "target_cutoffs": 4000,
+        "timeframe": "M30",
+        "unavailable": 40,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      },
+      {
+        "denominator": 24,
+        "insufficient": 0,
+        "market": "US",
+        "target_cutoffs": 2400,
+        "timeframe": "M30",
+        "unavailable": 24,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      },
+      {
+        "denominator": 16,
+        "insufficient": 0,
+        "market": "HK",
+        "target_cutoffs": 1600,
+        "timeframe": "M30",
+        "unavailable": 16,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      }
+    ],
+    "real_market_gate": "INCOMPLETE"
+  },
+  "additional_accepted_observations": 0,
+  "additional_ceiling": "2026-09-09T14:00:00Z",
+  "broker_or_LLM_requests": 0,
+  "new_accounts_or_secrets": 0,
+  "original": {
+    "denominators": [
+      {
+        "denominator": 40,
+        "insufficient": 0,
+        "market": "ALL",
+        "target_cutoffs": 4000,
+        "timeframe": "W1",
+        "unavailable": 39,
+        "valid_100": 1,
+        "valid_cutoffs": 100
+      },
+      {
+        "denominator": 24,
+        "insufficient": 0,
+        "market": "US",
+        "target_cutoffs": 2400,
+        "timeframe": "W1",
+        "unavailable": 23,
+        "valid_100": 1,
+        "valid_cutoffs": 100
+      },
+      {
+        "denominator": 16,
+        "insufficient": 0,
+        "market": "HK",
+        "target_cutoffs": 1600,
+        "timeframe": "W1",
+        "unavailable": 16,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      },
+      {
+        "denominator": 40,
+        "insufficient": 0,
+        "market": "ALL",
+        "target_cutoffs": 4000,
+        "timeframe": "D1",
+        "unavailable": 39,
+        "valid_100": 1,
+        "valid_cutoffs": 100
+      },
+      {
+        "denominator": 24,
+        "insufficient": 0,
+        "market": "US",
+        "target_cutoffs": 2400,
+        "timeframe": "D1",
+        "unavailable": 23,
+        "valid_100": 1,
+        "valid_cutoffs": 100
+      },
+      {
+        "denominator": 16,
+        "insufficient": 0,
+        "market": "HK",
+        "target_cutoffs": 1600,
+        "timeframe": "D1",
+        "unavailable": 16,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      },
+      {
+        "denominator": 40,
+        "insufficient": 1,
+        "market": "ALL",
+        "target_cutoffs": 4000,
+        "timeframe": "M30",
+        "unavailable": 39,
+        "valid_100": 0,
+        "valid_cutoffs": 74
+      },
+      {
+        "denominator": 24,
+        "insufficient": 1,
+        "market": "US",
+        "target_cutoffs": 2400,
+        "timeframe": "M30",
+        "unavailable": 23,
+        "valid_100": 0,
+        "valid_cutoffs": 74
+      },
+      {
+        "denominator": 16,
+        "insufficient": 0,
+        "market": "HK",
+        "target_cutoffs": 1600,
+        "timeframe": "M30",
+        "unavailable": 16,
+        "valid_100": 0,
+        "valid_cutoffs": 0
+      }
+    ],
+    "real_market_gate": "INCOMPLETE"
+  },
+  "original_data_access": "Exact files retained locally at D:/AI_Infra_Quant_Codex_v1/task006b-q-data; remote reviewers lacking them cannot reproduce from hashes alone.",
+  "precision_calendar_quality": "No extra numeric observations or calendars obtained. No extra normalization performed; no precision/availability upgrade. Original AVGO remains PARTIAL, current QFQ and unknown historical availability.",
+  "raw_responses": "outside Git: D:/AI_Infra_Quant_Codex_v1/task006b-q-r02-public-raw",
+  "real_market_gate": "INCOMPLETE",
+  "source_dispositions": [
+    {
+      "actual": "HTTP200 browser verification page, both history and terms entry; no OHLC or terms obtained",
+      "normalized": false,
+      "source": "Stooq"
+    },
+    {
+      "actual": "Official docs accessible; published demo NVDA/full request returns Information only; key registration not authorized",
+      "normalized": false,
+      "source": "Alpha Vantage"
+    },
+    {
+      "actual": "Official help confirms Gold subscription needed; none acquired, no alternate endpoint bypass",
+      "normalized": false,
+      "source": "Yahoo Finance"
+    }
+  ]
+}

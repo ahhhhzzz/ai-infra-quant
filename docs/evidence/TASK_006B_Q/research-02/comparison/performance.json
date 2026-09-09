@@ -1,0 +1,134 @@
+{
+  "fixture": "SYNTHETIC oscillation; default maximum normal W/A/N; no SLA",
+  "hardware": "Windows-11-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "python": "3.12.14",
+  "rows": [
+    {
+      "algorithm": "BASELINE",
+      "geometry_comparisons": {},
+      "p50_ns": 7841000,
+      "p95_nearest_rank_ns": 8344800,
+      "peak_traced_bytes": 233321,
+      "pivot_bar_visits": 130,
+      "repeats": 7,
+      "timeframe": "W1",
+      "timings_ns": [
+        7870300,
+        8066500,
+        7642800,
+        7841000,
+        7602600,
+        8344800,
+        7483700
+      ],
+      "window": 130
+    },
+    {
+      "algorithm": "H1",
+      "geometry_comparisons": {},
+      "p50_ns": 7912300,
+      "p95_nearest_rank_ns": 8295000,
+      "peak_traced_bytes": 233571,
+      "pivot_bar_visits": 130,
+      "repeats": 7,
+      "timeframe": "W1",
+      "timings_ns": [
+        7912300,
+        8295000,
+        7760600,
+        7799800,
+        7599600,
+        7926300,
+        8049600
+      ],
+      "window": 130
+    },
+    {
+      "algorithm": "BASELINE",
+      "geometry_comparisons": {
+        "pair_distance": 100,
+        "range_pairs": 2
+      },
+      "p50_ns": 19561900,
+      "p95_nearest_rank_ns": 20531900,
+      "peak_traced_bytes": 557955,
+      "pivot_bar_visits": 312,
+      "repeats": 7,
+      "timeframe": "D1",
+      "timings_ns": [
+        20531900,
+        19596600,
+        19440500,
+        19475300,
+        19561900,
+        20048400,
+        19539500
+      ],
+      "window": 312
+    },
+    {
+      "algorithm": "H1",
+      "geometry_comparisons": {
+        "pair_distance": 100,
+        "range_pairs": 2
+      },
+      "p50_ns": 20313900,
+      "p95_nearest_rank_ns": 22709700,
+      "peak_traced_bytes": 615847,
+      "pivot_bar_visits": 312,
+      "repeats": 7,
+      "timeframe": "D1",
+      "timings_ns": [
+        20280800,
+        22709700,
+        20313900,
+        20152400,
+        20827300,
+        21042000,
+        19888600
+      ],
+      "window": 312
+    },
+    {
+      "algorithm": "BASELINE",
+      "geometry_comparisons": {},
+      "p50_ns": 12743400,
+      "p95_nearest_rank_ns": 13039700,
+      "peak_traced_bytes": 360762,
+      "pivot_bar_visits": 200,
+      "repeats": 7,
+      "timeframe": "M30",
+      "timings_ns": [
+        13030600,
+        12781600,
+        12266400,
+        12652600,
+        13039700,
+        12743400,
+        12687400
+      ],
+      "window": 200
+    },
+    {
+      "algorithm": "H1",
+      "geometry_comparisons": {},
+      "p50_ns": 12343700,
+      "p95_nearest_rank_ns": 13663100,
+      "peak_traced_bytes": 360952,
+      "pivot_bar_visits": 200,
+      "repeats": 7,
+      "timeframe": "M30",
+      "timings_ns": [
+        12343700,
+        12470600,
+        12545700,
+        11876700,
+        13663100,
+        11945500,
+        11696000
+      ],
+      "window": 200
+    }
+  ]
+}

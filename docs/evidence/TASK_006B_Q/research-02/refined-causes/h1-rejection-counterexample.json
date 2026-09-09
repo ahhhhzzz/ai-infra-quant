@@ -1,0 +1,3363 @@
+{
+  "arm_evidence": {
+    "arm_decision_hashes": {
+      "BOTH": "7fcb0e3abb616e7ba3810102da553c672f4082d1ee65db1d3480ece2fff61538",
+      "LEFT": "f135e52ec2bc32b574da1e7153f9bfd8bca5521ce63d355540037d0bb7bbdc82",
+      "OLD": "2c6ffbf9a513d1455997391d6458e933eaa0881199c523f74c9fc473f4902b9a",
+      "RIGHT": "ee30cb095234c04ea9a3ff8b75b575224b051b4c38b2d80a77bcbdf5963483b6"
+    },
+    "arm_input_statuses": {
+      "BOTH": "COMPLETE",
+      "LEFT": "COMPLETE",
+      "OLD": "COMPLETE",
+      "RIGHT": "COMPLETE"
+    },
+    "arms": {
+      "BOTH": {
+        "pivots": [
+          [
+            "LOW",
+            "99",
+            "09a7c851eee3af218ab3531854499001a6302a26e427ca88eca2e9b869628f78",
+            "ea822671fd97c1f69e77cb8512dfa7462badd41ffb14f4d6db11bdc5fae246dc"
+          ],
+          [
+            "HIGH",
+            "125",
+            "dc094cb91a263289b2ddc59d7aa3e1c125ea46911ac4802fc7e3ba34f8ca0a52",
+            "53d0111b2514ff3417b65814ada513d6bd567cf2749e9fcdb008a612e2b9332c"
+          ],
+          [
+            "LOW",
+            "99",
+            "fdc59aa778b97651f2474634515ef9ff6f481617afd5460c22933669be12d3a7",
+            "1c065c464dc87ac41da2ed82b4dae0eec4f9f1d8b222d23c603b37ce962f17d1"
+          ],
+          [
+            "HIGH",
+            "125",
+            "95f41e11be1ae1bba8c63f7ed118360e044c1f53be88d44e4c820136486896b2",
+            "7862f1e32c547a49d5c9bfb5d534396c0960cded2150bd1e2935b84d68919989"
+          ],
+          [
+            "LOW",
+            "99",
+            "31fd8946fc432352bbe1af2c3092650be1b5a1e8fe9b1974d01f69b11d16ef42",
+            "1f1ba45781d7e5ba63e6e2c060b4dd7727e431f3f290eac24b1b11c78f478c55"
+          ],
+          [
+            "HIGH",
+            "125",
+            "0ff63005b5caba50bb5da5503273f60a3ef8c1fcc33d9d392698c42574e67d56",
+            "89f393dbc25e62f73d261c765b50a2bd5395efb6d59d23851763afc2d5c19e1c"
+          ],
+          [
+            "LOW",
+            "99",
+            "e7e8ea6fe9eb70412bb3f790f2abdbd50587523ed914c0e50fde06c5c0845103",
+            "a058ade3e472836221cfeae9806a6a3fd5b06fa0470fc5d4f5fdc3e3f28d2d94"
+          ],
+          [
+            "HIGH",
+            "125",
+            "c8de13db823450bb2a1ccc2141f5558d604e03641c20ed08f2c717ca8246c05f",
+            "b093d8e8c78247fece971bb6caf4fee6dfe9c44635275cfbfbe4a4b1a83bf864"
+          ],
+          [
+            "LOW",
+            "99",
+            "d90faccd6ff99af3adef5f53456b29a61b3bbc406ffba5413f03417b69239c4a",
+            "358e211d9d214464ec535baad37b40696231a927f69ab6aafee8d9799e1be5fc"
+          ],
+          [
+            "HIGH",
+            "125",
+            "26dbaabc0458b470adf3f83cbdeeff4178a1aa58051387e64ca2d48ad57ef448",
+            "64890fae0f9e3490e867a9788ec6f82df4215015ab29e1566493959b034f71de"
+          ],
+          [
+            "LOW",
+            "99",
+            "995995f6bdc8f85d44e43ff8b099cfc2bd879a22749560b56917887c4fcec3eb",
+            "a6a65a31c124c50bbc18a2accfcafe28fd78b18c6b24b086ae61ceb6e8df4c12"
+          ],
+          [
+            "HIGH",
+            "125",
+            "b76e392fec7f84526fb91f975161654c2a7c0b69f5cd3c77d0b9bafdd93d75bb",
+            "4652982bbb30af87baf65fd7c230b343df9181fffb2d66baeb26a108ded76b3d"
+          ],
+          [
+            "LOW",
+            "99",
+            "f7d3dfe25f6af31be84ba267c9da7ef77c2438bec6a9440ad8ec2cea6258bbd4",
+            "f4494e6a55f0f275a4c7d0c3e419b154417f11357125fcc35d97be8652c7e5c5"
+          ]
+        ],
+        "range": null,
+        "regime": "UNCERTAIN",
+        "zones": []
+      },
+      "LEFT": {
+        "pivots": [
+          [
+            "LOW",
+            "99",
+            "09a7c851eee3af218ab3531854499001a6302a26e427ca88eca2e9b869628f78",
+            "ea822671fd97c1f69e77cb8512dfa7462badd41ffb14f4d6db11bdc5fae246dc"
+          ],
+          [
+            "HIGH",
+            "125",
+            "dc094cb91a263289b2ddc59d7aa3e1c125ea46911ac4802fc7e3ba34f8ca0a52",
+            "53d0111b2514ff3417b65814ada513d6bd567cf2749e9fcdb008a612e2b9332c"
+          ],
+          [
+            "LOW",
+            "99",
+            "fdc59aa778b97651f2474634515ef9ff6f481617afd5460c22933669be12d3a7",
+            "1c065c464dc87ac41da2ed82b4dae0eec4f9f1d8b222d23c603b37ce962f17d1"
+          ],
+          [
+            "HIGH",
+            "125",
+            "95f41e11be1ae1bba8c63f7ed118360e044c1f53be88d44e4c820136486896b2",
+            "7862f1e32c547a49d5c9bfb5d534396c0960cded2150bd1e2935b84d68919989"
+          ],
+          [
+            "LOW",
+            "99",
+            "31fd8946fc432352bbe1af2c3092650be1b5a1e8fe9b1974d01f69b11d16ef42",
+            "1f1ba45781d7e5ba63e6e2c060b4dd7727e431f3f290eac24b1b11c78f478c55"
+          ],
+          [
+            "HIGH",
+            "125",
+            "0ff63005b5caba50bb5da5503273f60a3ef8c1fcc33d9d392698c42574e67d56",
+            "89f393dbc25e62f73d261c765b50a2bd5395efb6d59d23851763afc2d5c19e1c"
+          ],
+          [
+            "LOW",
+            "99",
+            "e7e8ea6fe9eb70412bb3f790f2abdbd50587523ed914c0e50fde06c5c0845103",
+            "a058ade3e472836221cfeae9806a6a3fd5b06fa0470fc5d4f5fdc3e3f28d2d94"
+          ],
+          [
+            "HIGH",
+            "125",
+            "c8de13db823450bb2a1ccc2141f5558d604e03641c20ed08f2c717ca8246c05f",
+            "b093d8e8c78247fece971bb6caf4fee6dfe9c44635275cfbfbe4a4b1a83bf864"
+          ],
+          [
+            "LOW",
+            "99",
+            "d90faccd6ff99af3adef5f53456b29a61b3bbc406ffba5413f03417b69239c4a",
+            "358e211d9d214464ec535baad37b40696231a927f69ab6aafee8d9799e1be5fc"
+          ],
+          [
+            "HIGH",
+            "125",
+            "26dbaabc0458b470adf3f83cbdeeff4178a1aa58051387e64ca2d48ad57ef448",
+            "64890fae0f9e3490e867a9788ec6f82df4215015ab29e1566493959b034f71de"
+          ],
+          [
+            "LOW",
+            "99",
+            "995995f6bdc8f85d44e43ff8b099cfc2bd879a22749560b56917887c4fcec3eb",
+            "a6a65a31c124c50bbc18a2accfcafe28fd78b18c6b24b086ae61ceb6e8df4c12"
+          ],
+          [
+            "HIGH",
+            "125",
+            "b76e392fec7f84526fb91f975161654c2a7c0b69f5cd3c77d0b9bafdd93d75bb",
+            "4652982bbb30af87baf65fd7c230b343df9181fffb2d66baeb26a108ded76b3d"
+          ],
+          [
+            "LOW",
+            "99",
+            "f7d3dfe25f6af31be84ba267c9da7ef77c2438bec6a9440ad8ec2cea6258bbd4",
+            "f4494e6a55f0f275a4c7d0c3e419b154417f11357125fcc35d97be8652c7e5c5"
+          ]
+        ],
+        "range": null,
+        "regime": "UNCERTAIN",
+        "zones": []
+      },
+      "OLD": {
+        "pivots": [],
+        "range": null,
+        "regime": "UNCERTAIN",
+        "zones": []
+      },
+      "RIGHT": {
+        "pivots": [],
+        "range": null,
+        "regime": "UNCERTAIN",
+        "zones": []
+      }
+    },
+    "availability_checks": {
+      "BOTH": {
+        "as_of_unknown_violations": 0,
+        "availability_status": "EXPLICIT_AS_OF",
+        "availability_violations": 0,
+        "completion_violations": 0,
+        "cutoff": "2010-01-08T04:30:00+00:00",
+        "evidence_time_hash": "605767d6cfa99cca2b90570bdeb64efd226a97c40be4a6e6d263543e8cabf1f6",
+        "observation_count": 200,
+        "unknown_availability_count": 0,
+        "violation_count": 0
+      },
+      "LEFT": {
+        "as_of_unknown_violations": 0,
+        "availability_status": "EXPLICIT_AS_OF",
+        "availability_violations": 0,
+        "completion_violations": 0,
+        "cutoff": "2010-01-08T04:00:00+00:00",
+        "evidence_time_hash": "a1e6ae3fe44bf47945b77813d83a831d15f1202d12602b76c1c6d1181925a7e0",
+        "observation_count": 199,
+        "unknown_availability_count": 0,
+        "violation_count": 0
+      },
+      "OLD": {
+        "as_of_unknown_violations": 0,
+        "availability_status": "EXPLICIT_AS_OF",
+        "availability_violations": 0,
+        "completion_violations": 0,
+        "cutoff": "2010-01-08T04:00:00+00:00",
+        "evidence_time_hash": "7529fb8b7e27d5c2bb45c7a342046fa05a359ad3d7505471d0920f905d21bdf1",
+        "observation_count": 200,
+        "unknown_availability_count": 0,
+        "violation_count": 0
+      },
+      "RIGHT": {
+        "as_of_unknown_violations": 0,
+        "availability_status": "EXPLICIT_AS_OF",
+        "availability_violations": 0,
+        "completion_violations": 0,
+        "cutoff": "2010-01-08T04:30:00+00:00",
+        "evidence_time_hash": "91c21d91133f31eebb8eaed32917184fea68d2c0f78060ad11f426a8fd9a3ac8",
+        "observation_count": 201,
+        "unknown_availability_count": 0,
+        "violation_count": 0
+      }
+    },
+    "classification": "LEFT_ONLY",
+    "diagnostic_version": "availability-2",
+    "direct_directional_flip": false,
+    "geometry": [],
+    "horizon_unavailable": false,
+    "information_change": {
+      "missing_at_new_cutoff_count": 0,
+      "newly_available_historical_count": 0,
+      "revised_historical_count": 0
+    },
+    "intervals": {
+      "BOTH": 200,
+      "LEFT": 199,
+      "OLD": 200,
+      "RIGHT": 201
+    },
+    "latest_pivot_replaced": true,
+    "material": true,
+    "review_required": true
+  },
+  "atr_changes_common_events": false,
+  "both_consequences": {
+    "comparator": "HH+HL or LH+LL",
+    "operands": [
+      [
+        "latest_high_label",
+        "EH"
+      ],
+      [
+        "latest_low_label",
+        "EL"
+      ],
+      [
+        "close",
+        "116"
+      ]
+    ],
+    "refs": [
+      "b76e392fec7f84526fb91f975161654c2a7c0b69f5cd3c77d0b9bafdd93d75bb",
+      "26dbaabc0458b470adf3f83cbdeeff4178a1aa58051387e64ca2d48ad57ef448",
+      "f7d3dfe25f6af31be84ba267c9da7ef77c2438bec6a9440ad8ec2cea6258bbd4",
+      "995995f6bdc8f85d44e43ff8b099cfc2bd879a22749560b56917887c4fcec3eb"
+    ],
+    "rule": "QSTR-008",
+    "threshold": null
+  },
+  "cause": "SEED_PATH",
+  "changed_event_times": [
+    {
+      "confirmation": {
+        "completed_at": "2010-01-05T01:30:00.000000Z",
+        "end": "2010-01-05T01:30:00.000000Z",
+        "market_local_completed": "2010-01-04T20:30:00-05:00",
+        "market_local_start": "2010-01-04T20:00:00-05:00",
+        "ref": "ea822671fd97c1f69e77cb8512dfa7462badd41ffb14f4d6db11bdc5fae246dc",
+        "session": "REGULAR",
+        "start": "2010-01-05T01:00:00.000000Z",
+        "transition_index": 50
+      },
+      "event": [
+        "LOW",
+        "09a7c851eee3af218ab3531854499001a6302a26e427ca88eca2e9b869628f78",
+        "ea822671fd97c1f69e77cb8512dfa7462badd41ffb14f4d6db11bdc5fae246dc"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-05T00:30:00.000000Z",
+        "end": "2010-01-05T00:30:00.000000Z",
+        "market_local_completed": "2010-01-04T19:30:00-05:00",
+        "market_local_start": "2010-01-04T19:00:00-05:00",
+        "ref": "09a7c851eee3af218ab3531854499001a6302a26e427ca88eca2e9b869628f78",
+        "session": "REGULAR",
+        "start": "2010-01-05T00:00:00.000000Z",
+        "transition_index": 48
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-05T07:30:00.000000Z",
+        "end": "2010-01-05T07:30:00.000000Z",
+        "market_local_completed": "2010-01-05T02:30:00-05:00",
+        "market_local_start": "2010-01-05T02:00:00-05:00",
+        "ref": "53d0111b2514ff3417b65814ada513d6bd567cf2749e9fcdb008a612e2b9332c",
+        "session": "REGULAR",
+        "start": "2010-01-05T07:00:00.000000Z",
+        "transition_index": 62
+      },
+      "event": [
+        "HIGH",
+        "dc094cb91a263289b2ddc59d7aa3e1c125ea46911ac4802fc7e3ba34f8ca0a52",
+        "53d0111b2514ff3417b65814ada513d6bd567cf2749e9fcdb008a612e2b9332c"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-05T06:30:00.000000Z",
+        "end": "2010-01-05T06:30:00.000000Z",
+        "market_local_completed": "2010-01-05T01:30:00-05:00",
+        "market_local_start": "2010-01-05T01:00:00-05:00",
+        "ref": "dc094cb91a263289b2ddc59d7aa3e1c125ea46911ac4802fc7e3ba34f8ca0a52",
+        "session": "REGULAR",
+        "start": "2010-01-05T06:00:00.000000Z",
+        "transition_index": 60
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-05T13:30:00.000000Z",
+        "end": "2010-01-05T13:30:00.000000Z",
+        "market_local_completed": "2010-01-05T08:30:00-05:00",
+        "market_local_start": "2010-01-05T08:00:00-05:00",
+        "ref": "1c065c464dc87ac41da2ed82b4dae0eec4f9f1d8b222d23c603b37ce962f17d1",
+        "session": "REGULAR",
+        "start": "2010-01-05T13:00:00.000000Z",
+        "transition_index": 74
+      },
+      "event": [
+        "LOW",
+        "fdc59aa778b97651f2474634515ef9ff6f481617afd5460c22933669be12d3a7",
+        "1c065c464dc87ac41da2ed82b4dae0eec4f9f1d8b222d23c603b37ce962f17d1"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-05T12:30:00.000000Z",
+        "end": "2010-01-05T12:30:00.000000Z",
+        "market_local_completed": "2010-01-05T07:30:00-05:00",
+        "market_local_start": "2010-01-05T07:00:00-05:00",
+        "ref": "fdc59aa778b97651f2474634515ef9ff6f481617afd5460c22933669be12d3a7",
+        "session": "REGULAR",
+        "start": "2010-01-05T12:00:00.000000Z",
+        "transition_index": 72
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-05T19:30:00.000000Z",
+        "end": "2010-01-05T19:30:00.000000Z",
+        "market_local_completed": "2010-01-05T14:30:00-05:00",
+        "market_local_start": "2010-01-05T14:00:00-05:00",
+        "ref": "7862f1e32c547a49d5c9bfb5d534396c0960cded2150bd1e2935b84d68919989",
+        "session": "REGULAR",
+        "start": "2010-01-05T19:00:00.000000Z",
+        "transition_index": 86
+      },
+      "event": [
+        "HIGH",
+        "95f41e11be1ae1bba8c63f7ed118360e044c1f53be88d44e4c820136486896b2",
+        "7862f1e32c547a49d5c9bfb5d534396c0960cded2150bd1e2935b84d68919989"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-05T18:30:00.000000Z",
+        "end": "2010-01-05T18:30:00.000000Z",
+        "market_local_completed": "2010-01-05T13:30:00-05:00",
+        "market_local_start": "2010-01-05T13:00:00-05:00",
+        "ref": "95f41e11be1ae1bba8c63f7ed118360e044c1f53be88d44e4c820136486896b2",
+        "session": "REGULAR",
+        "start": "2010-01-05T18:00:00.000000Z",
+        "transition_index": 84
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-06T01:30:00.000000Z",
+        "end": "2010-01-06T01:30:00.000000Z",
+        "market_local_completed": "2010-01-05T20:30:00-05:00",
+        "market_local_start": "2010-01-05T20:00:00-05:00",
+        "ref": "1f1ba45781d7e5ba63e6e2c060b4dd7727e431f3f290eac24b1b11c78f478c55",
+        "session": "REGULAR",
+        "start": "2010-01-06T01:00:00.000000Z",
+        "transition_index": 98
+      },
+      "event": [
+        "LOW",
+        "31fd8946fc432352bbe1af2c3092650be1b5a1e8fe9b1974d01f69b11d16ef42",
+        "1f1ba45781d7e5ba63e6e2c060b4dd7727e431f3f290eac24b1b11c78f478c55"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-06T00:30:00.000000Z",
+        "end": "2010-01-06T00:30:00.000000Z",
+        "market_local_completed": "2010-01-05T19:30:00-05:00",
+        "market_local_start": "2010-01-05T19:00:00-05:00",
+        "ref": "31fd8946fc432352bbe1af2c3092650be1b5a1e8fe9b1974d01f69b11d16ef42",
+        "session": "REGULAR",
+        "start": "2010-01-06T00:00:00.000000Z",
+        "transition_index": 96
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-06T07:30:00.000000Z",
+        "end": "2010-01-06T07:30:00.000000Z",
+        "market_local_completed": "2010-01-06T02:30:00-05:00",
+        "market_local_start": "2010-01-06T02:00:00-05:00",
+        "ref": "89f393dbc25e62f73d261c765b50a2bd5395efb6d59d23851763afc2d5c19e1c",
+        "session": "REGULAR",
+        "start": "2010-01-06T07:00:00.000000Z",
+        "transition_index": 110
+      },
+      "event": [
+        "HIGH",
+        "0ff63005b5caba50bb5da5503273f60a3ef8c1fcc33d9d392698c42574e67d56",
+        "89f393dbc25e62f73d261c765b50a2bd5395efb6d59d23851763afc2d5c19e1c"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-06T06:30:00.000000Z",
+        "end": "2010-01-06T06:30:00.000000Z",
+        "market_local_completed": "2010-01-06T01:30:00-05:00",
+        "market_local_start": "2010-01-06T01:00:00-05:00",
+        "ref": "0ff63005b5caba50bb5da5503273f60a3ef8c1fcc33d9d392698c42574e67d56",
+        "session": "REGULAR",
+        "start": "2010-01-06T06:00:00.000000Z",
+        "transition_index": 108
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-06T13:30:00.000000Z",
+        "end": "2010-01-06T13:30:00.000000Z",
+        "market_local_completed": "2010-01-06T08:30:00-05:00",
+        "market_local_start": "2010-01-06T08:00:00-05:00",
+        "ref": "a058ade3e472836221cfeae9806a6a3fd5b06fa0470fc5d4f5fdc3e3f28d2d94",
+        "session": "REGULAR",
+        "start": "2010-01-06T13:00:00.000000Z",
+        "transition_index": 122
+      },
+      "event": [
+        "LOW",
+        "e7e8ea6fe9eb70412bb3f790f2abdbd50587523ed914c0e50fde06c5c0845103",
+        "a058ade3e472836221cfeae9806a6a3fd5b06fa0470fc5d4f5fdc3e3f28d2d94"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-06T12:30:00.000000Z",
+        "end": "2010-01-06T12:30:00.000000Z",
+        "market_local_completed": "2010-01-06T07:30:00-05:00",
+        "market_local_start": "2010-01-06T07:00:00-05:00",
+        "ref": "e7e8ea6fe9eb70412bb3f790f2abdbd50587523ed914c0e50fde06c5c0845103",
+        "session": "REGULAR",
+        "start": "2010-01-06T12:00:00.000000Z",
+        "transition_index": 120
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-06T19:30:00.000000Z",
+        "end": "2010-01-06T19:30:00.000000Z",
+        "market_local_completed": "2010-01-06T14:30:00-05:00",
+        "market_local_start": "2010-01-06T14:00:00-05:00",
+        "ref": "b093d8e8c78247fece971bb6caf4fee6dfe9c44635275cfbfbe4a4b1a83bf864",
+        "session": "REGULAR",
+        "start": "2010-01-06T19:00:00.000000Z",
+        "transition_index": 134
+      },
+      "event": [
+        "HIGH",
+        "c8de13db823450bb2a1ccc2141f5558d604e03641c20ed08f2c717ca8246c05f",
+        "b093d8e8c78247fece971bb6caf4fee6dfe9c44635275cfbfbe4a4b1a83bf864"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-06T18:30:00.000000Z",
+        "end": "2010-01-06T18:30:00.000000Z",
+        "market_local_completed": "2010-01-06T13:30:00-05:00",
+        "market_local_start": "2010-01-06T13:00:00-05:00",
+        "ref": "c8de13db823450bb2a1ccc2141f5558d604e03641c20ed08f2c717ca8246c05f",
+        "session": "REGULAR",
+        "start": "2010-01-06T18:00:00.000000Z",
+        "transition_index": 132
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-07T01:30:00.000000Z",
+        "end": "2010-01-07T01:30:00.000000Z",
+        "market_local_completed": "2010-01-06T20:30:00-05:00",
+        "market_local_start": "2010-01-06T20:00:00-05:00",
+        "ref": "358e211d9d214464ec535baad37b40696231a927f69ab6aafee8d9799e1be5fc",
+        "session": "REGULAR",
+        "start": "2010-01-07T01:00:00.000000Z",
+        "transition_index": 146
+      },
+      "event": [
+        "LOW",
+        "d90faccd6ff99af3adef5f53456b29a61b3bbc406ffba5413f03417b69239c4a",
+        "358e211d9d214464ec535baad37b40696231a927f69ab6aafee8d9799e1be5fc"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-07T00:30:00.000000Z",
+        "end": "2010-01-07T00:30:00.000000Z",
+        "market_local_completed": "2010-01-06T19:30:00-05:00",
+        "market_local_start": "2010-01-06T19:00:00-05:00",
+        "ref": "d90faccd6ff99af3adef5f53456b29a61b3bbc406ffba5413f03417b69239c4a",
+        "session": "REGULAR",
+        "start": "2010-01-07T00:00:00.000000Z",
+        "transition_index": 144
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-07T07:30:00.000000Z",
+        "end": "2010-01-07T07:30:00.000000Z",
+        "market_local_completed": "2010-01-07T02:30:00-05:00",
+        "market_local_start": "2010-01-07T02:00:00-05:00",
+        "ref": "64890fae0f9e3490e867a9788ec6f82df4215015ab29e1566493959b034f71de",
+        "session": "REGULAR",
+        "start": "2010-01-07T07:00:00.000000Z",
+        "transition_index": 158
+      },
+      "event": [
+        "HIGH",
+        "26dbaabc0458b470adf3f83cbdeeff4178a1aa58051387e64ca2d48ad57ef448",
+        "64890fae0f9e3490e867a9788ec6f82df4215015ab29e1566493959b034f71de"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-07T06:30:00.000000Z",
+        "end": "2010-01-07T06:30:00.000000Z",
+        "market_local_completed": "2010-01-07T01:30:00-05:00",
+        "market_local_start": "2010-01-07T01:00:00-05:00",
+        "ref": "26dbaabc0458b470adf3f83cbdeeff4178a1aa58051387e64ca2d48ad57ef448",
+        "session": "REGULAR",
+        "start": "2010-01-07T06:00:00.000000Z",
+        "transition_index": 156
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-07T13:30:00.000000Z",
+        "end": "2010-01-07T13:30:00.000000Z",
+        "market_local_completed": "2010-01-07T08:30:00-05:00",
+        "market_local_start": "2010-01-07T08:00:00-05:00",
+        "ref": "a6a65a31c124c50bbc18a2accfcafe28fd78b18c6b24b086ae61ceb6e8df4c12",
+        "session": "REGULAR",
+        "start": "2010-01-07T13:00:00.000000Z",
+        "transition_index": 170
+      },
+      "event": [
+        "LOW",
+        "995995f6bdc8f85d44e43ff8b099cfc2bd879a22749560b56917887c4fcec3eb",
+        "a6a65a31c124c50bbc18a2accfcafe28fd78b18c6b24b086ae61ceb6e8df4c12"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-07T12:30:00.000000Z",
+        "end": "2010-01-07T12:30:00.000000Z",
+        "market_local_completed": "2010-01-07T07:30:00-05:00",
+        "market_local_start": "2010-01-07T07:00:00-05:00",
+        "ref": "995995f6bdc8f85d44e43ff8b099cfc2bd879a22749560b56917887c4fcec3eb",
+        "session": "REGULAR",
+        "start": "2010-01-07T12:00:00.000000Z",
+        "transition_index": 168
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-07T19:30:00.000000Z",
+        "end": "2010-01-07T19:30:00.000000Z",
+        "market_local_completed": "2010-01-07T14:30:00-05:00",
+        "market_local_start": "2010-01-07T14:00:00-05:00",
+        "ref": "4652982bbb30af87baf65fd7c230b343df9181fffb2d66baeb26a108ded76b3d",
+        "session": "REGULAR",
+        "start": "2010-01-07T19:00:00.000000Z",
+        "transition_index": 182
+      },
+      "event": [
+        "HIGH",
+        "b76e392fec7f84526fb91f975161654c2a7c0b69f5cd3c77d0b9bafdd93d75bb",
+        "4652982bbb30af87baf65fd7c230b343df9181fffb2d66baeb26a108ded76b3d"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-07T18:30:00.000000Z",
+        "end": "2010-01-07T18:30:00.000000Z",
+        "market_local_completed": "2010-01-07T13:30:00-05:00",
+        "market_local_start": "2010-01-07T13:00:00-05:00",
+        "ref": "b76e392fec7f84526fb91f975161654c2a7c0b69f5cd3c77d0b9bafdd93d75bb",
+        "session": "REGULAR",
+        "start": "2010-01-07T18:00:00.000000Z",
+        "transition_index": 180
+      }
+    },
+    {
+      "confirmation": {
+        "completed_at": "2010-01-08T01:30:00.000000Z",
+        "end": "2010-01-08T01:30:00.000000Z",
+        "market_local_completed": "2010-01-07T20:30:00-05:00",
+        "market_local_start": "2010-01-07T20:00:00-05:00",
+        "ref": "f4494e6a55f0f275a4c7d0c3e419b154417f11357125fcc35d97be8652c7e5c5",
+        "session": "REGULAR",
+        "start": "2010-01-08T01:00:00.000000Z",
+        "transition_index": 194
+      },
+      "event": [
+        "LOW",
+        "f7d3dfe25f6af31be84ba267c9da7ef77c2438bec6a9440ad8ec2cea6258bbd4",
+        "f4494e6a55f0f275a4c7d0c3e419b154417f11357125fcc35d97be8652c7e5c5"
+      ],
+      "extreme": {
+        "completed_at": "2010-01-08T00:30:00.000000Z",
+        "end": "2010-01-08T00:30:00.000000Z",
+        "market_local_completed": "2010-01-07T19:30:00-05:00",
+        "market_local_start": "2010-01-07T19:00:00-05:00",
+        "ref": "f7d3dfe25f6af31be84ba267c9da7ef77c2438bec6a9440ad8ec2cea6258bbd4",
+        "session": "REGULAR",
+        "start": "2010-01-08T00:00:00.000000Z",
+        "transition_index": 192
+      }
+    }
+  ],
+  "cutoff": "2010-01-08T04:30:00.000000Z",
+  "exiting_active": {
+    "completed_at": "2010-01-04T20:30:00.000000Z",
+    "end": "2010-01-04T20:30:00.000000Z",
+    "market_local_completed": "2010-01-04T15:30:00-05:00",
+    "market_local_start": "2010-01-04T15:00:00-05:00",
+    "ref": "70dfa52a7d120a17b7d71e1ea29af74c579d22211fc1617e31c8ccf20b39e99d",
+    "session": "REGULAR",
+    "start": "2010-01-04T20:00:00.000000Z",
+    "transition_index": 40
+  },
+  "exiting_warm": {
+    "completed_at": "2010-01-04T00:30:00.000000Z",
+    "end": "2010-01-04T00:30:00.000000Z",
+    "market_local_completed": "2010-01-03T19:30:00-05:00",
+    "market_local_start": "2010-01-03T19:00:00-05:00",
+    "ref": "c399ce1426d94a18782a6665b5df044b27acb3be0986a9671565277022173c7c",
+    "session": "REGULAR",
+    "start": "2010-01-04T00:00:00.000000Z",
+    "transition_index": 0
+  },
+  "first_predicate_divergence": {
+    "left": {
+      "atr": "16.928571428571428571",
+      "close": "120",
+      "completed_at": "2010-01-04T07:30:00.000000Z",
+      "down": false,
+      "down_distance": "1",
+      "dual": false,
+      "emitted": null,
+      "high": 13,
+      "high_price": "121",
+      "high_ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+      "high_separation": null,
+      "index": 13,
+      "low": 13,
+      "low_price": "119",
+      "low_ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+      "low_separation": null,
+      "ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+      "start": "2010-01-04T07:00:00.000000Z",
+      "state_after": "UNSEEDED",
+      "state_before": "UNSEEDED",
+      "threshold": "16.928571428571428571",
+      "up": false,
+      "up_distance": "1"
+    },
+    "old": {
+      "atr": "15.071428571428571428",
+      "close": "120",
+      "completed_at": "2010-01-04T07:30:00.000000Z",
+      "down": true,
+      "down_distance": "80",
+      "dual": true,
+      "emitted": null,
+      "high": 13,
+      "high_price": "200",
+      "high_ref": "4450bcdd69fc048d1e562549758a7dbe0675f24ed3d75ac6ed882f5ed9482c50",
+      "high_separation": null,
+      "index": 14,
+      "low": 13,
+      "low_price": "1",
+      "low_ref": "4450bcdd69fc048d1e562549758a7dbe0675f24ed3d75ac6ed882f5ed9482c50",
+      "low_separation": null,
+      "ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+      "start": "2010-01-04T07:00:00.000000Z",
+      "state_after": "UNSEEDED",
+      "state_before": "UNSEEDED",
+      "threshold": "15.071428571428571428",
+      "up": true,
+      "up_distance": "119"
+    }
+  },
+  "first_state_divergence": {
+    "left": {
+      "atr": "16.928571428571428571",
+      "close": "120",
+      "completed_at": "2010-01-04T07:30:00.000000Z",
+      "down": false,
+      "down_distance": "1",
+      "dual": false,
+      "emitted": null,
+      "high": 13,
+      "high_price": "121",
+      "high_ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+      "high_separation": null,
+      "index": 13,
+      "low": 13,
+      "low_price": "119",
+      "low_ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+      "low_separation": null,
+      "ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+      "start": "2010-01-04T07:00:00.000000Z",
+      "state_after": "UNSEEDED",
+      "state_before": "UNSEEDED",
+      "threshold": "16.928571428571428571",
+      "up": false,
+      "up_distance": "1"
+    },
+    "old": {
+      "atr": "15.071428571428571428",
+      "close": "120",
+      "completed_at": "2010-01-04T07:30:00.000000Z",
+      "down": true,
+      "down_distance": "80",
+      "dual": true,
+      "emitted": null,
+      "high": 13,
+      "high_price": "200",
+      "high_ref": "4450bcdd69fc048d1e562549758a7dbe0675f24ed3d75ac6ed882f5ed9482c50",
+      "high_separation": null,
+      "index": 14,
+      "low": 13,
+      "low_price": "1",
+      "low_ref": "4450bcdd69fc048d1e562549758a7dbe0675f24ed3d75ac6ed882f5ed9482c50",
+      "low_separation": null,
+      "ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+      "start": "2010-01-04T07:00:00.000000Z",
+      "state_after": "UNSEEDED",
+      "state_before": "UNSEEDED",
+      "threshold": "15.071428571428571428",
+      "up": true,
+      "up_distance": "119"
+    }
+  },
+  "interventions_diagnostic_only": {
+    "new_seed_new_common_atr": [
+      [
+        "LOW",
+        "09a7c851eee3af218ab3531854499001a6302a26e427ca88eca2e9b869628f78",
+        "ea822671fd97c1f69e77cb8512dfa7462badd41ffb14f4d6db11bdc5fae246dc"
+      ],
+      [
+        "HIGH",
+        "dc094cb91a263289b2ddc59d7aa3e1c125ea46911ac4802fc7e3ba34f8ca0a52",
+        "53d0111b2514ff3417b65814ada513d6bd567cf2749e9fcdb008a612e2b9332c"
+      ],
+      [
+        "LOW",
+        "fdc59aa778b97651f2474634515ef9ff6f481617afd5460c22933669be12d3a7",
+        "1c065c464dc87ac41da2ed82b4dae0eec4f9f1d8b222d23c603b37ce962f17d1"
+      ],
+      [
+        "HIGH",
+        "95f41e11be1ae1bba8c63f7ed118360e044c1f53be88d44e4c820136486896b2",
+        "7862f1e32c547a49d5c9bfb5d534396c0960cded2150bd1e2935b84d68919989"
+      ],
+      [
+        "LOW",
+        "31fd8946fc432352bbe1af2c3092650be1b5a1e8fe9b1974d01f69b11d16ef42",
+        "1f1ba45781d7e5ba63e6e2c060b4dd7727e431f3f290eac24b1b11c78f478c55"
+      ],
+      [
+        "HIGH",
+        "0ff63005b5caba50bb5da5503273f60a3ef8c1fcc33d9d392698c42574e67d56",
+        "89f393dbc25e62f73d261c765b50a2bd5395efb6d59d23851763afc2d5c19e1c"
+      ],
+      [
+        "LOW",
+        "e7e8ea6fe9eb70412bb3f790f2abdbd50587523ed914c0e50fde06c5c0845103",
+        "a058ade3e472836221cfeae9806a6a3fd5b06fa0470fc5d4f5fdc3e3f28d2d94"
+      ],
+      [
+        "HIGH",
+        "c8de13db823450bb2a1ccc2141f5558d604e03641c20ed08f2c717ca8246c05f",
+        "b093d8e8c78247fece971bb6caf4fee6dfe9c44635275cfbfbe4a4b1a83bf864"
+      ],
+      [
+        "LOW",
+        "d90faccd6ff99af3adef5f53456b29a61b3bbc406ffba5413f03417b69239c4a",
+        "358e211d9d214464ec535baad37b40696231a927f69ab6aafee8d9799e1be5fc"
+      ],
+      [
+        "HIGH",
+        "26dbaabc0458b470adf3f83cbdeeff4178a1aa58051387e64ca2d48ad57ef448",
+        "64890fae0f9e3490e867a9788ec6f82df4215015ab29e1566493959b034f71de"
+      ],
+      [
+        "LOW",
+        "995995f6bdc8f85d44e43ff8b099cfc2bd879a22749560b56917887c4fcec3eb",
+        "a6a65a31c124c50bbc18a2accfcafe28fd78b18c6b24b086ae61ceb6e8df4c12"
+      ],
+      [
+        "HIGH",
+        "b76e392fec7f84526fb91f975161654c2a7c0b69f5cd3c77d0b9bafdd93d75bb",
+        "4652982bbb30af87baf65fd7c230b343df9181fffb2d66baeb26a108ded76b3d"
+      ],
+      [
+        "LOW",
+        "f7d3dfe25f6af31be84ba267c9da7ef77c2438bec6a9440ad8ec2cea6258bbd4",
+        "f4494e6a55f0f275a4c7d0c3e419b154417f11357125fcc35d97be8652c7e5c5"
+      ]
+    ],
+    "new_seed_old_atr": [
+      [
+        "LOW",
+        "09a7c851eee3af218ab3531854499001a6302a26e427ca88eca2e9b869628f78",
+        "ea822671fd97c1f69e77cb8512dfa7462badd41ffb14f4d6db11bdc5fae246dc"
+      ],
+      [
+        "HIGH",
+        "dc094cb91a263289b2ddc59d7aa3e1c125ea46911ac4802fc7e3ba34f8ca0a52",
+        "53d0111b2514ff3417b65814ada513d6bd567cf2749e9fcdb008a612e2b9332c"
+      ],
+      [
+        "LOW",
+        "fdc59aa778b97651f2474634515ef9ff6f481617afd5460c22933669be12d3a7",
+        "1c065c464dc87ac41da2ed82b4dae0eec4f9f1d8b222d23c603b37ce962f17d1"
+      ],
+      [
+        "HIGH",
+        "95f41e11be1ae1bba8c63f7ed118360e044c1f53be88d44e4c820136486896b2",
+        "7862f1e32c547a49d5c9bfb5d534396c0960cded2150bd1e2935b84d68919989"
+      ],
+      [
+        "LOW",
+        "31fd8946fc432352bbe1af2c3092650be1b5a1e8fe9b1974d01f69b11d16ef42",
+        "1f1ba45781d7e5ba63e6e2c060b4dd7727e431f3f290eac24b1b11c78f478c55"
+      ],
+      [
+        "HIGH",
+        "0ff63005b5caba50bb5da5503273f60a3ef8c1fcc33d9d392698c42574e67d56",
+        "89f393dbc25e62f73d261c765b50a2bd5395efb6d59d23851763afc2d5c19e1c"
+      ],
+      [
+        "LOW",
+        "e7e8ea6fe9eb70412bb3f790f2abdbd50587523ed914c0e50fde06c5c0845103",
+        "a058ade3e472836221cfeae9806a6a3fd5b06fa0470fc5d4f5fdc3e3f28d2d94"
+      ],
+      [
+        "HIGH",
+        "c8de13db823450bb2a1ccc2141f5558d604e03641c20ed08f2c717ca8246c05f",
+        "b093d8e8c78247fece971bb6caf4fee6dfe9c44635275cfbfbe4a4b1a83bf864"
+      ],
+      [
+        "LOW",
+        "d90faccd6ff99af3adef5f53456b29a61b3bbc406ffba5413f03417b69239c4a",
+        "358e211d9d214464ec535baad37b40696231a927f69ab6aafee8d9799e1be5fc"
+      ],
+      [
+        "HIGH",
+        "26dbaabc0458b470adf3f83cbdeeff4178a1aa58051387e64ca2d48ad57ef448",
+        "64890fae0f9e3490e867a9788ec6f82df4215015ab29e1566493959b034f71de"
+      ],
+      [
+        "LOW",
+        "995995f6bdc8f85d44e43ff8b099cfc2bd879a22749560b56917887c4fcec3eb",
+        "a6a65a31c124c50bbc18a2accfcafe28fd78b18c6b24b086ae61ceb6e8df4c12"
+      ],
+      [
+        "HIGH",
+        "b76e392fec7f84526fb91f975161654c2a7c0b69f5cd3c77d0b9bafdd93d75bb",
+        "4652982bbb30af87baf65fd7c230b343df9181fffb2d66baeb26a108ded76b3d"
+      ],
+      [
+        "LOW",
+        "f7d3dfe25f6af31be84ba267c9da7ef77c2438bec6a9440ad8ec2cea6258bbd4",
+        "f4494e6a55f0f275a4c7d0c3e419b154417f11357125fcc35d97be8652c7e5c5"
+      ]
+    ],
+    "old_seed_new_common_atr": [],
+    "old_seed_old_atr": []
+  },
+  "label": "SYNTHETIC robustness rejection, not real-market evidence",
+  "left_initial_positive_atr": {
+    "atr": "16.928571428571428571",
+    "close": "120",
+    "completed_at": "2010-01-04T07:30:00.000000Z",
+    "down": false,
+    "down_distance": "1",
+    "dual": false,
+    "emitted": null,
+    "high": 13,
+    "high_price": "121",
+    "high_ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+    "high_separation": null,
+    "index": 13,
+    "low": 13,
+    "low_price": "119",
+    "low_ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+    "low_separation": null,
+    "ref": "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+    "start": "2010-01-04T07:00:00.000000Z",
+    "state_after": "UNSEEDED",
+    "state_before": "UNSEEDED",
+    "threshold": "16.928571428571428571",
+    "up": false,
+    "up_distance": "1"
+  },
+  "left_window_hash": "49402f6405548a0f700d30edf0402c317f16448c7610fd601877b8b4a7965078",
+  "lost_still_eligible": [],
+  "old_consequences": {
+    "comparator": "two active comparable highs AND lows",
+    "operands": [
+      [
+        "latest_high_label",
+        null
+      ],
+      [
+        "latest_low_label",
+        null
+      ],
+      [
+        "close",
+        "114"
+      ]
+    ],
+    "refs": [],
+    "rule": "QSTR-008",
+    "threshold": 4
+  },
+  "old_initial_positive_atr": {
+    "atr": "16.928571428571428571",
+    "close": "122",
+    "completed_at": "2010-01-04T07:00:00.000000Z",
+    "down": false,
+    "down_distance": "78",
+    "dual": false,
+    "emitted": null,
+    "high": 13,
+    "high_price": "200",
+    "high_ref": "4450bcdd69fc048d1e562549758a7dbe0675f24ed3d75ac6ed882f5ed9482c50",
+    "high_separation": null,
+    "index": 13,
+    "low": 13,
+    "low_price": "1",
+    "low_ref": "4450bcdd69fc048d1e562549758a7dbe0675f24ed3d75ac6ed882f5ed9482c50",
+    "low_separation": null,
+    "ref": "4450bcdd69fc048d1e562549758a7dbe0675f24ed3d75ac6ed882f5ed9482c50",
+    "start": "2010-01-04T06:30:00.000000Z",
+    "state_after": "UNSEEDED",
+    "state_before": "UNSEEDED",
+    "threshold": "16.928571428571428571",
+    "up": false,
+    "up_distance": "121"
+  },
+  "old_window_hash": "5a9e7c1d529f7a3b3130b437b2479e59e5e621df7b26fe67026f75a7a848e187",
+  "rediscovered_still_eligible": [
+    [
+      "LOW",
+      "09a7c851eee3af218ab3531854499001a6302a26e427ca88eca2e9b869628f78",
+      "ea822671fd97c1f69e77cb8512dfa7462badd41ffb14f4d6db11bdc5fae246dc"
+    ],
+    [
+      "HIGH",
+      "dc094cb91a263289b2ddc59d7aa3e1c125ea46911ac4802fc7e3ba34f8ca0a52",
+      "53d0111b2514ff3417b65814ada513d6bd567cf2749e9fcdb008a612e2b9332c"
+    ],
+    [
+      "LOW",
+      "fdc59aa778b97651f2474634515ef9ff6f481617afd5460c22933669be12d3a7",
+      "1c065c464dc87ac41da2ed82b4dae0eec4f9f1d8b222d23c603b37ce962f17d1"
+    ],
+    [
+      "HIGH",
+      "95f41e11be1ae1bba8c63f7ed118360e044c1f53be88d44e4c820136486896b2",
+      "7862f1e32c547a49d5c9bfb5d534396c0960cded2150bd1e2935b84d68919989"
+    ],
+    [
+      "LOW",
+      "31fd8946fc432352bbe1af2c3092650be1b5a1e8fe9b1974d01f69b11d16ef42",
+      "1f1ba45781d7e5ba63e6e2c060b4dd7727e431f3f290eac24b1b11c78f478c55"
+    ],
+    [
+      "HIGH",
+      "0ff63005b5caba50bb5da5503273f60a3ef8c1fcc33d9d392698c42574e67d56",
+      "89f393dbc25e62f73d261c765b50a2bd5395efb6d59d23851763afc2d5c19e1c"
+    ],
+    [
+      "LOW",
+      "e7e8ea6fe9eb70412bb3f790f2abdbd50587523ed914c0e50fde06c5c0845103",
+      "a058ade3e472836221cfeae9806a6a3fd5b06fa0470fc5d4f5fdc3e3f28d2d94"
+    ],
+    [
+      "HIGH",
+      "c8de13db823450bb2a1ccc2141f5558d604e03641c20ed08f2c717ca8246c05f",
+      "b093d8e8c78247fece971bb6caf4fee6dfe9c44635275cfbfbe4a4b1a83bf864"
+    ],
+    [
+      "LOW",
+      "d90faccd6ff99af3adef5f53456b29a61b3bbc406ffba5413f03417b69239c4a",
+      "358e211d9d214464ec535baad37b40696231a927f69ab6aafee8d9799e1be5fc"
+    ],
+    [
+      "HIGH",
+      "26dbaabc0458b470adf3f83cbdeeff4178a1aa58051387e64ca2d48ad57ef448",
+      "64890fae0f9e3490e867a9788ec6f82df4215015ab29e1566493959b034f71de"
+    ],
+    [
+      "LOW",
+      "995995f6bdc8f85d44e43ff8b099cfc2bd879a22749560b56917887c4fcec3eb",
+      "a6a65a31c124c50bbc18a2accfcafe28fd78b18c6b24b086ae61ceb6e8df4c12"
+    ],
+    [
+      "HIGH",
+      "b76e392fec7f84526fb91f975161654c2a7c0b69f5cd3c77d0b9bafdd93d75bb",
+      "4652982bbb30af87baf65fd7c230b343df9181fffb2d66baeb26a108ded76b3d"
+    ],
+    [
+      "LOW",
+      "f7d3dfe25f6af31be84ba267c9da7ef77c2438bec6a9440ad8ec2cea6258bbd4",
+      "f4494e6a55f0f275a4c7d0c3e419b154417f11357125fcc35d97be8652c7e5c5"
+    ]
+  ],
+  "seed_changes_common_events": true,
+  "source": {
+    "generator": "path_lock",
+    "label": "SYNTHETIC_NOT_MARKET_DATA"
+  },
+  "timeframe": "M30",
+  "trace_sequences": {
+    "LEFT": [
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 13,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 14,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 15,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 16,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 17,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "HIGH",
+          "2b05009e0f7faa41e77b7ce88bcfc4a864c7730052e1ebeb832f2657e3cbab9d",
+          "2a774d8c1d1237753a30c2e1e810053ac7e8a6c1ee3962c636aa77d1974c3b7f"
+        ],
+        "index": 18,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 19,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 20,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 21,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 22,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 23,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 24,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 25,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "LOW",
+          "2933fc77775f3f2531e04a31684dedc76807cd270ca0aa93d37bfa65f8fc97d5",
+          "8d91a5b850b2a63fd6159004c42b2b7e5ae8a4b01c55175973579a033c6afca7"
+        ],
+        "index": 26,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 27,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 28,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 29,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 30,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 31,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 32,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 33,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 34,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 35,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 36,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "HIGH",
+          "767a419b58951a69f7eeffa60ddffc2b6e2b61c9942b6ae0db8dc931a980b4ff",
+          "1c83c55d9d5c4b9ab52ece02f1bafdd609eae4ff645eb4ddffbf362cc08e27b1"
+        ],
+        "index": 37,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 38,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 39,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 40,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 41,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 42,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 43,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 44,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 45,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 46,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 47,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 48,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "LOW",
+          "09a7c851eee3af218ab3531854499001a6302a26e427ca88eca2e9b869628f78",
+          "ea822671fd97c1f69e77cb8512dfa7462badd41ffb14f4d6db11bdc5fae246dc"
+        ],
+        "index": 49,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 50,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 51,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 52,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 53,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 54,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 55,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 56,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 57,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 58,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 59,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 60,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "HIGH",
+          "dc094cb91a263289b2ddc59d7aa3e1c125ea46911ac4802fc7e3ba34f8ca0a52",
+          "53d0111b2514ff3417b65814ada513d6bd567cf2749e9fcdb008a612e2b9332c"
+        ],
+        "index": 61,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 62,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 63,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 64,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 65,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 66,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 67,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 68,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 69,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 70,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 71,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 72,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "LOW",
+          "fdc59aa778b97651f2474634515ef9ff6f481617afd5460c22933669be12d3a7",
+          "1c065c464dc87ac41da2ed82b4dae0eec4f9f1d8b222d23c603b37ce962f17d1"
+        ],
+        "index": 73,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 74,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 75,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 76,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 77,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 78,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 79,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 80,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 81,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 82,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 83,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 84,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "HIGH",
+          "95f41e11be1ae1bba8c63f7ed118360e044c1f53be88d44e4c820136486896b2",
+          "7862f1e32c547a49d5c9bfb5d534396c0960cded2150bd1e2935b84d68919989"
+        ],
+        "index": 85,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 86,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 87,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 88,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 89,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 90,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 91,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 92,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 93,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 94,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 95,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 96,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "LOW",
+          "31fd8946fc432352bbe1af2c3092650be1b5a1e8fe9b1974d01f69b11d16ef42",
+          "1f1ba45781d7e5ba63e6e2c060b4dd7727e431f3f290eac24b1b11c78f478c55"
+        ],
+        "index": 97,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 98,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 99,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 100,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 101,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 102,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 103,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 104,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 105,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 106,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 107,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 108,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "HIGH",
+          "0ff63005b5caba50bb5da5503273f60a3ef8c1fcc33d9d392698c42574e67d56",
+          "89f393dbc25e62f73d261c765b50a2bd5395efb6d59d23851763afc2d5c19e1c"
+        ],
+        "index": 109,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 110,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 111,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 112,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 113,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 114,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 115,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 116,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 117,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 118,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 119,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 120,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "LOW",
+          "e7e8ea6fe9eb70412bb3f790f2abdbd50587523ed914c0e50fde06c5c0845103",
+          "a058ade3e472836221cfeae9806a6a3fd5b06fa0470fc5d4f5fdc3e3f28d2d94"
+        ],
+        "index": 121,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 122,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 123,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 124,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 125,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 126,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 127,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 128,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 129,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 130,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 131,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 132,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "HIGH",
+          "c8de13db823450bb2a1ccc2141f5558d604e03641c20ed08f2c717ca8246c05f",
+          "b093d8e8c78247fece971bb6caf4fee6dfe9c44635275cfbfbe4a4b1a83bf864"
+        ],
+        "index": 133,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 134,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 135,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 136,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 137,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 138,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 139,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 140,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 141,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 142,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 143,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 144,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "LOW",
+          "d90faccd6ff99af3adef5f53456b29a61b3bbc406ffba5413f03417b69239c4a",
+          "358e211d9d214464ec535baad37b40696231a927f69ab6aafee8d9799e1be5fc"
+        ],
+        "index": 145,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 146,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 147,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 148,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 149,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 150,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 151,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 152,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 153,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 154,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 155,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 156,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "HIGH",
+          "26dbaabc0458b470adf3f83cbdeeff4178a1aa58051387e64ca2d48ad57ef448",
+          "64890fae0f9e3490e867a9788ec6f82df4215015ab29e1566493959b034f71de"
+        ],
+        "index": 157,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 158,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 159,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 160,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 161,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 162,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 163,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 164,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 165,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 166,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 167,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 168,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "LOW",
+          "995995f6bdc8f85d44e43ff8b099cfc2bd879a22749560b56917887c4fcec3eb",
+          "a6a65a31c124c50bbc18a2accfcafe28fd78b18c6b24b086ae61ceb6e8df4c12"
+        ],
+        "index": 169,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 170,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 171,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 172,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 173,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 174,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 175,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 176,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 177,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 178,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 179,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 180,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "HIGH",
+          "b76e392fec7f84526fb91f975161654c2a7c0b69f5cd3c77d0b9bafdd93d75bb",
+          "4652982bbb30af87baf65fd7c230b343df9181fffb2d66baeb26a108ded76b3d"
+        ],
+        "index": 181,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 182,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 183,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 184,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 185,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 186,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 187,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 188,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 189,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 190,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 191,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 192,
+        "state_after": "SEEK_LOW"
+      },
+      {
+        "dual": false,
+        "emitted": [
+          "LOW",
+          "f7d3dfe25f6af31be84ba267c9da7ef77c2438bec6a9440ad8ec2cea6258bbd4",
+          "f4494e6a55f0f275a4c7d0c3e419b154417f11357125fcc35d97be8652c7e5c5"
+        ],
+        "index": 193,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 194,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 195,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 196,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 197,
+        "state_after": "SEEK_HIGH"
+      },
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 198,
+        "state_after": "SEEK_HIGH"
+      }
+    ],
+    "OLD": [
+      {
+        "dual": false,
+        "emitted": null,
+        "index": 13,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 14,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 15,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 16,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 17,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 18,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 19,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 20,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 21,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 22,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 23,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 24,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 25,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 26,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 27,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 28,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 29,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 30,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 31,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 32,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 33,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 34,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 35,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 36,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 37,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 38,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 39,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 40,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 41,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 42,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 43,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 44,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 45,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 46,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 47,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 48,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 49,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 50,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 51,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 52,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 53,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 54,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 55,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 56,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 57,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 58,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 59,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 60,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 61,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 62,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 63,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 64,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 65,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 66,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 67,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 68,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 69,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 70,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 71,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 72,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 73,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 74,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 75,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 76,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 77,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 78,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 79,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 80,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 81,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 82,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 83,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 84,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 85,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 86,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 87,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 88,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 89,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 90,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 91,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 92,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 93,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 94,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 95,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 96,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 97,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 98,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 99,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 100,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 101,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 102,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 103,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 104,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 105,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 106,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 107,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 108,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 109,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 110,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 111,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 112,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 113,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 114,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 115,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 116,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 117,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 118,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 119,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 120,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 121,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 122,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 123,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 124,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 125,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 126,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 127,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 128,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 129,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 130,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 131,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 132,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 133,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 134,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 135,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 136,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 137,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 138,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 139,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 140,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 141,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 142,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 143,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 144,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 145,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 146,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 147,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 148,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 149,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 150,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 151,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 152,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 153,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 154,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 155,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 156,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 157,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 158,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 159,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 160,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 161,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 162,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 163,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 164,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 165,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 166,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 167,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 168,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 169,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 170,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 171,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 172,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 173,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 174,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 175,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 176,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 177,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 178,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 179,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 180,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 181,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 182,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 183,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 184,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 185,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 186,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 187,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 188,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 189,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 190,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 191,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 192,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 193,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 194,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 195,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 196,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 197,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 198,
+        "state_after": "UNSEEDED"
+      },
+      {
+        "dual": true,
+        "emitted": null,
+        "index": 199,
+        "state_after": "UNSEEDED"
+      }
+    ]
+  }
+}

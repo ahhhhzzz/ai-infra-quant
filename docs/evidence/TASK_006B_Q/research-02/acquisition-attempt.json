@@ -1,0 +1,54 @@
+{
+  "additional_ceiling": "2026-09-09T14:00:00Z",
+  "attempts": [
+    {
+      "bytes": "796",
+      "http_status": "200",
+      "raw_file": "D:\\AI_Infra_Quant_Codex_v1\\task006b-q-r02-public-raw\\public-0.txt",
+      "result": "FETCHED_REQUIRES_CONTENT_REVIEW",
+      "retrieved_at": "2026-09-09T15:19:03.808433+00:00",
+      "sha256": "1abb8e2cbf6460f944d0ec8ca5b66475005c98b784915e798f1d38e96365bbb1",
+      "url": "https://stooq.com/q/d/?s=nvda.us"
+    },
+    {
+      "bytes": "796",
+      "http_status": "200",
+      "raw_file": "D:\\AI_Infra_Quant_Codex_v1\\task006b-q-r02-public-raw\\public-1.txt",
+      "result": "FETCHED_REQUIRES_CONTENT_REVIEW",
+      "retrieved_at": "2026-09-09T15:19:06.192127+00:00",
+      "sha256": "28eb5ede9f57c660da04096cb317a3c694578627808c1569034c5009b9a957c7",
+      "url": "https://stooq.com/t/"
+    },
+    {
+      "bytes": "1059477",
+      "http_status": "200",
+      "raw_file": "D:\\AI_Infra_Quant_Codex_v1\\task006b-q-r02-public-raw\\public-2.txt",
+      "result": "FETCHED_REQUIRES_CONTENT_REVIEW",
+      "retrieved_at": "2026-09-09T15:19:07.249218+00:00",
+      "sha256": "fd3eac0eefae28ff8acbef60efabce063bc316b57c7b517ef559d3990c001915",
+      "url": "https://www.alphavantage.co/documentation/"
+    },
+    {
+      "bytes": "220",
+      "http_status": "200",
+      "public_demo_response": "{\n    \"Information\": \"The **demo** API key is for demo purposes only. Please claim your free API key at (https://www.alphavantage.co/support/#api-key) to explore our full API offerings. It takes fewer than 20 seconds.\"\n}",
+      "raw_file": "D:\\AI_Infra_Quant_Codex_v1\\task006b-q-r02-public-raw\\public-3.txt",
+      "result": "FETCHED_REQUIRES_CONTENT_REVIEW",
+      "retrieved_at": "2026-09-09T15:19:10.510730+00:00",
+      "sha256": "e8ddc218d89ff77ad7e395782b4c4d28d10d328ae90c3ba597a8e7d3689b9585",
+      "url": "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=NVDA&outputsize=full&apikey=demo"
+    },
+    {
+      "bytes": "113700",
+      "http_status": "200",
+      "raw_file": "D:\\AI_Infra_Quant_Codex_v1\\task006b-q-r02-public-raw\\public-4.txt",
+      "result": "FETCHED_REQUIRES_CONTENT_REVIEW",
+      "retrieved_at": "2026-09-09T15:19:11.231418+00:00",
+      "sha256": "5ed6e9a5db548eb9b557c8c09050ff80b3e7f0522d7da6a358062168b88d376f",
+      "url": "https://in.help.yahoo.com/kb/SLN2311.html"
+    }
+  ],
+  "automatic_retries": 0,
+  "note": "No observations normalized before source/calendar/terms review.",
+  "open_d_requests": 0
+}

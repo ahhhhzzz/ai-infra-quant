@@ -1,0 +1,8 @@
+{
+  "hashes": {
+    "D:\\AI_Infra_Quant_Codex_v1\\ai_infra_quant_codex_v1\\data\\ai_infra_quant.db": "81b32a5f0f74e5549e99414456f189d5111435e3601b00bcd3e43c41ee2f1034",
+    "D:\\AI_Infra_Quant_Codex_v1\\ai_infra_quant_codex_v1\\phase1_remediation_commit.txt": "c791ba73b41c4e7719957607e025105a8110fa54a2e1a67f3c5b142da8030440"
+  },
+  "method": "read-only file hash, no database connection or mutation",
+  "status": "UNCHANGED_FROM_PRIOR_EVIDENCE"
+}
