@@ -363,7 +363,15 @@ def audit(data: Dataset, limit: int = 100, *, ceiling: datetime | None = None) -
             )
             if ablation["material"] or ablation["review_required"]:
                 issues.append(
-                    {"kind": "BOUNDARY_MATERIAL", "cutoff": cutoff.isoformat(), **ablation}
+                    {
+                        "kind": "BOUNDARY_REVISION_CONFOUNDED"
+                        if ablation["classification"] == "REVISION_CONFOUNDED"
+                        else "BOUNDARY_MATERIAL"
+                        if ablation["material"]
+                        else "BOUNDARY_UNRESOLVED",
+                        "cutoff": cutoff.isoformat(),
+                        **ablation,
+                    }
                 )
         if compact["cap_suppressed_ranges"]:
             issues.append(

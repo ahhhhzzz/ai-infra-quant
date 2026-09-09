@@ -9,6 +9,7 @@ import pytest
 from tools.research.paqs_q.diagnostics import audit, boundary, structural
 from tools.research.paqs_q.engine import calculate_window, evaluate, prepare
 from tools.research.paqs_q.fixtures import synthetic
+from tools.research.paqs_q.study import boundary_case_lists
 from tools.research.paqs_q.temporal import availability_check
 from tools.research.paqs_q.types import Parameters
 
@@ -49,6 +50,10 @@ def test_later_revision_keeps_old_identical_and_marks_confounded() -> None:
         "LEFT",
         "BOTH",
     }
+    summary = boundary_case_lists(audited["outliers"])
+    assert summary["material_left_only"] == []
+    assert summary["revision_confounded_cutoffs"] == [new_cutoff.isoformat()]
+    assert any(r["kind"] == "BOUNDARY_REVISION_CONFOUNDED" for r in audited["outliers"])
 
 
 @pytest.mark.parametrize("missing_prior", [False, True])

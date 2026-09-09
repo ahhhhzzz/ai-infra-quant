@@ -55,6 +55,20 @@ def coverage(members: list[dict[str, Any]], results: list[dict[str, Any]]) -> di
     }
 
 
+def boundary_case_lists(outliers: list[dict[str, Any]]) -> dict[str, list[str]]:
+    """A review flag is not evidence that a case was caused only by the left boundary."""
+    return {
+        "material_left_only": [
+            r["cutoff"]
+            for r in outliers
+            if r.get("classification") == "LEFT_ONLY" and r.get("material")
+        ],
+        "revision_confounded_cutoffs": [
+            r["cutoff"] for r in outliers if r.get("classification") == "REVISION_CONFOUNDED"
+        ],
+    }
+
+
 def run(data_dir: Path, output_dir: Path, manifest: Path) -> None:
     universe = json.loads(manifest.read_text(encoding="utf-8"))
     ceiling = datetime.fromisoformat(universe["cutoffs"]["not_after"])
@@ -87,9 +101,7 @@ def run(data_dir: Path, output_dir: Path, manifest: Path) -> None:
                 Counter(r.get("boundary_class", "NO_ARM") for r in result["rows"])
             )
             summary["outlier_counts"] = dict(Counter(r["kind"] for r in result["outliers"]))
-            summary["material_left_only"] = [
-                r["cutoff"] for r in result["outliers"] if r.get("review_required")
-            ]
+            summary.update(boundary_case_lists(result["outliers"]))
             summary["direct_directional_flips"] = [
                 r["cutoff"] for r in result["outliers"] if r.get("direct_directional_flip")
             ]
