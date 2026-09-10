@@ -1,0 +1,83 @@
+{
+  "added_paths": [
+    "docs/evidence/TASK_006B_Q/research-03/PLAN.md",
+    "docs/evidence/TASK_006B_Q/research-03/README.md",
+    "docs/evidence/TASK_006B_Q/research-03/REPORT.md",
+    "docs/evidence/TASK_006B_Q/research-03/run-01/enumeration.json",
+    "docs/evidence/TASK_006B_Q/research-03/run-01/witnesses.json",
+    "docs/evidence/TASK_006B_Q/research-03/validation.json",
+    "docs/research/PAQS_Q_CONFIRMATION_AND_ROLLING_STABILITY_R03.md",
+    "tests/research/paqs_q/r03/test_semantics.py",
+    "tools/research/paqs_q/r03/__init__.py",
+    "tools/research/paqs_q/r03/models.py",
+    "tools/research/paqs_q/r03/verify.py",
+    "tools/research/paqs_q/r03/witnesses.py"
+  ],
+  "base_files": 465,
+  "checked_head": "ea46324471c6c558afa66896a1b95eaadda2f44e",
+  "contract": "8338144f0185f1b5b416daf08d5bcbff074bb345",
+  "development_base": "ddb61c15f1aea026b26c116f35fa1e2b0b0d055a",
+  "diff_check": "PASS",
+  "freeze_commit": "2e048607414021e12984871db3a888cba7f20557",
+  "local_links": [
+    [
+      "docs/evidence/TASK_006B_Q/research-03/README.md",
+      "REPORT.md"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/README.md",
+      "PLAN.md"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/README.md",
+      "../../../research/PAQS_Q_CONFIRMATION_AND_ROLLING_STABILITY_R03.md"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/README.md",
+      "PLAN.md"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/README.md",
+      "run-01/witnesses.json"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/README.md",
+      "run-01/enumeration.json"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/README.md",
+      "validation.json"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/REPORT.md",
+      "../../../research/PAQS_Q_CONFIRMATION_AND_ROLLING_STABILITY_R03.md"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/REPORT.md",
+      "run-01/witnesses.json"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/REPORT.md",
+      "run-01/enumeration.json"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/REPORT.md",
+      "validation.json"
+    ],
+    [
+      "docs/evidence/TASK_006B_Q/research-03/REPORT.md",
+      "README.md"
+    ],
+    [
+      "docs/research/PAQS_Q_CONFIRMATION_AND_ROLLING_STABILITY_R03.md",
+      "../evidence/TASK_006B_Q/research-03/PLAN.md"
+    ],
+    [
+      "docs/research/PAQS_Q_CONFIRMATION_AND_ROLLING_STABILITY_R03.md",
+      "../evidence/TASK_006B_Q/research-03/REPORT.md"
+    ]
+  ],
+  "protected_mode_type_blob_count": 467,
+  "status": "PASS",
+  "user_database_access": "NONE; no filesystem/hash certification claimed"
+}

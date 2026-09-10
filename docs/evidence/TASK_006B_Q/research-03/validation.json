@@ -1,0 +1,82 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "checks": [
+    {
+      "argv": [
+        "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/research/paqs_q",
+        "-ra"
+      ],
+      "exit_code": 0,
+      "stdout": "============================= test session starts =============================\nplatform win32 -- Python 3.12.14, pytest-8.4.1, pluggy-1.6.0\nrootdir: D:\\AI_Infra_Quant_Codex_v1\\task006b-q-r03-worktree\nconfigfile: pyproject.toml\nplugins: anyio-4.15.1, cov-6.2.1\ncollected 168 items\n\ntests\\research\\paqs_q\\r02\\test_candidate.py ............................ [ 16%]\n.......                                                                  [ 20%]\ntests\\research\\paqs_q\\r03\\test_semantics.py ............................ [ 37%]\n........                                                                 [ 42%]\ntests\\research\\paqs_q\\test_diagnostics.py ..........                     [ 48%]\ntests\\research\\paqs_q\\test_engine.py ....................                [ 60%]\ntests\\research\\paqs_q\\test_inputs.py ........                            [ 64%]\ntests\\research\\paqs_q\\test_remediation_quality.py ...................... [ 77%]\n.............                                                            [ 85%]\ntests\\research\\paqs_q\\test_remediation_temporal.py ..........            [ 91%]\ntests\\research\\paqs_q\\test_scope.py ..                                   [ 92%]\ntests\\research\\paqs_q\\test_zones.py ............                         [100%]\n\n============================== warnings summary ===============================\n..\\task007c1-env\\Lib\\site-packages\\starlette\\testclient.py:51\n  D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Lib\\site-packages\\starlette\\testclient.py:51: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================= 168 passed, 1 warning in 35.39s =======================\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "tools/research/paqs_q/r03",
+        "tests/research/paqs_q/r03"
+      ],
+      "exit_code": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "tools/research/paqs_q/r03",
+        "tests/research/paqs_q/r03"
+      ],
+      "exit_code": 0,
+      "stdout": "5 files already formatted\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+        "-m",
+        "mypy",
+        "--strict",
+        "--explicit-package-bases",
+        "tools/research/paqs_q/r03",
+        "tests/research/paqs_q/r03"
+      ],
+      "exit_code": 0,
+      "stdout": "Success: no issues found in 5 source files\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+        "-m",
+        "mypy",
+        "--strict",
+        "--explicit-package-bases",
+        "--platform",
+        "win32",
+        "tools/research/paqs_q/r03",
+        "tests/research/paqs_q/r03"
+      ],
+      "exit_code": 0,
+      "stdout": "Success: no issues found in 5 source files\n",
+      "stderr": ""
+    }
+  ],
+  "unexecuted": [
+    "business",
+    "browser",
+    "uvicorn",
+    "database"
+  ],
+  "reason": "Isolated additive pure research; contract section 6"
+}

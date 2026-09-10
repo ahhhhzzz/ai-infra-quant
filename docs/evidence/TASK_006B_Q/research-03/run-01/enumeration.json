@@ -1,0 +1,31 @@
+{
+  "budget_seconds": 120,
+  "count": 19683,
+  "domain": "all 3^9 close words in {99,100,101}; O=C,H=C+1,L=C-1",
+  "elapsed_seconds": "0.411",
+  "metrics": {
+    "0": {
+      "coverage_removed": 3402,
+      "endpoint_opportunities": 17010,
+      "expired": 0,
+      "full_support_lost": 0,
+      "full_support_opportunities": 13608,
+      "full_support_rediscovered": 0,
+      "lost": 3402,
+      "rediscovered": 0
+    },
+    "2": {
+      "coverage_removed": 0,
+      "endpoint_opportunities": 13608,
+      "expired": 3402,
+      "full_support_lost": 0,
+      "full_support_opportunities": 13608,
+      "full_support_rediscovered": 0,
+      "lost": 0,
+      "rediscovered": 0
+    }
+  },
+  "planned": 19683,
+  "seed": null,
+  "status": "FINITE_DOMAIN_CHECKED"
+}
