@@ -1,0 +1,112 @@
+{
+  "status": "Required research and static validation passed; focused independent review pending",
+  "implementation_sha": "151f0fb285f35b35ddbc5840f0920e65c5c17bf6",
+  "contract_sha": "0215d687b0ece28dee4b7854226b3e8916420518",
+  "cwd": "D:/AI_Infra_Quant_Codex_v1/task006b-q-r04-worktree",
+  "python_executable": "D:/AI_Infra_Quant_Codex_v1/task007c1-env/Scripts/python.exe",
+  "versions": {
+    "Python": "3.12.14",
+    "pytest": "8.4.1",
+    "Ruff": "0.12.9",
+    "mypy": "1.17.1",
+    "platform": "win32"
+  },
+  "environment": {
+    "PYTHONUTF8": "1",
+    "PYTHONPATH": "<cwd>/src;<cwd>",
+    "MYPYPATH": "<cwd>/src;<cwd>"
+  },
+  "checks": [
+    {
+      "command": "python -m pytest tests/research/paqs_q tests/unit/test_paqs_input.py -ra",
+      "exit_code": 0,
+      "collected": 234,
+      "passed": 234,
+      "failed": 0,
+      "skipped": 0,
+      "xfail": 0,
+      "deselected": 0,
+      "summary": "234 passed, 1 warning in 78.52s (0:01:18)"
+    },
+    {
+      "command": "python -m ruff check tools/research/paqs_q/r04 tests/research/paqs_q/r04",
+      "exit_code": 0,
+      "result": "All checks passed!"
+    },
+    {
+      "command": "python -m ruff format --check tools/research/paqs_q/r04 tests/research/paqs_q/r04",
+      "exit_code": 0,
+      "result": "15 files already formatted"
+    },
+    {
+      "command": "python -m mypy --strict --explicit-package-bases tools/research/paqs_q/r04 tests/research/paqs_q/r04",
+      "exit_code": 0,
+      "result": "Success: no issues found in 15 source files"
+    },
+    {
+      "command": "python -m mypy --strict --explicit-package-bases --platform win32 tools/research/paqs_q/r04 tests/research/paqs_q/r04",
+      "exit_code": 0,
+      "result": "Success: no issues found in 15 source files"
+    },
+    {
+      "command": "python -m tools.research.paqs_q.r04 --data-dir D:/AI_Infra_Quant_Codex_v1/task006b-q-data --calendar-file D:/AI_Infra_Quant_Codex_v1/task006b-q-r04-source/capture-calendar.json --output docs/evidence/TASK_006B_Q/research-04/study-03",
+      "exit_code": 0,
+      "cutoffs": 600,
+      "valid": 274,
+      "insufficient": 326,
+      "runtime_seconds": "272.49982889999956",
+      "started_at": "2026-09-11T12:14:29.386780Z",
+      "finished_at": "2026-09-11T12:19:01.889813Z",
+      "output_bytes_before_summary_and_plots": 7535176
+    },
+    {
+      "command": "python -m tools.research.paqs_q.r04.audit --data-dir D:/AI_Infra_Quant_Codex_v1/task006b-q-data --calendar D:/AI_Infra_Quant_Codex_v1/task006b-q-r04-source/capture-calendar.json --study docs/evidence/TASK_006B_Q/research-04/study-03 --output docs/evidence/TASK_006B_Q/research-04/remediation-01/audit-03.json",
+      "exit_code": 0,
+      "cutoff_rows": 600,
+      "cases": 12
+    },
+    {
+      "command": "python docs/evidence/TASK_006B_Q/research-04/remediation-01/reconcile.py --output docs/evidence/TASK_006B_Q/research-04/remediation-01/DELTA.json",
+      "exit_code": 0,
+      "result": "All-field comparison and independent census oracle passed"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "No output"
+    }
+  ],
+  "red_test": {
+    "code_under_test": "Unmodified study.py at contract SHA; newly added tests",
+    "command": "python -m pytest tests/research/paqs_q/r04/test_study.py -k 'public_w1_unresolved or retained_census_segment' -ra",
+    "exit_code": 1,
+    "summary": "2 failed, 5 passed, 9 deselected, 1 warning in 5.05s",
+    "failures": [
+      {
+        "test": "test_public_w1_unresolved_segment_is_counted_without_changing_census",
+        "assertion": "assert 'None' not in stats['segments']",
+        "observed": "'None' key present"
+      },
+      {
+        "test": "test_retained_census_segment_accounting[OBSERVATIONAL-W1]",
+        "assertion": "sum(segment centers) == active_centers",
+        "observed": "84 != 104 at first frozen cutoff"
+      }
+    ]
+  },
+  "warning": "Existing Starlette DeprecationWarning: anyio.abc.BlockingPortal alias is deprecated; use anyio.from_thread.BlockingPortal",
+  "supplemental_evidence_scripts": "Ruff, format and strict mypy native/win32 over reconcile.py and protect.py also passed; initial E501 string wrapping corrected before evidence delivery",
+  "network_limits": "Initial fetch reset then explicit per-command HTTP/1.1 fetch succeeded; later ls-remote reset, all 56 GitHub heads read via API instead. No config changed.",
+  "not_required_not_run": [
+    "browser",
+    "Uvicorn",
+    "PostgreSQL",
+    "migration",
+    "full product suite"
+  ],
+  "OpenD_history_requests": 0,
+  "price_acquisition_requests": 0,
+  "database_access": "none",
+  "market_gate": "INCOMPLETE",
+  "preservation_evidence": "protection.json; final post-commit check before push; remote readback after push"
+}
