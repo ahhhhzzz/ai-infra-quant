@@ -1,11 +1,17 @@
 # TASK-006B-Q R04-F01 focused independent re-review
 
-Reviewed remediation head: `c4e21a0204cf6cdd7bb139584b02f01792a49f13`  
-Code/test implementation: `151f0fb285f35b35ddbc5840f0920e65c5c17bf6`  
-Remediation contract: `0215d687b0ece28dee4b7854226b3e8916420518`  
-Original R04 review: `4906985744512092fc098340f43e8eec1f41c494`  
-Original reviewed R04 head: `30fa67bcf4521600030ce76bf953fdff87d2e668`  
-Review date: 2026-09-11  
+Reviewed remediation head: `c4e21a0204cf6cdd7bb139584b02f01792a49f13`
+
+Code/test implementation: `151f0fb285f35b35ddbc5840f0920e65c5c17bf6`
+
+Remediation contract: `0215d687b0ece28dee4b7854226b3e8916420518`
+
+Original R04 review: `4906985744512092fc098340f43e8eec1f41c494`
+
+Original reviewed R04 head: `30fa67bcf4521600030ce76bf953fdff87d2e668`
+
+Review date: 2026-09-11
+
 Review verdict: **PASS — R04-F01 CLOSED**
 
 ## Findings
