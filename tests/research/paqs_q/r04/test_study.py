@@ -1,10 +1,12 @@
 """Independent research-clock, census and chart-selection assertions."""
 
+import json
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -13,7 +15,7 @@ from tools.research.paqs_q.r04.model import evaluate
 from tools.research.paqs_q.r04.study import costs, recognize, select_cases, write_new
 from tools.research.paqs_q.types import Bar, Dataset, canonical
 
-from .test_calendar_model import bar, row, sample
+from .test_calendar_model import bar, fact, row, sample
 
 
 def test_research_recognition_clock_is_actual_not_scheduled_and_idempotent() -> None:
@@ -120,3 +122,88 @@ def test_calendar_identity_and_malformed_segment_fail_closed_for_witness() -> No
         result = evaluate(data, changed, data.bars[-1].end)
         assert row(result, data.bars[85])["support_hash"] is None
         assert not any(e["extreme_ref"] == data.bars[85].ref for e in result["events"])
+
+
+def assert_segment_conservation(stats: dict[str, Any]) -> None:
+    for field, total in (
+        ("centers", "active_centers"),
+        ("support", "complete_support_active"),
+        ("events", "events"),
+    ):
+        assert sum(s[field] for s in stats["segments"].values()) == stats[total]
+
+
+def test_public_w1_unresolved_segment_is_counted_without_changing_census() -> None:
+    # Hypothetical weekday calendar, with one explicitly unknown active week.
+    monday = date(2020, 1, 6)
+    facts = [fact(monday + timedelta(days=i), closed=i % 7 >= 5) for i in range(130 * 7)]
+    zone = ZoneInfo(facts[0].timezone)
+    bars = []
+    for i in range(130):
+        start = datetime.combine(monday + timedelta(weeks=i), time.min, zone)
+        end = datetime.combine(monday + timedelta(weeks=i + 1), time.min, zone)
+        completion = facts[i * 7 + 4].segments[-1][1]
+        bars.append(
+            replace(bar(start, end, "W1"), completed_at=completion, available_at=completion)
+        )
+    bars[85] = replace(bars[85], high=Decimal(110), close=Decimal(105))
+    facts[50 * 7] = replace(facts[50 * 7], kind="UNKNOWN", segments=())
+    result = evaluate(Dataset("US.TEST", "W1", zone.key, tuple(bars)), tuple(facts), bars[-1].end)
+    assert result["status"] == "VALID" and len(result["events"]) == 1
+    unresolved = [r for r in result["census"] if r["active"] and r["segment"] is None]
+    assert len(unresolved) == 1 and unresolved[0]["support_hash"] is None
+    before = canonical(result)
+    stats = costs(result)
+    assert "None" not in stats["segments"]
+    assert stats["segments"]["UNRESOLVED_SEGMENT"] == {"centers": 1, "support": 0, "events": 0}
+    assert stats["active_centers"] == 104
+    assert_segment_conservation(stats)
+    assert canonical(result) == before
+
+
+@pytest.mark.parametrize("timeframe", ["W1", "D1", "M30"])
+@pytest.mark.parametrize("mode", ["OBSERVATIONAL", "AS_OF"])
+def test_retained_census_segment_accounting(timeframe: str, mode: str) -> None:
+    # Decode immutable evidence, not its defective derived segment counts.
+    path = Path(__file__).resolve().parents[4] / "docs/evidence/TASK_006B_Q/research-04"
+    doc = json.loads(
+        (path / "study-02" / f"US.AVGO.{timeframe}.{mode}.json").read_text(encoding="utf-8")
+    )
+    unresolved_total = 0
+    for record in doc["rows"]:
+        result = {
+            "census": [
+                dict(doc["census_catalog"][identity], active=index >= record["active_start"])
+                for index, identity in enumerate(record["census_ids"])
+            ],
+            "events": [dict(doc["event_catalog"][e["identity"]], **e) for e in record["events"]],
+        }
+        stats = costs(result)
+        assert_segment_conservation(stats)
+        assert "None" not in stats["segments"]
+        unresolved = sum(r["active"] and r["segment"] is None for r in result["census"])
+        unresolved_total += unresolved
+        if unresolved:
+            assert record["status"] == "VALID" and timeframe == "W1"
+            assert stats["segments"]["UNRESOLVED_SEGMENT"]["centers"] == unresolved
+        else:
+            assert stats["segments"] == record["costs"]["segments"]
+        if record["status"] != "VALID":
+            assert stats["segments"] == {} and stats["active_centers"] == 0
+    assert unresolved_total == (1921 if timeframe == "W1" and mode == "OBSERVATIONAL" else 0)
+
+
+@pytest.mark.parametrize("status", ["INVALID", "INSUFFICIENT"])
+def test_rejected_input_does_not_fabricate_segment_coverage(status: str) -> None:
+    data, facts = sample(count=312)
+    data = (
+        replace(data, quality="INVALID")
+        if status == "INVALID"
+        else replace(data, bars=data.bars[:-1])
+    )
+    result = evaluate(data, facts, data.bars[-1].end)
+    assert result["status"] == status
+    stats = costs(result)
+    assert stats["segments"] == {} and stats["event_density"] is None
+    assert stats["active_centers"] == stats["complete_support_active"] == stats["events"] == 0
+    assert_segment_conservation(stats)

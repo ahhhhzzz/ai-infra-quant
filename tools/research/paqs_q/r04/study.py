@@ -48,6 +48,11 @@ def recognize(snapshot: dict[str, Any], records: dict[str, Any], now: datetime) 
         )
 
 
+def _segment_key(segment: str | None) -> str:
+    """Normalize unresolved slots consistently without changing the source census."""
+    return "UNRESOLVED_SEGMENT" if segment is None else segment
+
+
 def costs(result: dict[str, Any]) -> dict[str, Any]:
     rows, events = result["census"], result["events"]
     active = [r for r in rows if r["active"]]
@@ -76,13 +81,14 @@ def costs(result: dict[str, Any]) -> dict[str, Any]:
         ],
         "segments": {
             segment: {
-                "centers": sum(r["segment"] == segment for r in active),
+                "centers": sum(_segment_key(r["segment"]) == segment for r in active),
                 "support": sum(
-                    r["segment"] == segment and r["support_hash"] is not None for r in active
+                    _segment_key(r["segment"]) == segment and r["support_hash"] is not None
+                    for r in active
                 ),
-                "events": sum(e["segment"] == segment for e in events),
+                "events": sum(_segment_key(e["segment"]) == segment for e in events),
             }
-            for segment in sorted({str(r["segment"]) for r in active})
+            for segment in sorted({_segment_key(r["segment"]) for r in active})
         },
     }
 
