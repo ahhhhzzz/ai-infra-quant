@@ -1,0 +1,116 @@
+{
+  "status": "PASS",
+  "scope": "TASK-006B-Q-R05 isolated offline research",
+  "python_executable": "D:/AI_Infra_Quant_Codex_v1/task007c1-env/Scripts/python.exe",
+  "working_directory": "D:/AI_Infra_Quant_Codex_v1/task006b-q-r05-worktree",
+  "versions": {
+    "python": "3.12.14",
+    "pytest": "8.4.1",
+    "ruff": "0.12.9",
+    "mypy": "1.17.1",
+    "git": "2.55.0.windows.5",
+    "matplotlib": "3.11.1"
+  },
+  "environment": {
+    "PYTHONUTF8": "1",
+    "PYTHONPATH": "<repository>/src;<repository>",
+    "MYPYPATH": "<repository>/src;<repository>",
+    "plot_extra_path": "D:/AI_Infra_Quant_Codex_v1/task006b-q-r04-plot-env/Lib/site-packages",
+    "plot_backend": "Agg",
+    "plot_cache": "fresh temporary directory outside repository; existing environment reused"
+  },
+  "tested_implementation_sha": "b10e87cbb324442d1fc744d5fa94522802f870c1",
+  "test_timing": "All 268 tests and static gates passed on the exact implementation text before its freeze commit. Final candidate/code/test hashes are checked against that commit; no calculation edits after real results.",
+  "commands": [
+    {
+      "command": "python -m pytest tests/research/paqs_q tests/unit/test_paqs_input.py -ra",
+      "exit_code": 0,
+      "collected": 268,
+      "passed": 268,
+      "retained": 234,
+      "new_r05": 34,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xfail": 0,
+      "deselected": 0,
+      "warnings": 1,
+      "summary": "268 passed, 1 warning in 29.97s"
+    },
+    {
+      "command": "python -m ruff check tools/research/paqs_q/r05 tests/research/paqs_q/r05",
+      "exit_code": 0,
+      "output": "All checks passed!"
+    },
+    {
+      "command": "python -m ruff format --check tools/research/paqs_q/r05 tests/research/paqs_q/r05",
+      "exit_code": 0,
+      "output": "11 files already formatted"
+    },
+    {
+      "command": "python -m mypy --strict --explicit-package-bases tools/research/paqs_q/r05 tests/research/paqs_q/r05",
+      "exit_code": 0,
+      "output": "Success: no issues found in 11 source files"
+    },
+    {
+      "command": "python -m mypy --strict --explicit-package-bases --platform win32 tools/research/paqs_q/r05 tests/research/paqs_q/r05",
+      "exit_code": 0,
+      "output": "Success: no issues found in 11 source files"
+    },
+    {
+      "command": "git diff --cached --check",
+      "exit_code": 0,
+      "phase": "freeze commit staging"
+    },
+    {
+      "command": "python -m tools.research.paqs_q.r05.protect --freeze-sha b10e87cbb324442d1fc744d5fa94522802f870c1",
+      "exit_code": 0,
+      "phase": "freeze commit, clean index/worktree before receipt",
+      "protected_objects": 612,
+      "frozen_objects": 14
+    },
+    {
+      "command": "python -m tools.research.paqs_q.r05.study --data-dir D:/AI_Infra_Quant_Codex_v1/task006b-q-data --calendar D:/AI_Infra_Quant_Codex_v1/task006b-q-r04-source/capture-calendar.json --output docs/evidence/TASK_006B_Q/research-05 --freeze-sha b10e87cbb324442d1fc744d5fa94522802f870c1 --receipt docs/evidence/TASK_006B_Q/research-05/freeze-readback.json",
+      "exit_code": 0,
+      "integrity": "VALID",
+      "B0_reproduction_files": 21,
+      "paired_coordinates": 600,
+      "completed_at_utc": "2026-09-12T11:01:53.337752Z"
+    },
+    {
+      "command": "python -m tools.research.paqs_q.r05.charts --cases docs/evidence/TASK_006B_Q/research-05/cases --output docs/evidence/TASK_006B_Q/research-05/charts",
+      "exit_code": 0,
+      "charts": 14,
+      "visually_inspected": 14
+    }
+  ],
+  "warning": "Unchanged Starlette testclient.py:51 DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.",
+  "enumeration": {
+    "inputs": 40000,
+    "status": "PASS",
+    "input_and_output_sha256": "2a765fe99b5138a3bf92f992cb32836956eac4e6c6b48250f4bbdff7dfce3efd",
+    "same_kind_counterexamples": 0,
+    "set_or_bijection_failures": 0
+  },
+  "not_run": [
+    "browser tests",
+    "Uvicorn",
+    "PostgreSQL",
+    "migration execution",
+    "full product suite"
+  ],
+  "not_run_reason": "R05 contract explicitly does not require these product checks; product runtime and dependencies are unchanged.",
+  "external_research_requests": 0,
+  "user_database_access": false,
+  "network_delivery_issue": {
+    "resolved": true,
+    "errors": [
+      "Failed to connect to github.com:443 after 21047 ms: Could not connect to server",
+      "Recv failure: Connection was reset",
+      "Unsupported SSL backend 'openssl'. Supported SSL backends: schannel"
+    ],
+    "resolution": "Ordinary fast-forward git push used the already-running local network proxy as command-local http.proxy; no config file/global Git setting changed.",
+    "no_real_A1_before_freeze_readback": true
+  },
+  "final_diff_links_and_protection": "Recorded separately in protection.json, followed by a clean HEAD/index/worktree check after the evidence commit. Post-commit delivery SHA is read back from GitHub and returned with the report."
+}
