@@ -152,7 +152,8 @@ def main() -> None:
         json.dump(payload, stream, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
         stream.write("\n")
     print(
-        f"Frozen {len(vectors)} vectors / {case_count} cases: {hashlib.sha256(output.read_bytes()).hexdigest()}"
+        f"Frozen {len(vectors)} vectors / {case_count} cases: "
+        f"{hashlib.sha256(output.read_bytes()).hexdigest()}"
     )
 
 

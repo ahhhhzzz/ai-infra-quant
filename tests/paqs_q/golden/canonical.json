@@ -1,0 +1,40 @@
+[
+  {
+    "tag": "paqs-q/vector/v1",
+    "value": {
+      "unicode": "\u6c49\ud83d\ude00/\n\t\b\f\r\u0001",
+      "decimal": "0",
+      "long": "12345678901234567890.123456789012345678",
+      "instant": "2026-01-01T19:04:05.000006Z"
+    },
+    "canonical": "{\"decimal\":\"0\",\"instant\":\"2026-01-01T19:04:05.000006Z\",\"long\":\"12345678901234567890.123456789012345678\",\"unicode\":\"\\u6c49\\ud83d\\ude00/\\n\\t\\b\\f\\r\\u0001\"}",
+    "sha256": "bb1b1aa352840d00068ce1067c32aad4da474ee1126029b97fb3f80482ada7f3"
+  },
+  {
+    "tag": "paqs-q/config/v1",
+    "value": {
+      "config_schema_version": "vector-v1",
+      "values": {
+        "coefficient": "1",
+        "enabled": true,
+        "optional": null,
+        "count": -12
+      }
+    },
+    "canonical": "{\"config_schema_version\":\"vector-v1\",\"values\":{\"coefficient\":\"1\",\"count\":-12,\"enabled\":true,\"optional\":null}}",
+    "sha256": "d37a7f746cf48d146ee34e5b6a45372da7f94b6e83a9bdb7a19c7903eae2183e"
+  },
+  {
+    "tag": "paqs-q/input/v1",
+    "value": {
+      "a": [
+        1,
+        2,
+        3
+      ],
+      "b": false
+    },
+    "canonical": "{\"a\":[1,2,3],\"b\":false}",
+    "sha256": "df36240812811bba08e91cb92b1b5f54d5c398f673f6bea6f6fa54ba041376b5"
+  }
+]
