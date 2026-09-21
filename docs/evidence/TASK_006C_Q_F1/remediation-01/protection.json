@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "baseline": "d0e8dc22b38d85b0d1395cf76fc03f2de1e85122",
+  "baseline_objects": 727,
+  "protected_objects": 713,
+  "changed_files": [
+    "docs/ARCHITECTURE.md",
+    "docs/MASTER_SPEC.md",
+    "docs/REQUIREMENTS_MATRIX.md",
+    "docs/ROADMAP.md",
+    "docs/STRATEGY_SPEC.md",
+    "docs/engineering/PAQS_ENGINEERING_GUIDE.md",
+    "docs/engineering/PAQS_Q_FRAMEWORK.md",
+    "docs/evidence/TASK_006C_Q_F1/remediation-01/REPORT.md",
+    "docs/evidence/TASK_006C_Q_F1/remediation-01/linux-vectors.json",
+    "docs/evidence/TASK_006C_Q_F1/remediation-01/protection.json",
+    "docs/evidence/TASK_006C_Q_F1/remediation-01/validation.json",
+    "docs/evidence/TASK_006C_Q_F1/remediation-01/verify.py",
+    "prompts/tasks/TASK-006C-Q-F1_REMEDIATION_01.md",
+    "src/ai_infra_quant/core/domain/paqs_q/inputs.py",
+    "src/ai_infra_quant/core/domain/paqs_q/results.py",
+    "src/ai_infra_quant/core/strategy/paqs_q/registry.py",
+    "src/ai_infra_quant/resources/paqs_q/a1.json",
+    "src/ai_infra_quant/resources/paqs_q/b0.json",
+    "tests/architecture/test_task007b_boundaries.py",
+    "tests/paqs_q/test_registry.py",
+    "tests/paqs_q/test_remediation_01.py"
+  ],
+  "relative_links": 224,
+  "windows_comparison": "NOT_RUN"
+}

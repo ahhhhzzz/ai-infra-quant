@@ -1,0 +1,204 @@
+{
+  "schema": "paqs-q-f1-remediation-01-validation-v1",
+  "remote_mirrors": {
+    "contract_commit": "9c8c293f30db83db9984c309a01ec86976417495",
+    "contract_tree": "d1e71f80528de10dfc0ea10eca1555dc4da8e031",
+    "code_commit": "364412ec94c7138480e8e3b0e902d57e4ba55dc3",
+    "code_tree": "d93c625e1a52b856aa6a0d78e282d10d4cab2da0",
+    "attribution": "GitHub API mirrors preserve the complete tested local trees; commit metadata differs. Tests were not rerun under the remote commit SHA."
+  },
+  "baseline": "d0e8dc22b38d85b0d1395cf76fc03f2de1e85122",
+  "code_checkpoint": "5b62a250b93ff35e7a3baa8f65019bec4979e39b",
+  "contract_checkpoint": "81cf97391d682d4025f8691ab4129f73faa5bc66",
+  "platform": "Linux",
+  "python": "3.12.14",
+  "tzdata": "2025.2",
+  "pytest": "8.4.1",
+  "ruff": "0.12.9",
+  "mypy": "1.17.1",
+  "playwright": "1.55.0",
+  "browser": "Chromium Headless Shell 140.0.7339.16 build 1187",
+  "findings": {
+    "F01": "IMPLEMENTED / SELF-TEST PASS / AWAITING FOCUSED REVIEW",
+    "F02": "IMPLEMENTED / SELF-TEST PASS / AWAITING FOCUSED REVIEW",
+    "F03": "IMPLEMENTED / SELF-TEST PASS / AWAITING FOCUSED REVIEW"
+  },
+  "gates": {
+    "F1-01": "PASS_IMPLEMENTATION_VALIDATION",
+    "F1-02": "PENDING_WINDOWS",
+    "F1-03": "PASS_IMPLEMENTATION_VALIDATION",
+    "F1-04": "PASS_IMPLEMENTATION_VALIDATION",
+    "F1-05": "PASS_IMPLEMENTATION_VALIDATION",
+    "F1-06": "PASS_IMPLEMENTATION_VALIDATION",
+    "F1-07": "PASS_IMPLEMENTATION_VALIDATION",
+    "F1-08": "PASS_IMPLEMENTATION_VALIDATION",
+    "F1-09": "PASS_IMPLEMENTATION_VALIDATION",
+    "F1-10": "PASS_IMPLEMENTATION_VALIDATION",
+    "F1-11": "PASS_IMPLEMENTATION_VALIDATION",
+    "F1-12": "INCOMPLETE_BASELINE_BROWSER_FAILURE"
+  },
+  "checks": [
+    {
+      "label": "focused",
+      "tested_sha": "5b62a250b93ff35e7a3baa8f65019bec4979e39b",
+      "args": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/paqs_q",
+        "-ra",
+        "--tb=short"
+      ],
+      "exit_code": 0,
+      "seconds": 39.55,
+      "pytest_summary": "91 passed, 1 warning in 34.98s"
+    },
+    {
+      "label": "research",
+      "tested_sha": "5b62a250b93ff35e7a3baa8f65019bec4979e39b",
+      "args": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/research/paqs_q",
+        "tests/unit/test_paqs_input.py",
+        "-ra"
+      ],
+      "exit_code": 0,
+      "seconds": 66.84,
+      "pytest_summary": "268 passed, 1 warning in 62.93s (0:01:02)"
+    },
+    {
+      "label": "product",
+      "tested_sha": "5b62a250b93ff35e7a3baa8f65019bec4979e39b",
+      "args": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/architecture",
+        "tests/unit/test_paqs_structure.py",
+        "tests/unit/test_paqs_market_snapshot.py",
+        "tests/unit/test_market_data_archive.py",
+        "tests/integration/test_database_invariants.py",
+        "tests/integration/test_migrations.py",
+        "tests/integration/test_migration_configuration.py",
+        "tests/integration/test_sqlite_decimal_roundtrip.py",
+        "tests/integration/test_market_dashboard.py",
+        "tests/integration/test_offline_startup.py",
+        "tests/unit/test_paqs_e_ledger_canonical.py",
+        "tests/unit/test_paqs_e_model_gateway.py",
+        "tests/unit/test_paqs_e_narrative_provider.py",
+        "tests/unit/test_paqs_e_native_research.py",
+        "tests/unit/test_paqs_e_partial_actions.py",
+        "tests/unit/test_paqs_e_remediation_01.py",
+        "tests/unit/test_paqs_e_research_continuation.py",
+        "tests/unit/test_paqs_e_runtime.py",
+        "tests/unit/test_paqs_e_search_multiplicity.py",
+        "tests/integration/test_paqs_e_analysis_api.py",
+        "tests/integration/test_paqs_e_configuration.py",
+        "tests/integration/test_paqs_e_ledger.py",
+        "tests/integration/test_paqs_e_ledger_migrations.py",
+        "tests/integration/test_paqs_e_multi_model.py",
+        "tests/integration/test_paqs_e_narrative_ledger_api.py",
+        "tests/integration/test_paqs_e_native_memo_ledger.py",
+        "tests/integration/test_paqs_e_partial_actions_api.py",
+        "tests/integration/test_paqs_e_research_continuation_api.py",
+        "tests/integration/test_paqs_e_search_multiplicity_api.py",
+        "tests/integration/test_market_archive_f01.py",
+        "tests/integration/test_market_archive_migration.py",
+        "tests/integration/test_market_data_archive_api.py",
+        "-ra"
+      ],
+      "exit_code": 0,
+      "seconds": 75.74,
+      "environment": "absolute PYTHONPATH (migration subprocess changes cwd)",
+      "pytest_summary": "1096 passed, 1 warning in 69.39s (0:01:09)"
+    },
+    {
+      "label": "browser",
+      "tested_sha": "5b62a250b93ff35e7a3baa8f65019bec4979e39b",
+      "args": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/browser/test_paqs_e_ui_cleanup.py",
+        "tests/browser/test_market_archive_browser.py",
+        "tests/browser/test_paqs_e_workbench.py",
+        "-ra"
+      ],
+      "exit_code": 1,
+      "seconds": 108.71,
+      "environment": "absolute PYTHONPATH; runtime Node; Playwright Chromium Headless Shell 140.0.7339.16 build 1187; TASK007C_BROWSER_CHANNEL empty uses default headless executable; no test or product code change",
+      "pytest_summary": "1 failed, 56 passed, 1 warning, 8 errors in 104.99s (0:01:44)"
+    },
+    {
+      "label": "archive-retry",
+      "tested_sha": "5b62a250b93ff35e7a3baa8f65019bec4979e39b",
+      "args": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/browser/test_market_archive_browser.py",
+        "-ra",
+        "--tb=short"
+      ],
+      "exit_code": 0,
+      "seconds": 28.48,
+      "environment": "same Playwright 1.55.0 Headless Shell 140.0.7339.16; dependencies available through temporary venv .pth; original tests unchanged",
+      "pytest_summary": "8 passed, 1 warning in 24.96s"
+    },
+    {
+      "label": "baseline-layout",
+      "tested_sha": "d0e8dc22b38d85b0d1395cf76fc03f2de1e85122",
+      "args": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/browser/test_paqs_e_workbench.py::test_visual_acceptance_artifacts[390-844-success-True]",
+        "-ra",
+        "--tb=short"
+      ],
+      "exit_code": 1,
+      "seconds": 12.84,
+      "environment": "same Playwright 1.55.0 Headless Shell 140.0.7339.16; dependencies available through temporary venv .pth; original tests unchanged",
+      "pytest_summary": "1 failed, 1 warning in 8.93s"
+    }
+  ],
+  "ruff_check": "PASS",
+  "ruff_format": "PASS (22 related files; verifier separately)",
+  "mypy_native": "PASS (21 related files; verifier separately)",
+  "mypy_win32": "PASS (21 related files; not Windows execution)",
+  "mypy_environment": "MYPYPATH=src:. plus existing dependency environment; no strictness changes",
+  "startup": {
+    "status": "PASS",
+    "tested_sha": "5b62a250b93ff35e7a3baa8f65019bec4979e39b",
+    "actual_uvicorn": true,
+    "temporary_sqlite": true,
+    "health_http": 200,
+    "dashboard_http": 200,
+    "migration_revision": "0004_task006b1_market_archive",
+    "providers": "none",
+    "user_database_access": false
+  },
+  "vector_digest": "dbcdb54348d004819d58f5c948e8226851f7694113facffb81201314aed36e32",
+  "code_hashes": {
+    "paqs-q-structure-b0": "623f63f622cfdcfe364b121c99e6b35e987054b94ee24c9063f505484c1ff1df",
+    "paqs-q-structure-a1": "da1127afc9d76bb8edaa04833cb9f0cce54307fa8f2b50327900d780544ef040"
+  },
+  "browser_combined": {
+    "passed": 64,
+    "failed": 1,
+    "remaining_fixture_errors": 0,
+    "attribution": "56 passed plus the 8 disjoint archive tests after venv dependency correction; no duplicate counting",
+    "baseline_reproduction": "same unchanged mobile layout test fails at d0e8dc2 with y=856.03125 >= 844"
+  },
+  "windows_actual": "NOT_RUN; old Windows evidence cannot certify corrected artifacts",
+  "independent_review": "PENDING",
+  "omissions": [
+    "No full-product-suite claim",
+    "No PostgreSQL server",
+    "No user DB, OpenD, LLM or new market sample",
+    "No UI fix or browser-test waiver",
+    "No integration/merge or later strategy work"
+  ]
+}

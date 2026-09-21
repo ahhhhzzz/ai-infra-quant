@@ -4,16 +4,18 @@
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
 `7487cf57161a834d9100f983bab9d8534a1c0488` (Critical/Major/Minor: 0/0/0).
-006C-Q-F1: **IMPLEMENTED / VALIDATION INCOMPLETE / AWAITING INDEPENDENT REVIEW**;
+006C-Q-F1: **REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW**;
 [contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md): **OWNER-APPROVED / READY FOR IMPLEMENTATION**.
 B0 is the default reference structure plugin; A1 is experimental and disabled by default.
 No R06 or expanded stock sample is a startup prerequisite. `RECOMMEND_CROSS_SAMPLE_ONLY`
 remains an optional future research recommendation; strict historical confirmation and broad
 market applicability remain **INCOMPLETE**. This is a versioned framework implementation, not a completed formal Event strategy,
 profitability proof or final Swing/Pivot adoption. Existing product runtime and PAQS-E are unchanged.
-F1-02 awaits an actual Linux canonical-vector run; F1-12 fails one unchanged historical
-assertion forbidding all PAQS-Q source paths. Evidence and reproduction commands are in the
-implementation report. No independent F1 PASS or integration is claimed.
+Remediation 01 corrects closed result schemas, upstream identity checks and all-bar identity
+validation; the obsolete global Q-path prohibition is replaced by product isolation checks.
+The corrected implementation has Linux vector evidence; F1-02 requires a fresh Windows run.
+See the [remediation report](evidence/TASK_006C_Q_F1/remediation-01/REPORT.md).
+No independent F1 PASS or integration is claimed.
 See [Owner decision](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
 [independent review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md). Historical evidence is immutable.
 See the [F1 implementation report](reports/TASK_006C_Q_F1_IMPLEMENTATION_REPORT.md)
@@ -483,7 +485,7 @@ The previously planned future single-engine `TASK-006C`, `TASK-006D`, and `TASK-
 
 ```text
 TASK-006B-Q — REVIEWED / CLOSED AS REFERENCE RESEARCH
-TASK-006C-Q-F1 — Versioned Quant/Event Framework Foundation [implemented; F1-02 pending, F1-12 failed; awaiting independent review]
+TASK-006C-Q-F1 — Versioned Quant/Event Framework Foundation [remediated; platform validation incomplete; awaiting focused review]
 TASK-006C-Q — Later formal Event plugins [separate contracts; not completed]
 TASK-006D-Q — PAQS-Q Setup, Risk & Setup-Specific Quant Confirmation
 TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation
@@ -500,7 +502,7 @@ The F1 contract adopts only the versioned foundation and B0/A1 reference semanti
   → ADC-001 docs-only consolidation [reviewed, closed and integrated]
   → 006B1 bounded archive/replay [reviewed, user-accepted, closed and integrated]
   → 006B-Q research [independently reviewed and closed; no R06]
-  → 006C-Q-F1 [implemented / validation incomplete / awaiting independent review]
+  → 006C-Q-F1 [remediated / platform validation incomplete / awaiting focused review]
 ```
 
 F1 is bounded by its frozen contract; further PAQS-Q plugins remain separately governed and 007D remains deferred.

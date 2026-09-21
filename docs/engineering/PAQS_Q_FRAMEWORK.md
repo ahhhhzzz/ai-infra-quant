@@ -1,8 +1,11 @@
 # PAQS-Q F1 framework
 
-Status: **IMPLEMENTED / VALIDATION INCOMPLETE / AWAITING INDEPENDENT REVIEW**.
-F1-02 is PENDING (no actual Linux run); F1-12 is FAIL (an unchanged historical global
-assertion forbids all PAQS-Q paths). See the [implementation report](../reports/TASK_006C_Q_F1_IMPLEMENTATION_REPORT.md).
+Status: **REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW**.
+The corrected implementation has Linux evidence; F1-02 requires fresh Windows execution.
+The obsolete global Q-path prohibition is replaced by product-isolation checks under the
+[remediation contract](../../prompts/tasks/TASK-006C-Q-F1_REMEDIATION_01.md).
+See the [remediation report](../evidence/TASK_006C_Q_F1/remediation-01/REPORT.md);
+the [original report](../reports/TASK_006C_Q_F1_IMPLEMENTATION_REPORT.md) remains historical evidence.
 
 The implementation follows exact handoff `857823a0dc39b4c10a1986c575bcbcd9dda11c85`.
 The [frozen contract](../../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md)
@@ -72,6 +75,22 @@ W/A/N profile, materializing defaults. `Record` separates hashed semantic identi
 display fields. `QResult` validates the envelope schema/hash and stores immutable Structure/Event
 bytes. Every result binds input, snapshot, explicit cutoff, mode, plugin/config/artifact and status.
 Event results additionally bind the exact upstream structure result and plugin binding.
+
+All selected bars must match the input security and timeframe, including rows older than the
+calculation window. A mismatch returns INVALID / BAR_IDENTITY_CONFLICT before evaluation.
+Record constructors, factories and result decoders share validation of required named fields,
+field types and canonical Decimal/instant strings. Named price/calendar support schemas are
+closed and version references are verified. Record IDs and ordering are checked when decoding.
+`legacy`, Event `evidence`, result `evidence`/`lineage` and `display` are explicitly plugin-owned
+canonical objects; their internal semantics are supplied by each plugin's versioned contract,
+not inferred as a new production strategy by this framework.
+
+Event invocation checks the supplied Structure's input/as_of/mode/snapshot, original registered
+ID/version/code/capability/status/lineage, record integrity and time bounds before plugin code.
+It uses the recorded config hash without guessing defaults or rerunning Structure. Missing old
+implementations raise the typed selection failure UPSTREAM_IMPLEMENTATION_UNAVAILABLE; they
+never fall back to a current implementation. Hash validation establishes identity/integrity,
+not authenticity against a malicious party capable of rebuilding all hashes.
 
 The public stage protocols live in `core/ports/paqs_q.py`; the registry imports no concrete strategy.
 The existing package initializers import retained domain/port definitions, which are included in
@@ -183,11 +202,14 @@ test commands and omissions. No command targets the user's database.
 ```text
 python -m pytest tests/paqs_q -ra
 python tools/validation/paqs_q_f1.py --vectors <new-output-path>
-python tools/validation/paqs_q_f1.py --protect <new-output-path>
+python docs/evidence/TASK_006C_Q_F1/remediation-01/verify.py
 ```
 
 The vector digest covers 28 B0/A1 outputs (12 frozen inputs plus 2 synthetic inputs), canonical
 bytes hashes, record IDs, result hashes and input identities. Compare `vectors`, `code_hashes` and
 `vector_digest` across actual OS executions; platform labels are operational receipt metadata.
-Windows success or `mypy --platform win32` is not Linux evidence. F1-02 stays PENDING until the
-documented Linux command is actually executed in an available approved environment.
+An actual run is required on both operating systems; `mypy --platform win32` is not Windows
+execution. Remediation changes implementation hashes, so the previous Windows receipt cannot
+close F1-02 for this artifact. Follow the remediation report's Windows reproduction commands.
+The original protection tool remains unchanged historical evidence; use the focused verifier
+above to account for the explicitly authorized test exception and changed Q implementation.
