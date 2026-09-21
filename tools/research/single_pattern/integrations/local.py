@@ -83,11 +83,11 @@ def validate(data: Dataset, sessions: dict[date, tuple[datetime, datetime]]) -> 
         if bar.security != data.security or bar.timeframe != "D1" or bar.session != "REGULAR":
             raise ValueError("BAR_IDENTITY_CONFLICT")
         for value in (bar.start, bar.end, bar.completed_at, bar.retrieved_at):
-            if value.tzinfo is None or value.utcoffset() is None:
+            if not isinstance(value, datetime) or value.tzinfo is None or value.utcoffset() is None:
                 raise ValueError("TIME_REQUIRES_OFFSET")
         if bar.available_at is not None and bar.available_at.tzinfo is None:
             raise ValueError("TIME_REQUIRES_OFFSET")
-        if not bar.completed or bar.coverage != "COMPLETE":
+        if bar.completed is not True or bar.coverage != "COMPLETE":
             raise ValueError("UNFINISHED_OR_INCOMPLETE_BAR")
         if not bar.start < bar.end == bar.completed_at <= bar.retrieved_at:
             raise ValueError("INVALID_COMPLETION_TIME")

@@ -83,6 +83,7 @@ def test_bad_input_and_missing_sessions_are_rejected(sample):
     data = source.data
     for change, message in (
         ({"completed": False}, "UNFINISHED"),
+        ({"completed": "false"}, "UNFINISHED"),
         ({"coverage": "PARTIAL"}, "INCOMPLETE"),
         ({"close": D("NaN")}, "NONFINITE"),
         ({"high": D("1")}, "OHLC"),
