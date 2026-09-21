@@ -173,7 +173,22 @@ def test_no_later_strategy_execution_or_broker_state_is_added_to_the_ledger() ->
         "create_task(",
     ):
         assert forbidden not in source
-    assert not list(SOURCE_ROOT.rglob("*paqs_q*"))
+    # F1 authorizes dedicated Q modules, but no connection to accepted product paths.
+    allowed = (
+        SOURCE_ROOT / "core/domain/paqs_q",
+        SOURCE_ROOT / "core/ports/paqs_q.py",
+        SOURCE_ROOT / "core/strategy/paqs_q",
+        SOURCE_ROOT / "application/paqs_q_artifacts.py",
+        SOURCE_ROOT / "resources/paqs_q",
+    )
+    for path in SOURCE_ROOT.rglob("*"):
+        if "__pycache__" in path.parts or any(
+            path == root or root in path.parents for root in allowed
+        ):
+            continue
+        assert "paqs_q" not in path.name
+        if path.is_file() and path.suffix in {".py", ".js", ".html"}:
+            assert "paqs_q" not in path.read_text(encoding="utf-8").lower(), path
 
 
 def test_no_background_scheduler_or_worker_dependency_is_added() -> None:

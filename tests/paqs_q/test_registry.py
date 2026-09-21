@@ -171,13 +171,27 @@ def test_disabled_capability_and_absent_historical_binding():
         with pytest.raises(SelectionError, match=code):
             registry.event(data, structure, event.descriptor.strategy_id, "1.0.0")
     assert base.historical_binding_status(structure) == "AVAILABLE"
+    old_descriptor = replace(base.structures[0].descriptor, strategy_version="0.0.1")
     payload = structure.document()
     payload.pop("canonical_result_hash")
     payload["strategy_version"] = "0.0.1"
+    # A historical envelope must be internally valid before testing missing implementation.
+    for record in payload["records"]:
+        record["record_id"] = digest(
+            "paqs-q/record/v1",
+            {
+                "record_schema_version": record["record_schema_version"],
+                "binding_hash": old_descriptor.binding_hash(
+                    base.structures[0].resolve_config(None)
+                ),
+                "input_hash": data.input_hash,
+                "as_of": data.as_of,
+                "record": record["record"],
+            },
+        )
     payload["canonical_result_hash"] = digest("paqs-q/result/v1", payload)
     old = QResult(FrozenJSON.of(payload))
     assert base.historical_binding_status(old) == "UNAVAILABLE"
-    old_descriptor = replace(base.structures[0].descriptor, strategy_version="0.0.1")
     inventory_only = replace(base, allowlist=(*base.allowlist, old_descriptor))
     assert inventory_only.historical_binding_status(old) == "UNAVAILABLE"
 
@@ -223,6 +237,20 @@ def test_forged_event_upstream_and_future_evidence_are_rejected():
         payload.pop("canonical_result_hash")
         if change == "upstream":
             payload["upstream_structure_hash"] = "0" * 64
+            # Keep the envelope internally valid so the registry's supplied-upstream
+            # mismatch (rather than the decoder's record-integrity check) is exercised.
+            for record in payload["records"]:
+                record["record"]["upstream_structure_hash"] = "0" * 64
+                record["record_id"] = digest(
+                    "paqs-q/record/v1",
+                    {
+                        "record_schema_version": record["record_schema_version"],
+                        "binding_hash": plugin.descriptor.binding_hash(config),
+                        "input_hash": data.input_hash,
+                        "as_of": data.as_of,
+                        "record": record["record"],
+                    },
+                )
         else:
             payload["evidence"] = {"available_at": (data.as_of + timedelta(days=1)).isoformat()}
         payload["canonical_result_hash"] = digest("paqs-q/result/v1", payload)

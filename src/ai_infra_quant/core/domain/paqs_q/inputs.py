@@ -224,6 +224,8 @@ class QInput:
         object.__setattr__(self, "_hash", digest("paqs-q/input/v1", self.payload()))
 
     def problem(self) -> str | None:
+        if any((b.security, b.timeframe) != (self.security, self.timeframe) for b in self.bars):
+            return "BAR_IDENTITY_CONFLICT"
         if len({(b.security, b.timeframe, b.start) for b in self.bars}) != len(self.bars):
             return "CONFLICTING_TIME_VERSION"
         if len({(f.market, f.day) for f in self.calendar}) != len(self.calendar):

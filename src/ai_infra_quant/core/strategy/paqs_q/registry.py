@@ -129,8 +129,26 @@ class Registry:
             source["schema_version"] != STRUCTURE_SCHEMA
             or source["input_hash"] != data.input_hash
             or source["as_of"] != data.payload_as_of()
+            or source["qualification_mode"] != data.mode
+            or source["snapshot_identity"] != data.snapshot_identity
         ):
             raise SelectionError("UPSTREAM_STRUCTURE_MISMATCH")
+        descriptor = next(
+            (
+                p.descriptor
+                for p in self.structures
+                if (p.descriptor.strategy_id, p.descriptor.strategy_version, p.descriptor.code_hash)
+                == (source["strategy_id"], source["strategy_version"], source["code_hash"])
+            ),
+            None,
+        )
+        if descriptor is None or descriptor.plugin_status == "DISABLED":
+            raise SelectionError("UPSTREAM_IMPLEMENTATION_UNAVAILABLE")
+        if descriptor not in self.allowlist:
+            raise SelectionError("PLUGIN_BINDING_CHANGED")
+        # The result already binds its resolved config hash. Do not substitute defaults,
+        # re-evaluate the structure, or try to invert the original config hash.
+        self._verify(data, descriptor, source["config_hash"], structure, None)
         if strategy_id is None and version is None:
             descriptor = Descriptor(
                 "paqs-q-event-unconfigured",
@@ -173,11 +191,12 @@ class Registry:
 
     @staticmethod
     def _verify(
-        data: QInput, d: Descriptor, config: Config, result: QResult, upstream: QResult | None
+        data: QInput, d: Descriptor, config: Config | str, result: QResult, upstream: QResult | None
     ) -> None:
         payload = result.document()
+        binding = d.binding_for_hash(config if isinstance(config, str) else config.config_hash)
         if (
-            any(payload[k] != v for k, v in FrozenJSON.of(d.binding(config)).document().items())
+            any(payload[k] != v for k, v in FrozenJSON.of(binding).document().items())
             or payload["input_hash"] != data.input_hash
             or payload["as_of"] != data.payload_as_of()
             or payload["schema_version"] != d.output_schema
@@ -189,9 +208,7 @@ class Registry:
         expected = upstream.canonical_result_hash if upstream else None
         if payload["upstream_structure_hash"] != expected:
             raise SelectionError("UPSTREAM_STRUCTURE_MISMATCH")
-        upstream_binding = (
-            {k: upstream.document()[k] for k in d.binding(config)} if upstream else None
-        )
+        upstream_binding = {k: upstream.document()[k] for k in binding} if upstream else None
         if payload["upstream_structure_binding"] != upstream_binding:
             raise SelectionError("UPSTREAM_BINDING_MISMATCH")
 
@@ -199,14 +216,17 @@ class Registry:
             if isinstance(value, dict):
                 for key, item in value.items():
                     if (
-                        key
-                        in {
-                            "effective_at",
-                            "confirmation_time",
-                            "reversal_time",
-                            "completed_at",
-                            "available_at",
-                        }
+                        (
+                            key
+                            in {
+                                "effective_at",
+                                "confirmation_time",
+                                "reversal_time",
+                                "completed_at",
+                                "available_at",
+                            }
+                            or (key == "extreme_time" and data.timeframe != "W1")
+                        )
                         and item is not None
                     ) and (
                         not isinstance(item, str) or utc(datetime.fromisoformat(item)) > data.as_of
@@ -226,7 +246,7 @@ class Registry:
                 raise SelectionError("UPSTREAM_RECORD_MISMATCH")
             preimage = {
                 "record_schema_version": record["record_schema_version"],
-                "binding_hash": d.binding_hash(config),
+                "binding_hash": digest("paqs-q/binding/v1", binding),
                 "input_hash": data.input_hash,
                 "as_of": data.as_of,
                 "record": identity,
