@@ -1,10 +1,24 @@
 # Requirements Traceability Matrix
 
-## Current delivery status — 2026-09-09
+## PAQS-Q handoff — 2026-09-21
+
+006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
+`7487cf57161a834d9100f983bab9d8534a1c0488` (Critical/Major/Minor: 0/0/0).
+006C-Q-F1: **AUTHORIZED / CONTRACT FROZEN / IMPLEMENTATION NOT STARTED**;
+[contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md): **OWNER-APPROVED / READY FOR IMPLEMENTATION**.
+B0 is the default reference structure plugin; A1 is experimental and disabled by default.
+No R06 or expanded stock sample is a startup prerequisite. `RECOMMEND_CROSS_SAMPLE_ONLY`
+remains an optional future research recommendation; strict historical confirmation and broad
+market applicability remain **INCOMPLETE**. This is framework authorization, not completed
+Event strategy, profitability proof or final Swing/Pivot adoption. Runtime and PAQS-E are unchanged.
+See [Owner decision](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
+[independent review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md). Historical evidence is immutable.
+
+## Integrated product baseline — 2026-09-09
 
 C1/C2 and ADC-001 are accepted and integrated. ADC-001 passed focused re-review at
 `66a3ca7bbff258665b25e5ab17231138bf3cc49f`; ADC itself changed no runtime code.
-TASK-006B1 is independently reviewed PASS, user-accepted, closed and integrated at accepted implementation `2e9889ae9d2587fcfac6d715923f8a791b2333d8`. F01 is closed; no successor task is started.
+TASK-006B1 is independently reviewed PASS, user-accepted, closed and integrated at accepted implementation `2e9889ae9d2587fcfac6d715923f8a791b2333d8`. F01 is closed; the current Q-side authorization is recorded above.
 Exact SHAs, current sequence and evidence attribution are in [ROADMAP](ROADMAP.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
@@ -163,8 +177,9 @@ Only Phase 0 through Phase 4 are valid target phases.
 | PAQSQ-001 | PAQS-Q is the deterministic machine/reference/scanner branch | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 6 |
 | PAQSQ-002 | PAQS-Q mechanical thresholds and future methods do not silently bind PAQS-E semantic reasoning | RETAINED | 2 | DOCUMENTED | Roadmap 6; PAQS-E Master Spec/Doctrine |
 | PAQSQ-003 | PAQS-Q methods may evolve under separate research/Task Contract governance | RETAINED | 2 | DOCUMENTED | Roadmap 6/7 |
-| PAQSQ-004 | TASK-006B-Q — PAQS-Q Structure Stabilization | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
-| PAQSQ-005 | TASK-006C-Q — PAQS-Q Event Engine | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
+| PAQSQ-004 | TASK-006B-Q reference research closed after exact R05 PASS | RETAINED | 2 | REVIEWED / CLOSED AS REFERENCE RESEARCH | [Review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md); [closeout](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) |
+| PAQSQ-005 | TASK-006C-Q formal Event plugins, not delivered by F1 | RETAINED | 2 | PLANNED_TASK | Roadmap 7; separate future plugin contracts |
+| PAQSQ-F1 | Versioned quant/event foundation; B0 reference, A1 experimental default OFF; immutable identity and deterministic hashes | RETAINED | 2 | AUTHORIZED / CONTRACT FROZEN / IMPLEMENTATION NOT STARTED | [Frozen contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md); acceptance F1-01 through F1-12 |
 | PAQSQ-006 | TASK-006D-Q — PAQS-Q Setup, Risk & Setup-Specific Quant Confirmation | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSQ-007 | TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSQ-008 | PAQS-Q stabilization is not a prerequisite that blocks an otherwise safe PAQS-E current-analysis MVP | RETAINED | 2 | DOCUMENTED | Roadmap 7; `PAQS-DUAL-001` |
@@ -283,7 +298,7 @@ below are inspected evidence, not ADC execution results. C1 and C2 acceptance ar
 
 006B1 archive/replay/0004 is independently reviewed, user-accepted, closed and integrated.
 See [focused PASS](reviews/TASK_006B1_F01_FOCUSED_RE_REVIEW.md) and [closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md).
-PAQS-Q successors, strict historical As-Of/GoldSet,
+F1 framework alone is authorized as stated above; formal Event strategies, strict historical As-Of/GoldSet,
 007D comparison and Paper/PnL/Phase 3/4 remain deferred. Real-account/trading behavior is forbidden.
 
 ## TASK-006B1 acceptance traceability (reviewed, user-accepted and integrated)

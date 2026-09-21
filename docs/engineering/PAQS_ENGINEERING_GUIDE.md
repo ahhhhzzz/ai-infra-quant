@@ -1,5 +1,19 @@
 # PAQS Engineering Guide — TASK-007B Analyze/Decision Ledger independently accepted
 
+## PAQS-Q handoff — 2026-09-21
+
+006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
+`7487cf57161a834d9100f983bab9d8534a1c0488` (Critical/Major/Minor: 0/0/0).
+006C-Q-F1: **AUTHORIZED / CONTRACT FROZEN / IMPLEMENTATION NOT STARTED**;
+[contract](../../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md): **OWNER-APPROVED / READY FOR IMPLEMENTATION**.
+B0 is the default reference structure plugin; A1 is experimental and disabled by default.
+No R06 or expanded stock sample is a startup prerequisite. `RECOMMEND_CROSS_SAMPLE_ONLY`
+remains an optional future research recommendation; strict historical confirmation and broad
+market applicability remain **INCOMPLETE**. This is framework authorization, not completed
+Event strategy, profitability proof or final Swing/Pivot adoption. Runtime and PAQS-E are unchanged.
+See [Owner decision](../decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
+[independent review](../reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md). Historical evidence is immutable.
+
 ## Authority and boundary
 
 Implementation authority flows from `AGENTS.md`, `docs/ROADMAP.md`, `docs/MASTER_SPEC.md`, and the
@@ -344,8 +358,9 @@ or profitability evidence.
 
 ## Future extension points
 
-TASK-006C–006E may add events, setup/risk, and advisory/dashboard behavior only after separate
-approval and the required human review of real structure. They must not change input or structure
+F1 may add only the versioned framework, B0 reference and gated A1 plugins under its frozen
+contract. Formal Event plugins and later setup/risk/advisory/dashboard work require separate
+approval. No R06, broader market proof or final structure definition is a prerequisite for F1. They must not change input or structure
 facts based on desirable later outcomes. Broader historical replay requires a separate
 point-in-time adjustment/data contract.
 
@@ -360,3 +375,16 @@ point-in-time adjustment/data contract.
 | US `Session.ALL` = PAQS M30 structural session | Initial PAQS M30 filters to 09:30–16:00 regular time. |
 | QFQ = automatically point-in-time-safe historical replay | Current QFQ is explicitly marked replay-unsafe. |
 | PAQS input endpoint = trading recommendation | It exposes input health only and has no advisory output. |
+
+## F1 developer contract (authorized, implementation not started)
+
+Use explicit versioned protocols and an allowlist registry; freeze nested input/output/evidence
+values and preserve old result bindings. B0 is the only default selectable structure plugin.
+A1 requires explicit ID/version and experimental permission. No production Event strategy is
+required; fixture Event plugins remain test-only. Production core cannot import research tools.
+The [F1 contract](../../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md)
+defines canonical JSON, Decimal/UTC encoding, tagged SHA-256 preimages, implementation artifact
+inventory and Linux/Windows equality gates. Same input/binding/config/as_of yields identical bytes.
+Preserve completed bars, no-lookahead, explicit missing-data status and reference-only quotes.
+Do not read environment, databases, OpenD, LLMs or provider SDKs in core. Event != Setup != Advisory;
+no Entry/Hold/Exit, PnL, sizing, order or automatic trading semantics are added.

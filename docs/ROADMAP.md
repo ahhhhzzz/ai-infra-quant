@@ -1,6 +1,20 @@
 # Read-Only PAQS Dual-Branch Decision-Terminal Product Roadmap
 
-## Current delivery status — 2026-09-09
+## PAQS-Q handoff — 2026-09-21
+
+006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
+`7487cf57161a834d9100f983bab9d8534a1c0488` (Critical/Major/Minor: 0/0/0).
+006C-Q-F1: **AUTHORIZED / CONTRACT FROZEN / IMPLEMENTATION NOT STARTED**;
+[contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md): **OWNER-APPROVED / READY FOR IMPLEMENTATION**.
+B0 is the default reference structure plugin; A1 is experimental and disabled by default.
+No R06 or expanded stock sample is a startup prerequisite. `RECOMMEND_CROSS_SAMPLE_ONLY`
+remains an optional future research recommendation; strict historical confirmation and broad
+market applicability remain **INCOMPLETE**. This is framework authorization, not completed
+Event strategy, profitability proof or final Swing/Pivot adoption. Runtime and PAQS-E are unchanged.
+See [Owner decision](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
+[independent review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md). Historical evidence is immutable.
+
+## Integrated product baseline — 2026-09-09
 
 TASK-007A/B/C and user-accepted C1 are integrated. C2 is independently reviewed, user-closed and
 integrated; accepted C2 runtime code is `d2d25efc79d2560a7ed09895c7dd7a2c1724aee9`, included in
@@ -16,13 +30,13 @@ ADC-001 is **REVIEWED PASS / CLOSED / INTEGRATED** at accepted implementation
 `66a3ca7bbff258665b25e5ab17231138bf3cc49f`; its F01 is closed with zero outstanding findings.
 See [focused review](reviews/TASK_ADC_001_F01_FOCUSED_RE_REVIEW.md) and
 [closeout/resumption decision](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md).
-Latest completed task: **006B1 — REVIEWED PASS / USER-ACCEPTED / CLOSED / INTEGRATED**.
+Latest integrated product task: **006B1 — REVIEWED PASS / USER-ACCEPTED / CLOSED / INTEGRATED**.
 Accepted implementation: `2e9889ae9d2587fcfac6d715923f8a791b2333d8`; F01 is closed.
 See [focused PASS](reviews/TASK_006B1_F01_FOCUSED_RE_REVIEW.md) and
-[closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md). No successor task is started.
+[closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md). The Q-side handoff above is separate from product integration.
 The task started at `bed9059fd6ce6c0a7cd750376c972070db0a39dd`, with authoritative baseline
 `02326a3bb19c2a89352d765f5331670b5f3f466d`, under the updated handoff. Explicit archive/replay
-and additive 0004 are implemented; PAQS-Q successors, Paper/PnL and Phase 3/4 remain dormant.
+and additive 0004 are implemented; only the bounded Q-side F1 framework is now authorized. Paper/PnL and Phase 3/4 remain dormant.
 See [006B1 implementation report](reports/TASK_006B1_IMPLEMENTATION_REPORT.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
@@ -463,13 +477,14 @@ Planned scope:
 The previously planned future single-engine `TASK-006C`, `TASK-006D`, and `TASK-006E` wording is superseded for future implementation by:
 
 ```text
-TASK-006B-Q — PAQS-Q Structure Stabilization
-TASK-006C-Q — PAQS-Q Event Engine
+TASK-006B-Q — REVIEWED / CLOSED AS REFERENCE RESEARCH
+TASK-006C-Q-F1 — Versioned Quant/Event Framework Foundation [contract frozen; not implemented]
+TASK-006C-Q — Later formal Event plugins [separate contracts; not completed]
 TASK-006D-Q — PAQS-Q Setup, Risk & Setup-Specific Quant Confirmation
 TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation
 ```
 
-PAQS-Q concrete semantics still require explicit approval before implementation. PAQS-Q work must not block an otherwise safe PAQS-E MVP and must not redefine PAQS-E strategy authority.
+The F1 contract adopts only the versioned foundation and B0/A1 reference semantics; later formal Event semantics require separate approval. PAQS-Q work must not block an otherwise safe PAQS-E MVP and must not redefine PAQS-E strategy authority.
 
 ### Recommended current implementation order
 
@@ -479,10 +494,11 @@ PAQS-Q concrete semantics still require explicit approval before implementation.
   → 007C2 reviewed, user-closed and integrated
   → ADC-001 docs-only consolidation [reviewed, closed and integrated]
   → 006B1 bounded archive/replay [reviewed, user-accepted, closed and integrated]
-  → no successor task started; later work requires a separate approved contract
+  → 006B-Q research [independently reviewed and closed; no R06]
+  → 006C-Q-F1 [authorized / contract frozen / implementation not started]
 ```
 
-PAQS-Q successors remain separately governed; 007D follows usable Q-side output.
+F1 is bounded by its frozen contract; further PAQS-Q plugins remain separately governed and 007D remains deferred.
 The old 006B1 functional scope remains valid; its old starting SHA/prompt is not current authority.
 
 ### Deferred user request after 006B1 closeout

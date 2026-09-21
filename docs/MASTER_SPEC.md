@@ -1,10 +1,24 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
-## Current delivery status — 2026-09-09
+## PAQS-Q handoff — 2026-09-21
+
+006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
+`7487cf57161a834d9100f983bab9d8534a1c0488` (Critical/Major/Minor: 0/0/0).
+006C-Q-F1: **AUTHORIZED / CONTRACT FROZEN / IMPLEMENTATION NOT STARTED**;
+[contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md): **OWNER-APPROVED / READY FOR IMPLEMENTATION**.
+B0 is the default reference structure plugin; A1 is experimental and disabled by default.
+No R06 or expanded stock sample is a startup prerequisite. `RECOMMEND_CROSS_SAMPLE_ONLY`
+remains an optional future research recommendation; strict historical confirmation and broad
+market applicability remain **INCOMPLETE**. This is framework authorization, not completed
+Event strategy, profitability proof or final Swing/Pivot adoption. Runtime and PAQS-E are unchanged.
+See [Owner decision](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
+[independent review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md). Historical evidence is immutable.
+
+## Integrated product baseline — 2026-09-09
 
 C1/C2 and ADC-001 are accepted and integrated. ADC-001 passed focused re-review at
 `66a3ca7bbff258665b25e5ab17231138bf3cc49f`; ADC itself changed no runtime code.
-TASK-006B1 is independently reviewed PASS, user-accepted, closed and integrated at accepted implementation `2e9889ae9d2587fcfac6d715923f8a791b2333d8`. F01 is closed; no successor task is started.
+TASK-006B1 is independently reviewed PASS, user-accepted, closed and integrated at accepted implementation `2e9889ae9d2587fcfac6d715923f8a791b2333d8`. F01 is closed; the current Q-side authorization is recorded above.
 Exact SHAs, current sequence and evidence attribution are in [ROADMAP](ROADMAP.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
@@ -251,7 +265,7 @@ Phase 2 decision terminal, and optional Phase 3/4 extensions as assigned by the 
 Phase 4 is the final possible phase; no execution phase exists.
 
 Current sequence: accepted C2 → ADC-001 reviewed/integrated → 006B1 reviewed, user-accepted,
-closed and integrated. No successor task is started. The original 006B1 scope remains unchanged; the old
+closed and integrated → 006B-Q reference research closed → 006C-Q-F1 contract frozen, implementation not started. The original 006B1 scope remains unchanged; the old
 starting prompt is not reusable. See [ROADMAP](ROADMAP.md).
 
 TASK-006A is integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B deterministic
