@@ -4,7 +4,9 @@ The owner has prioritized the isolated [single-pattern research CLI](../PAQS_Q_S
 before complete formal Event implementation. It runs local exploratory D1 replay outside the
 product, reusing pure price/ATR functions without editing frozen artifacts. See its
 [Windows implementation/validation report](../reports/PAQS_Q_SINGLE_PATTERN_V1.md).
-Formal Event, Setup/Risk and Q product UI remain unimplemented; task delivery awaits review.
+Formal Event, Setup/Risk and Q product UI remain unimplemented. Single-pattern research is
+**FOCUSED REVIEW PASS / CLOSED / INTEGRATED**; see its
+[closeout decision](../decisions/PAQS_Q_SINGLE_PATTERN_V1_CLOSEOUT_2026_09_21.md).
 
 ## PAQS-Q handoff — 2026-09-21
 

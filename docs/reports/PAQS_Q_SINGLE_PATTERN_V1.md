@@ -100,3 +100,11 @@ or use `--demo`. Strict PIT research would additionally require historical price
 versions and independently evidenced calendar/availability. Only a single existing symbol was
 observed; 12 trades do not establish generality or profitability. Independent review is pending.
 Complete Event, Setup/Risk, Q/E comparison and formal UI remain unimplemented and are not started.
+
+## Subsequent closeout — 2026-09-21
+
+The original implementation/execution record above remains unchanged. The owner subsequently
+provided an external focused PASS and authorized closeout/fast-forward integration. Current state:
+**FOCUSED REVIEW PASS / CLOSED / INTEGRATED**, effective under the
+[closeout decision](../decisions/PAQS_Q_SINGLE_PATTERN_V1_CLOSEOUT_2026_09_21.md).
+This addition does not represent new Windows/browser/AVGO execution or independent AVGO recomputation.

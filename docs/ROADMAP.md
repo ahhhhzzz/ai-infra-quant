@@ -4,7 +4,8 @@
 
 The owner prioritized a bounded, offline PAQS-Q single-pattern research loop over the proposed
 complete Event Context/six-event implementation. The experimental D1 local-high retest simulator
-is implemented on its task branch, awaiting independent review; it is not integrated.
+has passed external focused review and is **CLOSED / INTEGRATED**, effective with the product
+fast-forward described in the [closeout decision](decisions/PAQS_Q_SINGLE_PATTERN_V1_CLOSEOUT_2026_09_21.md).
 [Rules and usage](PAQS_Q_SINGLE_PATTERN.md) / [implementation report](reports/PAQS_Q_SINGLE_PATTERN_V1.md).
 This explicit task authorization covers local simulated trades/statistics only, not activation of
 the general Phase 3/4 platform. Formal Event, Setup/Risk, Q/E comparison and product UI remain
@@ -523,7 +524,7 @@ The F1 contract adopts only the versioned foundation and B0/A1 reference semanti
   → 006B1 bounded archive/replay [reviewed, user-accepted, closed and integrated]
   → 006B-Q research [independently reviewed and closed; no R06]
   → 006C-Q-F1 [focused review PASS / user-accepted limitation / closed and integrated]
-  → single-pattern offline research loop [current task branch; awaiting review]
+  → single-pattern offline research loop [focused review PASS / closed / integrated]
   → formal Event engine [deferred; not started]
 ```
 

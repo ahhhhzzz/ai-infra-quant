@@ -1,6 +1,9 @@
 # Requirements Traceability Matrix
 
-## Single-pattern research — task branch, awaiting review
+## Single-pattern research — focused review PASS / closed / integrated
+
+External review attribution and retained limitations:
+[closeout decision](decisions/PAQS_Q_SINGLE_PATTERN_V1_CLOSEOUT_2026_09_21.md).
 
 | Requirement | Implementation / evidence |
 |---|---|

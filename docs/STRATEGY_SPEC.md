@@ -3,7 +3,9 @@
 ## Single-pattern research task — 2026-09-21
 
 The owner authorized an isolated exploratory D1 local-high breakout/retest experiment, now
-implemented on its task branch and awaiting review. [Rules](PAQS_Q_SINGLE_PATTERN.md) explicitly
+**FOCUSED REVIEW PASS / CLOSED / INTEGRATED** under the
+[closeout decision](decisions/PAQS_Q_SINGLE_PATTERN_V1_CLOSEOUT_2026_09_21.md).
+[Rules](PAQS_Q_SINGLE_PATTERN.md) explicitly
 separate reused reference parameters from new simulation assumptions. Point-price context is
 not a Major/Micro/Zone model; simulated stops/2R targets are not formal PAQS Setup/Risk.
 Historical current-QFQ observations do not satisfy strict point-in-time replay. This task does not
