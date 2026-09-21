@@ -1,0 +1,207 @@
+{
+  "schema": "paqs-q-f1-validation-v1",
+  "baseline": "857823a0dc39b4c10a1986c575bcbcd9dda11c85",
+  "code_checkpoint": "cc77ee8278ddb7db1dcacdce6c364a89cbf3b51a",
+  "contract_blob": "c2c5448c1eb72fd0ece1572c31ba30246a761b51",
+  "gates": {
+    "F1-01": "PASS",
+    "F1-02": "PENDING",
+    "F1-03": "PASS",
+    "F1-04": "PASS",
+    "F1-05": "PASS",
+    "F1-06": "PASS",
+    "F1-07": "PASS",
+    "F1-08": "PASS",
+    "F1-09": "PASS",
+    "F1-10": "PASS",
+    "F1-11": "PASS",
+    "F1-12": "FAIL"
+  },
+  "platform": "Windows",
+  "python": "3.12.14",
+  "pytest": "8.4.1",
+  "ruff": "0.12.9",
+  "mypy": "1.17.1",
+  "tzdata": "2025.2",
+  "checks": [
+    {
+      "args": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/paqs_q",
+        "-ra",
+        "--tb=short"
+      ],
+      "passed": 55,
+      "failed": 0,
+      "warnings": 1,
+      "seconds": "54.51",
+      "exit_code": 0
+    },
+    {
+      "args": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/research/paqs_q",
+        "tests/unit/test_paqs_input.py",
+        "-ra"
+      ],
+      "passed": 268,
+      "failed": 0,
+      "warnings": 1,
+      "seconds": "162.53",
+      "exit_code": 0
+    },
+    {
+      "args": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/architecture",
+        "tests/unit/test_paqs_structure.py",
+        "tests/unit/test_paqs_market_snapshot.py",
+        "tests/unit/test_market_data_archive.py",
+        "tests/integration/test_database_invariants.py",
+        "tests/integration/test_migrations.py",
+        "tests/integration/test_migration_configuration.py",
+        "tests/integration/test_sqlite_decimal_roundtrip.py",
+        "tests/integration/test_market_dashboard.py",
+        "tests/integration/test_offline_startup.py",
+        "tests/unit/test_paqs_e_ledger_canonical.py",
+        "tests/unit/test_paqs_e_model_gateway.py",
+        "tests/unit/test_paqs_e_narrative_provider.py",
+        "tests/unit/test_paqs_e_native_research.py",
+        "tests/unit/test_paqs_e_partial_actions.py",
+        "tests/unit/test_paqs_e_remediation_01.py",
+        "tests/unit/test_paqs_e_research_continuation.py",
+        "tests/unit/test_paqs_e_runtime.py",
+        "tests/unit/test_paqs_e_search_multiplicity.py",
+        "tests/integration/test_paqs_e_analysis_api.py",
+        "tests/integration/test_paqs_e_configuration.py",
+        "tests/integration/test_paqs_e_ledger.py",
+        "tests/integration/test_paqs_e_ledger_migrations.py",
+        "tests/integration/test_paqs_e_multi_model.py",
+        "tests/integration/test_paqs_e_narrative_ledger_api.py",
+        "tests/integration/test_paqs_e_native_memo_ledger.py",
+        "tests/integration/test_paqs_e_partial_actions_api.py",
+        "tests/integration/test_paqs_e_research_continuation_api.py",
+        "tests/integration/test_paqs_e_search_multiplicity_api.py",
+        "tests/integration/test_market_archive_f01.py",
+        "tests/integration/test_market_archive_migration.py",
+        "tests/integration/test_market_data_archive_api.py",
+        "-ra"
+      ],
+      "passed": 1095,
+      "failed": 1,
+      "warnings": 1,
+      "seconds": "426.33",
+      "exit_code": 1,
+      "failure": "tests/architecture/test_task007b_boundaries.py::test_no_later_strategy_execution_or_broker_state_is_added_to_the_ledger",
+      "reason": "Unchanged line 176 forbids any *paqs_q* source path; no skip, exception, rename or test modification"
+    },
+    {
+      "args": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/browser/test_paqs_e_ui_cleanup.py",
+        "tests/browser/test_market_archive_browser.py",
+        "tests/browser/test_paqs_e_workbench.py",
+        "-ra"
+      ],
+      "passed": 65,
+      "failed": 0,
+      "warnings": 1,
+      "seconds": "134.22",
+      "exit_code": 0
+    },
+    {
+      "args": [
+        "python",
+        "-m",
+        "ruff",
+        "check",
+        "src/ai_infra_quant/core/domain/paqs_q",
+        "src/ai_infra_quant/core/ports/paqs_q.py",
+        "src/ai_infra_quant/core/strategy/paqs_q",
+        "src/ai_infra_quant/application/paqs_q_artifacts.py",
+        "tests/paqs_q",
+        "tools/validation/paqs_q_f1.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "args": [
+        "python",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "src/ai_infra_quant/core/domain/paqs_q",
+        "src/ai_infra_quant/core/ports/paqs_q.py",
+        "src/ai_infra_quant/core/strategy/paqs_q",
+        "src/ai_infra_quant/application/paqs_q_artifacts.py",
+        "tests/paqs_q",
+        "tools/validation/paqs_q_f1.py"
+      ],
+      "exit_code": 0,
+      "files": 20
+    },
+    {
+      "args": [
+        "python",
+        "-m",
+        "mypy",
+        "--strict",
+        "--explicit-package-bases",
+        "src/ai_infra_quant/core/domain/paqs_q",
+        "src/ai_infra_quant/core/ports/paqs_q.py",
+        "src/ai_infra_quant/core/strategy/paqs_q",
+        "src/ai_infra_quant/application/paqs_q_artifacts.py",
+        "tests/paqs_q",
+        "tools/validation/paqs_q_f1.py"
+      ],
+      "exit_code": 0,
+      "files": 20
+    },
+    {
+      "args": [
+        "python",
+        "-m",
+        "mypy",
+        "--strict",
+        "--explicit-package-bases",
+        "src/ai_infra_quant/core/domain/paqs_q",
+        "src/ai_infra_quant/core/ports/paqs_q.py",
+        "src/ai_infra_quant/core/strategy/paqs_q",
+        "src/ai_infra_quant/application/paqs_q_artifacts.py",
+        "tests/paqs_q",
+        "tools/validation/paqs_q_f1.py",
+        "--platform",
+        "win32"
+      ],
+      "exit_code": 0,
+      "files": 20
+    }
+  ],
+  "warning": "Existing Starlette anyio.abc.BlockingPortal deprecation; unchanged",
+  "linux": {
+    "status": "PENDING",
+    "wsl_exit_code": 1,
+    "wsl_message": "\u672a\u5b89\u88c5\u9002\u7528\u4e8e Linux \u7684 Windows \u5b50\u7cfb\u7edf\u3002\u53ef\u901a\u8fc7\u8fd0\u884c \u201cwsl.exe --install\u201d \u8fdb\u884c\u5b89\u88c5\u3002\r\r\n\u6709\u5173\u8be6\u7ec6\u4fe1\u606f\uff0c\u8bf7\u8bbf\u95ee https://aka.ms/wslinstall",
+    "docker_available": false,
+    "provisioned_environment": false
+  },
+  "retained_execution_attribution": "Retained tests ran during implementation; all original product/test objects remain identical at delivery. Final focused tests/vectors ran at code_checkpoint.",
+  "omissions": [
+    "No actual Linux run",
+    "No built distribution wheel; portable source ZIP verification executed",
+    "No PostgreSQL server/full-product suite claim",
+    "No user DB/provider/LLM/new price calls",
+    "No R05 re-review or R06"
+  ],
+  "vector_receipt": "windows-vectors.json",
+  "protection_receipt": "protection.json"
+}

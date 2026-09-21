@@ -4,15 +4,20 @@
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
 `7487cf57161a834d9100f983bab9d8534a1c0488` (Critical/Major/Minor: 0/0/0).
-006C-Q-F1: **AUTHORIZED / CONTRACT FROZEN / IMPLEMENTATION NOT STARTED**;
+006C-Q-F1: **IMPLEMENTED / VALIDATION INCOMPLETE / AWAITING INDEPENDENT REVIEW**;
 [contract](../../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md): **OWNER-APPROVED / READY FOR IMPLEMENTATION**.
 B0 is the default reference structure plugin; A1 is experimental and disabled by default.
 No R06 or expanded stock sample is a startup prerequisite. `RECOMMEND_CROSS_SAMPLE_ONLY`
 remains an optional future research recommendation; strict historical confirmation and broad
-market applicability remain **INCOMPLETE**. This is framework authorization, not completed
-Event strategy, profitability proof or final Swing/Pivot adoption. Runtime and PAQS-E are unchanged.
+market applicability remain **INCOMPLETE**. This is a versioned framework implementation, not a completed formal Event strategy,
+profitability proof or final Swing/Pivot adoption. Existing product runtime and PAQS-E are unchanged.
+F1-02 awaits an actual Linux canonical-vector run; F1-12 fails one unchanged historical
+assertion forbidding all PAQS-Q source paths. Evidence and reproduction commands are in the
+implementation report. No independent F1 PASS or integration is claimed.
 See [Owner decision](../decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
 [independent review](../reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md). Historical evidence is immutable.
+See the [F1 implementation report](../reports/TASK_006C_Q_F1_IMPLEMENTATION_REPORT.md)
+and [developer guide](PAQS_Q_FRAMEWORK.md).
 
 ## Authority and boundary
 
@@ -376,7 +381,7 @@ point-in-time adjustment/data contract.
 | QFQ = automatically point-in-time-safe historical replay | Current QFQ is explicitly marked replay-unsafe. |
 | PAQS input endpoint = trading recommendation | It exposes input health only and has no advisory output. |
 
-## F1 developer contract (authorized, implementation not started)
+## F1 developer contract (implemented; validation incomplete; awaiting review)
 
 Use explicit versioned protocols and an allowlist registry; freeze nested input/output/evidence
 values and preserve old result bindings. B0 is the only default selectable structure plugin.
