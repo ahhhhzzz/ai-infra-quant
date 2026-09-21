@@ -1,7 +1,9 @@
 # PAQS-Q F1 framework
 
 Status: **REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW**.
-The corrected implementation has Linux evidence; F1-02 requires fresh Windows execution.
+The corrected implementation has matching actual Linux/Windows vectors (F1-02 PASS).
+F1-12 remains FAIL / INCOMPLETE because of the recorded Linux mobile visual acceptance failure.
+See the [minimal closeout report](../evidence/TASK_006C_Q_F1/closeout-01/REPORT.md).
 The obsolete global Q-path prohibition is replaced by product-isolation checks under the
 [remediation contract](../../prompts/tasks/TASK-006C-Q-F1_REMEDIATION_01.md).
 See the [remediation report](../evidence/TASK_006C_Q_F1/remediation-01/REPORT.md);
@@ -202,14 +204,17 @@ test commands and omissions. No command targets the user's database.
 ```text
 python -m pytest tests/paqs_q -ra
 python tools/validation/paqs_q_f1.py --vectors <new-output-path>
-python docs/evidence/TASK_006C_Q_F1/remediation-01/verify.py
 ```
 
 The vector digest covers 28 B0/A1 outputs (12 frozen inputs plus 2 synthetic inputs), canonical
 bytes hashes, record IDs, result hashes and input identities. Compare `vectors`, `code_hashes` and
 `vector_digest` across actual OS executions; platform labels are operational receipt metadata.
 An actual run is required on both operating systems; `mypy --platform win32` is not Windows
-execution. Remediation changes implementation hashes, so the previous Windows receipt cannot
-close F1-02 for this artifact. Follow the remediation report's Windows reproduction commands.
-The original protection tool remains unchanged historical evidence; use the focused verifier
-above to account for the explicitly authorized test exception and changed Q implementation.
+execution. The minimal closeout report records the corrected artifact's fresh Windows run and
+matching Linux vectors. Pre-remediation receipts remain historical; they did not close this gate.
+The recorded Linux mobile browser failure remains an unmet F1-12 acceptance item.
+Both original protection tools remain unchanged historical evidence. To reproduce remediation
+protection and its Windows comparison, check out `8a87150685c123bcf9e67288d81ac50a0697a54b` and run
+`python docs/evidence/TASK_006C_Q_F1/remediation-01/verify.py --windows <new-output-path>`.
+That verifier's closed scope predates the closeout files; it is not a validator for this later
+documentation-only addition. The closeout report links the separate document/object checks.

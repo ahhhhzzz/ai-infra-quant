@@ -13,7 +13,9 @@ market applicability remain **INCOMPLETE**. This is a versioned framework implem
 profitability proof or final Swing/Pivot adoption. Existing product runtime and PAQS-E are unchanged.
 Remediation 01 corrects closed result schemas, upstream identity checks and all-bar identity
 validation; the obsolete global Q-path prohibition is replaced by product isolation checks.
-The corrected implementation has Linux vector evidence; F1-02 requires a fresh Windows run.
+The corrected implementation has matching actual Linux/Windows vectors (F1-02 PASS).
+F1-12 remains FAIL / INCOMPLETE: the Linux mobile visual acceptance case still fails.
+See the [minimal closeout report](../evidence/TASK_006C_Q_F1/closeout-01/REPORT.md).
 See the [remediation report](../evidence/TASK_006C_Q_F1/remediation-01/REPORT.md).
 No independent F1 PASS or integration is claimed.
 See [Owner decision](../decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and

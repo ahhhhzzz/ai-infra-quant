@@ -1,0 +1,38 @@
+{
+  "schema": "paqs-q-f1-closeout-01-protection-v1",
+  "status": "PASS",
+  "baseline": "8a87150685c123bcf9e67288d81ac50a0697a54b",
+  "target": "documentation worktree after Windows tests; source unchanged",
+  "baseline_objects": 734,
+  "protected_original_objects": 727,
+  "algorithm": "git ls-tree -r baseline; git hash-object --stdin-paths for every original path except seven current docs; exact approved changed-path set; git diff --check; relative Markdown target/anchor validation; UTF-8/JSON/whitespace/status checks",
+  "product_authority": "8bf55f1ea5e7b3e9e65517ca9b5a505086bb761f",
+  "unchanged_product_source_and_dependency_objects": 150,
+  "product_source_policy": "Every source/dependency blob present at the authority SHA remains identical; pre-existing dedicated Q additions are preserved.",
+  "changed_files": [
+    "docs/ARCHITECTURE.md",
+    "docs/MASTER_SPEC.md",
+    "docs/REQUIREMENTS_MATRIX.md",
+    "docs/ROADMAP.md",
+    "docs/STRATEGY_SPEC.md",
+    "docs/engineering/PAQS_ENGINEERING_GUIDE.md",
+    "docs/engineering/PAQS_Q_FRAMEWORK.md",
+    "docs/evidence/TASK_006C_Q_F1/closeout-01/REPORT.md",
+    "docs/evidence/TASK_006C_Q_F1/closeout-01/protection.json",
+    "docs/evidence/TASK_006C_Q_F1/closeout-01/validation.json",
+    "docs/evidence/TASK_006C_Q_F1/closeout-01/windows-vectors.json"
+  ],
+  "relative_links": 232,
+  "contract_blobs": {
+    "prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md": "c2c5448c1eb72fd0ece1572c31ba30246a761b51",
+    "prompts/tasks/TASK-006C-Q-F1_REMEDIATION_01.md": "612197e9763b7708c87b3af2272717c7edb3daad"
+  },
+  "unchanged_scopes": [
+    "src",
+    "tests",
+    "tools",
+    "pyproject.toml",
+    "historical contracts/reports/receipts/golden"
+  ],
+  "source_tests_rerun_after_docs": false
+}

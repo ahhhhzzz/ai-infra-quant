@@ -1,0 +1,400 @@
+{
+  "schema": "paqs-q-f1-closeout-01-validation-v1",
+  "status": "REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW",
+  "tested_sha": "8a87150685c123bcf9e67288d81ac50a0697a54b",
+  "authority_sha": "8bf55f1ea5e7b3e9e65517ca9b5a505086bb761f",
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "system": "Windows",
+    "python": "3.12.14",
+    "python_full": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "executable": "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+    "browser": "140.0.7339.16",
+    "browser_build": "1187",
+    "browser_kind": "Chromium Headless Shell",
+    "channel": "",
+    "packages": {
+      "Jinja2": "3.1.6",
+      "Mako": "1.4.1",
+      "MarkupSafe": "3.0.3",
+      "Pygments": "2.21.0",
+      "SQLAlchemy": "2.0.43",
+      "ai-infra-quant": "0.1.0",
+      "alembic": "1.16.5",
+      "annotated-types": "0.8.0",
+      "anyio": "4.15.1",
+      "certifi": "2026.7.22",
+      "click": "8.5.0",
+      "colorama": "0.4.6",
+      "coverage": "7.16.0",
+      "fastapi": "0.116.1",
+      "greenlet": "3.5.5",
+      "h11": "0.16.0",
+      "httpcore": "1.0.9",
+      "httpcore2": "2.12.0",
+      "httpx": "0.28.1",
+      "httpx2": "2.12.0",
+      "idna": "3.19",
+      "iniconfig": "2.3.0",
+      "jiter": "0.16.0",
+      "mypy": "1.17.1",
+      "mypy_extensions": "1.1.0",
+      "openai": "3.8.0",
+      "packaging": "26.3",
+      "pathspec": "1.1.1",
+      "playwright": "1.55.0",
+      "pluggy": "1.6.0",
+      "psycopg": "3.2.9",
+      "psycopg-binary": "3.2.9",
+      "pydantic": "2.11.7",
+      "pydantic-settings": "2.10.1",
+      "pydantic_core": "2.33.2",
+      "pyee": "13.0.1",
+      "pytest": "8.4.1",
+      "pytest-cov": "6.2.1",
+      "python-dotenv": "1.2.3",
+      "ruff": "0.12.9",
+      "sniffio": "1.3.1",
+      "starlette": "0.47.3",
+      "truststore": "0.10.4",
+      "typing-inspection": "0.4.4",
+      "typing_extensions": "4.16.0",
+      "tzdata": "2025.2",
+      "uvicorn": "0.35.0"
+    }
+  },
+  "test_environment": {
+    "PYTHONUTF8": "1",
+    "PYTHONPATH": "<tested worktree>/src;<tested worktree>",
+    "PLAYWRIGHT_BROWSERS_PATH": "D:/AI_Infra_Quant_Codex_v1/playwright-browsers",
+    "TASK007C_BROWSER_CHANNEL": "",
+    "GIT_CONFIG_COUNT": "1",
+    "GIT_CONFIG_KEY_0": "safe.directory",
+    "GIT_CONFIG_VALUE_0": "<tested worktree>",
+    "browser_viewport": [
+      390,
+      844
+    ],
+    "browser_scenario": "success",
+    "browser_theme": "light",
+    "database": "fixture-owned temporary synthetic SQLite only"
+  },
+  "new_checks": [
+    {
+      "label": "focused",
+      "tested_sha": "8a87150685c123bcf9e67288d81ac50a0697a54b",
+      "cwd": "D:\\AI_Infra_Quant_Codex_v1\\task006c-q-f1-closeout-worktree",
+      "executable": "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "pytest",
+        "tests/paqs_q",
+        "-ra",
+        "--tb=short"
+      ],
+      "started_at_utc": "2026-09-21T07:27:35.062156+00:00",
+      "seconds": 103.11,
+      "exit_code": 0,
+      "tracked_status": "",
+      "summary": [
+        "================== 91 passed, 1 warning in 98.22s (0:01:38) ==================="
+      ]
+    },
+    {
+      "label": "vectors",
+      "tested_sha": "8a87150685c123bcf9e67288d81ac50a0697a54b",
+      "cwd": "D:\\AI_Infra_Quant_Codex_v1\\task006c-q-f1-closeout-worktree",
+      "executable": "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+      "args": [
+        "tools/validation/paqs_q_f1.py",
+        "--vectors",
+        "D:\\AI_Infra_Quant_Codex_v1\\f1-closeout-run\\windows-vectors.json"
+      ],
+      "started_at_utc": "2026-09-21T07:29:50.956689+00:00",
+      "seconds": 21.48,
+      "exit_code": 0,
+      "tracked_status": "",
+      "summary": []
+    },
+    {
+      "label": "comparison",
+      "tested_sha": "8a87150685c123bcf9e67288d81ac50a0697a54b",
+      "cwd": "D:\\AI_Infra_Quant_Codex_v1\\task006c-q-f1-closeout-worktree",
+      "executable": "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+      "args": [
+        "docs/evidence/TASK_006C_Q_F1/remediation-01/verify.py",
+        "--windows",
+        "D:\\AI_Infra_Quant_Codex_v1\\f1-closeout-run\\windows-vectors.json"
+      ],
+      "started_at_utc": "2026-09-21T07:30:36.718524+00:00",
+      "seconds": 26.22,
+      "exit_code": 0,
+      "tracked_status": "",
+      "summary": [],
+      "result": {
+        "status": "PASS",
+        "baseline": "d0e8dc22b38d85b0d1395cf76fc03f2de1e85122",
+        "baseline_objects": 727,
+        "protected_objects": 713,
+        "changed_files": [
+          "docs/ARCHITECTURE.md",
+          "docs/MASTER_SPEC.md",
+          "docs/REQUIREMENTS_MATRIX.md",
+          "docs/ROADMAP.md",
+          "docs/STRATEGY_SPEC.md",
+          "docs/engineering/PAQS_ENGINEERING_GUIDE.md",
+          "docs/engineering/PAQS_Q_FRAMEWORK.md",
+          "docs/evidence/TASK_006C_Q_F1/remediation-01/REPORT.md",
+          "docs/evidence/TASK_006C_Q_F1/remediation-01/linux-vectors.json",
+          "docs/evidence/TASK_006C_Q_F1/remediation-01/protection.json",
+          "docs/evidence/TASK_006C_Q_F1/remediation-01/validation.json",
+          "docs/evidence/TASK_006C_Q_F1/remediation-01/verify.py",
+          "prompts/tasks/TASK-006C-Q-F1_REMEDIATION_01.md",
+          "src/ai_infra_quant/core/domain/paqs_q/inputs.py",
+          "src/ai_infra_quant/core/domain/paqs_q/results.py",
+          "src/ai_infra_quant/core/strategy/paqs_q/registry.py",
+          "src/ai_infra_quant/resources/paqs_q/a1.json",
+          "src/ai_infra_quant/resources/paqs_q/b0.json",
+          "tests/architecture/test_task007b_boundaries.py",
+          "tests/paqs_q/test_registry.py",
+          "tests/paqs_q/test_remediation_01.py"
+        ],
+        "relative_links": 224,
+        "windows_comparison": "PASS"
+      }
+    },
+    {
+      "label": "browser-current",
+      "tested_sha": "8a87150685c123bcf9e67288d81ac50a0697a54b",
+      "cwd": "D:\\AI_Infra_Quant_Codex_v1\\task006c-q-f1-closeout-worktree",
+      "executable": "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "pytest",
+        "tests/browser/test_paqs_e_workbench.py::test_visual_acceptance_artifacts[390-844-success-True]",
+        "-ra",
+        "--tb=short"
+      ],
+      "started_at_utc": "2026-09-21T07:31:11.175643+00:00",
+      "seconds": 14.23,
+      "exit_code": 0,
+      "tracked_status": "",
+      "summary": [
+        "======================== 1 passed, 1 warning in 11.12s ========================"
+      ]
+    },
+    {
+      "label": "browser-baseline",
+      "tested_sha": "d0e8dc22b38d85b0d1395cf76fc03f2de1e85122",
+      "cwd": "D:\\AI_Infra_Quant_Codex_v1\\task006c-q-f1-worktree",
+      "executable": "D:\\AI_Infra_Quant_Codex_v1\\task007c1-env\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "pytest",
+        "tests/browser/test_paqs_e_workbench.py::test_visual_acceptance_artifacts[390-844-success-True]",
+        "-ra",
+        "--tb=short"
+      ],
+      "started_at_utc": "2026-09-21T07:31:58.634893+00:00",
+      "seconds": 12.78,
+      "exit_code": 0,
+      "tracked_status": "",
+      "summary": [
+        "======================== 1 passed, 1 warning in 9.70s ========================="
+      ]
+    }
+  ],
+  "gates": {
+    "F1-02": "PASS",
+    "F1-12": "FAIL / INCOMPLETE: recorded Linux mobile visual acceptance failure unresolved"
+  },
+  "canonical_comparison": {
+    "status": "PASS",
+    "compared_fields": [
+      "vectors",
+      "code_hashes",
+      "vector_digest",
+      "python",
+      "tzdata"
+    ],
+    "rows": 28,
+    "all_row_content_equal": true,
+    "output_bytes_sha256_all_equal": true,
+    "vector_digest": "dbcdb54348d004819d58f5c948e8226851f7694113facffb81201314aed36e32",
+    "code_hashes": {
+      "paqs-q-structure-b0": "623f63f622cfdcfe364b121c99e6b35e987054b94ee24c9063f505484c1ff1df",
+      "paqs-q-structure-a1": "da1127afc9d76bb8edaa04833cb9f0cce54307fa8f2b50327900d780544ef040"
+    },
+    "fixed_expected_vectors": {
+      "path": "tests/paqs_q/golden/canonical.json",
+      "git_blob": "63abd422d5992e990fd7528cdb9a3466378fb19c",
+      "count": 3,
+      "coverage": "Executed in both recorded 91-test F1 suites; includes exact canonical bytes and domain-separated digests"
+    },
+    "limits": "Linux receipt contains hashes of full result bytes, not the full bytes; compare complete receipt rows and all output byte digests."
+  },
+  "historical_applicability": {
+    "status": "PASS",
+    "windows_tested_sha": "8a87150685c123bcf9e67288d81ac50a0697a54b",
+    "linux_actual_tested_sha": "5b62a250b93ff35e7a3baa8f65019bec4979e39b",
+    "linux_recorded_tested_tree": "d93c625e1a52b856aa6a0d78e282d10d4cab2da0",
+    "verified_remote_mirror": "364412ec94c7138480e8e3b0e902d57e4ba55dc3",
+    "source_and_test_identity": {
+      "src": {
+        "linux_code_mirror": "369426f08848960c4f8cfb4baa53615697974fc9",
+        "windows_tested": "369426f08848960c4f8cfb4baa53615697974fc9"
+      },
+      "tests": {
+        "linux_code_mirror": "8a0dd52ad94a435d17b68c2dd1e791a34ff9331b",
+        "windows_tested": "8a0dd52ad94a435d17b68c2dd1e791a34ff9331b"
+      },
+      "tools": {
+        "linux_code_mirror": "3c9717544e57e89c9000c3c9ed0d253ae62308c4",
+        "windows_tested": "3c9717544e57e89c9000c3c9ed0d253ae62308c4"
+      },
+      "pyproject.toml": {
+        "linux_code_mirror": "5c26e42c9c279dacaf2c78e2ad67318f7b9878fc",
+        "windows_tested": "5c26e42c9c279dacaf2c78e2ad67318f7b9878fc"
+      }
+    },
+    "pinned_dependencies": {
+      "alembic": {
+        "required": "1.16.5",
+        "installed": "1.16.5"
+      },
+      "fastapi": {
+        "required": "0.116.1",
+        "installed": "0.116.1"
+      },
+      "jinja2": {
+        "required": "3.1.6",
+        "installed": "3.1.6"
+      },
+      "httpx": {
+        "required": "0.28.1",
+        "installed": "0.28.1"
+      },
+      "openai": {
+        "required": "3.8.0",
+        "installed": "3.8.0"
+      },
+      "pydantic": {
+        "required": "2.11.7",
+        "installed": "2.11.7"
+      },
+      "pydantic-settings": {
+        "required": "2.10.1",
+        "installed": "2.10.1"
+      },
+      "sqlalchemy": {
+        "required": "2.0.43",
+        "installed": "2.0.43"
+      },
+      "tzdata": {
+        "required": "2025.2",
+        "installed": "2025.2"
+      },
+      "uvicorn": {
+        "required": "0.35.0",
+        "installed": "0.35.0"
+      },
+      "playwright": {
+        "required": "1.55.0",
+        "installed": "1.55.0"
+      },
+      "mypy": {
+        "required": "1.17.1",
+        "installed": "1.17.1"
+      },
+      "psycopg[binary]": {
+        "required": "3.2.9",
+        "installed": "3.2.9"
+      },
+      "pytest": {
+        "required": "8.4.1",
+        "installed": "8.4.1"
+      },
+      "pytest-cov": {
+        "required": "6.2.1",
+        "installed": "6.2.1"
+      },
+      "ruff": {
+        "required": "0.12.9",
+        "installed": "0.12.9"
+      }
+    },
+    "linux_dependency_limits": "The historical receipt reports Python, tzdata, pytest, Ruff, mypy and Playwright; no full transitive installed-package inventory is present. Do not claim identical transitive environments or infer OS as the sole layout cause.",
+    "browser_baseline_identity": {
+      "src/ai_infra_quant/frontend": {
+        "baseline": "db5fab65ee8267c8353f824471b3fc5310ce6e2c",
+        "current": "db5fab65ee8267c8353f824471b3fc5310ce6e2c"
+      },
+      "tests/browser": {
+        "baseline": "ae33eb7e8ff6c1d96d55322035d4d512f8882b86",
+        "current": "ae33eb7e8ff6c1d96d55322035d4d512f8882b86"
+      },
+      "pyproject.toml": {
+        "baseline": "5c26e42c9c279dacaf2c78e2ad67318f7b9878fc",
+        "current": "5c26e42c9c279dacaf2c78e2ad67318f7b9878fc"
+      }
+    },
+    "contract_blobs": {
+      "prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md": "c2c5448c1eb72fd0ece1572c31ba30246a761b51",
+      "prompts/tasks/TASK-006C-Q-F1_REMEDIATION_01.md": "612197e9763b7708c87b3af2272717c7edb3daad"
+    }
+  },
+  "historical_checks_not_rerun": {
+    "source": "docs/evidence/TASK_006C_Q_F1/remediation-01/validation.json",
+    "git_blob": "34e318ef4889818dc32f2195a37275164058e188",
+    "actual_tested_sha": "5b62a250b93ff35e7a3baa8f65019bec4979e39b",
+    "remote_same_tree_mirror": "364412ec94c7138480e8e3b0e902d57e4ba55dc3",
+    "focused": "91 passed, 1 warning",
+    "research": "268 passed, 1 warning",
+    "product": "1096 passed, 1 warning (selected regression suites only)",
+    "browser": {
+      "passed": 64,
+      "failed": 1,
+      "remaining_fixture_errors": 0,
+      "attribution": "56 passed plus the 8 disjoint archive tests after venv dependency correction; no duplicate counting",
+      "baseline_reproduction": "same unchanged mobile layout test fails at d0e8dc2 with y=856.03125 >= 844"
+    },
+    "baseline_browser_sha": "d0e8dc22b38d85b0d1395cf76fc03f2de1e85122",
+    "ruff_check": "PASS",
+    "ruff_format": "PASS (22 related files; verifier separately)",
+    "mypy_native": "PASS (21 related files; verifier separately)",
+    "mypy_win32": "PASS (21 related files; not Windows execution)",
+    "startup": {
+      "status": "PASS",
+      "tested_sha": "5b62a250b93ff35e7a3baa8f65019bec4979e39b",
+      "actual_uvicorn": true,
+      "temporary_sqlite": true,
+      "health_http": 200,
+      "dashboard_http": 200,
+      "migration_revision": "0004_task006b1_market_archive",
+      "providers": "none",
+      "user_database_access": false
+    }
+  },
+  "browser_assessment": {
+    "nodeid": "tests/browser/test_paqs_e_workbench.py::test_visual_acceptance_artifacts[390-844-success-True]",
+    "windows_current": "PASS",
+    "windows_baseline": "PASS",
+    "linux_current_recorded": "FAIL",
+    "linux_baseline_recorded": "FAIL",
+    "linux_bounds_y": 856.03125,
+    "required_y_less_than": 844,
+    "linux_rerun_this_round": false,
+    "attribution": "Existing issue in recorded Linux environment; not shown to be introduced by Q remediation. Windows executions match dependencies/browser/config with each other; Linux lacks a complete transitive dependency/font inventory. OS-only causation is not established.",
+    "unmet_acceptance": "mobile first-viewport visibility of #mode-frozen",
+    "waived": false
+  },
+  "framework_state": {
+    "B0_A1_golden_parity": "PASS in fresh Windows F1 suite",
+    "default_structure": "paqs-q-structure-b0 1.0.0",
+    "A1": "disabled by default; explicit ID/version and per-call allow_experimental required",
+    "production_event": "UNAVAILABLE / EVENT_PLUGIN_NOT_CONFIGURED",
+    "formal_event_strategy_complete": false
+  },
+  "independent_review": "NOT_PERFORMED; ready for focused review with unresolved F1-12",
+  "scope": "Evidence/current status docs only; no runtime/test/dependency/historical evidence changes"
+}

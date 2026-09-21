@@ -13,7 +13,9 @@ market applicability remain **INCOMPLETE**. This is a versioned framework implem
 profitability proof or final Swing/Pivot adoption. Existing product runtime and PAQS-E are unchanged.
 Remediation 01 corrects closed result schemas, upstream identity checks and all-bar identity
 validation; the obsolete global Q-path prohibition is replaced by product isolation checks.
-The corrected implementation has Linux vector evidence; F1-02 requires a fresh Windows run.
+The corrected implementation has matching actual Linux/Windows vectors (F1-02 PASS).
+F1-12 remains FAIL / INCOMPLETE: the Linux mobile visual acceptance case still fails.
+See the [minimal closeout report](evidence/TASK_006C_Q_F1/closeout-01/REPORT.md).
 See the [remediation report](evidence/TASK_006C_Q_F1/remediation-01/REPORT.md).
 No independent F1 PASS or integration is claimed.
 See [Owner decision](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
@@ -272,7 +274,7 @@ Phase 2 decision terminal, and optional Phase 3/4 extensions as assigned by the 
 Phase 4 is the final possible phase; no execution phase exists.
 
 Current sequence: accepted C2 → ADC-001 reviewed/integrated → 006B1 reviewed, user-accepted,
-closed and integrated → 006B-Q reference research closed → 006C-Q-F1 remediated, platform validation incomplete, awaiting focused review. The original 006B1 scope remains unchanged; the old
+closed and integrated → 006B-Q reference research closed → 006C-Q-F1 remediated, browser acceptance incomplete, awaiting focused review. The original 006B1 scope remains unchanged; the old
 starting prompt is not reusable. See [ROADMAP](ROADMAP.md).
 
 TASK-006A is integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B deterministic

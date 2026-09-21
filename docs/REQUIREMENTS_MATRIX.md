@@ -13,7 +13,9 @@ market applicability remain **INCOMPLETE**. This is a versioned framework implem
 profitability proof or final Swing/Pivot adoption. Existing product runtime and PAQS-E are unchanged.
 Remediation 01 corrects closed result schemas, upstream identity checks and all-bar identity
 validation; the obsolete global Q-path prohibition is replaced by product isolation checks.
-The corrected implementation has Linux vector evidence; F1-02 requires a fresh Windows run.
+The corrected implementation has matching actual Linux/Windows vectors (F1-02 PASS).
+F1-12 remains FAIL / INCOMPLETE: the Linux mobile visual acceptance case still fails.
+See the [minimal closeout report](evidence/TASK_006C_Q_F1/closeout-01/REPORT.md).
 See the [remediation report](evidence/TASK_006C_Q_F1/remediation-01/REPORT.md).
 No independent F1 PASS or integration is claimed.
 See [Owner decision](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
@@ -186,7 +188,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | PAQSQ-003 | PAQS-Q methods may evolve under separate research/Task Contract governance | RETAINED | 2 | DOCUMENTED | Roadmap 6/7 |
 | PAQSQ-004 | TASK-006B-Q reference research closed after exact R05 PASS | RETAINED | 2 | REVIEWED / CLOSED AS REFERENCE RESEARCH | [Review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md); [closeout](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) |
 | PAQSQ-005 | TASK-006C-Q formal Event plugins, not delivered by F1 | RETAINED | 2 | PLANNED_TASK | Roadmap 7; separate future plugin contracts |
-| PAQSQ-F1 | Versioned quant/event foundation; B0 reference, A1 experimental default OFF; immutable identity and deterministic hashes | RETAINED | 2 | REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW | [Frozen contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md); [remediation report](evidence/TASK_006C_Q_F1/remediation-01/REPORT.md), F01/F02/F03 and F1-01 through F1-12 |
+| PAQSQ-F1 | Versioned quant/event foundation; B0 reference, A1 experimental default OFF; immutable identity and deterministic hashes | RETAINED | 2 | REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW | [Frozen contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md); [remediation report](evidence/TASK_006C_Q_F1/remediation-01/REPORT.md), F01/F02/F03; [minimal closeout](evidence/TASK_006C_Q_F1/closeout-01/REPORT.md): F1-02 PASS, F1-12 FAIL / INCOMPLETE |
 | PAQSQ-006 | TASK-006D-Q — PAQS-Q Setup, Risk & Setup-Specific Quant Confirmation | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSQ-007 | TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSQ-008 | PAQS-Q stabilization is not a prerequisite that blocks an otherwise safe PAQS-E current-analysis MVP | RETAINED | 2 | DOCUMENTED | Roadmap 7; `PAQS-DUAL-001` |

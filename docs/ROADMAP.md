@@ -13,7 +13,9 @@ market applicability remain **INCOMPLETE**. This is a versioned framework implem
 profitability proof or final Swing/Pivot adoption. Existing product runtime and PAQS-E are unchanged.
 Remediation 01 corrects closed result schemas, upstream identity checks and all-bar identity
 validation; the obsolete global Q-path prohibition is replaced by product isolation checks.
-The corrected implementation has Linux vector evidence; F1-02 requires a fresh Windows run.
+The corrected implementation has matching actual Linux/Windows vectors (F1-02 PASS).
+F1-12 remains FAIL / INCOMPLETE: the Linux mobile visual acceptance case still fails.
+See the [minimal closeout report](evidence/TASK_006C_Q_F1/closeout-01/REPORT.md).
 See the [remediation report](evidence/TASK_006C_Q_F1/remediation-01/REPORT.md).
 No independent F1 PASS or integration is claimed.
 See [Owner decision](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
@@ -485,7 +487,7 @@ The previously planned future single-engine `TASK-006C`, `TASK-006D`, and `TASK-
 
 ```text
 TASK-006B-Q — REVIEWED / CLOSED AS REFERENCE RESEARCH
-TASK-006C-Q-F1 — Versioned Quant/Event Framework Foundation [remediated; platform validation incomplete; awaiting focused review]
+TASK-006C-Q-F1 — Versioned Quant/Event Framework Foundation [remediated; browser acceptance incomplete; awaiting focused review]
 TASK-006C-Q — Later formal Event plugins [separate contracts; not completed]
 TASK-006D-Q — PAQS-Q Setup, Risk & Setup-Specific Quant Confirmation
 TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation
@@ -502,7 +504,7 @@ The F1 contract adopts only the versioned foundation and B0/A1 reference semanti
   → ADC-001 docs-only consolidation [reviewed, closed and integrated]
   → 006B1 bounded archive/replay [reviewed, user-accepted, closed and integrated]
   → 006B-Q research [independently reviewed and closed; no R06]
-  → 006C-Q-F1 [remediated / platform validation incomplete / awaiting focused review]
+  → 006C-Q-F1 [remediated / browser acceptance incomplete / awaiting focused review]
 ```
 
 F1 is bounded by its frozen contract; further PAQS-Q plugins remain separately governed and 007D remains deferred.
