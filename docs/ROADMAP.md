@@ -4,7 +4,7 @@
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
 `7487cf57161a834d9100f983bab9d8534a1c0488` (Critical/Major/Minor: 0/0/0).
-006C-Q-F1: **REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW**;
+006C-Q-F1: **FOCUSED REVIEW PASS / USER-ACCEPTED LIMITATION / CLOSED / INTEGRATED**;
 [contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md): **OWNER-APPROVED / READY FOR IMPLEMENTATION**.
 B0 is the default reference structure plugin; A1 is experimental and disabled by default.
 No R06 or expanded stock sample is a startup prerequisite. `RECOMMEND_CROSS_SAMPLE_ONLY`
@@ -14,10 +14,14 @@ profitability proof or final Swing/Pivot adoption. Existing product runtime and 
 Remediation 01 corrects closed result schemas, upstream identity checks and all-bar identity
 validation; the obsolete global Q-path prohibition is replaced by product isolation checks.
 The corrected implementation has matching actual Linux/Windows vectors (F1-02 PASS).
-F1-12 remains FAIL / INCOMPLETE: the Linux mobile visual acceptance case still fails.
+F1-12: **USER-ACCEPTED LIMITED EXCEPTION（用户接受的限定例外）**.
+The recorded Linux mobile layout FAIL remains unchanged and no longer blocks integration;
+Windows is the owner's primary acceptance platform. This is not an all-platform PASS.
+External ChatGPT focused review closed F01/F02/F03 with no new findings.
+See the [F1 closeout decision](decisions/TASK_006C_Q_F1_CLOSEOUT_2026_09_21.md) for attribution and scope.
 See the [minimal closeout report](evidence/TASK_006C_Q_F1/closeout-01/REPORT.md).
 See the [remediation report](evidence/TASK_006C_Q_F1/remediation-01/REPORT.md).
-No independent F1 PASS or integration is claimed.
+The focused review does not re-review the entire research history or establish market validity.
 See [Owner decision](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
 [independent review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md). Historical evidence is immutable.
 See the [F1 implementation report](reports/TASK_006C_Q_F1_IMPLEMENTATION_REPORT.md)
@@ -39,13 +43,15 @@ ADC-001 is **REVIEWED PASS / CLOSED / INTEGRATED** at accepted implementation
 `66a3ca7bbff258665b25e5ab17231138bf3cc49f`; its F01 is closed with zero outstanding findings.
 See [focused review](reviews/TASK_ADC_001_F01_FOCUSED_RE_REVIEW.md) and
 [closeout/resumption decision](decisions/TASK_ADC_001_CLOSEOUT_AND_006B1_RESUMPTION_2026_09_09.md).
-Latest integrated product task: **006B1 — REVIEWED PASS / USER-ACCEPTED / CLOSED / INTEGRATED**.
+Integrated product runtime before F1: **006B1 — REVIEWED PASS / USER-ACCEPTED / CLOSED / INTEGRATED**.
 Accepted implementation: `2e9889ae9d2587fcfac6d715923f8a791b2333d8`; F01 is closed.
 See [focused PASS](reviews/TASK_006B1_F01_FOCUSED_RE_REVIEW.md) and
-[closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md). The Q-side handoff above is separate from product integration.
+[closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md). F1 is now integrated as an isolated framework;
+it adds no Q-side product UI/API wiring.
 The task started at `bed9059fd6ce6c0a7cd750376c972070db0a39dd`, with authoritative baseline
 `02326a3bb19c2a89352d765f5331670b5f3f466d`, under the updated handoff. Explicit archive/replay
-and additive 0004 are implemented; only the bounded Q-side F1 framework is now authorized. Paper/PnL and Phase 3/4 remain dormant.
+and additive 0004 are implemented; the bounded Q-side F1 framework is closed and integrated.
+Paper/PnL and Phase 3/4 remain dormant.
 See [006B1 implementation report](reports/TASK_006B1_IMPLEMENTATION_REPORT.md).
 [ARCHITECTURE](ARCHITECTURE.md) is the current component/lifecycle entry point.
 
@@ -487,7 +493,7 @@ The previously planned future single-engine `TASK-006C`, `TASK-006D`, and `TASK-
 
 ```text
 TASK-006B-Q — REVIEWED / CLOSED AS REFERENCE RESEARCH
-TASK-006C-Q-F1 — Versioned Quant/Event Framework Foundation [remediated; browser acceptance incomplete; awaiting focused review]
+TASK-006C-Q-F1 — Versioned Quant/Event Framework Foundation [focused review PASS; user-accepted limitation; closed and integrated]
 TASK-006C-Q — Later formal Event plugins [separate contracts; not completed]
 TASK-006D-Q — PAQS-Q Setup, Risk & Setup-Specific Quant Confirmation
 TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation
@@ -504,7 +510,8 @@ The F1 contract adopts only the versioned foundation and B0/A1 reference semanti
   → ADC-001 docs-only consolidation [reviewed, closed and integrated]
   → 006B1 bounded archive/replay [reviewed, user-accepted, closed and integrated]
   → 006B-Q research [independently reviewed and closed; no R06]
-  → 006C-Q-F1 [remediated / browser acceptance incomplete / awaiting focused review]
+  → 006C-Q-F1 [focused review PASS / user-accepted limitation / closed and integrated]
+  → formal Event engine [next task; not started]
 ```
 
 F1 is bounded by its frozen contract; further PAQS-Q plugins remain separately governed and 007D remains deferred.

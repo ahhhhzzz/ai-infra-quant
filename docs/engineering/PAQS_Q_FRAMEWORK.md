@@ -1,8 +1,12 @@
 # PAQS-Q F1 framework
 
-Status: **REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW**.
+Status: **FOCUSED REVIEW PASS / USER-ACCEPTED LIMITATION / CLOSED / INTEGRATED**.
 The corrected implementation has matching actual Linux/Windows vectors (F1-02 PASS).
-F1-12 remains FAIL / INCOMPLETE because of the recorded Linux mobile visual acceptance failure.
+F1-12: **USER-ACCEPTED LIMITED EXCEPTION（用户接受的限定例外）**.
+The recorded Linux mobile layout FAIL remains unchanged and no longer blocks integration;
+Windows is the owner's primary acceptance platform. This is not an all-platform PASS.
+External ChatGPT focused review closed F01/F02/F03 with no new findings; it did not re-review
+the entire history. See the [F1 closeout decision](../decisions/TASK_006C_Q_F1_CLOSEOUT_2026_09_21.md).
 See the [minimal closeout report](../evidence/TASK_006C_Q_F1/closeout-01/REPORT.md).
 The obsolete global Q-path prohibition is replaced by product-isolation checks under the
 [remediation contract](../../prompts/tasks/TASK-006C-Q-F1_REMEDIATION_01.md).
@@ -212,7 +216,8 @@ bytes hashes, record IDs, result hashes and input identities. Compare `vectors`,
 An actual run is required on both operating systems; `mypy --platform win32` is not Windows
 execution. The minimal closeout report records the corrected artifact's fresh Windows run and
 matching Linux vectors. Pre-remediation receipts remain historical; they did not close this gate.
-The recorded Linux mobile browser failure remains an unmet F1-12 acceptance item.
+The recorded Linux mobile browser failure is a user-accepted limited F1-12 exception;
+its historical FAIL is preserved and is not an all-platform test PASS.
 Both original protection tools remain unchanged historical evidence. To reproduce remediation
 protection and its Windows comparison, check out `8a87150685c123bcf9e67288d81ac50a0697a54b` and run
 `python docs/evidence/TASK_006C_Q_F1/remediation-01/verify.py --windows <new-output-path>`.

@@ -4,7 +4,7 @@
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
 `7487cf57161a834d9100f983bab9d8534a1c0488` (Critical/Major/Minor: 0/0/0).
-006C-Q-F1: **REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW**;
+006C-Q-F1: **FOCUSED REVIEW PASS / USER-ACCEPTED LIMITATION / CLOSED / INTEGRATED**;
 [contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md): **OWNER-APPROVED / READY FOR IMPLEMENTATION**.
 B0 is the default reference structure plugin; A1 is experimental and disabled by default.
 No R06 or expanded stock sample is a startup prerequisite. `RECOMMEND_CROSS_SAMPLE_ONLY`
@@ -14,10 +14,14 @@ profitability proof or final Swing/Pivot adoption. Existing product runtime and 
 Remediation 01 corrects closed result schemas, upstream identity checks and all-bar identity
 validation; the obsolete global Q-path prohibition is replaced by product isolation checks.
 The corrected implementation has matching actual Linux/Windows vectors (F1-02 PASS).
-F1-12 remains FAIL / INCOMPLETE: the Linux mobile visual acceptance case still fails.
+F1-12: **USER-ACCEPTED LIMITED EXCEPTION（用户接受的限定例外）**.
+The recorded Linux mobile layout FAIL remains unchanged and no longer blocks integration;
+Windows is the owner's primary acceptance platform. This is not an all-platform PASS.
+External ChatGPT focused review closed F01/F02/F03 with no new findings.
+See the [F1 closeout decision](decisions/TASK_006C_Q_F1_CLOSEOUT_2026_09_21.md) for attribution and scope.
 See the [minimal closeout report](evidence/TASK_006C_Q_F1/closeout-01/REPORT.md).
 See the [remediation report](evidence/TASK_006C_Q_F1/remediation-01/REPORT.md).
-No independent F1 PASS or integration is claimed.
+The focused review does not re-review the entire research history or establish market validity.
 See [Owner decision](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
 [independent review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md). Historical evidence is immutable.
 See the [F1 implementation report](reports/TASK_006C_Q_F1_IMPLEMENTATION_REPORT.md)
@@ -188,7 +192,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | PAQSQ-003 | PAQS-Q methods may evolve under separate research/Task Contract governance | RETAINED | 2 | DOCUMENTED | Roadmap 6/7 |
 | PAQSQ-004 | TASK-006B-Q reference research closed after exact R05 PASS | RETAINED | 2 | REVIEWED / CLOSED AS REFERENCE RESEARCH | [Review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md); [closeout](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) |
 | PAQSQ-005 | TASK-006C-Q formal Event plugins, not delivered by F1 | RETAINED | 2 | PLANNED_TASK | Roadmap 7; separate future plugin contracts |
-| PAQSQ-F1 | Versioned quant/event foundation; B0 reference, A1 experimental default OFF; immutable identity and deterministic hashes | RETAINED | 2 | REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW | [Frozen contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md); [remediation report](evidence/TASK_006C_Q_F1/remediation-01/REPORT.md), F01/F02/F03; [minimal closeout](evidence/TASK_006C_Q_F1/closeout-01/REPORT.md): F1-02 PASS, F1-12 FAIL / INCOMPLETE |
+| PAQSQ-F1 | Versioned quant/event foundation; B0 reference, A1 experimental default OFF; immutable identity and deterministic hashes | RETAINED | 2 | FOCUSED REVIEW PASS / USER-ACCEPTED LIMITATION / CLOSED / INTEGRATED | [Frozen contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md); [closeout decision](decisions/TASK_006C_Q_F1_CLOSEOUT_2026_09_21.md): external F01/F02/F03 CLOSED, F1-02 PASS, F1-12 用户接受的限定例外; historical [validation](evidence/TASK_006C_Q_F1/closeout-01/REPORT.md) unchanged |
 | PAQSQ-006 | TASK-006D-Q — PAQS-Q Setup, Risk & Setup-Specific Quant Confirmation | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSQ-007 | TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSQ-008 | PAQS-Q stabilization is not a prerequisite that blocks an otherwise safe PAQS-E current-analysis MVP | RETAINED | 2 | DOCUMENTED | Roadmap 7; `PAQS-DUAL-001` |
@@ -307,7 +311,7 @@ below are inspected evidence, not ADC execution results. C1 and C2 acceptance ar
 
 006B1 archive/replay/0004 is independently reviewed, user-accepted, closed and integrated.
 See [focused PASS](reviews/TASK_006B1_F01_FOCUSED_RE_REVIEW.md) and [closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md).
-F1 framework alone is authorized as stated above; formal Event strategies, strict historical As-Of/GoldSet,
+F1 framework is closed and integrated as stated above; formal Event strategies, strict historical As-Of/GoldSet,
 007D comparison and Paper/PnL/Phase 3/4 remain deferred. Real-account/trading behavior is forbidden.
 
 ## TASK-006B1 acceptance traceability (reviewed, user-accepted and integrated)

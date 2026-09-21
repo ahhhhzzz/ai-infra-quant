@@ -4,7 +4,7 @@
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
 `7487cf57161a834d9100f983bab9d8534a1c0488` (Critical/Major/Minor: 0/0/0).
-006C-Q-F1: **REMEDIATED / VALIDATION INCOMPLETE / AWAITING FOCUSED REVIEW**;
+006C-Q-F1: **FOCUSED REVIEW PASS / USER-ACCEPTED LIMITATION / CLOSED / INTEGRATED**;
 [contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md): **OWNER-APPROVED / READY FOR IMPLEMENTATION**.
 B0 is the default reference structure plugin; A1 is experimental and disabled by default.
 No R06 or expanded stock sample is a startup prerequisite. `RECOMMEND_CROSS_SAMPLE_ONLY`
@@ -14,10 +14,14 @@ profitability proof or final Swing/Pivot adoption. Existing product runtime and 
 Remediation 01 corrects closed result schemas, upstream identity checks and all-bar identity
 validation; the obsolete global Q-path prohibition is replaced by product isolation checks.
 The corrected implementation has matching actual Linux/Windows vectors (F1-02 PASS).
-F1-12 remains FAIL / INCOMPLETE: the Linux mobile visual acceptance case still fails.
+F1-12: **USER-ACCEPTED LIMITED EXCEPTION（用户接受的限定例外）**.
+The recorded Linux mobile layout FAIL remains unchanged and no longer blocks integration;
+Windows is the owner's primary acceptance platform. This is not an all-platform PASS.
+External ChatGPT focused review closed F01/F02/F03 with no new findings.
+See the [F1 closeout decision](decisions/TASK_006C_Q_F1_CLOSEOUT_2026_09_21.md) for attribution and scope.
 See the [minimal closeout report](evidence/TASK_006C_Q_F1/closeout-01/REPORT.md).
 See the [remediation report](evidence/TASK_006C_Q_F1/remediation-01/REPORT.md).
-No independent F1 PASS or integration is claimed.
+The focused review does not re-review the entire research history or establish market validity.
 See [Owner decision](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) and
 [independent review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md). Historical evidence is immutable.
 See the [F1 implementation report](reports/TASK_006C_Q_F1_IMPLEMENTATION_REPORT.md)
@@ -259,7 +263,7 @@ No conversion rewrites old records or fabricates structured fields from prose.
 | Current user capabilities | Market/watchlist workbench, current Snapshot, selected-model Narrative, secure credentials, explicit research, immutable evidence/history |
 | Retained non-default | Legacy structured runtime/validator/ledger; original deterministic 006B with `STRUCTURE_CONCERNS_FOUND`; Phase 1 opening accounting/descriptors and compatibility reads |
 | Reviewed, user-accepted and integrated | 006B1 explicit local market archive/replay and additive 0004; separate from Analyze |
-| Implemented, validation incomplete, awaiting independent review | 006C-Q-F1 versioned Structure/Event protocols, immutable evidence and hashes; default B0, gated experimental A1 |
+| Focused review PASS, user-accepted limitation, closed and integrated | 006C-Q-F1 versioned Structure/Event protocols, immutable evidence and hashes; default B0, gated experimental A1; no production Event plugin |
 | Deferred | Strict historical As-Of/GoldSet; formal Q Event plugins and later Q successors; 007D comparison; Paper Broker/PaperFill/NAV/performance and Phase 3/4 extensions |
 | Permanently excluded | Real-account observation/import/positions, broker writes/orders, autonomous execution |
 
@@ -315,7 +319,7 @@ and table. Epoch/request guards discard late responses. Known-ID reading works w
 initialization. No archive read enters Snapshot, NarrativeGateway, Research/Synthesis or Legacy.
 See [API](API_CONTRACTS.md#11-local-market-archive-006b1) and [schema](DATABASE_SCHEMA.md#7-local-market-archive-0004).
 
-## 11. PAQS-Q framework boundary (implemented; validation incomplete; awaiting review)
+## 11. PAQS-Q framework boundary (closed and integrated with accepted limitation)
 
 Canonical PAQS Input / Snapshot Identity → Versioned Structure Plugin → Immutable Structure
 Result → Versioned Event Plugin → Immutable Event Result + Evidence. An optional
