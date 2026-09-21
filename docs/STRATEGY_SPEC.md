@@ -1,5 +1,14 @@
 # PAQS-E / PAQS-Q Strategy Governance and Historical Research Specification
 
+## Single-pattern research task — 2026-09-21
+
+The owner authorized an isolated exploratory D1 local-high breakout/retest experiment, now
+implemented on its task branch and awaiting review. [Rules](PAQS_Q_SINGLE_PATTERN.md) explicitly
+separate reused reference parameters from new simulation assumptions. Point-price context is
+not a Major/Micro/Zone model; simulated stops/2R targets are not formal PAQS Setup/Risk.
+Historical current-QFQ observations do not satisfy strict point-in-time replay. This task does not
+adopt the previously proposed complete Event plan or alter PAQS-E, B0/A1 or F1 identities.
+
 ## PAQS-Q handoff — 2026-09-21
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at

@@ -1,5 +1,17 @@
 # Read-Only PAQS Dual-Branch Decision-Terminal Product Roadmap
 
+## Current task override — 2026-09-21
+
+The owner prioritized a bounded, offline PAQS-Q single-pattern research loop over the proposed
+complete Event Context/six-event implementation. The experimental D1 local-high retest simulator
+is implemented on its task branch, awaiting independent review; it is not integrated.
+[Rules and usage](PAQS_Q_SINGLE_PATTERN.md) / [implementation report](reports/PAQS_Q_SINGLE_PATTERN_V1.md).
+This explicit task authorization covers local simulated trades/statistics only, not activation of
+the general Phase 3/4 platform. Formal Event, Setup/Risk, Q/E comparison and product UI remain
+unimplemented. F1 status, accepted Linux exception and historical research conclusions are retained.
+The concise rules/usage document fixes this task's assumptions; no additional approval contract
+or approval round is required by the current user instruction. The older sequence below is deferred.
+
 ## PAQS-Q handoff — 2026-09-21
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
@@ -511,7 +523,8 @@ The F1 contract adopts only the versioned foundation and B0/A1 reference semanti
   → 006B1 bounded archive/replay [reviewed, user-accepted, closed and integrated]
   → 006B-Q research [independently reviewed and closed; no R06]
   → 006C-Q-F1 [focused review PASS / user-accepted limitation / closed and integrated]
-  → formal Event engine [next task; not started]
+  → single-pattern offline research loop [current task branch; awaiting review]
+  → formal Event engine [deferred; not started]
 ```
 
 F1 is bounded by its frozen contract; further PAQS-Q plugins remain separately governed and 007D remains deferred.

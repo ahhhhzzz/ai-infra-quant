@@ -1,5 +1,11 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
+Current owner-authorized exception to the earlier implementation sequence: an isolated D1,
+long-only single-pattern research CLI now produces signals, simulated trades and offline reports.
+See [rules/usage](PAQS_Q_SINGLE_PATTERN.md) and [validation](reports/PAQS_Q_SINGLE_PATTERN_V1.md).
+Task-branch implementation awaits review/integration. This bounded experiment does not activate
+general Paper/Backtest infrastructure or complete formal Event, Setup/Risk or product integration.
+
 ## PAQS-Q handoff — 2026-09-21
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
@@ -278,7 +284,7 @@ Phase 2 decision terminal, and optional Phase 3/4 extensions as assigned by the 
 Phase 4 is the final possible phase; no execution phase exists.
 
 Current sequence: accepted C2 → ADC-001 reviewed/integrated → 006B1 reviewed, user-accepted,
-closed and integrated → 006B-Q reference research closed → 006C-Q-F1 focused review PASS, user-accepted limitation, closed and integrated → formal Event engine next (not started). The original 006B1 scope remains unchanged; the old
+closed and integrated → 006B-Q reference research closed → 006C-Q-F1 focused review PASS, user-accepted limitation, closed and integrated → single-pattern research task (awaiting review); formal Event is deferred. The original 006B1 scope remains unchanged; the old
 starting prompt is not reusable. See [ROADMAP](ROADMAP.md).
 
 TASK-006A is integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B deterministic

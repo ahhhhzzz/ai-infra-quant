@@ -1,5 +1,17 @@
 # Requirements Traceability Matrix
 
+## Single-pattern research — task branch, awaiting review
+
+| Requirement | Implementation / evidence |
+|---|---|
+| Explicit local D1 + calendar import; missing bars rejected; exploratory labels | [adapter](../tools/research/single_pattern/integrations/local.py), [rules](PAQS_Q_SINGLE_PATTERN.md) |
+| Confirmed local-price evidence, causal signals, next-open cash-funded simulation | [strategy](../tools/research/single_pattern/strategy.py), [simulation](../tools/research/single_pattern/simulation.py), [tests](../tests/research/single_pattern/test_research.py) |
+| Exact exports, offline K-line/trade/equity report | [report](../tools/research/single_pattern/report.py), [offline browser test](../tests/research/single_pattern/test_report_browser.py) |
+| Windows verification; retained product/F1 identity | [implementation report](reports/PAQS_Q_SINGLE_PATTERN_V1.md) |
+
+This user-authorized experiment is not formal Event/Setup/Risk, a general backtesting platform,
+market-validity certification or product integration. Existing F1 dispositions below are unchanged.
+
 ## PAQS-Q handoff — 2026-09-21
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at

@@ -1,5 +1,11 @@
 # PAQS Engineering Guide — TASK-007B Analyze/Decision Ledger independently accepted
 
+The owner has prioritized the isolated [single-pattern research CLI](../PAQS_Q_SINGLE_PATTERN.md)
+before complete formal Event implementation. It runs local exploratory D1 replay outside the
+product, reusing pure price/ATR functions without editing frozen artifacts. See its
+[Windows implementation/validation report](../reports/PAQS_Q_SINGLE_PATTERN_V1.md).
+Formal Event, Setup/Risk and Q product UI remain unimplemented; task delivery awaits review.
+
 ## PAQS-Q handoff — 2026-09-21
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at

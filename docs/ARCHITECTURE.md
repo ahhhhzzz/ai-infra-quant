@@ -1,5 +1,12 @@
 # Current Architecture
 
+Additive task-branch research: `tools/research/single_pattern` reads explicit local D1/calendar
+files, reuses the unchanged F1 raw price kernel and old pure ATR function, then writes simulated
+trades and standalone HTML/CSV/JSON. No production `src/` module, dependency, database or route
+changes. Product modules do not import these tools. F1 AS_OF and artifact identities are unchanged.
+See [usage](PAQS_Q_SINGLE_PATTERN.md) / [report](reports/PAQS_Q_SINGLE_PATTERN_V1.md).
+Formal Event/Setup/Risk/product UI remain deferred; this experiment awaits independent review.
+
 ## PAQS-Q handoff — 2026-09-21
 
 006B-Q: **REVIEWED / CLOSED AS REFERENCE RESEARCH** after independent R05 PASS at
