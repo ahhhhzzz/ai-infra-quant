@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PAQS-Q 实验复盘 · {{ result.security }}</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0b1220;color:#e4ebf5;font:15px/1.65 system-ui,sans-serif}main{max-width:1500px;margin:auto;padding:32px}h1{font-size:30px;margin:8px 0}h2{font-size:20px;margin:30px 0 12px}.muted{color:#94a7c1}.tag{color:#78ddcb;letter-spacing:2px}.warning{background:#382c19;border-left:4px solid #eab866;padding:16px;margin:20px 0}.cards{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px}.card{background:#162236;padding:16px;border-radius:8px}.card b{font-size:24px;display:block}.chart{background:#111d2e;border:1px solid #2b3b51;padding:16px;border-radius:10px}canvas{display:block;width:100%}#candles{height:370px}#equity{height:210px}input[type=range]{width:60%}button,select{background:#253a56;color:#edf4ff;border:1px solid #57728f;padding:6px 12px;border-radius:5px;cursor:pointer}table{border-collapse:collapse;min-width:950px;width:100%;font-size:13px}td,th{border-bottom:1px solid #293b52;padding:9px;text-align:left}th{color:#9eb6d0}td{white-space:nowrap}.scroll{overflow:auto;max-height:440px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}a{color:#7acbd9}#hover{min-height:48px;white-space:pre-wrap}summary{cursor:pointer}footer{margin-top:40px;color:#96a6bb}@media(max-width:700px){main{padding:14px}.cards{grid-template-columns:1fr 1fr}}
+</style></head><body><main>
+<div class="tag">PAQS-Q / SINGLE PATTERN RESEARCH V1</div>
+<h1>{{ result.security }} · 局部高点突破后回踩</h1>
+<div class="muted">D1 / 仅做多 / {{ result.currency }} / {{ result.bars|length }} 根日线 / {{ result.timezone }}<br>{{ result.bars[0].start }} → {{ result.bars[-1].end }}</div>
+<div class="warning"><b>{{ result.metadata.data_kind }} · 探索性回放，非严格历史回测</b><br>
+真实数据结果不证明策略有效；合成数据仅验证程序。不是完整 PAQS-Q / 正式 Event / Setup/Risk。<br>
+{% for item in result.metadata.limitations %}{{ item }}<br>{% endfor %}
+历史可知时间未知 {{ result.metadata.unknown_historical_availability }} 根；晚于历史收盘 {{ result.metadata.late_historical_availability }} 根。</div>
+<div class="cards" id="cards"></div>
+<h2>权益与回撤</h2><p class="muted">蓝色：策略收盘权益 · 灰色：买入持有。两者同资金比例、买卖成本模型；样本末不强平，不含股息。策略暖机期间持有现金，基准首日买入。</p>
+<div class="chart"><canvas id="equity"></canvas></div>
+<h2>K 线与交易定位</h2>
+<p class="muted">S：收盘信号 · B：下一开盘买入 · X：卖出 · 绿色点：局部高点确认日（不是极值当日）。点击交易/信号的“定位”查看前后 K 线。</p>
+<div class="chart"><label>起点 <input id="range" type="range" min="0" value="0"></label>
+<label>窗口 <select id="window"><option>40</option><option selected>80</option><option>160</option></select></label>
+<canvas id="candles"></canvas><div id="hover" class="muted">移动鼠标查看精确 OHLC；图表坐标采用浏览器数字，所有指标及成交结果由 Python Decimal 计算。</div></div>
+<h2>交易明细</h2><p class="muted">盘中触价的精确时刻未知，列出所在日线区间；同根止损/目标冲突时止损优先。费用和滑点为模拟假设。</p>
+<div class="scroll"><table><thead><tr><th>定位</th><th>信号 UTC</th><th>买入 UTC</th><th>数量</th><th>买价 / 费</th><th>卖出区间 UTC</th><th>卖价 / 费</th><th>退出原因</th><th>净盈亏</th></tr></thead><tbody>
+{% for t in result.trades %}<tr><td><button data-index="{{ t.signal_index }}">定位</button></td><td>{{ t.signal_time }}</td><td>{{ t.entry_time }}</td><td>{{ t.quantity }}</td><td>{{ t.entry_price }} / {{ t.entry_fee }}</td><td>{{ t.exit_bar_start }} — {{ t.exit_bar_end }}<br>{{ t.exit_phase }}</td><td>{{ t.exit_price }} / {{ t.exit_fee }}</td><td>{{ t.exit_reason }}</td><td>{{ t.pnl }}</td></tr>{% else %}<tr><td colspan="9">无已平仓交易；胜率不适用。</td></tr>{% endfor %}
+</tbody></table></div>
+<h2>未平仓与待成交</h2><pre id="open"></pre>
+<h2>信号及原因</h2><div class="scroll"><table><thead><tr><th>定位</th><th>信号 UTC</th><th>局部点 / 首次确认 UTC</th><th>止损</th><th>原因</th><th>模拟处理</th></tr></thead><tbody>
+{% for s in result.strategy.signals %}<tr><td><button data-index="{{ s.index }}">定位</button></td><td>{{ s.signal_time }}</td><td>{{ s.level }} / {{ s.level_known_time }}</td><td>{{ s.stop }}</td><td>{{ s.reason }}</td><td>{% for d in result.decisions if d.signal_id == s.signal_id %}{{ d.status }} @bar{{ d.index }}<br>{% endfor %}</td></tr>{% else %}<tr><td colspan="6">该样本及参数没有信号；未调整参数寻找交易。</td></tr>{% endfor %}
+</tbody></table></div>
+<h2>规则与运行参数</h2><p>只使用已确认局部点，突破后首次回踩，再等后续强阳线。不是 Major/Micro Pivot 或 Confirmed Zone。局部价格不等式复用 B0 内核；EMA14 和 ATR 缓冲参考已有定义；点位替代、止损、2R、资金和成本是新增研究假设。无多周期、结构目标、正式交易资格。</p>
+<pre>{{ result.config|tojson(indent=2) }}</pre>
+<details><summary>输入身份、完整性限制和代码摘要</summary><pre>{{ result.metadata|tojson(indent=2) }}</pre><pre>{{ result.code|tojson(indent=2) }}</pre></details>
+<p><a href="results.json">完整 JSON</a> · <a href="trades.csv">交易 CSV</a> · <a href="signals.csv">信号 CSV</a> · <a href="equity.csv">权益 CSV</a></p>
+<footer>仅本地研究，无网络请求、账户接入或真实订单。少量交易不构成统计结论。该报告不更新 PAQS-E 或产品状态。</footer>
+</main><script id="payload" type="application/json">{{ payload|safe }}</script><script>
+"use strict";
+const d=JSON.parse(document.getElementById("payload").textContent), $=id=>document.getElementById(id), n=Number;
+const pct=x=>x===null?"不适用":(n(x)*100).toFixed(2)+"%";
+const metrics=[["总收益（含未实现）",pct(d.summary.total_return)],["最大回撤（收盘）",pct(d.summary.max_drawdown)],["已平仓 / 未平仓",d.summary.closed_trades+" / "+d.summary.open_positions],["胜率（仅已平仓）",pct(d.summary.win_rate)],["买入持有收益",pct(d.summary.buy_hold_return)],["买入持有回撤",pct(d.summary.buy_hold_max_drawdown)],["收盘权益",n(d.summary.final_equity).toFixed(2)],["信号 / 入场",d.strategy.signals.length+" / "+d.summary.entries]];
+for(const [label,value] of metrics){const card=document.createElement("div");card.className="card";const b=document.createElement("b");b.textContent=value;card.append(label,b);$("cards").append(card)}
+$("open").textContent=JSON.stringify({open_position:d.open_position,pending_signal:d.pending_signal},null,2);
+function ctx(id){const canvas=$(id),ratio=devicePixelRatio||1,w=canvas.clientWidth,h=canvas.clientHeight;canvas.width=w*ratio;canvas.height=h*ratio;const c=canvas.getContext("2d");c.scale(ratio,ratio);return {c,w,h}}
+function lineChart(){const {c,w,h}=ctx("equity"),rows=[{equity:d.config.initial_cash,buy_hold:d.config.initial_cash},...d.equity],values=rows.flatMap(r=>[n(r.equity),n(r.buy_hold)]),lo=Math.min(...values),hi=Math.max(...values),y=v=>h-25-(v-lo)/(hi-lo||1)*(h-50);for(const [key,color] of [["buy_hold","#8092a9"],["equity","#62c5ff"]]){c.strokeStyle=color;c.beginPath();rows.forEach((r,i)=>{let x=10+i*(w-90)/Math.max(1,rows.length-1);i?c.lineTo(x,y(n(r[key]))):c.moveTo(x,y(n(r[key])))});c.stroke()}c.fillStyle="#9db3cb";c.fillText(hi.toFixed(2),w-80,18);c.fillText(lo.toFixed(2),w-80,h-12)}
+let view={};function draw(){const start=n($("range").value),count=n($("window").value),rows=d.bars.slice(start,start+count),{c,w,h}=ctx("candles"),lo=Math.min(...rows.map(r=>n(r.low))),hi=Math.max(...rows.map(r=>n(r.high))),span=hi-lo||1,y=v=>h-35-(v-lo)/span*(h-75),dx=(w-85)/rows.length,x=i=>25+(i-start+.5)*dx;view={start,rows,dx};c.font="12px system-ui";rows.forEach((r,j)=>{const i=j+start,color=n(r.close)>=n(r.open)?"#5dddd0":"#fa8b8b";c.strokeStyle=color;c.fillStyle=color;c.beginPath();c.moveTo(x(i),y(n(r.high)));c.lineTo(x(i),y(n(r.low)));c.stroke();c.fillRect(x(i)-Math.max(1,dx*.3),Math.min(y(n(r.open)),y(n(r.close))),Math.max(2,dx*.6),Math.max(1,Math.abs(y(n(r.open))-y(n(r.close)))))});function mark(i,text,color,above){if(i<start||i>=start+rows.length)return;c.fillStyle=color;const r=d.bars[i];c.fillText(text,x(i)-4,above?y(n(r.high))-9:y(n(r.low))+18)}d.strategy.points.forEach(p=>mark(p.known_index,"•","#80ddd0",true));d.strategy.signals.forEach(s=>mark(s.index,"S","#ffd274",true));[...d.trades,...(d.open_position?[d.open_position]:[])].forEach(t=>{mark(t.entry_index,"B","#62c5ff",false);if(t.exit_index!==undefined)mark(t.exit_index,"X","#ff9bd7",false)});c.fillStyle="#9db3cb";c.fillText(hi.toFixed(3),w-65,25);c.fillText(lo.toFixed(3),w-65,h-30);c.fillText(rows[0].start.slice(0,10),10,h-5);c.fillText(rows.at(-1).start.slice(0,10),w-150,h-5)}
+$("range").max=Math.max(0,d.bars.length-1);$("range").addEventListener("input",draw);$("window").addEventListener("change",draw);document.querySelectorAll("button[data-index]").forEach(b=>b.addEventListener("click",()=>{$("range").value=Math.max(0,n(b.dataset.index)-20);draw();$("candles").scrollIntoView({behavior:"smooth",block:"center"})}));$("candles").addEventListener("mousemove",e=>{const j=Math.floor((e.offsetX-25)/view.dx);const r=view.rows[j];if(r)$("hover").textContent=r.start+" → "+r.end+"\nO "+r.open+"  H "+r.high+"  L "+r.low+"  C "+r.close+"  V "+r.volume});window.addEventListener("resize",()=>{draw();lineChart()});draw();lineChart();
+</script></body></html>
