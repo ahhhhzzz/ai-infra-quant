@@ -179,6 +179,7 @@ def test_no_later_strategy_execution_or_broker_state_is_added_to_the_ledger() ->
         SOURCE_ROOT / "core/ports/paqs_q.py",
         SOURCE_ROOT / "core/strategy/paqs_q",
         SOURCE_ROOT / "application/paqs_q_artifacts.py",
+        SOURCE_ROOT / "application/paqs_q_event_artifacts.py",
         SOURCE_ROOT / "resources/paqs_q",
     )
     for path in SOURCE_ROOT.rglob("*"):
