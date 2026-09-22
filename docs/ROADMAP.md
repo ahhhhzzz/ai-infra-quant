@@ -2,12 +2,17 @@
 
 ## Fixed-risk sizing comparison — 2026-09-22
 
-**IMPLEMENTED / WINDOWS VALIDATED / AWAITING FOCUSED REVIEW**, task branch only.
+**FOCUSED REVIEW PASS / CLOSED / INTEGRATED**, effective only upon the successful product
+fast-forward described in the [closeout decision](decisions/PAQS_Q_RISK_SIZING_V1_CLOSEOUT_2026_09_22.md).
+External review facts are attributed to the user-provided independent review; Windows/browser
+checks retain their original Codex execution attribution. The closeout reruns no tests or research.
 The default cash sizing and closed single-pattern v1 acceptance remain unchanged.
 An explicit fixed-risk mode and offline comparison use the same signals and execution rules;
 the one preselected AVGO 1% comparison is recorded in the
 [implementation report](reports/PAQS_Q_RISK_SIZING_COMPARISON_V1.md).
-This is exploratory research, not formal Setup/Risk; no product integration or parameter search.
+This is integrated exploratory research tooling, not formal Setup/Risk or product UI integration.
+The approximately +0.50% is cumulative sample-period return, not annualized or proof of stable
+profitability. The 1% planned risk budget can be exceeded by gaps; no parameter search.
 Full Event, formal Setup/Risk, Q/E comparison and product UI remain deferred.
 
 ## Current task override — 2026-09-21

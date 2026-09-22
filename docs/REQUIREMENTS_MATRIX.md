@@ -1,6 +1,11 @@
 # Requirements Traceability Matrix
 
-## Fixed-risk sizing comparison — implemented / awaiting focused review
+## Fixed-risk sizing comparison — focused review PASS / closed / integrated
+
+Integration takes effect only with the successful product fast-forward in the
+[closeout decision](decisions/PAQS_Q_RISK_SIZING_V1_CLOSEOUT_2026_09_22.md).
+That decision records the user-provided external Linux review and independent AVGO recalculation;
+Windows/browser evidence retains its original execution attribution. No tests rerun for closeout.
 
 | Requirement | Implementation / evidence |
 |---|---|
