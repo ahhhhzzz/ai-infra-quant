@@ -1,5 +1,17 @@
 # Current Architecture
 
+2026-09-23 Event task: additive `core/domain/paqs_q/event_reference.py` and
+`core/strategy/paqs_q/event_*` modules implement strict evidence schemas, calendar qualification,
+prefix context and six price-event families. `application/paqs_q_event_artifacts.py` verifies new
+manifests and registers explicitly selected F1 plugins. It preserves the old B0 default and
+unconfigured Event default. Core reuses the unchanged pure `paqs_structure.py`; core never imports
+research tools. `tools/research/event_engine` adapts local input and writes offline HTML/JSON.
+One exact new-loader entry is added to the existing isolation allowlist; other assertions remain.
+[Rules](PAQS_Q_EVENT_V1.md) / [validation](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
+Status: **IMPLEMENTED / VALIDATED ON WINDOWS / AWAITING FOCUSED REVIEW**, not product-integrated.
+No API, database, PAQS-E, old engine, package initializer or dependency changes; formal Setup/Risk
+and product UI remain deferred. This supersedes the earlier Event deferral in the historical entries.
+
 Isolated research: `tools/research/single_pattern` reads explicit local D1/calendar
 files, reuses the unchanged F1 raw price kernel and old pure ATR function, then writes simulated
 trades and standalone HTML/CSV/JSON. No production `src/` module, dependency, database or route

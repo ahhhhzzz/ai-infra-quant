@@ -1,5 +1,17 @@
 # Read-Only PAQS Dual-Branch Decision-Terminal Product Roadmap
 
+## TASK-006C-Q Event reference v1 — 2026-09-23
+
+**IMPLEMENTED / VALIDATED ON WINDOWS / AWAITING FOCUSED REVIEW** on the independent task branch.
+The owner resumed the six-family Event scope after the integrated risk-sizing closeout at
+`5326ff6cfa3cae19ebb186643bc3a16bed88b518`. This supersedes the earlier Event deferral below.
+New explicit context/Event plugins provide prefix-known ATR, Major/Micro, Zone/Range and price
+events through F1; an offline CLI provides exact JSON and an event/K-line viewer.
+[Rules and usage](PAQS_Q_EVENT_V1.md) / [implementation and validation](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
+Product integration is **not** performed. Formal Setup/Risk, Q/E comparison and product UI remain
+unimplemented/deferred. Existing single-pattern/risk tools, F1 identities, research limitations and
+the accepted Linux layout exception are unchanged. No new returns study or market-validity claim.
+
 ## Fixed-risk sizing comparison — 2026-09-22
 
 **FOCUSED REVIEW PASS / CLOSED / INTEGRATED**, effective only upon the successful product

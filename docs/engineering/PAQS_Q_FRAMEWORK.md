@@ -195,9 +195,25 @@ are checked for binding/record integrity and known future evidence. New schemas 
 
 F1 Event fixtures live only in tests and require a test-only registry; default production rejects
 their `TEST_ONLY` capability. They prove replacement and upstream binding, not a production strategy.
-Formal Breakout/Failed Break/Retest/Transition/Trigger/Follow-through remain unimplemented.
+At the F1 closeout, formal Breakout/Failed Break/Retest/Transition/Trigger/Follow-through were
+unimplemented. The additive 2026-09-23 Event implementation below supersedes that earlier scope.
 `Event != Setup != Advisory`; no Entry/Hold/Exit, position, PnL, backtest, account or order semantics
 are added. There is no Dashboard/API/Analyze/PAQS-E/database integration.
+
+### Explicit Event reference v1 extension — 2026-09-23
+
+`application.paqs_q_event_artifacts.load_event_registry(root)` adds
+`paqs-q-event-context-reference@1.0.0` and `paqs-q-event-reference@1.0.0`, using new manifests and
+`PREFIX_EVENT_CONTEXT_V1`. The original loader and B0/A1 bindings stay byte-for-byte unchanged.
+The Event protocol and F1 closed record envelopes are unchanged; strict plugin-owned evidence
+schemas carry per-bar context, frozen sources, event guards and stable event_key lifecycles.
+Explicit ID/version are required. B0 cannot satisfy the new context capability; default Event
+selection still returns `EVENT_PLUGIN_NOT_CONFIGURED`. PENDING and later terminal facts append;
+their F1 record IDs bind each complete input/upstream result and need not survive input extension.
+Core has no research import; a separate offline tool converts local inputs and renders results.
+See [rules/usage](../PAQS_Q_EVENT_V1.md) and
+[implementation report](../reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
+This extension awaits focused review and has not been integrated into the product branch.
 
 ## Reproducing validation
 

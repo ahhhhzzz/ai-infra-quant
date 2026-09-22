@@ -1,5 +1,18 @@
 # Requirements Traceability Matrix
 
+## Event reference v1 — Windows validated / awaiting focused review
+
+| Requirement | Implementation / verification |
+|---|---|
+| Prefix-known ATR/Major/Micro/Zone/Range, component readiness, frozen sources | [context](../src/ai_infra_quant/core/strategy/paqs_q/event_context.py), [real OHLC E2E](../tests/paqs_q_event/test_end_to_end.py) |
+| Six symmetric event families, equality/window priorities, immutable lifecycle facts | [rules](../src/ai_infra_quant/core/strategy/paqs_q/event_rules.py), [equation tests](../tests/paqs_q_event/test_rules.py) |
+| AS_OF/OBSERVATIONAL separation, missing expected bars, W1/M30/D1 calendars | [qualification](../src/ai_infra_quant/core/strategy/paqs_q/event_calendar.py), [tests](../tests/paqs_q_event/test_input_calendar.py) |
+| F1 explicit versions/capability/evidence schema; unchanged B0/A1 manifests/defaults | [loader](../src/ai_infra_quant/application/paqs_q_event_artifacts.py), [artifact/schema tests](../tests/paqs_q_event/test_registry_artifacts.py) |
+| Offline Windows CLI, precise JSON, event/K-line inspection, one AVGO observation | [usage](PAQS_Q_EVENT_V1.md), [CLI/browser tests](../tests/paqs_q_event/test_report_browser.py), [report](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md) |
+
+This task does not implement formal Setup/Risk, Q/E comparison or product integration; it does not
+reopen earlier research acceptance or change its exploratory data limitations.
+
 ## Fixed-risk sizing comparison — focused review PASS / closed / integrated
 
 Integration takes effect only with the successful product fast-forward in the

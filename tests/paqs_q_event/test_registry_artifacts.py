@@ -24,6 +24,25 @@ from .support import candle, prefix
 ROOT = Path(__file__).resolve().parents[2]
 
 
+@pytest.mark.parametrize("timeframe", ["W1", "M30"])
+def test_explicit_event_registry_accepts_calendar_qualified_timeframes(registry, timeframe):
+    from .test_input_calendar import intraday, weekly
+
+    data = weekly() if timeframe == "W1" else intraday()
+    structure = registry.structure(data, CONTEXT_ID, VERSION)
+    assert structure.status == "AVAILABLE"
+    events = registry.event(data, structure, EVENT_ID, VERSION)
+    assert events.status == "AVAILABLE"
+    assert events.document()["evidence"]["readiness"]["atr"]
+    assert events.document()["input_hash"] == data.input_hash
+    if timeframe == "W1":
+        assert data.bars[-1].end > data.as_of
+        assert all(
+            r["record"]["effective_at"] <= data.payload_as_of()
+            for r in events.document()["records"]
+        )
+
+
 @pytest.fixture(scope="module")
 def registry():
     return load_event_registry(ROOT, include_experimental=True)

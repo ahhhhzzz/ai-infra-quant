@@ -1,5 +1,16 @@
 # PAQS-E / PAQS-Q Strategy Governance and Historical Research Specification
 
+## Event reference implementation — 2026-09-23
+
+The owner explicitly adopted the fixed reference context and six price-event formulas in
+[Event v1 rules/usage](PAQS_Q_EVENT_V1.md), superseding the earlier deferral. The task implementation
+is **VALIDATED ON WINDOWS / AWAITING FOCUSED REVIEW**; see the
+[implementation report](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
+This is a versioned F1 price-event implementation, not profitability validation or complete PAQS-Q.
+Trigger is a price candidate; event_guard is an event invalidation condition, not a trading stop.
+Formal Setup/Risk, LONG_READY, Q/E comparison and product UI remain incomplete. B0/A1 and prior
+research meanings, parameters, outputs and identities are preserved.
+
 ## Single-pattern research task — 2026-09-21
 
 The owner authorized an isolated exploratory D1 local-high breakout/retest experiment, now

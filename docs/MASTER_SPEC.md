@@ -1,5 +1,12 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
+Current task, 2026-09-23: the owner resumed TASK-006C-Q Event engineering. Explicit versioned
+reference context and six price-event families are implemented and Windows-validated, awaiting
+focused review on a task branch. See [rules/usage](PAQS_Q_EVENT_V1.md) and
+[validation](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
+This supersedes earlier Event deferral; formal Setup/Risk, Q/E comparison, product integration and
+trading qualification remain incomplete. Earlier research closeouts and F1 remain unchanged.
+
 Current owner-authorized exception to the earlier implementation sequence: an isolated D1,
 long-only single-pattern research CLI now produces signals, simulated trades and offline reports.
 See [rules/usage](PAQS_Q_SINGLE_PATTERN.md) and [validation](reports/PAQS_Q_SINGLE_PATTERN_V1.md).
