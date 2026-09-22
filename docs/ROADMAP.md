@@ -1,5 +1,15 @@
 # Read-Only PAQS Dual-Branch Decision-Terminal Product Roadmap
 
+## Fixed-risk sizing comparison — 2026-09-22
+
+**IMPLEMENTED / WINDOWS VALIDATED / AWAITING FOCUSED REVIEW**, task branch only.
+The default cash sizing and closed single-pattern v1 acceptance remain unchanged.
+An explicit fixed-risk mode and offline comparison use the same signals and execution rules;
+the one preselected AVGO 1% comparison is recorded in the
+[implementation report](reports/PAQS_Q_RISK_SIZING_COMPARISON_V1.md).
+This is exploratory research, not formal Setup/Risk; no product integration or parameter search.
+Full Event, formal Setup/Risk, Q/E comparison and product UI remain deferred.
+
 ## Current task override — 2026-09-21
 
 The owner prioritized a bounded, offline PAQS-Q single-pattern research loop over the proposed

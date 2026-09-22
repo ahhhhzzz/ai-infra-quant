@@ -1,5 +1,15 @@
 # Requirements Traceability Matrix
 
+## Fixed-risk sizing comparison — implemented / awaiting focused review
+
+| Requirement | Implementation / evidence |
+|---|---|
+| Explicit Decimal risk budget; lot, cash, cost constraints; unchanged default cash path | [sizing](../tools/research/single_pattern/sizing.py), [simulation](../tools/research/single_pattern/simulation.py), [focused tests](../tests/research/single_pattern/test_sizing.py) |
+| Shared signal identity, original benchmark, offline exact comparison | [comparison](../tools/research/single_pattern/comparison.py), [browser test](../tests/research/single_pattern/test_comparison_browser.py) |
+| Windows execution; one preselected 1% AVGO comparison; unchanged v1 business results | [report](reports/PAQS_Q_RISK_SIZING_COMPARISON_V1.md), [usage](PAQS_Q_SINGLE_PATTERN.md) |
+
+This extension does not reopen the closed v1 acceptance below or complete formal Setup/Risk.
+
 ## Single-pattern research — focused review PASS / closed / integrated
 
 External review attribution and retained limitations:

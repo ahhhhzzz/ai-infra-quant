@@ -130,3 +130,4 @@ Start-Process data/avgo-risk-comparison-v1/report.html
 计划及实际损益比例的分母均为该笔入场前权益。未平仓只报告截至末日的未实现损益，
 不虚计卖出费用；总费用为所有已发生的入场费用与已平仓退出费用。
 输出代码摘要包含新增研究文件，与 v1 旧摘要不同；F1/B0/A1 身份未变。
+本次 Windows 运行和指定 AVGO 对照见[实现报告](reports/PAQS_Q_RISK_SIZING_COMPARISON_V1.md)。
