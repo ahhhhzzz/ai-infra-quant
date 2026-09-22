@@ -6,6 +6,7 @@ from typing import Any
 from tools.research.paqs_q.types import CONTEXT, Bar, Dataset
 
 from .model import Config
+from .sizing import SizingConfig, plan_entry
 
 
 def buy(cash: Decimal, price: Decimal, config: Config) -> tuple[int, Decimal]:
@@ -32,12 +33,23 @@ def exit_quote(
     return None
 
 
-def simulate(data: Dataset, signals: list[dict[str, Any]], config: Config) -> dict[str, Any]:
+def simulate(
+    data: Dataset,
+    signals: list[dict[str, Any]],
+    config: Config,
+    *,
+    sizing: SizingConfig | None = None,
+) -> dict[str, Any]:
     with localcontext(CONTEXT):
-        return _simulate(data, signals, config)
+        return _simulate(data, signals, config, sizing)
 
 
-def _simulate(data: Dataset, signals: list[dict[str, Any]], config: Config) -> dict[str, Any]:
+def _simulate(
+    data: Dataset,
+    signals: list[dict[str, Any]],
+    config: Config,
+    sizing: SizingConfig | None,
+) -> dict[str, Any]:
     cash = config.initial_cash
     position: dict[str, Any] | None = None
     trades: list[dict[str, Any]] = []
@@ -56,6 +68,8 @@ def _simulate(data: Dataset, signals: list[dict[str, Any]], config: Config) -> d
     benchmark_drawdown = Decimal(0)
     for i, bar in enumerate(data.bars):
         if pending is not None:
+            if position is not None:
+                raise ValueError("ENTRY_REQUIRES_FLAT_ACCOUNT")
             signal = pending
             pending = None
             if bar.open <= signal["stop"] or bar.open <= signal["level"]:
@@ -69,17 +83,30 @@ def _simulate(data: Dataset, signals: list[dict[str, Any]], config: Config) -> d
             else:
                 price = bar.open * (1 + config.slippage)
                 quantity, fee = buy(cash, price, config)
+                plan = {}
+                if sizing is not None:
+                    plan = plan_entry(cash, price, signal["stop"], quantity, config, sizing)
+                    quantity = plan["quantity"]
+                    fee = price * quantity * config.fee_rate
                 if quantity == 0:
                     decisions.append(
                         {
                             "signal_id": signal["signal_id"],
                             "index": i,
-                            "status": "INSUFFICIENT_CASH",
+                            "status": (
+                                "ZERO_RISK_QUANTITY"
+                                if plan.get("sizing_constraint") == "RISK"
+                                else "ZERO_CASH_AND_RISK_QUANTITY"
+                                if plan.get("sizing_constraint") == "BOTH"
+                                else "INSUFFICIENT_CASH"
+                            ),
+                            **plan,
                         }
                     )
                 else:
                     cash -= price * quantity + fee
                     position = {
+                        **plan,
                         "signal_id": signal["signal_id"],
                         "signal_time": signal["signal_time"],
                         "signal_index": signal["index"],
@@ -120,6 +147,11 @@ def _simulate(data: Dataset, signals: list[dict[str, Any]], config: Config) -> d
                         "pnl": pnl,
                         "return_on_cost": pnl
                         / (position["entry_price"] * position["quantity"] + position["entry_fee"]),
+                        **(
+                            {"pnl_fraction_of_entry_equity": pnl / position["entry_equity"]}
+                            if sizing is not None
+                            else {}
+                        ),
                     }
                 )
                 position = None
@@ -165,6 +197,15 @@ def _simulate(data: Dataset, signals: list[dict[str, Any]], config: Config) -> d
             - position["entry_fee"],
         }
     realized = sum((trade["pnl"] for trade in trades), Decimal(0))
+    extra_summary = {}
+    if sizing is not None:
+        extra_summary["total_fees"] = sum(
+            (t["entry_fee"] + t["exit_fee"] for t in trades), Decimal(0)
+        ) + (position["entry_fee"] if position is not None else Decimal(0))
+        if open_position is not None:
+            open_position["unrealized_pnl_fraction_of_entry_equity"] = (
+                open_position["unrealized_pnl_net_entry_fee"] / open_position["entry_equity"]
+            )
     return {
         "trades": trades,
         "decisions": decisions,
@@ -172,6 +213,7 @@ def _simulate(data: Dataset, signals: list[dict[str, Any]], config: Config) -> d
         "open_position": open_position,
         "pending_signal": pending,
         "summary": {
+            **extra_summary,
             "initial_cash": config.initial_cash,
             "final_equity": equity[-1]["equity"],
             "total_return": equity[-1]["equity"] / config.initial_cash - 1,

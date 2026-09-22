@@ -29,6 +29,7 @@
 </tbody></table></div>
 <h2>规则与运行参数</h2><p>只使用已确认局部点，突破后首次回踩，再等后续强阳线。不是 Major/Micro Pivot 或 Confirmed Zone。局部价格不等式复用 B0 内核；EMA14 和 ATR 缓冲参考已有定义；点位替代、止损、2R、资金和成本是新增研究假设。无多周期、结构目标、正式交易资格。</p>
 <pre>{{ result.config|tojson(indent=2) }}</pre>
+{% if result.sizing is defined %}<h2>显式仓位模式：{{ result.sizing.mode }}</h2><p>risk_fraction={{ result.sizing.risk_fraction }}。计划净止损包含费用和滑点，基于入场前权益；跳空可能超过预算。买入持有仍使用原现金比例，没有采用 fixed-risk，也不声称风险相同。逐笔计划、数量约束及实际盈亏比例保留在 JSON/交易 CSV；两模式并列报告使用 --sizing-mode compare。</p><pre>{{ result.sizing|tojson(indent=2) }}</pre>{% endif %}
 <details><summary>输入身份、完整性限制和代码摘要</summary><pre>{{ result.metadata|tojson(indent=2) }}</pre><pre>{{ result.code|tojson(indent=2) }}</pre></details>
 <p><a href="results.json">完整 JSON</a> · <a href="trades.csv">交易 CSV</a> · <a href="signals.csv">信号 CSV</a> · <a href="equity.csv">权益 CSV</a></p>
 <footer>仅本地研究，无网络请求、账户接入或真实订单。少量交易不构成统计结论。该报告不更新 PAQS-E 或产品状态。</footer>

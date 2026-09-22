@@ -88,3 +88,45 @@ Start-Process data/avgo-single-pattern/report.html
 HTML 可离线直接打开，配套 `results.json`、`trades.csv`、`signals.csv`、`equity.csv`。
 输出目录必须不存在，避免覆盖先前研究。图表数字转换仅用于绘图，金融结果来自 Decimal。
 真实样本不存在时用 demo 验证程序，不能声称真实市场验证完成。
+
+## 固定风险预算仓位对照 v1（2026-09-22）
+
+原命令默认仍为 `--sizing-mode cash`，资金比例、信号和成交规则不变。
+新增仓位配置独立于原 `Config`，不进入 signal_id 的生成；不修改局部点、事件、
+信号止损、取消条件、2R 目标、持有期限或成本假设。它是单形态研究扩展，不是正式 Setup/Risk。
+
+在持仓为空、下一开盘满足原入场条件时，使用**买入前现金（即当时权益）**计算：
+
+- E=开盘×(1+买滑点)，S=信号已经冻结的止损，P_stop=S×(1−卖滑点)。
+- f=原单边费率；每股计划净损失 L=E×(1+f)−P_stop×(1−f)，必须有限且大于零。
+- B=买入前权益×risk_fraction；风险允许手数为 floor(B/(L×每手股数))。
+- 现金允许手数仍为 floor(现金×allocation/(E×(1+f)×每手股数))。
+- 两者取小值，整手向下取整。RISK/CASH/BOTH 表示风险/现金/两者股数上限相同；
+  零股数分别记录 ZERO_RISK_QUANTITY、INSUFFICIENT_CASH 或 ZERO_CASH_AND_RISK_QUANTITY。
+  不借款、不移动止损、不用当天尚未知晓的收盘权益。
+
+`risk_fraction` 必须是 (0,1] 内有限 Decimal，显式非法值直接拒绝。
+本轮仅使用用户预先指定的 **0.01**，不是优化结果或投资建议；计划风险不是最大损失保证，
+跳空实际亏损可超过预算。cash 模式没有风险预算（null），但对照中仍显示其计划止损损失。
+买入持有始终使用原 allocation、费用、滑点、手数；没有策略止损、不套用 fixed-risk，
+不代表两者承担相同风险。
+
+Windows Python 3.12，在仓库根目录用一条命令读取同一份行情和日历，运行两种模式：
+
+```powershell
+python -m tools.research.single_pattern --input ../task006b-q-data/US.AVGO.D1.json --calendar ../task006b-q-r04-source/capture-calendar.json --sizing-mode compare --risk-fraction 0.01 --output data/avgo-risk-comparison-v1
+Start-Process data/avgo-risk-comparison-v1/report.html
+```
+
+目录必须不存在；复跑请选择新目录，不覆盖 v1 或输入。没有本地行情时，以 `--demo`
+替代 `--input` 和 `--calendar`，输出明确标为 SYNTHETIC。
+`--sizing-mode fixed-risk --risk-fraction 0.01` 可单独运行风险模式；默认 cash 下传入
+`--risk-fraction` 会拒绝，避免静默忽略。对照不修改两种模式共享的信号配置。
+
+`report.html` 可离线打开，展示两种模式的权益曲线、指标、逐笔计划风险和实际结果，
+支持切换显示原买入持有曲线。`results.json` 保留精确 Decimal 文本；`summary.csv`、
+`trades.csv`（包括未平仓）、`equity.csv`、`decisions.csv`（包括跳过原因）、`signals.csv`
+可逐项核对。HTML 金额/比例为两位显示，精确值以导出为准；图形转换仅用于绘图。
+计划及实际损益比例的分母均为该笔入场前权益。未平仓只报告截至末日的未实现损益，
+不虚计卖出费用；总费用为所有已发生的入场费用与已平仓退出费用。
+输出代码摘要包含新增研究文件，与 v1 旧摘要不同；F1/B0/A1 身份未变。

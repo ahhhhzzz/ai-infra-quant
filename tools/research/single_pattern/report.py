@@ -13,13 +13,14 @@ from tools.research.paqs_q.types import canonical, primitive
 
 from .model import STRATEGY, Config, Input
 from .simulation import simulate
+from .sizing import SizingConfig
 from .strategy import signals
 
 ROOT = Path(__file__).resolve().parents[3]
 
 
 def code_identity() -> dict[str, Any]:
-    files = [*Path(__file__).parent.rglob("*.py"), Path(__file__).with_name("report.html")]
+    files = [*Path(__file__).parent.rglob("*.py"), *Path(__file__).parent.glob("*.html")]
     files += [
         ROOT / path
         for path in (
@@ -40,9 +41,9 @@ def code_identity() -> dict[str, Any]:
     return {"files": hashes, "sha256": sha256(canonical(hashes).encode()).hexdigest()}
 
 
-def run(source: Input, config: Config) -> dict[str, Any]:
+def run(source: Input, config: Config, *, sizing: SizingConfig | None = None) -> dict[str, Any]:
     strategy = signals(source.data, config)
-    simulation = simulate(source.data, strategy["signals"], config)
+    simulation = simulate(source.data, strategy["signals"], config, sizing=sizing)
     return cast(
         dict[str, Any],
         primitive(
@@ -54,6 +55,7 @@ def run(source: Input, config: Config) -> dict[str, Any]:
                 "timezone": source.data.market_timezone,
                 "metadata": source.metadata,
                 "config": asdict(config),
+                **({"sizing": asdict(sizing)} if sizing is not None else {}),
                 "code": code_identity(),
                 "bars": source.data.bars,
                 "strategy": strategy,
