@@ -1,5 +1,17 @@
 # Requirements Traceability Matrix
 
+## TASK-006D-Q Setup/Risk 1.0.0 — local validation PASS, awaiting focused review
+
+| Requirement | Implementation / evidence |
+|---|---|
+| Closed Setup/Entry facts, three-period identities, explicit 1.0.1 upstream and manifest | [schema](../src/ai_infra_quant/core/domain/paqs_q/setup_reference.py), [loader](../src/ai_infra_quant/application/paqs_q_setup_artifacts.py), [focused tests](../tests/paqs_q_setup/test_setup.py) |
+| Three long Setup variants plus separate Breakout FT/Retest, lifecycle, frozen B and age | [rules](../src/ai_infra_quant/core/strategy/paqs_q/setup_rules.py), [rule document](PAQS_Q_SETUP_RISK_V1.md) |
+| Nearest T1/T2, non-chain confluence, open-gap evidence, Decimal RR and next-open revalidation | [targets](../src/ai_infra_quant/core/strategy/paqs_q/setup_targets.py), [rules/tests](../tests/paqs_q_setup/test_setup.py) |
+| Windows offline CLI, exact JSON/HTML, synthetic positive paths and AVGO insufficiency | [CLI](../tools/research/setup_risk/__main__.py), [browser check](../tests/paqs_q_setup/test_report_browser.py), [report](reports/TASK_006D_Q_SETUP_RISK_V1_IMPLEMENTATION_REPORT.md) |
+
+This task does not amend the earlier Event/F1 identities or implement execution, PnL, Q/E
+comparison, product integration or strict PIT certification for the retrospective AVGO files.
+
 ## Event reference v1.0.1 — focused review PASS / closed / integrated
 
 The [closeout decision](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md) attributes the

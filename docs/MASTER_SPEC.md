@@ -1,5 +1,12 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
+Current bounded override: TASK-006D-Q adds an isolated PAQS-Q Setup/Risk 1.0.0 reference on
+`task/006d-q-setup-risk-v1`, **local validation PASS; awaiting focused review and not integrated**. Three long Setup
+families and two-stage Entry Advisory consume explicit W1/D1/M30 Event 1.0.1 results; see
+[rules](PAQS_Q_SETUP_RISK_V1.md) and [implementation report](reports/TASK_006D_Q_SETUP_RISK_V1_IMPLEMENTATION_REPORT.md).
+No product UI/API, Q/E comparison, account, order, fill, holder advice, or profitability claim
+is added. The earlier Event-only snapshot below remains historical.
+
 TASK-006C-Q Event 1.0.1 reference context and six price-event families are
 **FOCUSED REVIEW PASS / CLOSED / INTEGRATED**, effective after the product fast-forward in the
 [closeout decision](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md). See

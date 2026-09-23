@@ -1,5 +1,16 @@
 # PAQS-E / PAQS-Q Strategy Governance and Historical Research Specification
 
+## Setup/Risk reference implementation — 2026-09-23
+
+The owner authorized the bounded [Setup/Risk 1.0.0 rules](PAQS_Q_SETUP_RISK_V1.md) after
+Event 1.0.1 integration. The isolated task branch implements three long Setup families,
+frozen thesis anchors, nearest structural T1/T2 and an independent next-open Entry Advisory;
+it has **local validation PASS; awaiting focused review, not integrated**. See the
+[implementation report](reports/TASK_006D_Q_SETUP_RISK_V1_IMPLEMENTATION_REPORT.md).
+LONG_READY is a rule qualification only, never a fill or market-validity finding. The AVGO
+archive has insufficient W1 calendar evidence, and OBSERVATIONAL never claims strict PIT.
+The historical Event-only status below remains true for that earlier stage.
+
 ## Event reference implementation — 2026-09-23
 
 The owner explicitly adopted the fixed reference context and six price-event formulas in

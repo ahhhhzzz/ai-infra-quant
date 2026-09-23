@@ -1,5 +1,19 @@
 # Read-Only PAQS Dual-Branch Decision-Terminal Product Roadmap
 
+## TASK-006D-Q Setup/Risk reference v1 — 2026-09-23
+
+The owner has authorized formal PAQS-Q Setup/Risk work, superseding the earlier deferral for
+this bounded layer. The isolated task branch adds three long Setup families, frozen structural
+risk and T1/T2 geometry, setup-bound M30 trigger/follow-through, and two-stage Entry Advisory
+with an independent next-open reference. It binds explicit W1/D1/M30 Event 1.0.1 outputs to
+Setup/Risk 1.0.0 without changing F1/Event code or defaults. Status: **IMPLEMENTED / LOCAL
+VALIDATION PASS / AWAITING FOCUSED REVIEW / NOT INTEGRATED**. See [rules and CLI](PAQS_Q_SETUP_RISK_V1.md)
+and [implementation report](reports/TASK_006D_Q_SETUP_RISK_V1_IMPLEMENTATION_REPORT.md).
+The AVGO archive cannot certify this three-period path because its W1 calendar lacks required
+closed-day facts; no real LONG_READY is claimed. Q/E comparison, product UI, holder advice,
+accounts, orders and trading remain unimplemented. Earlier historical statements below retain
+their time-specific meaning.
+
 ## TASK-006C-Q Event reference v1 — 2026-09-23
 
 **1.0.1 FOCUSED REVIEW PASS / CLOSED / INTEGRATED** after the product fast-forward recorded by the

@@ -1,5 +1,15 @@
 # Current Architecture
 
+TASK-006D-Q adds independent `core/domain/paqs_q/setup_reference.py`, pure
+`core/strategy/paqs_q/setup_rules.py`/`setup_targets.py`, and an explicit application loader
+with a Setup/Risk 1.0.0 dependency manifest. It consumes three separately verified Event 1.0.1
+input/result bindings; the F1 Structure/Event schemas and defaults are unchanged. The local
+`tools/research/setup_risk` CLI writes exact JSON and offline HTML, with no product route,
+database, account or execution connector. See [rules](PAQS_Q_SETUP_RISK_V1.md) and
+[validation](reports/TASK_006D_Q_SETUP_RISK_V1_IMPLEMENTATION_REPORT.md).
+Status: **task branch, local validation PASS, awaiting focused review, not integrated**. The earlier Event-only
+architecture paragraph below describes the completed predecessor, not this additive layer.
+
 2026-09-23 Event task: additive `core/domain/paqs_q/event_reference.py` and
 `core/strategy/paqs_q/event_*` modules implement strict evidence schemas, calendar qualification,
 prefix context and six price-event families. `application/paqs_q_event_artifacts.py` verifies new
