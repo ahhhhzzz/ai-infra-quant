@@ -1,6 +1,7 @@
 # Database Schema
 
-This is the integrated 006B1 schema at accepted implementation `2e9889ae9d2587fcfac6d715923f8a791b2333d8`.
+The integrated 006B1 schema at accepted implementation `2e9889ae9d2587fcfac6d715923f8a791b2333d8`
+remains intact. This task branch adds the Q product-analysis 0005 migration; it is not yet integrated.
 006B1/0004 is reviewed, user-accepted and closed; [closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md).
 Runtime is SQLite with SQLAlchemy repositories and explicit Alembic migrations. PostgreSQL
 compatibility is a portability/test concern, not a current deployment requirement.
@@ -13,7 +14,8 @@ For request orchestration and provenance, see [ARCHITECTURE](ARCHITECTURE.md).
 | `0001_phase1_foundation` | Canonical identity/watchlist, strategy configuration, historical paper descriptors/opening accounting and settings |
 | `0002_task007b_paqs_e_ledger` | Immutable runtime artifacts and Legacy structured Analysis Runs/Decisions |
 | `0003_task007c1_narrative_ledger` | Additive Narrative Runs and exact-text Results; retained unchanged |
-| `0004_task006b1_market_archive` | Explicit immutable market captures, bar versions and memberships; integrated head |
+| `0004_task006b1_market_archive` | Explicit immutable market captures, bar versions and memberships; integrated predecessor |
+| `0005_task006e_q_analysis` | Append-only Q analysis with full frozen Snapshot/input/result JSON, content digest and historical reads; task-branch head |
 
 Source: [0001](../src/ai_infra_quant/database/migrations/versions/0001_phase1_foundation.py),
 [0002](../src/ai_infra_quant/database/migrations/versions/0002_task007b_paqs_e_decision_ledger.py),
@@ -23,7 +25,8 @@ and performs the accepted idempotent foundation bootstrap; it does not create sc
 ORM metadata or delete databases. All three migration files remain unchanged by ADC.
 
 006B1 adds [0004](../src/ai_infra_quant/database/migrations/versions/0004_task006b1_market_archive.py)
-as the integrated schema head; no earlier migration or ledger definition changes.
+as the integrated predecessor. [0005](../src/ai_infra_quant/database/migrations/versions/0005_task006e_q_analysis.py)
+adds only `paqs_q_analysis_runs`; no earlier migration or ledger definition changes.
 
 ## 2. Foundation tables retained from 0001
 
@@ -92,7 +95,18 @@ successful parent and lineage at insertion. Repository reads additionally verify
 hash/identity, strategy/prompt artifact hashes, Result text hash, parent identity and predecessor.
 These application checks should not be represented as SQL-only semantic certification.
 
-## 5. Exact values, time and storage limits
+## 5. Q product-analysis record (task branch)
+
+The additive [Q table](../src/ai_infra_quant/database/models/paqs_q_analysis.py) and
+[repository](../src/ai_infra_quant/database/repositories/paqs_q_analysis.py) store one complete
+canonical payload per explicit Q action: full immutable Snapshot, selected Q input payloads,
+Context/Event/Setup outputs and identities, conditional Holder and diagnostics. The table binds
+Security, Snapshot hash, status, UTC creation time, exact JSON and SHA-256. Record/read verify the
+Snapshot content hash and payload digest. SQLite/PostgreSQL triggers reject UPDATE/DELETE;
+history returns metadata, and opening an item reads its exact saved payload without invoking an
+engine or data provider. 0005 does not alter Narrative/Legacy/archive rows or earlier migrations.
+
+## 6. Exact values, time and storage limits
 
 Financial values use Python `Decimal`. [ExactDecimal](../src/ai_infra_quant/database/types.py)
 binds fixed-scale canonical TEXT on SQLite and NUMERIC(38,18) on PostgreSQL. Floats and invalid
@@ -109,7 +123,7 @@ Frozen W1/D1/M30/quote evidence inside a request is not a generic local market a
 QFQ provider reads do not establish strict arbitrary historical As-Of replay, GoldSet or backtesting.
 The separate 0004 archive does not introduce PaperOrder/PaperFill, live positions/orders or performance tables.
 
-## 6. Verification references
+## 7. Verification references
 
 Existing [Narrative ledger/API tests](../tests/integration/test_paqs_e_narrative_ledger_api.py)
 cover additive upgrade/Legacy-byte preservation, exact text, revisions, immutability, rollback,
@@ -118,7 +132,7 @@ readback corruption and default Legacy POST behavior. Existing
 research before reasoning and no ledger mutation on failed research. These are implementation
 source references; ADC performs docs-only audits, not a new database migration/test run.
 
-## 7. Local market archive (0004)
+## 8. Local market archive (0004)
 
 | Table | Meaning and constraints |
 |---|---|

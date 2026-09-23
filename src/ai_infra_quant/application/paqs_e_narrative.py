@@ -94,6 +94,50 @@ class NarrativeAnalysisService:
         canonical_uuid(security_id)
         strategy, prompt = load_strategy_package(strategy_id), load_narrative_prompt()
         snapshot = self.snapshots.current_snapshot(security_id)
+        return self._analyze_snapshot(
+            security_id=security_id,
+            snapshot=snapshot,
+            model_key=model_key,
+            web_research=web_research,
+            strategy=strategy,
+            prompt=prompt,
+        )
+
+    def analyze_frozen(
+        self,
+        *,
+        security_id: str,
+        snapshot: PaqsMarketSnapshot,
+        model_key: str,
+        strategy_id: str,
+        web_research: bool,
+    ) -> PersistedNarrative:
+        """Explicit E analysis of an already frozen factual Snapshot.
+
+        The normal Analyze path still captures a fresh Snapshot. This entry point is
+        reserved for an explicit same-Snapshot Q/E comparison and never fetches data.
+        """
+        canonical_uuid(security_id)
+        strategy, prompt = load_strategy_package(strategy_id), load_narrative_prompt()
+        return self._analyze_snapshot(
+            security_id=security_id,
+            snapshot=snapshot,
+            model_key=model_key,
+            web_research=web_research,
+            strategy=strategy,
+            prompt=prompt,
+        )
+
+    def _analyze_snapshot(
+        self,
+        *,
+        security_id: str,
+        snapshot: PaqsMarketSnapshot,
+        model_key: str,
+        web_research: bool,
+        strategy: StrategyPackage,
+        prompt: PromptPackage,
+    ) -> PersistedNarrative:
         if snapshot.security.security_id != security_id:
             raise ValueError("Snapshot Security mismatch")
         model = self.models.resolve(model_key)

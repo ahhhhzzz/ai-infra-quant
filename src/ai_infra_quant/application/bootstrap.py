@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-EXPECTED_REVISION = "0004_task006b1_market_archive"
+EXPECTED_REVISION = "0005_task006e_q_analysis"
 
 
 class DatabaseNotReadyError(RuntimeError):

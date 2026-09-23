@@ -202,6 +202,31 @@
         </aside>
       </section>
 
+      <section id="paqs-q-workbench" class="paqs-q-workbench" aria-label="PAQS-Q 分析与 Q/E 对照">
+        <div class="section-heading"><div><p class="eyebrow">DETERMINISTIC REFERENCE</p><h2>PAQS-Q · 当前快照分析</h2></div></div>
+        <p class="note">仅显式点击才采集快照并运行 Q。行情刷新、重载和历史读取不会重新分析。Q 的 Entry 是规则资格，LONG_READY 不代表成交或真实持仓。</p>
+        <p id="q-security" class="identity-line">请选择证券</p>
+        <div class="archive-actions">
+          <button id="q-analyze" type="button" disabled>分析当前快照 · Q</button>
+          <button id="q-history-refresh" type="button" disabled>读取 Q 历史</button>
+        </div>
+        <p id="q-status" role="status" aria-live="polite">尚未发起 Q 分析</p>
+        <div class="paqs-q-columns">
+          <section aria-label="PAQS-Q 历史"><h3>Q 分析历史</h3><div id="q-history"></div></section>
+          <section aria-label="PAQS-Q 结果"><h3>选定 Q 结果</h3><div id="q-result"><p class="note">运行分析或选择历史记录。</p></div></section>
+        </div>
+        <section class="paqs-q-compare" aria-label="Q/E 同快照对照">
+          <h3>Q/E 对照</h3>
+          <p class="note">仅相同冻结快照可标记为同快照对照。E 模型、主策略与联网研究选项沿用上方显式选择；点击下方按钮才会发起可能收费的模型请求。</p>
+          <div class="archive-actions">
+            <button id="q-e-analyze" type="button" disabled>用选定模型分析这份 Q 快照 · E</button>
+            <form id="q-e-known-form" class="paqs-q-known-form"><label>已有 E Narrative Result UUID<input id="q-e-known-id" maxlength="36" autocomplete="off" required></label><button type="submit">读取对照</button></form>
+          </div>
+          <p id="q-e-status" role="status" aria-live="polite">请选择 Q 记录后显式发起 E 或读取已有 E 结果。</p>
+          <div id="q-e-result"></div>
+        </section>
+      </section>
+
 
       <details id="market-archive" class="market-archive">
         <summary>本地行情存档</summary>
@@ -234,5 +259,6 @@
     <script src="/static/app.js" defer></script>
     <script src="/static/narrative-markdown.js" defer></script>
     <script src="/static/paqs-e.js" defer></script>
+    <script src="/static/paqs-q.js" defer></script>
   </body>
 </html>

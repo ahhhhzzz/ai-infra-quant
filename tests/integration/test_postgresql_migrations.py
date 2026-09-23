@@ -81,7 +81,16 @@ def _prepare_empty_database(engine: Engine, config: Config) -> None:
     tables = set(inspect(engine).get_table_names())
     if tables:
         if "alembic_version" not in tables or not tables.issubset(
-            PHASE_ONE_TABLES | TASK007B_TABLES
+            PHASE_ONE_TABLES
+            | TASK007B_TABLES
+            | {
+                "paqs_e_narrative_runs",
+                "paqs_e_narrative_results",
+                "market_archive_captures",
+                "market_archive_bar_versions",
+                "market_archive_memberships",
+                "paqs_q_analysis_runs",
+            }
         ):
             pytest.fail("dedicated PostgreSQL test database contains unrelated tables")
         command.downgrade(config, "base")
@@ -140,7 +149,7 @@ def test_postgresql_16_fresh_upgrade_downgrade_reupgrade_and_invariants() -> Non
         command.upgrade(config, "head")
         with engine.connect() as connection:
             assert MigrationContext.configure(connection).get_current_revision() == (
-                "0004_task006b1_market_archive"
+                "0005_task006e_q_analysis"
             )
 
         command.downgrade(config, "base")
@@ -156,6 +165,7 @@ def test_postgresql_16_fresh_upgrade_downgrade_reupgrade_and_invariants() -> Non
             "market_archive_captures",
             "market_archive_bar_versions",
             "market_archive_memberships",
+            "paqs_q_analysis_runs",
         }
         rr_column = next(
             column

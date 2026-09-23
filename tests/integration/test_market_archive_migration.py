@@ -67,7 +67,7 @@ def test_0003_representative_ledger_watchlist_bytes_survive_0004(
     assert before["paqs_e_narrative_results"][1]
     assert before["paqs_e_decisions"][1]
     command.upgrade(config, "head")
-    assert current_migration_revision(migrated_engine) == "0004_task006b1_market_archive"
+    assert current_migration_revision(migrated_engine) == "0005_task006e_q_analysis"
     assert freeze() == before
     assert ledger.get_decision(legacy.decision.id) == legacy.decision
     assert narrative_store.get_result(narrative.result.narrative_result_id) == narrative.result
@@ -75,6 +75,7 @@ def test_0003_representative_ledger_watchlist_bytes_survive_0004(
         "market_archive_captures",
         "market_archive_bar_versions",
         "market_archive_memberships",
+        "paqs_q_analysis_runs",
     }
     command.downgrade(config, "0003_task007c1_narrative_ledger")
     assert freeze() == before

@@ -17,6 +17,7 @@ from ai_infra_quant.database.models.paqs_e_ledger import (
 )
 from ai_infra_quant.database.models.paqs_e_narrative import results as narrative_results
 from ai_infra_quant.database.models.paqs_e_narrative import runs as narrative_runs
+from ai_infra_quant.database.models.paqs_q_analysis import paqs_q_analysis_runs
 from ai_infra_quant.database.models.portfolio import (
     BrokerAccountModel,
     BrokerProfileModel,
@@ -62,4 +63,5 @@ __all__ = [
     "archive_versions",
     "narrative_results",
     "narrative_runs",
+    "paqs_q_analysis_runs",
 ]

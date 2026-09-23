@@ -20,6 +20,7 @@ from ai_infra_quant.application.paqs_e_narrative import NarrativeAnalysisService
 from ai_infra_quant.application.paqs_e_runtime import PaqsEReasoningRuntime, RuntimePackageError
 from ai_infra_quant.application.paqs_input_queries import PaqsInputQueries
 from ai_infra_quant.application.paqs_market_snapshot_queries import PaqsMarketSnapshotQueries
+from ai_infra_quant.application.paqs_q_product_analysis import PaqsQProductAnalysisService
 from ai_infra_quant.application.paqs_structure_queries import PaqsStructureQueries
 from ai_infra_quant.application.portfolio_queries import PortfolioQueries
 from ai_infra_quant.application.security_service import SecurityService
@@ -36,6 +37,7 @@ from ai_infra_quant.core.strategy.registry import StrategyRegistry
 from ai_infra_quant.database.repositories.market_data_archive import SQLAlchemyMarketDataArchive
 from ai_infra_quant.database.repositories.paqs_e_ledger import SQLAlchemyPaqsELedger
 from ai_infra_quant.database.repositories.paqs_e_narrative import SQLAlchemyNarrativeLedger
+from ai_infra_quant.database.repositories.paqs_q_analysis import SQLAlchemyPaqsQAnalysisStore
 from ai_infra_quant.database.repositories.unit_of_work import SQLAlchemyUnitOfWork
 from ai_infra_quant.integrations.futu_quote.adapter import FutuQuoteAdapter
 from ai_infra_quant.integrations.openai_reasoning.gateway import ModelGateway
@@ -67,6 +69,8 @@ class AppContainer:
     paqs_e_credentials: ModelCredentials
     narrative_ledger: NarrativeLedger
     narrative_analysis_service: NarrativeAnalysisService
+    paqs_q_analysis_ledger: SQLAlchemyPaqsQAnalysisStore
+    paqs_q_analysis_service: PaqsQProductAnalysisService
 
 
 def build_container(
@@ -142,6 +146,7 @@ def build_container(
     )
     gateway = ModelGateway(models, credentials)
     narrative_ledger = SQLAlchemyNarrativeLedger(session_factory)
+    paqs_q_ledger = SQLAlchemyPaqsQAnalysisStore(session_factory)
     return AppContainer(
         settings=settings,
         engine=engine,
@@ -176,6 +181,8 @@ def build_container(
         paqs_e_configuration=configuration,
         paqs_e_credentials=credentials,
         narrative_ledger=narrative_ledger,
+        paqs_q_analysis_ledger=paqs_q_ledger,
+        paqs_q_analysis_service=PaqsQProductAnalysisService(snapshot_queries, paqs_q_ledger),
         narrative_analysis_service=NarrativeAnalysisService(
             snapshot_queries,
             NarrativeGateway(models, credentials),

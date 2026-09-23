@@ -322,15 +322,34 @@ semantics and the validator are retained. Legacy and Narrative revisions do not 
 no historical records are rewritten. See [Legacy review](reviews/TASK_007B_INDEPENDENT_REVIEW.md)
 for that implementation's original contract, and [DATABASE_SCHEMA](DATABASE_SCHEMA.md) for storage.
 
-## 9. Deferred and forbidden routes
+## 9. TASK-006E-Q / TASK-007D task-branch routes
+
+All writes below require an explicit user action. `POST /paqs-q/analyses` captures one current
+Snapshot and its selected observational Q input; `GET` routes only read stored immutable results.
+The captured Snapshot and Context/Event/Setup/Holder identities remain in the Q record. See
+[product rules](PAQS_Q_PRODUCT_COMPARE_V1.md) and
+[implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md).
+
+| Method/path under `/api/v1` | Behavior |
+|---|---|
+| POST `/paqs-q/analyses` | `{security_id}`; freezes and persists one Q result, including `INSUFFICIENT` with reasons |
+| GET `/paqs-q/analyses/{analysis_id}` | Original full Q result and frozen input/Snapshot, no recompute |
+| GET `/paqs-q/securities/{security_id}/analyses` | Newest-first bounded analysis identity/history |
+| POST `/paqs-e/narrative-analyses/from-q` | Explicit `{q_analysis_id,model_key,strategy_id,web_research}`; E runs against the Q record's exact frozen Snapshot; existing E endpoint unchanged |
+| GET `/paqs-q/analyses/{analysis_id}/compare/{narrative_result_id}` | Read-only Q facts + original E text; `same_snapshot` only for identical complete Snapshot identity |
+
+These task-branch routes await focused review and are not product-integrated. No automatic model
+request, machine prose-to-Entry extraction, score or order is implied.
+
+## 10. Deferred and forbidden routes
 
 The 006B1 archive routes below are separate local observations. No strict historical As-Of/GoldSet,
-score/ranking, PAQS-Q successor, 007D comparison, PaperOrder/PaperFill/performance or backtest endpoint is introduced.
+score/ranking, broader PAQS-Q scanner or disagreement classification, PaperOrder/PaperFill/performance or backtest endpoint is introduced.
 Future scope requires its own approved contract. Broker accounts, real cash/positions/trades,
 import/synchronization, order submission/cancellation/modification and autonomous execution are
 permanently excluded. Inert foundation descriptors are not broker connectivity.
 
-## 10. Verification references
+## 11. Verification references
 
 [API surface tests](../tests/integration/test_api_surface.py),
 [Narrative ledger/API tests](../tests/integration/test_paqs_e_narrative_ledger_api.py),

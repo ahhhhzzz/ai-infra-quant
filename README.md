@@ -1,8 +1,8 @@
 # AI Infra Quant
 
 AI Infra Quant is a local-first, single-user research and decision-support workbench. It provides
-read-only current US/HK market data, active watchlist management and explicit Snapshot-on-Demand
-PAQS-E Narrative analysis using one registered model. Optional web research defaults OFF; final
+read-only current US/HK market data, active watchlist management, explicit PAQS-Q reference analysis,
+and explicit Snapshot-on-Demand PAQS-E Narrative analysis using one registered model. Optional web research defaults OFF; final
 reasoning is tool-free. Exact text and frozen evidence are retained in the Narrative Ledger, with
 Legacy structured history kept separately. The app never observes/imports brokerage accounts,
 positions or trades, or sends orders. Real trading is manual in the broker's official client.
@@ -104,7 +104,7 @@ Alembic selects its database URL in this order: an explicit
 `-x database_url=...` override, `DATABASE_URL` from application settings or `.env`, then the
 application's default SQLite URL. PostgreSQL overrides are for migration verification only;
 application runtime remains SQLite-only. Current migration head is
-`0004_task006b1_market_archive`. Narrative evidence remains separate from the new local archive;
+`0005_task006e_q_analysis`. Q analysis, Narrative evidence and the local archive are separate;
 neither provides strict historical As-Of replay.
 
 ## Validation

@@ -1,5 +1,15 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
+Current TASK-006E-Q / TASK-007D task-branch scope is the explicit Q product action and a minimal
+same-frozen-Snapshot Q/E reading surface. The Q record binds its selected input, Context/Event
+1.0.1, Setup/Risk 1.0.1, and an independent conditional Holder identity; the original E Narrative
+remains verbatim and model invocation remains separately user-triggered. See
+[product/Holder rules](PAQS_Q_PRODUCT_COMPARE_V1.md) and
+[implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md). This is awaiting focused
+review and is **not integrated**. Existing product data lacks strict historical availability,
+complete CLOSED-day calendar facts and independent M30 open evidence; no real LONG_READY is claimed.
+The time-specific Setup/Event closeout statements below remain historical.
+
 TASK-006D-Q Setup/Risk **1.0.1 FOCUSED REVIEW PASS / CLOSED** closes S01/S02 without changing
 strategy parameters or Event/F1 identities. Status becomes **INTEGRATED** only after the
 product fast-forward in the [closeout decision](decisions/TASK_006D_Q_SETUP_RISK_V1_CLOSEOUT_2026_09_23.md).

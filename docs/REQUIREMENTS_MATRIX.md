@@ -1,5 +1,19 @@
 # Requirements Traceability Matrix
 
+## TASK-006E-Q / TASK-007D — task-branch implementation, awaiting focused review
+
+| Requirement | Implementation / focused verification |
+|---|---|
+| Explicit Q Snapshot+input binding to accepted Context/Event and Setup/Risk 1.0.1 | [capture/adapter](../src/ai_infra_quant/application/paqs_q_product_input.py), [analysis service](../src/ai_infra_quant/application/paqs_q_product_analysis.py), [rules](PAQS_Q_PRODUCT_COMPARE_V1.md) |
+| Conditional Holder independent of Entry and actual-position state | [holder](../src/ai_infra_quant/application/paqs_q_holder.py), [focused tests](../tests/unit/test_paqs_q_product_analysis.py) |
+| Append-only Q analysis, complete frozen results and history without recomputation | [0005 migration](../src/ai_infra_quant/database/migrations/versions/0005_task006e_q_analysis.py), [store](../src/ai_infra_quant/database/repositories/paqs_q_analysis.py), [tests](../tests/integration/test_paqs_q_analysis.py) |
+| Separate explicit E-from-Q call, identical-Snapshot comparison, original Narrative | [Q API](../src/ai_infra_quant/backend/api/v1/paqs_q.py), [E API](../src/ai_infra_quant/backend/api/v1/paqs_e.py), [workbench test](../tests/browser/test_paqs_q_workbench.py) |
+
+The [implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md) records actual
+Windows tests, synthetic/model mock attribution and real-data limitations. Earlier task statuses
+below remain their own historical checkpoints. Neither this table nor the task branch asserts
+independent review PASS or product integration.
+
 TASK-006D-Q Setup/Risk **1.0.1 FOCUSED REVIEW PASS / CLOSED** addresses S01 exact Breakdown
 parent lineage and S02 availability-clock/fact-key stability. It becomes **INTEGRATED** only
 after the product fast-forward in the
@@ -202,8 +216,8 @@ Only Phase 0 through Phase 4 are valid target phases.
 | UI-005 | Dynamic supported US/HK add/remove flow is user-facing rather than backend-only | SUPERSEDED_PAQS_MVP | 2 | IMPLEMENTED | TASK-006A Dashboard form and integration tests |
 | UI-006 | Current Dashboard presents exact Narrative text and frozen identity/evidence; structured levels/RR remain Legacy-only | RETAINED | 2 | IMPLEMENTED | `docs/PAQS_E_WORKBENCH.md`; `tests/browser/test_paqs_e_workbench.py`; `docs/evidence/TASK_007C/` |
 | UI-007 | No real-order UI/control and no claim user executed advisory | RETAINED | all | DOCUMENTED | Roadmap safety boundary |
-| UI-008 | Market-data page refresh does not automatically trigger PAQS-E or PAQS-Q strategy re-analysis | RETAINED | 2 | DOCUMENTED | `PAQS-DUAL-001`; Roadmap 4 |
-| UI-009 | Future dual-branch comparison must show PAQS-E and PAQS-Q separately and surface disagreement without averaging into one synthetic decision score | RETAINED | 2 | PLANNED_TASK | TASK-007D scope direction |
+| UI-008 | Market-data page refresh does not automatically trigger PAQS-E or PAQS-Q strategy re-analysis | RETAINED | 2 | TASK_BRANCH_IMPLEMENTED | `tests/browser/test_paqs_q_workbench.py`; Roadmap 4 |
+| UI-009 | Dual-branch comparison shows PAQS-E and PAQS-Q separately; when E has only prose, it makes no machine agreement claim or averaged decision score | RETAINED | 2 | TASK_BRANCH_IMPLEMENTED | `src/ai_infra_quant/frontend/static/paqs-q.js`; `tests/browser/test_paqs_q_workbench.py` |
 
 ## 5. PAQS shared architecture, PAQS-E, PAQS-Q and Score requirements
 

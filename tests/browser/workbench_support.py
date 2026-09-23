@@ -325,6 +325,8 @@ class Workbench:
         request = route.request
         parsed = urlparse(request.url)
         path = parsed.path
+        if "/paqs-q/securities/" in path and path.endswith("/analyses"):
+            return self.fulfill(route, {"items": []})
         if path.endswith("/configuration"):
             package = load_strategy_package()
             return self.fulfill(

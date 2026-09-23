@@ -1,5 +1,18 @@
 # Read-Only PAQS Dual-Branch Decision-Terminal Product Roadmap
 
+## TASK-006E-Q / TASK-007D bounded product batch — task branch, 2026-09-23
+
+The owner authorized one delivery batch for an explicit PAQS-Q product action, conditional Holder,
+immutable Q history and minimal same-Snapshot Q/E display. The implementation on the isolated task
+branch is **IMPLEMENTED / LOCAL VALIDATION PASS / AWAITING FOCUSED REVIEW / NOT INTEGRATED**; see
+[scope and Holder rules](PAQS_Q_PRODUCT_COMPARE_V1.md) and the
+[implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md).
+Existing Context/Event 1.0.1 and Setup/Risk 1.0.1 identities remain unchanged. The product's
+current calendar/availability/adjustment capture is observational and cannot certify real
+`LONG_READY`; the earlier AVGO `INSUFFICIENT` result is unchanged. Q/E stays two separate outputs
+without an automatic model request, blended score or trade execution. Historical predecessor
+paragraphs below describe their own closeout times.
+
 ## TASK-006D-Q Setup/Risk reference v1 — 2026-09-23
 
 Setup/Risk **1.0.1 FOCUSED REVIEW PASS / CLOSED** after the user-provided independent
@@ -545,7 +558,9 @@ Historical pending-review statements are superseded by this closeout, not rewrit
 
 #### TASK-007D — Dual-Branch Comparison / Disagreement Dashboard
 
-Deferred until PAQS-Q produces usable advisory/reference output.
+The owner resumed the bounded same-Snapshot part in the current 006E-Q/007D task branch; it
+awaits focused review and is not integrated. Unstructured E prose permits side-by-side reading,
+but no machine agreement/disagreement label. Broader comparison/dashboard work remains deferred.
 
 Planned scope:
 
@@ -563,7 +578,7 @@ TASK-006B-Q — REVIEWED / CLOSED AS REFERENCE RESEARCH
 TASK-006C-Q-F1 — Versioned Quant/Event Framework Foundation [focused review PASS; user-accepted limitation; closed and integrated]
 TASK-006C-Q — Event 1.0.1 reference [focused review PASS; closed and integrated]
 TASK-006D-Q — Setup/Risk 1.0.1 reference [focused review PASS; closed; integration by closeout fast-forward]
-TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation
+TASK-006E-Q — bounded Q analysis/conditional Holder product action [task branch; awaiting focused review]; scanner deferred
 ```
 
 The F1 contract adopts only the versioned foundation and B0/A1 reference semantics; later formal Event semantics require separate approval. PAQS-Q work must not block an otherwise safe PAQS-E MVP and must not redefine PAQS-E strategy authority.

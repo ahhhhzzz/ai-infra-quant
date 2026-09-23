@@ -6,6 +6,7 @@ from ai_infra_quant.backend.api.v1 import (
     market_data_archive,
     paqs_e,
     paqs_market_snapshot,
+    paqs_q,
     performance,
     portfolio,
     positions,
@@ -27,5 +28,6 @@ api_router.include_router(providers.router)
 api_router.include_router(market_data.router)
 api_router.include_router(paqs_market_snapshot.router)
 api_router.include_router(paqs_e.router)
+api_router.include_router(paqs_q.router)
 
 api_router.include_router(market_data_archive.router)

@@ -145,7 +145,7 @@ python -m mypy src tests
 ```
 
 The existing browser fixture creates a fresh temporary SQLite DB, runs Alembic upgrade to
-`0004_task006b1_market_archive`, launches the actual `ai_infra_quant.backend.main:app` via Uvicorn on
+`0005_task006e_q_analysis`, launches the actual `ai_infra_quant.backend.main:app` via Uvicorn on
 an ephemeral loopback port, unsets `OPENAI_API_KEY` and selects provider `none`. It checks real
 health/OpenAPI/configuration/page/static HTTP routes before browser scenarios. Only its own
 subprocess is terminated during cleanup. No existing user process or database is touched.

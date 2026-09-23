@@ -1,5 +1,12 @@
 # Current Architecture
 
+TASK-006E-Q / 007D task branch adds an explicit Q product action, an append-only full Q result
+record, conditional Holder reader and a separate user-triggered E-from-Q frozen Snapshot call.
+The [bounded product rules](PAQS_Q_PRODUCT_COMPARE_V1.md) and
+[implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md) distinguish synthetic
+positive checks from current observational input limitations. Neither read/history/refresh nor Q
+analysis invokes the E provider. This batch awaits focused review and is not product-integrated.
+
 The distinct Setup/Risk **1.0.1** code/manifest binding for S01/S02 is **FOCUSED REVIEW PASS /
 CLOSED**; it becomes **INTEGRATED** only after the product fast-forward in the
 [closeout decision](decisions/TASK_006D_Q_SETUP_RISK_V1_CLOSEOUT_2026_09_23.md).
@@ -273,7 +280,7 @@ The request freezes Snapshot, model/provider, strategy/prompt hashes/versions, r
 research flag and auxiliary context. Run start/completion surround final reasoning; research
 precedes `started_at` and has its own retrieval timestamp. UTC instants and local sessions remain
 distinct. Decimal facts remain exact canonical strings; chart number conversion is drawing only.
-Head is `0004_task006b1_market_archive`; 0001/0002/0003 are retained. See [DATABASE_SCHEMA](DATABASE_SCHEMA.md).
+Task-branch head is `0005_task006e_q_analysis`; 0001/0002/0003/0004 are retained. See [DATABASE_SCHEMA](DATABASE_SCHEMA.md).
 
 This ledger is not a generic market archive. Current provider read-through/QFQ and frozen
 W1/D1/M30 evidence do not provide arbitrary strict historical As-Of replay. Hashes prove stored

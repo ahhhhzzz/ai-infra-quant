@@ -8,6 +8,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
+from pydantic import Field, StrictBool, TypeAdapter
 
 from ai_infra_quant.application.market_data_queries import (
     MarketDataSecurityMetadataConflict,
@@ -18,7 +19,7 @@ from ai_infra_quant.application.paqs_e_research import ResearchFailure
 from ai_infra_quant.application.paqs_e_runtime import RuntimePackageError
 from ai_infra_quant.backend.api.errors import problem_response
 from ai_infra_quant.backend.dependencies import ContainerDep
-from ai_infra_quant.backend.schemas.common import Problem
+from ai_infra_quant.backend.schemas.common import Problem, StrictSchema
 from ai_infra_quant.backend.schemas.paqs_e import (
     AnalysisProblem,
     AnalysisRunRead,
@@ -44,10 +45,21 @@ from ai_infra_quant.core.domain.paqs_e_ledger import (
     LedgerPersistenceError,
 )
 from ai_infra_quant.core.domain.paqs_e_narrative import NarrativeResult, NarrativeRun
-from ai_infra_quant.core.domain.paqs_market_snapshot import canonical_json
+from ai_infra_quant.core.domain.paqs_market_snapshot import PaqsMarketSnapshot, canonical_json
 from ai_infra_quant.core.ports.paqs_e_reasoning import ReasoningFailureKind
+from ai_infra_quant.database.repositories.paqs_q_analysis import (
+    PaqsQAnalysisIntegrityError,
+    PaqsQAnalysisPersistenceError,
+)
 
 router = APIRouter(prefix="/paqs-e", tags=["paqs-e"])
+
+
+class AnalyzeFrozenQCreate(StrictSchema):
+    q_analysis_id: UUID
+    model_key: str = Field(min_length=1, max_length=80)
+    strategy_id: str = Field(min_length=1, max_length=120)
+    web_research: StrictBool
 
 
 @router.get("/configuration", response_model=ConfigurationRead, responses={503: {"model": Problem}})
@@ -369,6 +381,93 @@ def analyze_narrative(
                 "failure_kind": run.failure_kind,
             },
         )
+    return JSONResponse(
+        status_code=201,
+        content={**json.loads(canonical_json(persisted.result)), "status": "SUCCEEDED"},
+    )
+
+
+@router.post("/narrative-analyses/from-q", status_code=201, response_model=None)
+def analyze_narrative_from_q(
+    payload: AnalyzeFrozenQCreate, request: Request, container: ContainerDep
+) -> JSONResponse:
+    """Explicit E request against the exact snapshot frozen in one Q record."""
+    try:
+        record = container.paqs_q_analysis_ledger.get(str(payload.q_analysis_id))
+    except (
+        PaqsQAnalysisIntegrityError,
+        PaqsQAnalysisPersistenceError,
+        LedgerIntegrityError,
+        LedgerPersistenceError,
+        ValueError,
+        TypeError,
+        KeyError,
+    ):
+        return _ledger_error(request)
+    if record is None:
+        return _not_found(request, "PAQS_Q_ANALYSIS")
+    try:
+        snapshot = TypeAdapter(PaqsMarketSnapshot).validate_python(
+            record["payload"]["market_snapshot"]
+        )
+        if (
+            record["snapshot_hash"] != snapshot.snapshot_hash
+            or record["security_id"] != snapshot.security.security_id
+        ):
+            raise ValueError("Q frozen snapshot identity mismatch")
+    except (ValueError, TypeError, KeyError):
+        return _ledger_error(request)
+    try:
+        persisted = container.narrative_analysis_service.analyze_frozen(
+            security_id=record["security_id"],
+            snapshot=snapshot,
+            model_key=payload.model_key,
+            strategy_id=payload.strategy_id,
+            web_research=payload.web_research,
+        )
+    except ResearchFailure as failure:
+        return problem_response(
+            request,
+            status=422,
+            code="PAQS_E_RESEARCH_PRECONDITION_FAILED",
+            title="Web research failed",
+            detail=str(failure),
+            extra={
+                "failure_kind": failure.kind.value,
+                **(
+                    {"research_diagnostic": failure.diagnostic.as_dict()}
+                    if failure.diagnostic
+                    else {}
+                ),
+            },
+        )
+    except (LedgerIntegrityError, LedgerPersistenceError):
+        return _ledger_error(request)
+    except (MarketDataSecurityNotSupported, RuntimePackageError, ValueError):
+        return problem_response(
+            request,
+            status=422,
+            code="PAQS_E_NARRATIVE_PRECONDITION_FAILED",
+            title="Narrative precondition failed",
+            detail="A valid frozen narrative request could not be formed.",
+        )
+    if persisted.result is None:
+        run = persisted.run
+        status = 503 if run.failure_kind in {"CONFIGURATION_ERROR", "PROVIDER_UNAVAILABLE"} else 502
+        return problem_response(
+            request,
+            status=status,
+            code="PAQS_E_NARRATIVE_PROVIDER_FAILED",
+            title="Narrative provider failed",
+            detail=run.failure_reason or "Narrative provider failed",
+            extra={
+                "narrative_run_id": run.narrative_run_id,
+                "analysis_status": run.status,
+                "failure_kind": run.failure_kind,
+            },
+        )
+    if persisted.result.snapshot_hash != snapshot.snapshot_hash:
+        return _ledger_error(request)
     return JSONResponse(
         status_code=201,
         content={**json.loads(canonical_json(persisted.result)), "status": "SUCCEEDED"},
