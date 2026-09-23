@@ -61,10 +61,11 @@ def test_synthetic_holder_is_setup_specific_and_never_infers_position() -> None:
     assert len(holder["items"]) >= 2
     assert all(item["hypothetical_position_only"] for item in holder["items"])
     assert all(item["evidence_fact_keys"] for item in holder["items"])
-    assert any(item["status"] == "TARGET_REACHED_REVIEW" for item in holder["items"])
-    # Remove all post-target completed M30 evidence: a target is not inferred from
-    # the confirmation bar's final high or an unknown later interval.
-    first_target_time = min(f.target1.known_at for f in result.facts if f.target1 is not None)
+    assert all(item["status"] != "TARGET_REACHED_REVIEW" for item in holder["items"])
+    assert all(item["target_binding"]["candidate_key"] for item in holder["items"])
+    # Removing all completed M30 evidence after the binding cannot create a
+    # target touch, regardless of when the source structure was first known.
+    first_target_time = min(item["target_binding"]["effective_at"] for item in holder["items"])
     assert bundle.m30 is not None
     earlier = replace(
         bundle.m30,
@@ -107,13 +108,8 @@ def test_holder_requires_actual_hard_reason_and_full_negative_target_coverage() 
     raised_target = original.target1.model_copy(
         update={"effective_price": "1000000", "lower": "1000000", "upper": "1000000"}
     )
-    base = original.model_copy(
-        update={
-            "target1": raised_target,
-            "status": "OBSERVED",
-            "reasons": ("SYNTHETIC_OBSERVATION",),
-        }
-    )
+    assert original.status == "ENTRY_PENDING_REVALIDATION"
+    base = original.model_copy(update={"target1": raised_target})
     isolated = result.model_copy(update={"facts": (base,)})
     assert conditional_holder(isolated, bundle.m30)["status"] == "THESIS_VALID"
     after_target = next(bar for bar in bundle.m30.bars if bar.start >= raised_target.known_at)

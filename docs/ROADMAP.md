@@ -3,10 +3,13 @@
 ## TASK-006E-Q / TASK-007D bounded product batch — task branch, 2026-09-23
 
 The owner authorized one delivery batch for an explicit PAQS-Q product action, conditional Holder,
-immutable Q history and minimal same-Snapshot Q/E display. The implementation on the isolated task
-branch is **IMPLEMENTED / LOCAL VALIDATION PASS / AWAITING FOCUSED REVIEW / NOT INTEGRATED**; see
+immutable Q history and minimal same-Snapshot Q/E display. External focused review of
+`06748540d67f2c120f8dfecc46a342db9f1c6aaf` found Q01 (target touch before Holder target
+binding); the isolated task branch now carries a Holder 1.0.1 correction and remains
+**REMEDIATED / AWAITING Q01 FOCUSED REVIEW / NOT INTEGRATED**. See the
 [scope and Holder rules](PAQS_Q_PRODUCT_COMPARE_V1.md) and the
-[implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md).
+[original implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md) and
+[Q01 remediation report](reports/TASK_006E_Q_007D_Q01_REMEDIATION.md).
 Existing Context/Event 1.0.1 and Setup/Risk 1.0.1 identities remain unchanged. The product's
 current calendar/availability/adjustment capture is observational and cannot certify real
 `LONG_READY`; the earlier AVGO `INSUFFICIENT` result is unchanged. Q/E stays two separate outputs

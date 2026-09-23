@@ -8,19 +8,19 @@
 
 现有市场快照只存日历汇总，当前行情采集只列交易日而不提供逐日 CLOSED 事实，当前复权也没有历史版本证明。因此真实采集是 `OBSERVATIONAL`，不是严格 `AS_OF`；缺闭市日历、逐根可知时间、独立 M30 开盘事实或覆盖时如实给出 `INSUFFICIENT`/待验证及补证据说明，绝不抬升为 `LONG_READY`。合成全证据样本只用于测试正常路径，不是市场验证。一次完整捕获的价位、日历原事实和诊断均随记录冻结；不从日历计数推造 CLOSED 日。
 
-## Holder 参考 v1
+## Holder 参考 1.0.1
 
-Holder 身份独立于 Setup/Risk 1.0.1，显示前提始终为“若持有这一可追溯 Setup”，绝不表示系统知道用户持仓。它仅使用已保存的 SetupFact、完成行情和冻结目标；不使用 Entry 资格推断应退出。优先级为硬失效、目标达到、明确软弱、结构仍有效；证据不足则 `UNDETERMINED`。
+Holder 身份独立于 Setup/Risk 1.0.1，显示前提始终为“若持有这一可追溯 Setup”，绝不表示系统知道用户持仓。它仅使用已保存的 SetupFact、完成行情和冻结目标；不使用 Entry 资格推断应退出。每个 Setup 以最早有效 `ENTRY_PENDING_REVALIDATION` 的 Setup/候选/事实绑定为条件式参考目标。同候选后续 `LONG_READY` 或 `OBSERVATIONAL_LONG_QUALIFIED` 若选定不同 T1，才从该资格事实时点绑定新目标；重复同一 T1 不重置起点。其他候选的 `NO_TRADE` 几何不能替换目标；多个有效候选的目标互相冲突时无法确定持有的是哪一个，返回 `UNDETERMINED`。每项显示绑定事实、候选、绑定时间、结构 `known_at`、目标来源及触价 K 线身份。优先级为硬失效、目标达到、明确软弱、结构仍有效；证据不足则 `UNDETERMINED`。
 
 | 状态 | 足够依据及转换 |
 | --- | --- |
 | `EXIT_IF_HELD` | 同一 Setup 的追加 `INVALIDATED` 事实明确给出 `D1_CLOSE_BELOW_FROZEN_ANCHOR`，即冻结 B 与当前已完成 D1 ATR 所定义的 D1 收盘硬失效。仅为条件式建议，不代表自动卖出。W1 Context 不再允许产生的 `INVALIDATED` 不冒充这一依据。 |
-| `TARGET_REACHED_REVIEW` | 未硬失效，冻结 T1 后**完整落在冻结时间之后**的已完成常规 M30 bar 触及 T1；仅提示复核，不自动调整目标或平仓。 |
+| `TARGET_REACHED_REVIEW` | 未硬失效，有上述有效绑定，且绑定时间之后**完整落在有效观察区间内**、截至分析时点可用的已完成常规 M30 bar 触及该候选 T1；仅提示复核，不自动调整目标或平仓。 |
 | `HOLD_WITH_WARNING` | 未满足以上两项，同一 Setup 后续事实明确 `FOLLOW_THROUGH_FAILED`；只表示已记录的价格确认转弱，不移动 B/止损。 |
-| `THESIS_VALID` | 同一 Setup 有仍有效的创建/观察或资格事实、未到期/失效，目标确认后逐日 OPEN/CLOSED 日历和每个已完成常规 M30 时段完整，足以排除前三项；不等于 Entry 合格。 |
-| `UNDETERMINED` | 无可追溯 Setup、到期、仅 W1 Context 不再允许、最新事实只说明 `NO_TRADE`、关键周期/目标/完成时序缺失，或无法排除日历及 M30 缺口；列明原因，不猜测建议。 |
+| `THESIS_VALID` | 同一 Setup 有仍有效的创建/观察或资格事实、未到期/失效，目标绑定后逐日 OPEN/CLOSED 日历和每个已完成常规 M30 时段完整，足以排除前三项；不等于 Entry 合格。 |
+| `UNDETERMINED` | 无可追溯 Setup、无有效目标绑定、有效候选目标冲突、到期、仅 W1 Context 不再允许、最新事实只说明 `NO_TRADE`、关键周期/目标/完成时序缺失，或无法排除日历及 M30 缺口；列明原因，不猜测建议。 |
 
-同一时刻的硬失效优先于目标触及。目标触及仅在完成 bar 的 `start >= target.known_at` 时判断，以免把冻结前的日内高点回填；缺后续完整 M30 覆盖不能把“未见触及”说成未触及。Holder 不加追踪止损、目标上移或新策略阈值。状态变更随新 Q 分析记录产生，旧结论不回写。
+同一时刻的硬失效优先于目标触及。`target.known_at` 只是来源结构首次可知时间，不能替代目标绑定时间；触价只在完成 bar 的 `start >= binding_fact.effective_at` 且整个 bar 已完成、可用时判断。跨越绑定时刻的 bar 排除；负向覆盖检查使用同一绑定时间。缺后续完整 M30 覆盖不能把“未见触及”说成未触及。Holder 不加追踪止损、目标上移或新策略阈值。状态变更随新 Q 分析记录产生，旧结论不回写；原 1.0.0 历史记录保留原身份。
 
 ## Q/E 对照
 

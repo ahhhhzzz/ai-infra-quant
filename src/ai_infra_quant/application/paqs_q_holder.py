@@ -17,7 +17,7 @@ from ai_infra_quant.core.domain.paqs_q.inputs import QInput
 from ai_infra_quant.core.domain.paqs_q.setup_reference import SetupFact, SetupRun
 
 HOLDER_ID = "paqs-q-conditional-holder"
-HOLDER_VERSION = "1.0.0"
+HOLDER_VERSION = "1.0.1"
 
 
 def holder_code_hash() -> str:
@@ -28,15 +28,69 @@ def _newest(facts: list[SetupFact]) -> SetupFact:
     return max(enumerate(facts), key=lambda pair: (pair[1].effective_at, pair[0]))[1]
 
 
-def _complete_post_target_coverage(m30: QInput, known_at: datetime) -> bool:
-    """Prove every elapsed regular slot from target availability through as_of.
+def _target_binding(facts: list[SetupFact]) -> tuple[SetupFact | None, str | None]:
+    """Keep the first frozen candidate; only its qualified Stage B may revise T1.
+
+    A geometry on NO_TRADE is not a Holder target. A later candidate cannot
+    silently replace the hypothetical target of the first traceable candidate.
+    Repeating the same target never moves its first binding time.
+    """
+    ordered = [
+        fact for _, fact in sorted(enumerate(facts), key=lambda row: (row[1].effective_at, row[0]))
+    ]
+    stages_a = [
+        fact
+        for fact in ordered
+        if fact.status == "ENTRY_PENDING_REVALIDATION"
+        and fact.candidate_key is not None
+        and fact.target1 is not None
+    ]
+    if not stages_a:
+        return None, "FROZEN_TARGET_BINDING_UNAVAILABLE"
+    first = stages_a[0]
+    assert first.target1 is not None and first.candidate_key is not None
+    if first.target1.known_at > first.effective_at:
+        return None, "TARGET_STRUCTURE_NOT_KNOWN_AT_BINDING"
+    if any(
+        fact.candidate_key == first.candidate_key and fact.target1 != first.target1
+        for fact in stages_a[1:]
+    ):
+        return None, "CONFLICTING_STAGE_A_TARGET_FOR_CANDIDATE"
+    qualified = [
+        fact
+        for fact in ordered
+        if fact.candidate_key == first.candidate_key
+        and fact.status in {"LONG_READY", "OBSERVATIONAL_LONG_QUALIFIED"}
+        and fact.target1 is not None
+        and fact.effective_at >= first.effective_at
+    ]
+    selected = first
+    if qualified:
+        final = qualified[0]
+        assert final.target1 is not None
+        if final.target1.known_at > final.effective_at or any(
+            fact.target1 != final.target1 for fact in qualified[1:]
+        ):
+            return None, "CONFLICTING_OR_FUTURE_STAGE_B_TARGET"
+        if final.target1 != first.target1:
+            selected = final
+    if any(
+        fact.candidate_key != first.candidate_key and fact.target1 != selected.target1
+        for fact in stages_a[1:]
+    ):
+        return None, "MULTIPLE_CANDIDATE_TARGETS_AMBIGUOUS"
+    return selected, None
+
+
+def _complete_post_target_coverage(m30: QInput, binding_at: datetime) -> bool:
+    """Prove every elapsed regular slot from target binding through as_of.
 
     OBSERVATIONAL Event qualification does not certify unlisted calendar dates.
     Negative target evidence therefore needs each intervening OPEN/CLOSED day and
     every completed regular M30 bucket, including the current partial session.
     """
     zone = ZoneInfo(m30.market_timezone)
-    first = known_at.astimezone(zone).date()
+    first = binding_at.astimezone(zone).date()
     last = m30.as_of.astimezone(zone).date()
     span = (last - first).days
     if not 0 <= span <= 10000 or m30.problem() is not None:
@@ -61,19 +115,25 @@ def _complete_post_target_coverage(m30: QInput, known_at: datetime) -> bool:
                 return False
             point = start
             while point < end:
-                if point >= known_at and point + step <= m30.as_of:
+                if point >= binding_at and point + step <= m30.as_of:
                     expected.append((point, point + step))
                 point += step
     actual = [
-        (bar.start, bar.end) for bar in m30.bars if bar.start >= known_at and bar.end <= m30.as_of
+        (bar.start, bar.end) for bar in m30.bars if bar.start >= binding_at and bar.end <= m30.as_of
     ]
     return (
         bool(expected)
         and expected == actual
         and all(
-            bar.completed and bar.coverage == "COMPLETE" and bar.session == "REGULAR"
+            bar.completed
+            and bar.coverage == "COMPLETE"
+            and bar.session == "REGULAR"
+            and bar.completed_at <= m30.as_of
+            and bar.retrieved_at <= m30.as_of
+            and (bar.available_at is not None or m30.mode != "AS_OF")
+            and (bar.available_at is None or bar.available_at <= m30.as_of)
             for bar in m30.bars
-            if bar.start >= known_at and bar.end <= m30.as_of
+            if bar.start >= binding_at and bar.end <= m30.as_of
         )
     )
 
@@ -81,8 +141,8 @@ def _complete_post_target_coverage(m30: QInput, known_at: datetime) -> bool:
 def conditional_holder(setup: SetupRun, m30: QInput | None) -> dict[str, Any]:
     """Assess only a hypothetical holder of each traceable Setup.
 
-    Target touches use completed M30 bars whose entire interval follows target
-    availability; a bar straddling target confirmation cannot be replayed into it.
+    Target touches use completed M30 bars whose entire interval follows the
+    candidate's frozen target binding; structural known_at is not that binding.
     """
 
     identity = {
@@ -112,10 +172,14 @@ def conditional_holder(setup: SetupRun, m30: QInput | None) -> dict[str, Any]:
     items: list[dict[str, Any]] = []
     for setup_key, facts in sorted(grouped.items()):
         latest = _newest(facts)
-        frozen_target = next((fact.target1 for fact in reversed(facts) if fact.target1), None)
+        binding, binding_problem = _target_binding(facts)
+        frozen_target = binding.target1 if binding is not None else None
         state = "UNDETERMINED"
         reasons: list[str] = []
         evidence_keys = [latest.fact_key]
+        touch: dict[str, Any] | None = None
+        if binding is not None and binding.fact_key not in evidence_keys:
+            evidence_keys.append(binding.fact_key)
         hard_invalidation = next(
             (
                 fact
@@ -141,10 +205,12 @@ def conditional_holder(setup: SetupRun, m30: QInput | None) -> dict[str, Any]:
             evidence_keys = [context_invalidation.fact_key]
         elif latest.status == "EXPIRED":
             reasons = ["SETUP_EXPIRED_NO_CURRENT_THESIS"]
-        elif frozen_target is None:
-            reasons = ["FROZEN_TARGET_UNAVAILABLE"]
+        elif binding is None or frozen_target is None:
+            reasons = [binding_problem or "FROZEN_TARGET_UNAVAILABLE"]
         elif m30 is None or m30.quality != "COMPLETE":
             reasons = ["COMPLETE_M30_TARGET_EVIDENCE_MISSING"]
+        elif m30.problem() is not None or binding.effective_at > m30.as_of:
+            reasons = ["M30_OR_TARGET_BINDING_NOT_AVAILABLE_AS_OF"]
         else:
             observed = [
                 bar
@@ -152,18 +218,29 @@ def conditional_holder(setup: SetupRun, m30: QInput | None) -> dict[str, Any]:
                 if bar.completed
                 and bar.coverage == "COMPLETE"
                 and bar.session == "REGULAR"
-                and bar.start >= frozen_target.known_at
+                and bar.start >= binding.effective_at
+                and bar.end <= m30.as_of
                 and bar.completed_at <= m30.as_of
+                and bar.retrieved_at <= m30.as_of
+                and (bar.available_at is not None or m30.mode != "AS_OF")
+                and (bar.available_at is None or bar.available_at <= m30.as_of)
             ]
             if not observed:
                 reasons = ["POST_TARGET_COMPLETE_M30_EVIDENCE_MISSING"]
-            elif any(bar.high >= Decimal(frozen_target.effective_price) for bar in observed):
+            elif touched := next(
+                (bar for bar in observed if bar.high >= Decimal(frozen_target.effective_price)),
+                None,
+            ):
                 state = "TARGET_REACHED_REVIEW"
-                reasons = ["FROZEN_T1_TOUCHED_BY_LATER_COMPLETE_M30"]
-                target_fact = next(f for f in reversed(facts) if f.target1 == frozen_target)
-                if target_fact.fact_key not in evidence_keys:
-                    evidence_keys.append(target_fact.fact_key)
-            elif not _complete_post_target_coverage(m30, frozen_target.known_at):
+                reasons = ["FROZEN_T1_TOUCHED_AFTER_SETUP_BINDING"]
+                touch = {
+                    "bar_version_ref": touched.version_ref,
+                    "source_ref": touched.source_ref,
+                    "start": touched.start,
+                    "completed_at": touched.completed_at,
+                    "high": str(touched.high),
+                }
+            elif not _complete_post_target_coverage(m30, binding.effective_at):
                 reasons = ["POST_TARGET_M30_CALENDAR_OR_BUCKET_COVERAGE_UNPROVEN"]
             elif latest.status == "FOLLOW_THROUGH_FAILED":
                 state = "HOLD_WITH_WARNING"
@@ -195,6 +272,21 @@ def conditional_holder(setup: SetupRun, m30: QInput | None) -> dict[str, Any]:
                 "as_of": m30.as_of if m30 is not None else latest.effective_at,
                 "anchor_price": latest.anchor_price,
                 "target1": frozen_target.effective_price if frozen_target else None,
+                "target_binding": (
+                    {
+                        "setup_key": setup_key,
+                        "candidate_key": binding.candidate_key,
+                        "fact_key": binding.fact_key,
+                        "fact_status": binding.status,
+                        "effective_at": binding.effective_at,
+                        "structural_known_at": frozen_target.known_at,
+                        "source_keys": frozen_target.source_keys,
+                        "sources": frozen_target.sources,
+                    }
+                    if binding is not None and frozen_target is not None
+                    else None
+                ),
+                "target_touch": touch,
                 "hypothetical_position_only": True,
             }
         )

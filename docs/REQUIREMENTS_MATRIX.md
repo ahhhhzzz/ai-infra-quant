@@ -1,16 +1,18 @@
 # Requirements Traceability Matrix
 
-## TASK-006E-Q / TASK-007D — task-branch implementation, awaiting focused review
+## TASK-006E-Q / TASK-007D — Q01 remediated, awaiting focused review
 
 | Requirement | Implementation / focused verification |
 |---|---|
 | Explicit Q Snapshot+input binding to accepted Context/Event and Setup/Risk 1.0.1 | [capture/adapter](../src/ai_infra_quant/application/paqs_q_product_input.py), [analysis service](../src/ai_infra_quant/application/paqs_q_product_analysis.py), [rules](PAQS_Q_PRODUCT_COMPARE_V1.md) |
-| Conditional Holder independent of Entry and actual-position state | [holder](../src/ai_infra_quant/application/paqs_q_holder.py), [focused tests](../tests/unit/test_paqs_q_product_analysis.py) |
+| Conditional Holder independent of Entry and actual-position state; 1.0.1 target binding and post-binding touch | [holder](../src/ai_infra_quant/application/paqs_q_holder.py), [Q01 OHLC and boundary tests](../tests/unit/test_paqs_q_holder_q01.py), [remediation report](reports/TASK_006E_Q_007D_Q01_REMEDIATION.md) |
 | Append-only Q analysis, complete frozen results and history without recomputation | [0005 migration](../src/ai_infra_quant/database/migrations/versions/0005_task006e_q_analysis.py), [store](../src/ai_infra_quant/database/repositories/paqs_q_analysis.py), [tests](../tests/integration/test_paqs_q_analysis.py) |
 | Separate explicit E-from-Q call, identical-Snapshot comparison, original Narrative | [Q API](../src/ai_infra_quant/backend/api/v1/paqs_q.py), [E API](../src/ai_infra_quant/backend/api/v1/paqs_e.py), [workbench test](../tests/browser/test_paqs_q_workbench.py) |
 
-The [implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md) records actual
-Windows tests, synthetic/model mock attribution and real-data limitations. Earlier task statuses
+The [original implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md) records actual
+Windows tests, synthetic/model mock attribution and real-data limitations. The later Q01
+[remediation report](reports/TASK_006E_Q_007D_Q01_REMEDIATION.md) records the external finding
+and separately attributed local correction. Earlier task statuses
 below remain their own historical checkpoints. Neither this table nor the task branch asserts
 independent review PASS or product integration.
 
