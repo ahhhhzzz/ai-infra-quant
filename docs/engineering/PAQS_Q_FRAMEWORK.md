@@ -215,6 +215,13 @@ See [rules/usage](../PAQS_Q_EVENT_V1.md) and
 [implementation report](../reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
 This extension awaits focused review and has not been integrated into the product branch.
 
+Event 1.0.1 focused remediation supersedes the active 1.0.0 binding while retaining that fixed
+commit and its two manifest files. Strict D1/M30 qualification now checks intervening CLOSED facts
+at the first dependent completed bar; the replay output revalues prior-known Major/Range structure
+with the current completed close after event/transition processing. New 1.0.1 manifests bind both
+plugins; B0/A1 manifests and the F1 default remain unchanged. See the
+[focused remediation report](../reports/TASK_006C_Q_EVENT_V1_REMEDIATION_01.md).
+
 ## Reproducing validation
 
 Use Python 3.12 and the repository's existing pinned dependencies. Set `PYTHONPATH` to `src` and

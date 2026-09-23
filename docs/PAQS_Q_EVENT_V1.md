@@ -6,7 +6,9 @@
 
 ## 结构与身份
 
-显式 `paqs-q-event-context-reference@1.0.0` 与 `paqs-q-event-reference@1.0.0`。
+当前显式绑定为 `paqs-q-event-context-reference@1.0.1` 与
+`paqs-q-event-reference@1.0.1`。1.0.0 的固定提交与清单保留作历史证据，当前 loader
+不再注册该版本。
 复用旧 `paqs_structure.py` 的纯 ATR/Pivot/Swing/Zone/Range 算法；它们保持研究参考含义，
 初始化等待、历史起点敏感性没有被解决。B0/A1、旧 manifest 和包初始化文件不修改。
 新 loader 保持默认 B0、Event 未配置；只有显式 ID/version 才运行新插件，B0 不具备
@@ -60,6 +62,9 @@ AS_OF 默认且不降级：保留 QInput.problem、F1 价格校验、实际可�
 逐 bar 历史回放要求用于该收盘判断的价格/日历当时已知；延迟提供或缺失的历史证据
 返回 INSUFFICIENT，不把晚得数据倒填成当时确认。OBSERVATIONAL 必须显式选择，
 始终 strict_confirmation=false，按同版本前缀计算位置并保留历史时点/当前复权限制。
+1.0.1 对 D1/M30 连续性证明中实际用到的中间闭市日，也要求其日历事实最迟在后续
+第一根依赖该事实的 bar 完成时可知；否则返回 INSUFFICIENT。合法周末、假日、午休
+和 W1 的事实完成时刻按原有规则处理。OBSERVATIONAL 不获得历史可知性认证。
 非合成 AS_OF 输入还须提供 `provenance.historical_evidence` 的三个非空证据引用：
 `price_versions`、`adjustment_as_of`、`calendar_versions`。`POINT_IN_TIME_ADJUSTED`
 标签本身不充分；必须保留可核查的原始历史档案。这是声明及时间一致性校验，工具不
@@ -70,6 +75,9 @@ ATR 组件标为未就绪，不以零充当有效波动率。
 无 bar/历史证据不足为 INSUFFICIENT；非法输入为 INVALID；可计算但无事件为 AVAILABLE
 且空事件列表。ATR/Micro/Major/Zone/Range 逐组件报告准备度；缺 Zone 不抹掉价格形态。
 缺少已列入日历的预期 bar 则全次返回 INSUFFICIENT，不跳过、不填造、不推进期限。
+Event 的每根 bar 先以先前已确认的结构处理失效、突破和 Transition，再用当前完成
+收盘价重评这份先前已知的 Major/Range，输出该根结束时的 regime。当前根新确认的
+结构不参与其开始前决策；有效趋势若被当前收盘击穿，输出 UNCERTAIN，不滞后一根。
 D1/M30 可正常跨隔夜、午休、假日；M30 桶本身不可跨午休。W1 使用日历事实完成时刻，
 名义周末只是区间几何。AS_OF 要求完整日历；明确的 OBSERVATIONAL 可按提供的交易日
 清单核对，未列日期不构成完整性证明；缺少周内日历证据不得认证 W1 完成。
@@ -114,13 +122,13 @@ F1 结果，仍输出原因供查看；不会自动降级。`report.html` 内嵌
   内含日历时不再传 `--calendar`，CLI 模式须与 payload 一致；W1、D1、M30 均支持。
 
 F1 接入使用新增 `application.paqs_q_event_artifacts.load_event_registry(root)`，显式调用
-`registry.structure(data, "paqs-q-event-context-reference", "1.0.0")`，再将同一 QInput
-及该结果传给 `registry.event(data, structure, "paqs-q-event-reference", "1.0.0")`。
+`registry.structure(data, "paqs-q-event-context-reference", "1.0.1")`，再将同一 QInput
+及该结果传给 `registry.event(data, structure, "paqs-q-event-reference", "1.0.1")`。
 闭合 schema 位于新增 `core/domain/paqs_q/event_reference.py`；F1 record 顶层不扩字段。
 上下文 evidence 保留每根 bar 的准备度及前缀来源版本，事件 evidence 为追加式时间事实。
 
-新 manifest 为 `event-context-1.0.0.json`、`event-event-1.0.0.json`；覆盖项目内传递依赖和
-包初始化文件，包含原 B0/A1 manifest 的身份。`tools/validation/paqs_q_event.py --write-artifacts`
-只用于本版首次交付前固定新清单，不触碰旧清单。交付后更改清单覆盖代码须引入新版本及
-新绑定；旧代码/清单需保留在其固定提交或独立安装包中。旧绑定不可用时显式 UNAVAILABLE，
-不得以同一版本重写旧结果或重生成 B0/A1 清单掩盖差异。
+当前 manifest 为 `event-context-1.0.1.json`、`event-event-1.0.1.json`；覆盖项目内传递依赖、
+包初始化文件以及原 B0/A1 和 Event 1.0.0 manifest 的身份。1.0.1 的 series/event_key
+与 1.0.0 分离。`tools/validation/paqs_q_event.py --write-artifacts` 只创建当前版本的新清单，
+拒绝覆盖已有文件。原 Event 1.0.0 固定提交和清单保留；当前 loader 对显式旧版本
+返回 UNKNOWN_PLUGIN_VERSION，不冒充原结果，也不重生成 B0/A1 清单。

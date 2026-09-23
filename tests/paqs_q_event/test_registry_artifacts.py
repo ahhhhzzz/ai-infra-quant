@@ -43,6 +43,29 @@ def test_explicit_event_registry_accepts_calendar_qualified_timeframes(registry,
         )
 
 
+@pytest.mark.parametrize("timeframe", ["D1", "M30"])
+def test_closed_calendar_fact_late_for_historical_prefix_blocks_registry(registry, timeframe):
+    from .test_input_calendar import intraday
+
+    data = demo_input() if timeframe == "D1" else intraday()
+    closed = next(f for f in data.calendar if f.kind == "CLOSED" and f.day > data.calendar[0].day)
+    changed = replace(
+        data,
+        calendar=tuple(
+            replace(f, available_at=data.as_of, retrieved_at=data.as_of)
+            if f.day == closed.day
+            else f
+            for f in data.calendar
+        ),
+    )
+    source = registry.structure(changed, CONTEXT_ID, VERSION)
+    assert source.status == "INSUFFICIENT"
+    assert source.document()["reason_codes"] == ["HISTORICAL_CALENDAR_NOT_KNOWN_AT_COMPLETION"]
+    result = registry.event(changed, source, EVENT_ID, VERSION)
+    assert result.status == "UNAVAILABLE"
+    assert result.document()["reason_codes"] == ["UPSTREAM_STRUCTURE_UNAVAILABLE"]
+
+
 @pytest.fixture(scope="module")
 def registry():
     return load_event_registry(ROOT, include_experimental=True)
@@ -63,6 +86,10 @@ def test_explicit_plugin_binding_defaults_and_f1_identity(registry):
         registry.event(data, registry.structure(data), EVENT_ID, VERSION)
     with pytest.raises(SelectionError):
         registry.structure(data, CONTEXT_ID, "9.0.0")
+    with pytest.raises(SelectionError, match="UNKNOWN_PLUGIN_VERSION"):
+        registry.structure(data, CONTEXT_ID, "1.0.0")
+    with pytest.raises(SelectionError, match="UNKNOWN_PLUGIN_VERSION"):
+        registry.event(data, source, EVENT_ID, "1.0.0")
     with pytest.raises(SelectionError):
         registry.structure(data, "paqs-q-a1", "1.0.0")
     result = registry.event(data, source, EVENT_ID, VERSION)
@@ -199,8 +226,8 @@ def test_manifest_covers_recursive_project_imports_and_initializers():
 def test_artifact_tamper_inventory_and_active_package_check(tmp_path):
     for name in (
         *FILES,
-        "src/ai_infra_quant/resources/paqs_q/event-context-1.0.0.json",
-        "src/ai_infra_quant/resources/paqs_q/event-event-1.0.0.json",
+        f"src/ai_infra_quant/resources/paqs_q/event-context-{VERSION}.json",
+        f"src/ai_infra_quant/resources/paqs_q/event-event-{VERSION}.json",
     ):
         dest = tmp_path / name
         dest.parent.mkdir(parents=True, exist_ok=True)

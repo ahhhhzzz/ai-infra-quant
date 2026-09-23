@@ -37,7 +37,7 @@ from .event_calendar import qualify
 
 CONTEXT_ID = "paqs-q-event-context-reference"
 EVENT_ID = "paqs-q-event-reference"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 CAPABILITY = "PREFIX_EVENT_CONTEXT_V1"
 
 
@@ -129,6 +129,7 @@ def series_prefixes(data: QInput) -> tuple[str, tuple[str, ...]]:
             "mode": data.mode,
             "start": data.bars[0].start,
             "context_config": context_config().config_hash,
+            "reference_version": VERSION,
         },
     )
     zone = ZoneInfo(data.market_timezone)

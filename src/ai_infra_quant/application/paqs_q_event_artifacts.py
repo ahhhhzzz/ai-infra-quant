@@ -39,6 +39,8 @@ FILES = tuple(
                     "application/paqs_q_event_artifacts.py",
                     "resources/paqs_q/b0.json",
                     "resources/paqs_q/a1.json",
+                    "resources/paqs_q/event-context-1.0.0.json",
+                    "resources/paqs_q/event-event-1.0.0.json",
                 )
             ),
         }
@@ -65,7 +67,7 @@ def build_manifest(root: Path, name: str, *, wheel: bool = False) -> dict[str, A
 
 
 def verify(root: Path, name: str, *, wheel: bool = False) -> str:
-    path = PACKAGE + f"resources/paqs_q/event-{name}-1.0.0.json"
+    path = PACKAGE + f"resources/paqs_q/event-{name}-{VERSION}.json"
     encoded = (
         artifact_path(root, path, wheel=wheel)
         .read_bytes()

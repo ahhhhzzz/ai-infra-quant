@@ -87,6 +87,7 @@ def qualify(data: QInput) -> tuple[str, ...]:
             raise Insufficient("MISSING_EXPECTED_WEEK")
     else:
         expected = []
+        next_bar = 0
         for day in sorted(days):
             if not first <= day <= last:
                 continue
@@ -96,6 +97,17 @@ def qualify(data: QInput) -> tuple[str, ...]:
                 if str(exc) in {"CALENDAR_UNKNOWN", "CALENDAR_NOT_STRICT"}:
                     raise Insufficient(str(exc)) from exc
                 raise
+            if data.mode == "AS_OF":
+                # Every fact in this date-by-date continuity proof must have been
+                # known by the first completed bar whose prefix depends on it.
+                # This includes CLOSED days between two observed sessions.
+                while data.bars[next_bar].start.astimezone(zone).date() < day:
+                    next_bar += 1
+                if (
+                    fact.available_at is None
+                    or fact.available_at > data.bars[next_bar].completed_at
+                ):
+                    raise Insufficient("HISTORICAL_CALENDAR_NOT_KNOWN_AT_COMPLETION")
             if fact.kind != "OPEN":
                 continue
             if data.timeframe == "D1":

@@ -78,6 +78,32 @@ def test_real_ohlc_full_mirror_and_determinism():
     assert Counter(shape(e) for e in f) == Counter(shape(e, True) for e in mirrored)
 
 
+@pytest.mark.parametrize(
+    ("mirror", "crossing", "expected_prior", "expected_current"),
+    [
+        (False, "112.7", "BULL_TREND", "UNCERTAIN"),
+        (True, "187.3", "BEAR_TREND", "UNCERTAIN"),
+        (False, "112.8", "BULL_TREND", "BULL_TREND"),
+        (True, "187.2", "BEAR_TREND", "BEAR_TREND"),
+    ],
+)
+def test_current_close_invalidates_prior_known_major_trend(
+    mirror, crossing, expected_prior, expected_current
+):
+    original = demo_input(mirror=mirror)
+    values = [
+        tuple(str(getattr(b, k)) for k in ("open", "high", "low", "close"))
+        for b in original.bars[:101]
+    ]
+    prior = daily_input(values)
+    assert replay(prior)[2] == expected_prior
+    current = daily_input([*values, candle(crossing)])
+    context, facts, regime = replay(current)
+    assert context.frames[-1].base_regime == expected_current
+    assert regime == expected_current
+    assert tuple(e for e in facts if e.bar_index < 101) == replay(prior)[1]
+
+
 @pytest.mark.parametrize("count", [32, 54, 86, 89, 94, 101, 112])
 def test_future_append_preserves_context_and_facts_not_f1_ids(count):
     data = demo_input()

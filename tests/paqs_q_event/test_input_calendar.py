@@ -189,7 +189,15 @@ def test_d1_missing_session_is_not_window_expiry_but_closed_day_is_allowed():
     with pytest.raises(Insufficient, match="MISSING_EXPECTED_BAR"):
         qualify(changed)
     holiday = tuple(
-        replace(f, kind="CLOSED", segments=()) if f.day == missing.start.date() else f
+        replace(
+            f,
+            kind="CLOSED",
+            segments=(),
+            available_at=data.bars[91].completed_at,
+            retrieved_at=data.bars[91].completed_at,
+        )
+        if f.day == missing.start.date()
+        else f
         for f in data.calendar
     )
     assert qualify(replace(changed, calendar=holiday)) == ()
@@ -254,6 +262,33 @@ def test_strict_historical_evidence_and_late_availability():
                 calendar=(replace(data.calendar[0], available_at=data.as_of), *data.calendar[1:]),
             )
         )
+
+
+@pytest.mark.parametrize("factory", [demo_input, intraday], ids=["D1", "M30"])
+def test_strict_intervening_closed_fact_must_be_known_by_next_bar(factory):
+    data = factory()
+    zone = ZoneInfo(data.market_timezone)
+    first_day = data.bars[0].start.astimezone(zone).date()
+    last_day = data.bars[-1].start.astimezone(zone).date()
+    closed = next(f for f in data.calendar if first_day < f.day < last_day and f.kind == "CLOSED")
+    next_bar = next(b for b in data.bars if b.start.astimezone(zone).date() > closed.day)
+
+    def with_availability(when):
+        return replace(
+            data,
+            calendar=tuple(
+                replace(f, available_at=when, retrieved_at=when) if f.day == closed.day else f
+                for f in data.calendar
+            ),
+        )
+
+    for late in (next_bar.completed_at + timedelta(seconds=1), data.as_of):
+        with pytest.raises(Insufficient, match="HISTORICAL_CALENDAR_NOT_KNOWN_AT_COMPLETION"):
+            qualify(with_availability(late))
+    assert qualify(with_availability(next_bar.completed_at)) == ()
+    assert "OBSERVATIONAL_NOT_POINT_IN_TIME" in qualify(
+        replace(with_availability(data.as_of), mode="OBSERVATIONAL")
+    )
 
 
 def test_invalid_data_and_incomplete_evidence_distinguished():

@@ -229,7 +229,37 @@ class Replay:
             )
         a.retest_done = True
 
-    def invalidations(self, bar: Bar) -> set[str]:
+    def closing_regime(self, frame: Frame, bar: Bar) -> Regime:
+        """Revalue only structure known before this bar at its completed close."""
+        if self.atr <= 0:
+            return "UNCERTAIN"
+        active = self.ranges.get(frame.active_range or "")
+        if active and D(active.lower) <= bar.close <= D(active.upper):
+            return "RANGE"
+        high = next(
+            (
+                self.pivots[k]
+                for k in reversed(frame.major)
+                if self.pivots[k].kind == "HIGH" and self.pivots[k].label is not None
+            ),
+            None,
+        )
+        low = next(
+            (
+                self.pivots[k]
+                for k in reversed(frame.major)
+                if self.pivots[k].kind == "LOW" and self.pivots[k].label is not None
+            ),
+            None,
+        )
+        if high and low:
+            if high.label == "HH" and low.label == "HL" and bar.close >= D(low.price):
+                return "BULL_TREND"
+            if high.label == "LH" and low.label == "LL" and bar.close <= D(high.price):
+                return "BEAR_TREND"
+        return "UNCERTAIN"
+
+    def invalidations(self, bar: Bar, frame: Frame) -> set[str]:
         confirmed: set[str] = set()
         for a in list(self.anchors.values()):
             if a.invalid is not None:
@@ -264,8 +294,13 @@ class Replay:
             active = self.ranges.get(current.active_range or "")
             self.regime = (
                 "RANGE"
-                if (original and active and original.key == active.key)
-                else current.base_regime
+                if (
+                    original
+                    and active
+                    and original.key == active.key
+                    and D(original.lower) <= bar.close <= D(original.upper)
+                )
+                else self.closing_regime(frame, bar)
             )
             self.emit(
                 "TRANSITION",
@@ -663,11 +698,17 @@ class Replay:
                 frame = self.context.frames[i - 1]
                 if self.transition is None:
                     self.regime = frame.base_regime
-                confirmations = self.invalidations(bar)
+                started_in_transition = self.transition is not None
+                confirmations = self.invalidations(bar, frame)
                 confirmations |= self.breaks(bar, frame)
                 raw = self.patterns(bar, frame)
                 candidates = self.candidates(bar, raw, confirmations)
                 self.retests(bar, raw, candidates)
                 self.followthrough(bar)
                 self.transitions(bar, frame)
+                if self.transition is None and not started_in_transition:
+                    # Break/transition decisions above use the prior completed
+                    # structure. Only the closing output revalues that same
+                    # structure with this bar's now-known price.
+                    self.regime = self.closing_regime(frame, bar)
         return tuple(self.facts), self.regime
