@@ -8,7 +8,8 @@ from zoneinfo import ZoneInfo
 
 from ai_infra_quant.application.paqs_q_holder import conditional_holder
 from ai_infra_quant.application.paqs_q_setup_artifacts import run as run_setup
-from ai_infra_quant.core.domain.paqs_q.setup_reference import MultiInput, SetupRun
+from ai_infra_quant.core.domain.paqs_q.canonical import digest
+from ai_infra_quant.core.domain.paqs_q.setup_reference import MultiInput, SetupFact, SetupRun
 from tools.research.setup_risk.demo import demo_bundle
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -188,3 +189,70 @@ def test_repeat_and_other_candidate_cannot_reset_or_replace_bound_target() -> No
     assert unknown["status"] == "UNDETERMINED"
     assert unknown["target_binding"] is None
     assert "MULTIPLE_CANDIDATE_TARGETS_AMBIGUOUS" in unknown["reasons"]
+
+
+def _two_qualified_candidates() -> tuple[MultiInput, SetupRun, tuple[SetupFact, ...]]:
+    source = demo_bundle()
+    result = run_setup(source, ROOT)
+    assert result.status == "AVAILABLE" and source.m30 is not None
+    first = next(f for f in result.facts if f.status == "ENTRY_PENDING_REVALIDATION")
+    assert first.candidate_key is not None
+    second = next(
+        f
+        for f in result.facts
+        if f.status == "ENTRY_PENDING_REVALIDATION"
+        and f.setup_key == first.setup_key
+        and f.candidate_key != first.candidate_key
+    )
+    stages = []
+    for stage_a in (first, second):
+        stage_b = next(
+            f
+            for f in result.facts
+            if f.setup_key == stage_a.setup_key
+            and f.candidate_key == stage_a.candidate_key
+            and f.status == "LONG_READY"
+        )
+        stages.extend((stage_a, stage_b))
+    assert all(f.target1 is not None and f.target1.effective_price == "115.2" for f in stages)
+    return source, result, tuple(stages)
+
+
+def test_other_candidate_qualified_stage_b_target_conflict_is_undetermined() -> None:
+    source, result, stages = _two_qualified_candidates()
+    second_b = stages[3]
+    assert second_b.target1 is not None
+    assert second_b.reference_price is not None and second_b.risk_reference_price is not None
+    changed = second_b.model_dump()
+    changed["target1"] = second_b.target1.model_copy(
+        update={"effective_price": "115.1", "lower": "115.1", "upper": "115.1"}
+    ).model_dump()
+    entry = Decimal(second_b.reference_price)
+    stop = Decimal(second_b.risk_reference_price)
+    changed["rr_t1"] = str((Decimal("115.1") - entry) / (entry - stop))
+    assert Decimal(changed["rr_t1"]) > 2
+    changed["fact_key"] = digest(
+        "paqs-q/setup-fact/v1.0.1", {k: v for k, v in changed.items() if k != "fact_key"}
+    )
+    revised_b = SetupFact.model_validate(changed)
+    assert revised_b.fact_key == digest(
+        "paqs-q/setup-fact/v1.0.1", revised_b.model_dump(exclude={"fact_key"})
+    )
+    isolated = result.model_copy(update={"facts": (*stages[:3], revised_b)})
+    holder = conditional_holder(isolated, source.m30)
+    assert holder["holder_version"] == "1.0.2"
+    item = holder["items"][0]
+    assert item["status"] == "UNDETERMINED"
+    assert item["target_binding"] is None
+    assert item["target1"] is None
+    assert "MULTIPLE_CANDIDATE_TARGETS_AMBIGUOUS" in item["reasons"]
+
+
+def test_other_candidate_qualified_stage_b_same_target_is_not_a_conflict() -> None:
+    source, result, stages = _two_qualified_candidates()
+    isolated = result.model_copy(update={"facts": stages})
+    item = conditional_holder(isolated, source.m30)["items"][0]
+    assert item["status"] == "THESIS_VALID"
+    assert item["target1"] == "115.2"
+    assert item["target_binding"]["candidate_key"] == stages[0].candidate_key
+    assert item["target_binding"]["fact_key"] == stages[0].fact_key

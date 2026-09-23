@@ -5,11 +5,13 @@
 The owner authorized one delivery batch for an explicit PAQS-Q product action, conditional Holder,
 immutable Q history and minimal same-Snapshot Q/E display. External focused review of
 `06748540d67f2c120f8dfecc46a342db9f1c6aaf` found Q01 (target touch before Holder target
-binding); the isolated task branch now carries a Holder 1.0.1 correction and remains
-**REMEDIATED / AWAITING Q01 FOCUSED REVIEW / NOT INTEGRATED**. See the
+binding). External re-review of `0a3f132541296249094a04b88b609fd2130f9bee` found the
+remaining multi-candidate Stage B boundary. The isolated task branch now carries a Holder 1.0.2
+local correction and remains **LOCALLY REMEDIATED / AWAITING Q01 FOCUSED REVIEW / NOT INTEGRATED**. See the
 [scope and Holder rules](PAQS_Q_PRODUCT_COMPARE_V1.md) and the
 [original implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md) and
-[Q01 remediation report](reports/TASK_006E_Q_007D_Q01_REMEDIATION.md).
+[first Q01 remediation report](reports/TASK_006E_Q_007D_Q01_REMEDIATION.md) and
+[incremental Q01 report](reports/TASK_006E_Q_007D_Q01_REMEDIATION_02.md).
 Existing Context/Event 1.0.1 and Setup/Risk 1.0.1 identities remain unchanged. The product's
 current calendar/availability/adjustment capture is observational and cannot certify real
 `LONG_READY`; the earlier AVGO `INSUFFICIENT` result is unchanged. Q/E stays two separate outputs

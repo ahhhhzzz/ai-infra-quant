@@ -17,7 +17,7 @@ from ai_infra_quant.core.domain.paqs_q.inputs import QInput
 from ai_infra_quant.core.domain.paqs_q.setup_reference import SetupFact, SetupRun
 
 HOLDER_ID = "paqs-q-conditional-holder"
-HOLDER_VERSION = "1.0.1"
+HOLDER_VERSION = "1.0.2"
 
 
 def holder_code_hash() -> str:
@@ -29,7 +29,7 @@ def _newest(facts: list[SetupFact]) -> SetupFact:
 
 
 def _target_binding(facts: list[SetupFact]) -> tuple[SetupFact | None, str | None]:
-    """Keep the first frozen candidate; only its qualified Stage B may revise T1.
+    """Resolve each candidate's frozen target before comparing candidate theses.
 
     A geometry on NO_TRADE is not a Holder target. A later candidate cannot
     silently replace the hypothetical target of the first traceable candidate.
@@ -47,39 +47,46 @@ def _target_binding(facts: list[SetupFact]) -> tuple[SetupFact | None, str | Non
     ]
     if not stages_a:
         return None, "FROZEN_TARGET_BINDING_UNAVAILABLE"
-    first = stages_a[0]
-    assert first.target1 is not None and first.candidate_key is not None
-    if first.target1.known_at > first.effective_at:
-        return None, "TARGET_STRUCTURE_NOT_KNOWN_AT_BINDING"
-    if any(
-        fact.candidate_key == first.candidate_key and fact.target1 != first.target1
-        for fact in stages_a[1:]
-    ):
-        return None, "CONFLICTING_STAGE_A_TARGET_FOR_CANDIDATE"
-    qualified = [
-        fact
-        for fact in ordered
-        if fact.candidate_key == first.candidate_key
-        and fact.status in {"LONG_READY", "OBSERVATIONAL_LONG_QUALIFIED"}
-        and fact.target1 is not None
-        and fact.effective_at >= first.effective_at
-    ]
-    selected = first
-    if qualified:
-        final = qualified[0]
-        assert final.target1 is not None
-        if final.target1.known_at > final.effective_at or any(
-            fact.target1 != final.target1 for fact in qualified[1:]
-        ):
-            return None, "CONFLICTING_OR_FUTURE_STAGE_B_TARGET"
-        if final.target1 != first.target1:
-            selected = final
-    if any(
-        fact.candidate_key != first.candidate_key and fact.target1 != selected.target1
-        for fact in stages_a[1:]
-    ):
+    by_candidate: dict[str, list[SetupFact]] = defaultdict(list)
+    for fact in stages_a:
+        assert fact.candidate_key is not None
+        by_candidate[fact.candidate_key].append(fact)
+
+    bindings: list[SetupFact] = []
+    for candidate_key, candidate_stages_a in by_candidate.items():
+        first = candidate_stages_a[0]
+        assert first.target1 is not None
+        if first.target1.known_at > first.effective_at:
+            return None, "TARGET_STRUCTURE_NOT_KNOWN_AT_BINDING"
+        if any(fact.target1 != first.target1 for fact in candidate_stages_a[1:]):
+            return None, "CONFLICTING_STAGE_A_TARGET_FOR_CANDIDATE"
+        qualified = [
+            fact
+            for fact in ordered
+            if fact.candidate_key == candidate_key
+            and fact.status in {"LONG_READY", "OBSERVATIONAL_LONG_QUALIFIED"}
+            and fact.target1 is not None
+            and fact.effective_at >= first.effective_at
+        ]
+        selected = first
+        if qualified:
+            final = qualified[0]
+            assert final.target1 is not None
+            if any(
+                fact.target1 is None
+                or fact.target1.known_at > fact.effective_at
+                or fact.target1 != final.target1
+                for fact in qualified
+            ):
+                return None, "CONFLICTING_OR_FUTURE_STAGE_B_TARGET"
+            if final.target1 != first.target1:
+                selected = final
+        bindings.append(selected)
+
+    first_binding = bindings[0]
+    if any(fact.target1 != first_binding.target1 for fact in bindings[1:]):
         return None, "MULTIPLE_CANDIDATE_TARGETS_AMBIGUOUS"
-    return selected, None
+    return first_binding, None
 
 
 def _complete_post_target_coverage(m30: QInput, binding_at: datetime) -> bool:
