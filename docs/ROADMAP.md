@@ -2,18 +2,22 @@
 
 ## TASK-006D-Q Setup/Risk reference v1 — 2026-09-23
 
-The task branch now carries a Setup/Risk **1.0.1 S01/S02 focused remediation**. Windows
-Python 3.12 local validation passed; the exact scope is tracked in the
-[remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md). It awaits independent
-focused review and is **not integrated**. The 1.0.0 implementation and AVGO diagnosis below
-remain historical.
+Setup/Risk **1.0.1 FOCUSED REVIEW PASS / CLOSED** after the user-provided independent
+Linux review closed S01/S02. It becomes **INTEGRATED** only with the successful product
+fast-forward recorded by the [closeout decision](decisions/TASK_006D_Q_SETUP_RISK_V1_CLOSEOUT_2026_09_23.md).
+Windows local validation remains attributed to the
+[remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md).
+The 1.0.0 implementation and AVGO diagnosis below remain historical; AVGO was not rerun,
+its `INSUFFICIENT` result is unchanged, and no real Entry qualification is claimed.
 
-The owner has authorized formal PAQS-Q Setup/Risk work, superseding the earlier deferral for
-this bounded layer. The isolated task branch adds three long Setup families, frozen structural
-risk and T1/T2 geometry, setup-bound M30 trigger/follow-through, and two-stage Entry Advisory
-with an independent next-open reference. It binds explicit W1/D1/M30 Event 1.0.1 outputs to
-Setup/Risk 1.0.0 without changing F1/Event code or defaults. Status: **IMPLEMENTED / LOCAL
-VALIDATION PASS / AWAITING FOCUSED REVIEW / NOT INTEGRATED**. See [rules and CLI](PAQS_Q_SETUP_RISK_V1.md)
+At the original 1.0.0 task delivery, the owner authorized formal PAQS-Q Setup/Risk work,
+superseding the earlier deferral for this bounded layer. The isolated task branch added three
+long Setup families, frozen structural risk and T1/T2 geometry, setup-bound M30
+trigger/follow-through, and two-stage Entry Advisory
+with an independent next-open reference. It bound explicit W1/D1/M30 Event 1.0.1 outputs to
+Setup/Risk 1.0.0 without changing F1/Event code or defaults. The original status was
+**IMPLEMENTED / LOCAL VALIDATION PASS / AWAITING FOCUSED REVIEW / NOT INTEGRATED**.
+See [rules and CLI](PAQS_Q_SETUP_RISK_V1.md)
 and [implementation report](reports/TASK_006D_Q_SETUP_RISK_V1_IMPLEMENTATION_REPORT.md).
 The AVGO archive cannot certify this three-period path because its W1 calendar lacks required
 closed-day facts; no real LONG_READY is claimed. Q/E comparison, product UI, holder advice,
@@ -31,7 +35,7 @@ events through F1; an offline CLI provides exact JSON and an event/K-line viewer
 [Rules and usage](PAQS_Q_EVENT_V1.md) / [implementation and validation](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
 [E01/E02 focused remediation](reports/TASK_006C_Q_EVENT_V1_REMEDIATION_01.md) records the
 current 1.0.1 binding; the original 1.0.0 report remains historical.
-The reviewed Event code is on the product branch; formal Setup/Risk, Q/E comparison and product UI remain
+At that Event-only closeout, formal Setup/Risk, Q/E comparison and product UI remained
 unimplemented/deferred. Existing single-pattern/risk tools, F1 identities, research limitations and
 the accepted Linux layout exception are unchanged. No new returns study or market-validity claim.
 
@@ -557,8 +561,8 @@ The previously planned future single-engine `TASK-006C`, `TASK-006D`, and `TASK-
 ```text
 TASK-006B-Q — REVIEWED / CLOSED AS REFERENCE RESEARCH
 TASK-006C-Q-F1 — Versioned Quant/Event Framework Foundation [focused review PASS; user-accepted limitation; closed and integrated]
-TASK-006C-Q — Later formal Event plugins [separate contracts; not completed]
-TASK-006D-Q — PAQS-Q Setup, Risk & Setup-Specific Quant Confirmation
+TASK-006C-Q — Event 1.0.1 reference [focused review PASS; closed and integrated]
+TASK-006D-Q — Setup/Risk 1.0.1 reference [focused review PASS; closed; integration by closeout fast-forward]
 TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation
 ```
 
@@ -574,8 +578,9 @@ The F1 contract adopts only the versioned foundation and B0/A1 reference semanti
   → 006B1 bounded archive/replay [reviewed, user-accepted, closed and integrated]
   → 006B-Q research [independently reviewed and closed; no R06]
   → 006C-Q-F1 [focused review PASS / user-accepted limitation / closed and integrated]
-  → single-pattern offline research loop [focused review PASS / closed / integrated]
-  → formal Event engine [deferred; not started]
+  → single-pattern offline research loop and fixed-risk comparison [focused review PASS / closed / integrated]
+  → Event 1.0.1 reference [focused review PASS / closed / integrated]
+  → Setup/Risk 1.0.1 reference [focused review PASS / closed; integration by closeout fast-forward]
 ```
 
 F1 is bounded by its frozen contract; further PAQS-Q plugins remain separately governed and 007D remains deferred.

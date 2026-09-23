@@ -2,15 +2,19 @@
 
 ## Setup/Risk reference implementation — 2026-09-23
 
-Current task-branch Setup/Risk **1.0.1** corrects the exact Failure parent relation and late
-EntryReference replay/fact identity. Parameters and the original 1.0.0 research limitations
-below are unchanged. [S01/S02 remediation](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md)
-records validation attribution; independent focused review and product integration are pending.
+Setup/Risk **1.0.1 FOCUSED REVIEW PASS / CLOSED** corrects the exact Failure parent relation and
+late EntryReference replay/fact identity. It becomes **INTEGRATED** only after the product
+fast-forward in the [closeout decision](decisions/TASK_006D_Q_SETUP_RISK_V1_CLOSEOUT_2026_09_23.md).
+Parameters and the original 1.0.0 research limitations below are unchanged.
+[S01/S02 remediation](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md) records local validation;
+the external Linux review is user-provided. AVGO remains `INSUFFICIENT`, with no real Entry
+qualification.
 
 The owner authorized the bounded [Setup/Risk 1.0.0 rules](PAQS_Q_SETUP_RISK_V1.md) after
-Event 1.0.1 integration. The isolated task branch implements three long Setup families,
+Event 1.0.1 integration. At the original delivery, the isolated task branch implemented
+three long Setup families,
 frozen thesis anchors, nearest structural T1/T2 and an independent next-open Entry Advisory;
-it has **local validation PASS; awaiting focused review, not integrated**. See the
+its original status was **local validation PASS; awaiting focused review, not integrated**. See the
 [implementation report](reports/TASK_006D_Q_SETUP_RISK_V1_IMPLEMENTATION_REPORT.md).
 LONG_READY is a rule qualification only, never a fill or market-validity finding. The AVGO
 archive has insufficient W1 calendar evidence, and OBSERVATIONAL never claims strict PIT.
@@ -26,7 +30,8 @@ is **1.0.1 FOCUSED REVIEW PASS / CLOSED / INTEGRATED** after the product fast-fo
 [E01/E02 remediation](reports/TASK_006C_Q_EVENT_V1_REMEDIATION_01.md).
 This is a versioned F1 price-event implementation, not profitability validation or complete PAQS-Q.
 Trigger is a price candidate; event_guard is an event invalidation condition, not a trading stop.
-Formal Setup/Risk, LONG_READY, Q/E comparison and product UI remain incomplete. B0/A1 and prior
+At that Event-only stage, formal Setup/Risk, LONG_READY, Q/E comparison and product UI remained
+incomplete. B0/A1 and prior
 research meanings, parameters, outputs and identities are preserved.
 
 ## Single-pattern research task — 2026-09-21

@@ -1,19 +1,22 @@
 # Current Architecture
 
-The task branch adds a distinct Setup/Risk **1.0.1** code/manifest binding for S01/S02 causal
-corrections. The 1.0.0 implementation snapshot below remains historical; F1, B0/A1 and Event
-identities remain unchanged. See the
-[remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md). The 1.0.1 work is
-awaiting independent focused review and has not entered the product branch.
+The distinct Setup/Risk **1.0.1** code/manifest binding for S01/S02 is **FOCUSED REVIEW PASS /
+CLOSED**; it becomes **INTEGRATED** only after the product fast-forward in the
+[closeout decision](decisions/TASK_006D_Q_SETUP_RISK_V1_CLOSEOUT_2026_09_23.md).
+The 1.0.0 implementation snapshot below remains historical; F1, B0/A1 and Event identities
+are unchanged. The user-provided Linux review is separate from the local Windows validation
+in the [remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md).
 
-TASK-006D-Q adds independent `core/domain/paqs_q/setup_reference.py`, pure
+At the original 1.0.0 delivery, TASK-006D-Q added independent
+`core/domain/paqs_q/setup_reference.py`, pure
 `core/strategy/paqs_q/setup_rules.py`/`setup_targets.py`, and an explicit application loader
 with a Setup/Risk 1.0.0 dependency manifest. It consumes three separately verified Event 1.0.1
 input/result bindings; the F1 Structure/Event schemas and defaults are unchanged. The local
 `tools/research/setup_risk` CLI writes exact JSON and offline HTML, with no product route,
 database, account or execution connector. See [rules](PAQS_Q_SETUP_RISK_V1.md) and
 [validation](reports/TASK_006D_Q_SETUP_RISK_V1_IMPLEMENTATION_REPORT.md).
-Status: **task branch, local validation PASS, awaiting focused review, not integrated**. The earlier Event-only
+Original status: **task branch, local validation PASS, awaiting focused review, not integrated**.
+The earlier Event-only
 architecture paragraph below describes the completed predecessor, not this additive layer.
 
 2026-09-23 Event task: additive `core/domain/paqs_q/event_reference.py` and
@@ -27,8 +30,8 @@ One exact new-loader entry is added to the existing isolation allowlist; other a
 Status: **1.0.1 FOCUSED REVIEW PASS / CLOSED / INTEGRATED** after the product fast-forward;
 [closeout decision](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md). The code is integrated
 in the product branch; no Event API/UI or trading integration is added.
-No API, database, PAQS-E, old engine, package initializer or dependency changes; formal Setup/Risk
-and product UI remain deferred. This supersedes the earlier Event deferral in the historical entries.
+No API, database, PAQS-E, old engine, package initializer or dependency changes; at that Event-only
+stage, formal Setup/Risk and product UI remained deferred. This superseded the earlier Event deferral.
 
 Isolated research: `tools/research/single_pattern` reads explicit local D1/calendar
 files, reuses the unchanged F1 raw price kernel and old pure ATR function, then writes simulated
@@ -303,8 +306,9 @@ No conversion rewrites old records or fabricates structured fields from prose.
 | Retained non-default | Legacy structured runtime/validator/ledger; original deterministic 006B with `STRUCTURE_CONCERNS_FOUND`; Phase 1 opening accounting/descriptors and compatibility reads |
 | Reviewed, user-accepted and integrated | 006B1 explicit local market archive/replay and additive 0004; separate from Analyze |
 | Focused review PASS, user-accepted limitation, closed and integrated | 006C-Q-F1 versioned Structure/Event protocols, immutable evidence and hashes; default B0, gated experimental A1; F1 alone delivered no production Event plugin |
-| Focused review PASS, closed and integrated | 006C-Q Event 1.0.1 reference Context/six price-event families; no Setup/Risk or API/UI integration; [closeout](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md) |
-| Deferred | Strict historical As-Of/GoldSet; formal Q Setup/Risk and later Q successors; 007D comparison; Paper Broker/PaperFill/NAV/performance and Phase 3/4 extensions |
+| Focused review PASS, closed and integrated | 006C-Q Event 1.0.1 reference Context/six price-event families; no API/UI integration; [closeout](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md) |
+| Focused review PASS, closed; integrated upon product fast-forward | 006D-Q Setup/Risk 1.0.1 reference; no product API/UI, fill or market-validity claim; [closeout](decisions/TASK_006D_Q_SETUP_RISK_V1_CLOSEOUT_2026_09_23.md) |
+| Deferred | Strict historical As-Of/GoldSet; Q Holder advice and later Q successors; 007D comparison; Paper Broker/PaperFill/NAV/performance and Phase 3/4 extensions |
 | Permanently excluded | Real-account observation/import/positions, broker writes/orders, autonomous execution |
 
 ADC is reviewed/integrated; 006B1 uses the verified updated post-ADC handoff.

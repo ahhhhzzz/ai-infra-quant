@@ -1,13 +1,16 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
-TASK-006D-Q's current task-branch implementation is Setup/Risk **1.0.1**, correcting S01/S02
-without changing strategy parameters or Event/F1 identities. See the
-[focused remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md) for local
-verification; independent focused review and product integration remain outstanding. The
-original 1.0.0 implementation statement below is historical.
+TASK-006D-Q Setup/Risk **1.0.1 FOCUSED REVIEW PASS / CLOSED** closes S01/S02 without changing
+strategy parameters or Event/F1 identities. Status becomes **INTEGRATED** only after the
+product fast-forward in the [closeout decision](decisions/TASK_006D_Q_SETUP_RISK_V1_CLOSEOUT_2026_09_23.md).
+The user-provided Linux review is distinct from local Windows verification in the
+[focused remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md).
+The original 1.0.0 implementation statement below is historical; AVGO remains
+`INSUFFICIENT` and no real Entry qualification is established.
 
-Current bounded override: TASK-006D-Q adds an isolated PAQS-Q Setup/Risk 1.0.0 reference on
-`task/006d-q-setup-risk-v1`, **local validation PASS; awaiting focused review and not integrated**. Three long Setup
+At its original bounded delivery, TASK-006D-Q added an isolated PAQS-Q Setup/Risk 1.0.0
+reference on `task/006d-q-setup-risk-v1`, with original status **local validation PASS;
+awaiting focused review and not integrated**. Three long Setup
 families and two-stage Entry Advisory consume explicit W1/D1/M30 Event 1.0.1 results; see
 [rules](PAQS_Q_SETUP_RISK_V1.md) and [implementation report](reports/TASK_006D_Q_SETUP_RISK_V1_IMPLEMENTATION_REPORT.md).
 No product UI/API, Q/E comparison, account, order, fill, holder advice, or profitability claim
@@ -18,8 +21,9 @@ TASK-006C-Q Event 1.0.1 reference context and six price-event families are
 [closeout decision](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md). See
 [rules/usage](PAQS_Q_EVENT_V1.md), the historical
 [implementation report](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md) and
-[E01/E02 remediation](reports/TASK_006C_Q_EVENT_V1_REMEDIATION_01.md). Formal Setup/Risk,
-Q/E comparison, product UI and trading qualification remain incomplete. Earlier research
+[E01/E02 remediation](reports/TASK_006C_Q_EVENT_V1_REMEDIATION_01.md). At that Event-only
+closeout, formal Setup/Risk, Q/E comparison, product UI and trading qualification remained
+incomplete. Earlier research
 closeouts and F1 remain unchanged.
 
 Current owner-authorized exception to the earlier implementation sequence: an isolated D1,
@@ -310,7 +314,8 @@ Phase 4 is the final possible phase; no execution phase exists.
 Current sequence: accepted C2 → ADC-001 reviewed/integrated → 006B1 reviewed, user-accepted,
 closed and integrated → 006B-Q reference research closed → 006C-Q-F1 focused review PASS,
 user-accepted limitation, closed and integrated → single-pattern research and fixed-risk sizing
-closed/integrated → Event 1.0.1 focused review PASS, closed/integrated → formal Setup/Risk next.
+closed/integrated → Event 1.0.1 focused review PASS, closed/integrated → Setup/Risk 1.0.1
+focused review PASS, closed; integration by its closeout fast-forward.
 The original 006B1 scope remains unchanged; the old starting prompt is not reusable.
 See [ROADMAP](ROADMAP.md).
 

@@ -1,13 +1,15 @@
 # Requirements Traceability Matrix
 
-TASK-006D-Q Setup/Risk **1.0.1** addresses S01 exact Breakdown parent lineage and S02
-availability-clock/fact-key stability on the task branch. The
-[focused remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md) separates
-external 1.0.0 findings from passing local Windows correction/compatibility/browser tests.
-Independent focused review remains outstanding. Product integration is not claimed. The 1.0.0 matrix below is
-historical.
+TASK-006D-Q Setup/Risk **1.0.1 FOCUSED REVIEW PASS / CLOSED** addresses S01 exact Breakdown
+parent lineage and S02 availability-clock/fact-key stability. It becomes **INTEGRATED** only
+after the product fast-forward in the
+[closeout decision](decisions/TASK_006D_Q_SETUP_RISK_V1_CLOSEOUT_2026_09_23.md).
+The [focused remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md)
+retains local Windows correction/compatibility/browser results; the 39-pass Linux review is
+user-provided external evidence. The 1.0.0 matrix below is historical. AVGO remains
+`INSUFFICIENT` and no real Entry qualification is claimed.
 
-## TASK-006D-Q Setup/Risk 1.0.0 — local validation PASS, awaiting focused review
+## TASK-006D-Q Setup/Risk 1.0.0 — historical local validation PASS, then awaiting focused review
 
 | Requirement | Implementation / evidence |
 |---|---|
@@ -22,8 +24,8 @@ comparison, product integration or strict PIT certification for the retrospectiv
 ## Event reference v1.0.1 — focused review PASS / closed / integrated
 
 The [closeout decision](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md) attributes the
-external E01/E02 review and becomes integrated upon the product fast-forward. Setup/Risk and UI
-remain separate future work.
+external E01/E02 review and became integrated upon that product fast-forward. At the Event-only
+closeout, Setup/Risk and UI remained separate future work.
 
 | Requirement | Implementation / verification |
 |---|---|
