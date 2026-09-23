@@ -11,7 +11,7 @@ from .canonical import FrozenJSON, digest, utc
 from .event_reference import Hash, Price
 from .inputs import QInput
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 SETUP_ID = "paqs-q-setup-risk-reference"
 
 
@@ -182,7 +182,7 @@ class SetupFact(Closed):
 class SetupRun(Closed):
     schema_version: Literal["paqs-q-setup-run-v1"] = "paqs-q-setup-run-v1"
     strategy_id: Literal["paqs-q-setup-risk-reference"] = "paqs-q-setup-risk-reference"
-    strategy_version: Literal["1.0.0"] = "1.0.0"
+    strategy_version: Literal["1.0.1"] = "1.0.1"
     code_hash: Hash
     config_hash: Hash
     entry_reference_hash: Hash

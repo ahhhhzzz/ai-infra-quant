@@ -1,5 +1,12 @@
 # Requirements Traceability Matrix
 
+TASK-006D-Q Setup/Risk **1.0.1** addresses S01 exact Breakdown parent lineage and S02
+availability-clock/fact-key stability on the task branch. The
+[focused remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md) separates
+external 1.0.0 findings from passing local Windows correction/compatibility/browser tests.
+Independent focused review remains outstanding. Product integration is not claimed. The 1.0.0 matrix below is
+historical.
+
 ## TASK-006D-Q Setup/Risk 1.0.0 — local validation PASS, awaiting focused review
 
 | Requirement | Implementation / evidence |

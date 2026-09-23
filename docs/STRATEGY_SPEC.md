@@ -2,6 +2,11 @@
 
 ## Setup/Risk reference implementation — 2026-09-23
 
+Current task-branch Setup/Risk **1.0.1** corrects the exact Failure parent relation and late
+EntryReference replay/fact identity. Parameters and the original 1.0.0 research limitations
+below are unchanged. [S01/S02 remediation](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md)
+records validation attribution; independent focused review and product integration are pending.
+
 The owner authorized the bounded [Setup/Risk 1.0.0 rules](PAQS_Q_SETUP_RISK_V1.md) after
 Event 1.0.1 integration. The isolated task branch implements three long Setup families,
 frozen thesis anchors, nearest structural T1/T2 and an independent next-open Entry Advisory;

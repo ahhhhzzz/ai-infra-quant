@@ -108,6 +108,7 @@ class Replay:
         self.by_d1: dict[int, list[EventEvidence]] = defaultdict(list)
         self.by_m30: dict[int, list[EventEvidence]] = defaultdict(list)
         self.d1_events = {e.event_key: e for e in self.d1.events if e.kind == "BREAKOUT"}
+        self.d1_breakdowns = {e.event_key: e for e in self.d1.events if e.kind == "BREAKDOWN"}
         self.d1_candidates = {
             e.event_key: e for e in self.d1.events if e.kind == "PRICE_TRIGGER_CANDIDATE"
         }
@@ -116,6 +117,7 @@ class Replay:
         for event in self.m30.events:
             self.by_m30[event.bar_index].append(event)
         self.refs = {r.price_at: r for r in bundle.entry_references}
+        self.missed_opens: dict[datetime, list[tuple[State, PendingEntry, int]]] = defaultdict(list)
         self.zone = ZoneInfo(self.m30.data.market_timezone)
 
     def regime(self, period: Period, when: datetime) -> Regime | None:
@@ -170,10 +172,7 @@ class Replay:
         related: tuple[str, ...] = (),
     ) -> None:
         fact = SetupFact(
-            fact_key=digest(
-                "paqs-q/setup-fact/v1",
-                (state.key, candidate_key, status, when, m30_index, len(self.facts)),
-            ),
+            fact_key="0" * 64,
             setup_key=state.key,
             candidate_key=candidate_key,
             family=cast("LiteralFamily", state.family),
@@ -223,7 +222,10 @@ class Replay:
             reasons=reasons,
             related_keys=related,
         )
-        self.facts.append(fact)
+        # A fact is identified by its immutable meaning, not its position among
+        # unrelated facts that may arrive later from another evidence stream.
+        key = digest("paqs-q/setup-fact/v1.0.1", fact.model_dump(exclude={"fact_key"}))
+        self.facts.append(fact.model_copy(update={"fact_key": key}))
 
     def _create(
         self,
@@ -340,12 +342,21 @@ class Replay:
                     item.version_key == source.range_version and item.calculation_index < i
                     for item in self.d1.context.ranges
                 )
-                original_breakdown = any(
-                    prior.kind == "BREAKDOWN"
-                    and prior.source == source
-                    and prior.anchor_key == event.anchor_key
-                    and prior.bar_index < i
-                    for prior in self.d1.events
+                # BREAKOUT_FAILURE has a new reclaim anchor. Event 1.0.1 links
+                # the confirmed parent BREAKDOWN by its exact event key instead.
+                parent = (
+                    self.d1_breakdowns.get(event.related_keys[0])
+                    if event.kind == "BREAKOUT_FAILURE" and len(event.related_keys) == 1
+                    else None
+                )
+                original_breakdown = (
+                    parent is not None
+                    and parent.kind == "BREAKDOWN"
+                    and parent.status == "CONFIRMED"
+                    and parent.direction == "DOWN"
+                    and parent.source == source
+                    and parent.bar_index < i
+                    and self.d1.data.bars[parent.bar_index].completed_at < bar.completed_at
                 )
                 if (
                     w1_regime == "RANGE"
@@ -557,8 +568,17 @@ class Replay:
                 self._terminate(state, "EXPIRED", at, "NEXT_M30_BAR_MISSING")
                 continue
             ref = self.refs.get(at)
-            if ref is None:
+            if ref is None or ref.available_at > at:
                 self.reasons.add("ENTRY_REFERENCE_UNAVAILABLE_AT_OPEN")
+                self._emit(
+                    state,
+                    "NO_TRADE",
+                    at,
+                    ("ENTRY_REFERENCE_UNAVAILABLE_AT_OPEN",),
+                    m30_index=j,
+                    candidate_key=pending.key,
+                )
+                self.missed_opens[at].append((state, pending, j))
                 state.pending_entry = None
                 continue
             if (
@@ -571,19 +591,6 @@ class Replay:
                     "NO_TRADE",
                     ref.available_at,
                     ("ENTRY_REFERENCE_PRICE_BASIS_CONFLICT",),
-                    m30_index=j,
-                    candidate_key=pending.key,
-                    price=ref.price,
-                    entry_ref=ref,
-                )
-                state.pending_entry = None
-                continue
-            if ref.available_at > ref.price_at:
-                self._emit(
-                    state,
-                    "NO_TRADE",
-                    ref.available_at,
-                    ("LATE_OPEN_REFERENCE_NOT_OPEN_TIME_QUALIFICATION",),
                     m30_index=j,
                     candidate_key=pending.key,
                     price=ref.price,
@@ -661,6 +668,21 @@ class Replay:
                 entry_ref=ref,
             )
             state.pending_entry = None
+
+    def _on_reference_available(self, ref: EntryReference) -> None:
+        # The opening decision is already closed. Receipt can explain a missed
+        # opening, but it cannot backdate qualification or move to a later open.
+        for state, pending, index in self.missed_opens.pop(ref.price_at, ()):
+            self._emit(
+                state,
+                "NO_TRADE",
+                ref.available_at,
+                ("LATE_OPEN_REFERENCE_NOT_OPEN_TIME_QUALIFICATION",),
+                m30_index=index,
+                candidate_key=pending.key,
+                price=ref.price,
+                entry_ref=ref,
+            )
 
     def _stage_a(self, state: State, j: int, trigger: Trigger) -> None:
         bar = self.m30.data.bars[j]
@@ -803,6 +825,8 @@ class Replay:
 
     def run(self) -> tuple[tuple[SetupFact, ...], tuple[str, ...]]:
         events: list[tuple[datetime, int, str, int]] = []
+        # Equal-time order: D1 close, M30 close, M30 open, then receipt of an
+        # independently observed but late opening reference.
         for i, bar in enumerate(self.d1.data.bars):
             events.append((bar.completed_at, 0, "D1_CLOSE", i))
         for j, bar in enumerate(self.m30.data.bars):
@@ -815,6 +839,9 @@ class Replay:
             next_open = next_regular_open(self.m30.data, last.completed_at)
             if next_open is not None and next_open <= self.m30.data.as_of:
                 events.append((next_open, 2, "M30_OPEN_ONLY", len(self.m30.data.bars)))
+        for index, ref in enumerate(self.bundle.entry_references):
+            if ref.available_at > ref.price_at:
+                events.append((ref.available_at, 3, "REFERENCE_AVAILABLE", index))
         with localcontext(CONTEXT):
             for instant, _, kind, index in sorted(events):
                 if kind == "D1_CLOSE":
@@ -827,6 +854,8 @@ class Replay:
                         else self.m30.data.bars[-1].adjustment
                     )
                     self._on_m30_open(index, at, adjustment)
+                elif kind == "REFERENCE_AVAILABLE":
+                    self._on_reference_available(self.bundle.entry_references[index])
                 else:
                     self._on_m30_close(index)
         if not self.states:

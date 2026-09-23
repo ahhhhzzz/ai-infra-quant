@@ -2,6 +2,12 @@
 
 ## TASK-006D-Q Setup/Risk reference v1 — 2026-09-23
 
+The task branch now carries a Setup/Risk **1.0.1 S01/S02 focused remediation**. Windows
+Python 3.12 local validation passed; the exact scope is tracked in the
+[remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md). It awaits independent
+focused review and is **not integrated**. The 1.0.0 implementation and AVGO diagnosis below
+remain historical.
+
 The owner has authorized formal PAQS-Q Setup/Risk work, superseding the earlier deferral for
 this bounded layer. The isolated task branch adds three long Setup families, frozen structural
 risk and T1/T2 geometry, setup-bound M30 trigger/follow-through, and two-stage Entry Advisory

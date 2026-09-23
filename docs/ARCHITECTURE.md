@@ -1,5 +1,11 @@
 # Current Architecture
 
+The task branch adds a distinct Setup/Risk **1.0.1** code/manifest binding for S01/S02 causal
+corrections. The 1.0.0 implementation snapshot below remains historical; F1, B0/A1 and Event
+identities remain unchanged. See the
+[remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md). The 1.0.1 work is
+awaiting independent focused review and has not entered the product branch.
+
 TASK-006D-Q adds independent `core/domain/paqs_q/setup_reference.py`, pure
 `core/strategy/paqs_q/setup_rules.py`/`setup_targets.py`, and an explicit application loader
 with a Setup/Risk 1.0.0 dependency manifest. It consumes three separately verified Event 1.0.1

@@ -1,5 +1,9 @@
 # PAQS-Q Setup/Risk 1.0.0 — 规则与本地使用
 
+当前任务分支的 1.0.1 整改修正 Range Breakdown→Failure 的精确父事件关联，以及迟到
+EntryReference 的历史消费时间和 SetupFact 身份；参数及下文 1.0.0 规则来源不变。
+详见 [S01/S02 整改报告](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md)。
+
 本版是用户授权的首个**做多资格**参考 profile，不是交易执行、收益验证或完整 PAQS-Q。
 规则优先级为本轮任务指令、已整合 Event 1.0.1、明确采用的 v0.2/v0.3.1/Amendment A。
 以下时钟、去重、目标聚类和 Gap 期限为本轮新增工程约定，未经市场优化。

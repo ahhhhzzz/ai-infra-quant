@@ -15,7 +15,7 @@ def test_offline_report_locates_trigger_and_keeps_exact_export(tmp_path):
         requests = []
         page.on("request", lambda request: requests.append(request.url))
         page.goto((output / "report.html").as_uri())
-        assert page.title() == "PAQS-Q Setup/Risk 1.0.0 — 离线复盘"
+        assert page.title() == "PAQS-Q Setup/Risk 1.0.1 — 离线复盘"
         assert page.locator("#facts tr").count() == summary["facts"]
         assert page.locator("#chart").is_visible()
         page.locator("#facts tr").filter(has_text="TRIGGER_PENDING").first.locator("button").click()

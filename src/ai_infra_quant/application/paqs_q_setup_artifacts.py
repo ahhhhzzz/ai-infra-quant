@@ -1,4 +1,4 @@
-"""Explicit Setup/Risk 1.0.0 loader over immutable Event 1.0.1 results."""
+"""Explicit Setup/Risk 1.0.1 loader over immutable Event 1.0.1 results."""
 
 from dataclasses import replace
 from decimal import Decimal
@@ -22,7 +22,7 @@ from ai_infra_quant.core.strategy.paqs_q.event_context import CONTEXT_ID, EVENT_
 from ai_infra_quant.core.strategy.paqs_q.setup_rules import Period, Replay, setup_config
 from ai_infra_quant.core.strategy.paqs_q.setup_targets import next_regular_open
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 FILES = tuple(
     sorted(
         {
@@ -61,7 +61,7 @@ def build_manifest(root: Path, *, wheel: bool = False) -> dict[str, Any]:
 
 
 def verify(root: Path, *, wheel: bool = False) -> str:
-    path = PACKAGE + "resources/paqs_q/setup-risk-1.0.0.json"
+    path = PACKAGE + "resources/paqs_q/setup-risk-1.0.1.json"
     encoded = artifact_path(root, path, wheel=wheel).read_bytes().replace(b"\r\n", b"\n")
     manifest = FrozenJSON(encoded.removesuffix(b"\n")).document()
     if manifest != build_manifest(root, wheel=wheel):

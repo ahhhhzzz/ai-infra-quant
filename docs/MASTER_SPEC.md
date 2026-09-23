@@ -1,5 +1,11 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
+TASK-006D-Q's current task-branch implementation is Setup/Risk **1.0.1**, correcting S01/S02
+without changing strategy parameters or Event/F1 identities. See the
+[focused remediation report](reports/TASK_006D_Q_SETUP_RISK_V1_REMEDIATION_01.md) for local
+verification; independent focused review and product integration remain outstanding. The
+original 1.0.0 implementation statement below is historical.
+
 Current bounded override: TASK-006D-Q adds an isolated PAQS-Q Setup/Risk 1.0.0 reference on
 `task/006d-q-setup-risk-v1`, **local validation PASS; awaiting focused review and not integrated**. Three long Setup
 families and two-stage Entry Advisory consume explicit W1/D1/M30 Event 1.0.1 results; see
