@@ -1,12 +1,10 @@
 # PAQS Engineering Guide — TASK-007B Analyze/Decision Ledger independently accepted
 
-The owner has prioritized the isolated [single-pattern research CLI](../PAQS_Q_SINGLE_PATTERN.md)
-before complete formal Event implementation. It runs local exploratory D1 replay outside the
-product, reusing pure price/ATR functions without editing frozen artifacts. See its
-[Windows implementation/validation report](../reports/PAQS_Q_SINGLE_PATTERN_V1.md).
-Formal Event, Setup/Risk and Q product UI remain unimplemented. Single-pattern research is
-**FOCUSED REVIEW PASS / CLOSED / INTEGRATED**; see its
-[closeout decision](../decisions/PAQS_Q_SINGLE_PATTERN_V1_CLOSEOUT_2026_09_21.md).
+The isolated [single-pattern research CLI](../PAQS_Q_SINGLE_PATTERN.md) remains exploratory D1
+replay; its [closeout](../decisions/PAQS_Q_SINGLE_PATTERN_V1_CLOSEOUT_2026_09_21.md) is unchanged.
+Formal Event 1.0.1 is **FOCUSED REVIEW PASS / CLOSED / INTEGRATED** after the product fast-forward;
+see its [closeout decision](../decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md).
+Formal Setup/Risk and Q product UI remain unimplemented.
 
 ## PAQS-Q handoff — 2026-09-21
 
@@ -380,8 +378,10 @@ or profitability evidence.
 ## Future extension points
 
 F1 delivered only the versioned framework, B0 reference and gated A1 plugins under its frozen
-contract. Formal Event plugins and later setup/risk/advisory/dashboard work require separate
-approval. No R06, broader market proof or final structure definition is a prerequisite for F1. They must not change input or structure
+contract. Event 1.0.1 was delivered and integrated under its separate
+[closeout](../decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md); later Setup/Risk,
+advisory and dashboard work require separate authorization. No R06, broader market proof or final
+structure definition is a prerequisite for F1. They must not change input or structure
 facts based on desirable later outcomes. Broader historical replay requires a separate
 point-in-time adjustment/data contract.
 

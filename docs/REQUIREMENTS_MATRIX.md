@@ -1,6 +1,10 @@
 # Requirements Traceability Matrix
 
-## Event reference v1.0.1 — Windows validated / awaiting focused review
+## Event reference v1.0.1 — focused review PASS / closed / integrated
+
+The [closeout decision](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md) attributes the
+external E01/E02 review and becomes integrated upon the product fast-forward. Setup/Risk and UI
+remain separate future work.
 
 | Requirement | Implementation / verification |
 |---|---|
@@ -238,7 +242,7 @@ Only Phase 0 through Phase 4 are valid target phases.
 | PAQSQ-002 | PAQS-Q mechanical thresholds and future methods do not silently bind PAQS-E semantic reasoning | RETAINED | 2 | DOCUMENTED | Roadmap 6; PAQS-E Master Spec/Doctrine |
 | PAQSQ-003 | PAQS-Q methods may evolve under separate research/Task Contract governance | RETAINED | 2 | DOCUMENTED | Roadmap 6/7 |
 | PAQSQ-004 | TASK-006B-Q reference research closed after exact R05 PASS | RETAINED | 2 | REVIEWED / CLOSED AS REFERENCE RESEARCH | [Review](reviews/TASK_006B_Q_R05_INDEPENDENT_REVIEW.md); [closeout](decisions/TASK_006B_Q_CLOSEOUT_AND_006C_Q_HANDOFF_2026_09_21.md) |
-| PAQSQ-005 | TASK-006C-Q formal Event plugins, separate from F1 | RETAINED | 2 | REMEDIATED / AWAITING FOCUSED REVIEW | [Event rules](PAQS_Q_EVENT_V1.md); [E01/E02 report](reports/TASK_006C_Q_EVENT_V1_REMEDIATION_01.md); not integrated |
+| PAQSQ-005 | TASK-006C-Q formal Event plugins, separate from F1 | RETAINED | 2 | FOCUSED REVIEW PASS / CLOSED / INTEGRATED | [Event rules](PAQS_Q_EVENT_V1.md); [E01/E02 report](reports/TASK_006C_Q_EVENT_V1_REMEDIATION_01.md); [closeout](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md) |
 | PAQSQ-F1 | Versioned quant/event foundation; B0 reference, A1 experimental default OFF; immutable identity and deterministic hashes | RETAINED | 2 | FOCUSED REVIEW PASS / USER-ACCEPTED LIMITATION / CLOSED / INTEGRATED | [Frozen contract](../prompts/tasks/TASK-006C-Q-F1_VERSIONED_QUANT_EVENT_FRAMEWORK_FOUNDATION.md); [closeout decision](decisions/TASK_006C_Q_F1_CLOSEOUT_2026_09_21.md): external F01/F02/F03 CLOSED, F1-02 PASS, F1-12 用户接受的限定例外; historical [validation](evidence/TASK_006C_Q_F1/closeout-01/REPORT.md) unchanged |
 | PAQSQ-006 | TASK-006D-Q — PAQS-Q Setup, Risk & Setup-Specific Quant Confirmation | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |
 | PAQSQ-007 | TASK-006E-Q — PAQS-Q Advisory / Scanner Presentation | RETAINED | 2 | PLANNED_TASK | Roadmap 7 |

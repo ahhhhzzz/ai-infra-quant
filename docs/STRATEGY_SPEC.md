@@ -4,8 +4,10 @@
 
 The owner explicitly adopted the fixed reference context and six price-event formulas in
 [Event v1 rules/usage](PAQS_Q_EVENT_V1.md), superseding the earlier deferral. The task implementation
-is **VALIDATED ON WINDOWS / AWAITING FOCUSED REVIEW**; see the
-[implementation report](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
+is **1.0.1 FOCUSED REVIEW PASS / CLOSED / INTEGRATED** after the product fast-forward; see the
+[closeout decision](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md), historical
+[implementation report](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md) and
+[E01/E02 remediation](reports/TASK_006C_Q_EVENT_V1_REMEDIATION_01.md).
 This is a versioned F1 price-event implementation, not profitability validation or complete PAQS-Q.
 Trigger is a price candidate; event_guard is an event invalidation condition, not a trading stop.
 Formal Setup/Risk, LONG_READY, Q/E comparison and product UI remain incomplete. B0/A1 and prior

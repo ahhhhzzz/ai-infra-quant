@@ -1,11 +1,13 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
-Current task, 2026-09-23: the owner resumed TASK-006C-Q Event engineering. Explicit versioned
-reference context and six price-event families are implemented and Windows-validated, awaiting
-focused review on a task branch. See [rules/usage](PAQS_Q_EVENT_V1.md) and
-[validation](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
-This supersedes earlier Event deferral; formal Setup/Risk, Q/E comparison, product integration and
-trading qualification remain incomplete. Earlier research closeouts and F1 remain unchanged.
+TASK-006C-Q Event 1.0.1 reference context and six price-event families are
+**FOCUSED REVIEW PASS / CLOSED / INTEGRATED**, effective after the product fast-forward in the
+[closeout decision](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md). See
+[rules/usage](PAQS_Q_EVENT_V1.md), the historical
+[implementation report](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md) and
+[E01/E02 remediation](reports/TASK_006C_Q_EVENT_V1_REMEDIATION_01.md). Formal Setup/Risk,
+Q/E comparison, product UI and trading qualification remain incomplete. Earlier research
+closeouts and F1 remain unchanged.
 
 Current owner-authorized exception to the earlier implementation sequence: an isolated D1,
 long-only single-pattern research CLI now produces signals, simulated trades and offline reports.
@@ -293,8 +295,11 @@ Phase 2 decision terminal, and optional Phase 3/4 extensions as assigned by the 
 Phase 4 is the final possible phase; no execution phase exists.
 
 Current sequence: accepted C2 → ADC-001 reviewed/integrated → 006B1 reviewed, user-accepted,
-closed and integrated → 006B-Q reference research closed → 006C-Q-F1 focused review PASS, user-accepted limitation, closed and integrated → single-pattern research (focused review PASS / closed / integrated); formal Event is deferred. The original 006B1 scope remains unchanged; the old
-starting prompt is not reusable. See [ROADMAP](ROADMAP.md).
+closed and integrated → 006B-Q reference research closed → 006C-Q-F1 focused review PASS,
+user-accepted limitation, closed and integrated → single-pattern research and fixed-risk sizing
+closed/integrated → Event 1.0.1 focused review PASS, closed/integrated → formal Setup/Risk next.
+The original 006B1 scope remains unchanged; the old starting prompt is not reusable.
+See [ROADMAP](ROADMAP.md).
 
 TASK-006A is integrated at `7909f1c04f7049cf1ccec78a3d5023ae801b7177`. TASK-006B deterministic
 implementation is integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`; its real-market

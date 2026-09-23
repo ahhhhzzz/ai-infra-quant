@@ -213,7 +213,9 @@ their F1 record IDs bind each complete input/upstream result and need not surviv
 Core has no research import; a separate offline tool converts local inputs and renders results.
 See [rules/usage](../PAQS_Q_EVENT_V1.md) and
 [implementation report](../reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
-This extension awaits focused review and has not been integrated into the product branch.
+The original 1.0.0 delivery was awaiting review; the current 1.0.1 binding is
+**FOCUSED REVIEW PASS / CLOSED / INTEGRATED** after the product fast-forward in the
+[closeout decision](../decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md).
 
 Event 1.0.1 focused remediation supersedes the active 1.0.0 binding while retaining that fixed
 commit and its two manifest files. Strict D1/M30 qualification now checks intervening CLOSED facts

@@ -8,7 +8,9 @@ unconfigured Event default. Core reuses the unchanged pure `paqs_structure.py`; 
 research tools. `tools/research/event_engine` adapts local input and writes offline HTML/JSON.
 One exact new-loader entry is added to the existing isolation allowlist; other assertions remain.
 [Rules](PAQS_Q_EVENT_V1.md) / [validation](reports/TASK_006C_Q_EVENT_V1_IMPLEMENTATION_REPORT.md).
-Status: **IMPLEMENTED / VALIDATED ON WINDOWS / AWAITING FOCUSED REVIEW**, not product-integrated.
+Status: **1.0.1 FOCUSED REVIEW PASS / CLOSED / INTEGRATED** after the product fast-forward;
+[closeout decision](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md). The code is integrated
+in the product branch; no Event API/UI or trading integration is added.
 No API, database, PAQS-E, old engine, package initializer or dependency changes; formal Setup/Risk
 and product UI remain deferred. This supersedes the earlier Event deferral in the historical entries.
 
@@ -284,8 +286,9 @@ No conversion rewrites old records or fabricates structured fields from prose.
 | Current user capabilities | Market/watchlist workbench, current Snapshot, selected-model Narrative, secure credentials, explicit research, immutable evidence/history |
 | Retained non-default | Legacy structured runtime/validator/ledger; original deterministic 006B with `STRUCTURE_CONCERNS_FOUND`; Phase 1 opening accounting/descriptors and compatibility reads |
 | Reviewed, user-accepted and integrated | 006B1 explicit local market archive/replay and additive 0004; separate from Analyze |
-| Focused review PASS, user-accepted limitation, closed and integrated | 006C-Q-F1 versioned Structure/Event protocols, immutable evidence and hashes; default B0, gated experimental A1; no production Event plugin |
-| Deferred | Strict historical As-Of/GoldSet; formal Q Event plugins and later Q successors; 007D comparison; Paper Broker/PaperFill/NAV/performance and Phase 3/4 extensions |
+| Focused review PASS, user-accepted limitation, closed and integrated | 006C-Q-F1 versioned Structure/Event protocols, immutable evidence and hashes; default B0, gated experimental A1; F1 alone delivered no production Event plugin |
+| Focused review PASS, closed and integrated | 006C-Q Event 1.0.1 reference Context/six price-event families; no Setup/Risk or API/UI integration; [closeout](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md) |
+| Deferred | Strict historical As-Of/GoldSet; formal Q Setup/Risk and later Q successors; 007D comparison; Paper Broker/PaperFill/NAV/performance and Phase 3/4 extensions |
 | Permanently excluded | Real-account observation/import/positions, broker writes/orders, autonomous execution |
 
 ADC is reviewed/integrated; 006B1 uses the verified updated post-ADC handoff.
