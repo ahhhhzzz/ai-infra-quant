@@ -1,11 +1,13 @@
 # Current Architecture
 
-TASK-006E-Q / 007D task branch adds an explicit Q product action, an append-only full Q result
+TASK-006E-Q / 007D adds an explicit Q product action, an append-only full Q result
 record, conditional Holder reader and a separate user-triggered E-from-Q frozen Snapshot call.
 The [bounded product rules](PAQS_Q_PRODUCT_COMPARE_V1.md) and
 [implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md) distinguish synthetic
 positive checks from current observational input limitations. Neither read/history/refresh nor Q
-analysis invokes the E provider. This batch awaits focused review and is not product-integrated.
+analysis invokes the E provider. Holder 1.0.2 passed user-provided focused review; Q01 is closed.
+The batch is **INTEGRATED** upon the successful product fast-forward recorded by the
+[closeout decision](decisions/TASK_006E_Q_007D_PRODUCT_COMPARE_CLOSEOUT_2026_09_23.md).
 
 The distinct Setup/Risk **1.0.1** code/manifest binding for S01/S02 is **FOCUSED REVIEW PASS /
 CLOSED**; it becomes **INTEGRATED** only after the product fast-forward in the
@@ -309,13 +311,14 @@ No conversion rewrites old records or fabricates structured fields from prose.
 
 | State | Scope |
 |---|---|
-| Current user capabilities | Market/watchlist workbench, current Snapshot, selected-model Narrative, secure credentials, explicit research, immutable evidence/history |
+| Current user capabilities | Market/watchlist workbench, current Snapshot, selected-model Narrative, secure credentials, explicit research, Q analysis and immutable Q/Narrative history, explicit same-Snapshot Q/E reading |
 | Retained non-default | Legacy structured runtime/validator/ledger; original deterministic 006B with `STRUCTURE_CONCERNS_FOUND`; Phase 1 opening accounting/descriptors and compatibility reads |
 | Reviewed, user-accepted and integrated | 006B1 explicit local market archive/replay and additive 0004; separate from Analyze |
 | Focused review PASS, user-accepted limitation, closed and integrated | 006C-Q-F1 versioned Structure/Event protocols, immutable evidence and hashes; default B0, gated experimental A1; F1 alone delivered no production Event plugin |
 | Focused review PASS, closed and integrated | 006C-Q Event 1.0.1 reference Context/six price-event families; no API/UI integration; [closeout](decisions/TASK_006C_Q_EVENT_V1_CLOSEOUT_2026_09_23.md) |
 | Focused review PASS, closed; integrated upon product fast-forward | 006D-Q Setup/Risk 1.0.1 reference; no product API/UI, fill or market-validity claim; [closeout](decisions/TASK_006D_Q_SETUP_RISK_V1_CLOSEOUT_2026_09_23.md) |
-| Deferred | Strict historical As-Of/GoldSet; Q Holder advice and later Q successors; 007D comparison; Paper Broker/PaperFill/NAV/performance and Phase 3/4 extensions |
+| Focused review PASS, closed; integrated upon product fast-forward | 006E-Q / bounded 007D explicit Q action, conditional Holder and same-Snapshot Q/E reading; [closeout](decisions/TASK_006E_Q_007D_PRODUCT_COMPARE_CLOSEOUT_2026_09_23.md) |
+| Deferred | Strict historical As-Of/GoldSet; broader Q scanner and 007D comparison beyond same-Snapshot reading; Paper Broker/PaperFill/NAV/performance and Phase 3/4 extensions |
 | Permanently excluded | Real-account observation/import/positions, broker writes/orders, autonomous execution |
 
 ADC is reviewed/integrated; 006B1 uses the verified updated post-ADC handoff.

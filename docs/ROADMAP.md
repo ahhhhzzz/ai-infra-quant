@@ -1,13 +1,15 @@
 # Read-Only PAQS Dual-Branch Decision-Terminal Product Roadmap
 
-## TASK-006E-Q / TASK-007D bounded product batch — task branch, 2026-09-23
+## TASK-006E-Q / TASK-007D bounded product batch — closeout, 2026-09-23
 
 The owner authorized one delivery batch for an explicit PAQS-Q product action, conditional Holder,
 immutable Q history and minimal same-Snapshot Q/E display. External focused review of
 `06748540d67f2c120f8dfecc46a342db9f1c6aaf` found Q01 (target touch before Holder target
 binding). External re-review of `0a3f132541296249094a04b88b609fd2130f9bee` found the
-remaining multi-candidate Stage B boundary. The isolated task branch now carries a Holder 1.0.2
-local correction and remains **LOCALLY REMEDIATED / AWAITING Q01 FOCUSED REVIEW / NOT INTEGRATED**. See the
+remaining multi-candidate Stage B boundary, corrected at reviewed `dc18cef8f5f616115112dd80b371a255336571a4`.
+The user-provided focused review is **PASS; Q01 CLOSED**. This batch becomes
+**INTEGRATED** upon the successful product fast-forward described in the
+[closeout decision](decisions/TASK_006E_Q_007D_PRODUCT_COMPARE_CLOSEOUT_2026_09_23.md). See the
 [scope and Holder rules](PAQS_Q_PRODUCT_COMPARE_V1.md) and the
 [original implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md) and
 [first Q01 remediation report](reports/TASK_006E_Q_007D_Q01_REMEDIATION.md) and
@@ -563,8 +565,9 @@ Historical pending-review statements are superseded by this closeout, not rewrit
 
 #### TASK-007D — Dual-Branch Comparison / Disagreement Dashboard
 
-The owner resumed the bounded same-Snapshot part in the current 006E-Q/007D task branch; it
-awaits focused review and is not integrated. Unstructured E prose permits side-by-side reading,
+The owner resumed the bounded same-Snapshot part in the 006E-Q/007D batch. It passed focused
+review and is integrated upon the [product closeout fast-forward](decisions/TASK_006E_Q_007D_PRODUCT_COMPARE_CLOSEOUT_2026_09_23.md).
+Unstructured E prose permits side-by-side reading,
 but no machine agreement/disagreement label. Broader comparison/dashboard work remains deferred.
 
 Planned scope:
@@ -583,7 +586,7 @@ TASK-006B-Q — REVIEWED / CLOSED AS REFERENCE RESEARCH
 TASK-006C-Q-F1 — Versioned Quant/Event Framework Foundation [focused review PASS; user-accepted limitation; closed and integrated]
 TASK-006C-Q — Event 1.0.1 reference [focused review PASS; closed and integrated]
 TASK-006D-Q — Setup/Risk 1.0.1 reference [focused review PASS; closed; integration by closeout fast-forward]
-TASK-006E-Q — bounded Q analysis/conditional Holder product action [task branch; awaiting focused review]; scanner deferred
+TASK-006E-Q — bounded Q analysis/conditional Holder product action [focused review PASS; closed; integration by closeout fast-forward]; scanner deferred
 ```
 
 The F1 contract adopts only the versioned foundation and B0/A1 reference semantics; later formal Event semantics require separate approval. PAQS-Q work must not block an otherwise safe PAQS-E MVP and must not redefine PAQS-E strategy authority.
@@ -603,7 +606,9 @@ The F1 contract adopts only the versioned foundation and B0/A1 reference semanti
   → Setup/Risk 1.0.1 reference [focused review PASS / closed; integration by closeout fast-forward]
 ```
 
-F1 is bounded by its frozen contract; further PAQS-Q plugins remain separately governed and 007D remains deferred.
+F1 is bounded by its frozen contract; further PAQS-Q plugins remain separately governed.
+The bounded 007D same-Snapshot reading is closed by the 006E-Q/007D fast-forward;
+broader comparison work remains deferred.
 The old 006B1 functional scope remains valid; its old starting SHA/prompt is not current authority.
 
 ### Deferred user request after 006B1 closeout

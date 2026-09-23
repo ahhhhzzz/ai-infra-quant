@@ -1,12 +1,14 @@
 # AI Infra Quant Platform — Master Specification v3.2
 
-Current TASK-006E-Q / TASK-007D task-branch scope is the explicit Q product action and a minimal
+TASK-006E-Q / TASK-007D scope is the explicit Q product action and a minimal
 same-frozen-Snapshot Q/E reading surface. The Q record binds its selected input, Context/Event
 1.0.1, Setup/Risk 1.0.1, and an independent conditional Holder identity; the original E Narrative
 remains verbatim and model invocation remains separately user-triggered. See
 [product/Holder rules](PAQS_Q_PRODUCT_COMPARE_V1.md) and
-[implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md). This is awaiting focused
-review and is **not integrated**. Existing product data lacks strict historical availability,
+[implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md). Holder 1.0.2 is
+**FOCUSED REVIEW PASS / Q01 CLOSED** and becomes **INTEGRATED** upon the product fast-forward in the
+[closeout decision](decisions/TASK_006E_Q_007D_PRODUCT_COMPARE_CLOSEOUT_2026_09_23.md).
+Existing product data lacks strict historical availability,
 complete CLOSED-day calendar facts and independent M30 open evidence; no real LONG_READY is claimed.
 The time-specific Setup/Event closeout statements below remain historical.
 
@@ -334,7 +336,9 @@ implementation is integrated at `96747041ef0ff8c00937c5dd5e80cb4c5c28c17c`; its 
 semantic checkpoint remains `STRUCTURE_CONCERNS_FOUND`. Earlier 006C/006D/006E single-engine plans
 are superseded by separately planned 006B-Q/006C-Q/006D-Q/006E-Q work and the 007A/B/C/D workstream.
 TASK-006B1 explicit observation archive/replay is reviewed, user-accepted and integrated.
-It is isolated from current Snapshot/Analyze; TASK-007D Q/E comparison remains deferred. `TASK-006` and `TASK-007` remain umbrellas only.
+At that 006B1 checkpoint it was isolated from Snapshot/Analyze and TASK-007D remained deferred;
+the bounded same-Snapshot part is now covered by the [006E-Q/007D closeout](decisions/TASK_006E_Q_007D_PRODUCT_COMPARE_CLOSEOUT_2026_09_23.md).
+`TASK-006` and `TASK-007` remain umbrellas only.
 
 ## 13. Quality and change control
 

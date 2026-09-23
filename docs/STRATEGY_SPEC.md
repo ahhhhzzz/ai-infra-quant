@@ -1,11 +1,13 @@
 # PAQS-E / PAQS-Q Strategy Governance and Historical Research Specification
 
-TASK-006E-Q / TASK-007D task-branch [product and Holder rules](PAQS_Q_PRODUCT_COMPARE_V1.md)
+TASK-006E-Q / TASK-007D [product and Holder rules](PAQS_Q_PRODUCT_COMPARE_V1.md)
 read the accepted 1.0.1 Q outputs without changing their formulas, parameters or manifests.
 Holder is conditional on an identifiable Setup and never indicates a known user position;
 Entry qualification and hypothetical Holder advice remain separate. E Narrative is shown verbatim
 beside Q facts only for exact same frozen Snapshot identity; no prose-to-Entry extraction, blended
-score or real trading. This batch awaits focused review and is not product-integrated.
+score or real trading. Holder 1.0.2 is **FOCUSED REVIEW PASS / Q01 CLOSED** and becomes
+**INTEGRATED** upon the product fast-forward recorded by the
+[closeout decision](decisions/TASK_006E_Q_007D_PRODUCT_COMPARE_CLOSEOUT_2026_09_23.md).
 
 ## Setup/Risk reference implementation — 2026-09-23
 

@@ -1,6 +1,6 @@
 # Requirements Traceability Matrix
 
-## TASK-006E-Q / TASK-007D — Q01 locally remediated, awaiting focused review
+## TASK-006E-Q / TASK-007D — Q01 focused review PASS / CLOSED; integrated upon product fast-forward
 
 | Requirement | Implementation / focused verification |
 |---|---|
@@ -9,13 +9,15 @@
 | Append-only Q analysis, complete frozen results and history without recomputation | [0005 migration](../src/ai_infra_quant/database/migrations/versions/0005_task006e_q_analysis.py), [store](../src/ai_infra_quant/database/repositories/paqs_q_analysis.py), [tests](../tests/integration/test_paqs_q_analysis.py) |
 | Separate explicit E-from-Q call, identical-Snapshot comparison, original Narrative | [Q API](../src/ai_infra_quant/backend/api/v1/paqs_q.py), [E API](../src/ai_infra_quant/backend/api/v1/paqs_e.py), [workbench test](../tests/browser/test_paqs_q_workbench.py) |
 
+The [closeout decision](decisions/TASK_006E_Q_007D_PRODUCT_COMPARE_CLOSEOUT_2026_09_23.md)
+records the user-provided external PASS and the product fast-forward condition.
 The [original implementation report](reports/TASK_006E_Q_007D_IMPLEMENTATION_REPORT.md) records actual
 Windows tests, synthetic/model mock attribution and real-data limitations. The later Q01
 [remediation report](reports/TASK_006E_Q_007D_Q01_REMEDIATION.md) records the original external finding
 and separately attributed local correction. The [incremental report](reports/TASK_006E_Q_007D_Q01_REMEDIATION_02.md)
 records the remaining multi-candidate boundary. Earlier task statuses
-below remain their own historical checkpoints. Neither this table nor the task branch asserts
-independent review PASS or product integration.
+below remain their own historical checkpoints. The original implementation task branch remains
+at the reviewed SHA; integration occurs only when the closeout commit reaches the product branch.
 
 TASK-006D-Q Setup/Risk **1.0.1 FOCUSED REVIEW PASS / CLOSED** addresses S01 exact Breakdown
 parent lineage and S02 availability-clock/fact-key stability. It becomes **INTEGRATED** only
@@ -400,8 +402,10 @@ below are inspected evidence, not ADC execution results. C1 and C2 acceptance ar
 
 006B1 archive/replay/0004 is independently reviewed, user-accepted, closed and integrated.
 See [focused PASS](reviews/TASK_006B1_F01_FOCUSED_RE_REVIEW.md) and [closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md).
-F1 framework is closed and integrated as stated above; formal Event strategies, strict historical As-Of/GoldSet,
-007D comparison and Paper/PnL/Phase 3/4 remain deferred. Real-account/trading behavior is forbidden.
+At the 006B1 checkpoint, formal Event strategies and 007D comparison remained deferred.
+Event 1.0.1 and the bounded same-Snapshot 006E-Q/007D reading have since passed focused review;
+strict historical As-Of/GoldSet, broader 007D comparison and Paper/PnL/Phase 3/4 remain deferred.
+Real-account/trading behavior is forbidden.
 
 ## TASK-006B1 acceptance traceability (reviewed, user-accepted and integrated)
 
