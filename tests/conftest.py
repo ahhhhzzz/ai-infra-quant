@@ -19,6 +19,7 @@ from ai_infra_quant.database.session import create_database_engine, create_sessi
 
 @pytest.fixture(autouse=True)
 def isolated_os_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("TAVILY_API_KEY", raising=False)
     monkeypatch.setattr(
         "ai_infra_quant.backend.dependencies.WindowsCredentialStore", MemoryCredentials
     )

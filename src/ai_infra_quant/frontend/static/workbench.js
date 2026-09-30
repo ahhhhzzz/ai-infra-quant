@@ -62,7 +62,8 @@
   const selection = () => {
     const model = $("model-id").selectedOptions[0]?.textContent || "尚未选择模型";
     const strategy = $("strategy-id").selectedOptions[0]?.textContent || "尚未选择策略";
-    $("q-e-selection").textContent = `将使用：${model} · ${strategy} · 联网研究${$("web-research").checked ? "开启" : "关闭"}。运行可能产生模型费用。`;
+    const tavily = $("web-research").checked && $("web-research").dataset.provider === "tavily";
+    $("q-e-selection").textContent = `将使用：${model} · ${strategy} · 联网研究${$("web-research").checked ? "开启" : "关闭"}。运行可能产生模型费用。${tavily ? "Tavily 当前资料不用于历史 Q 快照；请关闭联网后运行同快照 E。" : ""}`;
   };
   for (const name of ["model-id", "strategy-id", "web-research"]) $(name).addEventListener("change", selection);
   new MutationObserver(selection).observe($("model-id"), {childList: true});

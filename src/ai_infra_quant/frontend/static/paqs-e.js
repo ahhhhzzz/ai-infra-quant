@@ -144,6 +144,8 @@
   function clearEvidence(message = "冻结证据尚不可用") {
     snapshot = null;
     $("research-evidence").textContent = "—";
+    $("external-research-evidence").replaceChildren();
+    $("external-research-evidence").hidden = true;
     for (const line of priceLines) frozenCandles?.removePriceLine(line);
     priceLines = [];
     frozenCandles?.setData([]);
@@ -177,7 +179,9 @@
         for (const button of buttons) button.setAttribute("aria-pressed", String(button.dataset.narrativeView === narrativeView));
       }
       updateView();
-      $("decision-result").replaceChildren(node("p", `模型生成的分析，未经过结构化语义校验。联网研究：${decision.web_research ? "已冻结辅助上下文" : "关闭"}`, "note"), controls, formatted, text);
+      const researchSummary = node("p", `模型生成的分析，未经过结构化语义校验。联网研究：${decision.web_research ? "已冻结辅助上下文" : "关闭"}`, "note");
+      researchSummary.id = "decision-research-summary";
+      $("decision-result").replaceChildren(researchSummary, controls, formatted, text);
       $("decision-audit").textContent = JSON.stringify(decision, null, 2);
       return;
     }
@@ -371,12 +375,48 @@
       const evidence = parseRun(run, { ...item, status: "SUCCEEDED" });
       if (token !== detailGeneration || nav !== navigation || resultId(decision) !== resultId(item)) return;
       snapshot = evidence;
-      $("research-evidence").textContent = JSON.stringify(JSON.parse(run.request_payload_json).auxiliary_context || [], null, 2);
+      const context = JSON.parse(run.request_payload_json).auxiliary_context || [];
+      $("research-evidence").textContent = JSON.stringify(context, null, 2);
+      renderExternalResearch(context, item);
       $("evidence-status").textContent = "冻结输入已按 Decision / Run / 请求身份关联；切换冻结证据查看";
       $("decision-audit").textContent = JSON.stringify({ decision: item, run }, null, 2);
       drawEvidence();
     } catch (error) {
       if (token === detailGeneration && nav === navigation) clearEvidence(`冻结输入证据不可用：${error.message}`);
+    }
+  }
+  function renderExternalResearch(context, item) {
+    const root = $("external-research-evidence");
+    root.replaceChildren(); root.hidden = true;
+    for (const entry of context) {
+      if (entry.source_label !== "Tavily" || typeof entry.provenance !== "string") continue;
+      let evidence;
+      try { evidence = JSON.parse(entry.provenance); } catch (_error) { continue; }
+      if (evidence.schema_version !== "paqs-e-tavily-evidence-v1" || evidence.provider !== "tavily"
+        || !Array.isArray(evidence.sources)) continue;
+      root.hidden = false;
+      const heading = node("h3", "联网研究：Tavily");
+      root.append(heading, node("p", `检索时间：${stamp(evidence.retrieved_at, item.market)}；行情快照：${stamp(evidence.snapshot_as_of, item.market)}`, "note"),
+        node("p", "资料在检索时获取；不代表快照当时已知。来源编号仅核对属于本次资料，未自动验证每项分析结论。", "note"));
+      for (const source of evidence.sources) {
+        if (!source || !/^T[1-9][0-9]*$/.test(source.source_id)) continue;
+        const section = node("div", "", "field-row");
+        let url;
+        try { url = new URL(source.url); } catch (_error) { url = null; }
+        const title = `[${source.source_id}] ${source.title || "未提供标题"}`;
+        if (url && ["https:", "http:"].includes(url.protocol) && !url.username && !url.password) {
+          const link = node("a", title); link.href = url.href; link.target = "_blank";
+          link.rel = "noopener noreferrer"; section.append(link);
+        } else section.append(node("span", title));
+        const publication = typeof source.published_at === "string" && /^\d{4}-\d{2}-\d{2}$/.test(source.published_at)
+          ? `${source.published_at}（仅日期，具体时刻未知）`
+          : source.published_at ? stamp(source.published_at, item.market) : "未知（未用检索时间替代）";
+        section.append(node("p", `发布时间：${publication}`, "note"));
+        const fragment = node("details");
+        fragment.append(node("summary", "实际传入模型的资料片段"), node("p", source.content || "未提供", "field-value"));
+        section.append(fragment); root.append(section);
+      }
+      if ($("decision-research-summary")) $("decision-research-summary").textContent = "模型生成的分析，未经过结构化语义校验。联网研究：Tavily；来源及检索时间见下方。";
     }
   }
   async function selectDecision(item, explicit = true) {
@@ -539,12 +579,14 @@
         }
       } else if ([404, 409, 422, 500].includes(response.status) && body.status === response.status && typeof body.code === "string") {
         const researchFailure = body.code === "PAQS_E_RESEARCH_PRECONDITION_FAILED";
+        const external = researchFailure && body.external_research?.provider === "tavily";
         const detail = researchFailure
-          ? "联网研究未完成：没有取得符合协议的搜索证据。请检查模型的联网支持，或明确关闭联网研究后再点击分析（仍可能产生模型费用）"
+          ? (external ? externalFailure(body.external_research.failure_code) : "联网研究未完成：没有取得符合协议的搜索证据。请检查模型的联网支持，或明确关闭联网研究后再点击分析（仍可能产生模型费用）")
           : (body.detail || "");
         state(`${target}：${response.status === 500 ? "账本证据无法提交或验证" : "分析前提失败"} · ${detail}。没有确认新的 Narrative。`);
         const technical = node("details");
-        technical.append(node("summary", "错误技术详情"), node("p", `${body.code} · ${researchFailure ? researchDiagnostic(body.research_diagnostic) : detail}`));
+        const diagnostic = external ? `Tavily / ${String(body.external_research.failure_code || "UNKNOWN")}；研究记录 ${body.external_research.research_id || "未建立"}` : researchFailure ? researchDiagnostic(body.research_diagnostic) : detail;
+        technical.append(node("summary", "错误技术详情"), node("p", `${body.code} · ${diagnostic}`));
         $("analysis-state").append(technical);
       } else throw new Error("未确认响应");
     } catch (_error) {
@@ -555,6 +597,21 @@
       updateButton();
     }
   });
+
+  function externalFailure(code) {
+    const labels = {
+      NOT_CONFIGURED: "请配置搜索服务（Tavily Key）",
+      AUTHENTICATION_FAILED: "Tavily 认证失败，请检查搜索 Key",
+      RATE_LIMITED: "Tavily 限流或额度不足，请检查额度后再显式重试",
+      TIMEOUT: "Tavily 搜索超时，本次未继续调用模型",
+      EMPTY_RESULTS: "Tavily 未返回可用的检索资料",
+      INVALID_RESPONSE: "Tavily 响应格式异常，未接受为研究证据",
+      PROVIDER_UNAVAILABLE: "Tavily 搜索服务暂不可用",
+      IDENTITY_INSUFFICIENT: "公司身份不足，无法安全生成搜索词；请核对证券资料",
+      FROZEN_SNAPSHOT_EXTERNAL_RESEARCH_BLOCKED: "历史 Q 快照不接受今天补取的搜索资料；请关闭联网后再运行同快照 E 对照",
+    };
+    return `联网研究未完成：${labels[code] || "搜索证据未通过检查"}。可取消联网勾选，再显式运行不联网分析（仍可能产生模型费用）`;
+  }
 
   function researchDiagnostic(value) {
     if (!value || value.detail_version !== "paqs-e-research-diagnostic-v1"
@@ -618,11 +675,20 @@
   const selectedModel = () => configuration?.models.find((item) => item.model_key === $("model-id").value);
   const modelName = (id) => configuration?.models.find((item) => item.model_key === id)?.display_name || id;
   let credentialModel = null, credentialBusy = false;
+  const externalAvailable = (item) => item?.external_web_research_supported === true
+    && configuration?.external_research?.provider === "tavily";
   function modelChanged() {
     const item = selectedModel();
-    $("web-research").disabled = !item?.web_research_supported;
+    const external = externalAvailable(item);
+    const configured = configuration?.external_research?.credential_configured === true;
+    $("web-research").disabled = !(item?.web_research_supported || (external && configured));
     $("web-research").checked = false;
-    $("research-status").textContent = item?.web_research_supported
+    $("web-research").dataset.provider = external ? "tavily" : "native";
+    $("web-research-label").textContent = external ? "联网研究 · Tavily" : "联网研究";
+    $("configure-research-credential").hidden = !external;
+    $("research-status").textContent = external
+      ? `DeepSeek 不支持内置联网搜索；外部 Tavily 研究默认关闭。${configured ? "仅点击分析后，最多 2 次 basic 搜索，每次最多 5 条；搜索与模型请求可能产生费用。" : "请配置搜索服务；也可直接运行不联网分析，仍可能产生模型费用。"}`
+      : item?.web_research_supported
       ? "联网研究默认关闭；开启可能在最终分析前增加最多 2 次研究请求，增加耗时和 API 成本。"
       : (item?.model_key.startsWith("deepseek-")
         ? "DeepSeek 当前 Responses 接口不支持内置联网搜索。此处仅可运行不联网分析；不会自动替代联网请求，点击分析仍可能产生模型费用。"
@@ -636,6 +702,7 @@
   $("configure-credential").addEventListener("click", async () => {
     if (!selectedModel() || credentialBusy) return;
     credentialModel = selectedModel();
+    $("credential-title").textContent = "配置此模型 API Key";
     $("credential-secret").value = "";
     $("credential-service").textContent = `${credentialModel.display_name} · ${credentialModel.credential_label}`;
     $("credential-status").textContent = "";
@@ -647,30 +714,50 @@
         : status.secure_storage_available ? "Windows 安全存储可用。" : "操作系统安全存储不可用；不能保存。";
     } catch (_error) { $("credential-status").textContent = "无法读取凭据状态。"; }
   });
+  $("configure-research-credential").addEventListener("click", async () => {
+    if (credentialBusy || !externalAvailable(selectedModel())) return;
+    credentialModel = { external: true, model_key: "tavily" };
+    $("credential-title").textContent = "配置 Tavily 搜索 Key";
+    $("credential-secret").value = "";
+    $("credential-service").textContent = "独立搜索凭据 · TAVILY_API_KEY；不替代 DeepSeek 模型 Key。";
+    $("credential-status").textContent = "";
+    $("credential-dialog").showModal();
+    try {
+      const status = await get("research-credentials/tavily");
+      $("credential-status").textContent = status.credential_configured
+        ? "搜索凭据已存在；有效性与额度未验证。删除本地凭据不删除服务器环境变量回退。"
+        : "尚未配置搜索凭据。可保存到 Windows 凭据管理器，或由启动环境设置 TAVILY_API_KEY。";
+    } catch (_error) { $("credential-status").textContent = "无法读取搜索凭据状态。"; }
+  });
   $("credential-close").addEventListener("click", () => $("credential-dialog").close());
   $("credential-dialog").addEventListener("close", () => {
     $("credential-secret").value = "";
-    $("configure-credential").focus();
+    $(credentialModel?.external ? "configure-research-credential" : "configure-credential").focus();
   });
   async function mutateCredential(method) {
     if (credentialBusy || !credentialModel) return;
     credentialBusy = true;
     const key = credentialModel.model_key;
+    const prefix = credentialModel.external ? "research-credentials" : "credentials";
     const body = method === "PUT" ? { secret: $("credential-secret").value } : {};
     $("credential-save").disabled = true; $("credential-delete").disabled = true;
     try {
-      const response = await fetch(`/api/v1/paqs-e/credentials/${encodeURIComponent(key)}`, {
+      const response = await fetch(`/api/v1/paqs-e/${prefix}/${encodeURIComponent(key)}`, {
         method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
       if (!response.ok) throw new Error("Credential mutation failed");
       $("credential-secret").value = "";
       const value = await get("configuration");
       configuration.models = value.models;
+      configuration.external_research = value.external_research;
+      modelChanged();
+      $("web-research").dispatchEvent(new Event("change"));
       $("configuration-status").textContent = selectedModel()?.credential_configured ? "凭据已存在；权限与余额未验证。" : "未配置此模型凭据。";
       $("credential-status").textContent = method === "PUT" ? "已安全保存；未验证权限或余额。" : "已删除本地凭据；服务器环境变量回退不受影响。";
     } catch (_error) { $("credential-status").textContent = "操作未能确认；请检查安全存储状态后手动重试。"; }
     finally {
       delete body.secret;
+      $("credential-secret").value = "";
       credentialBusy = false; $("credential-save").disabled = false; $("credential-delete").disabled = false;
       updateButton();
     }

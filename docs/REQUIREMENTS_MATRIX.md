@@ -437,3 +437,12 @@ Real-account/trading behavior is forbidden.
 | Q 计划日历完整范围及观察性闭市事实 | `observed_calendar.py`、Futu 日历适配、产品适配 1.0.1；范围/未知/未来证据拒绝，W1 正例；VRT 只读 OpenD 复验通过 |
 | E 当前接口能力与显式不联网路径 | 当前 DeepSeek Flash 身份、禁用未支持的内置联网；无传输前置拒绝，原文与历史保持，错误技术详情；真实付费调用未执行 |
 | 保留严格证据及历史 | 原策略 manifest 不变；三张 Q/E 记录表摘要不变；浏览器历史/切换没有 POST；详见 [增量说明](DASHBOARD_WORKBENCH.md) |
+
+### 2026-09-30 PAQS-E 独立 Tavily 研究（任务分支实现，待聚焦复核）
+
+| 要求 | 实现与验证 |
+| --- | --- |
+| DeepSeek 原生能力不变，独立外部研究显式选择 | `external_research.py`、`tavily_research.py`；每次最多两次 basic、每次五条，禁重试/原始网页/自动参数；[适配器测试](../tests/unit/test_tavily_research.py) |
+| 独立安全 Key 与默认关闭 | Windows 独立 tavily 凭据槽、只读环境后备；[凭据测试](../tests/unit/test_search_credentials.py)、[浏览器测试](../tests/browser/test_tavily_workbench.py) |
+| 先保存检索证据，失败停止最终模型；引用编号属于本次来源 | 只追加增量迁移 0006、新版本 Narrative 提示词；[API 与模拟全链路测试](../tests/integration/test_external_research_api.py) |
+| 旧历史无外部调用、Q 冻结事实不变、历史 Q 禁止后补 Tavily | 旧 E Ledger、Q API/同快照兼容检查；[使用与实际验证说明](PAQS_E_MODELS.md#deepseek-独立联网研究--tavily2026-09-30)；不宣称真实服务已验收 |

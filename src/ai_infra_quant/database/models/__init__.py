@@ -7,6 +7,7 @@ from ai_infra_quant.database.models.accounting import (
     PortfolioSnapshotModel,
     UnitTransactionModel,
 )
+from ai_infra_quant.database.models.external_research import searches as external_searches
 from ai_infra_quant.database.models.market_data_archive import captures as archive_captures
 from ai_infra_quant.database.models.market_data_archive import memberships as archive_memberships
 from ai_infra_quant.database.models.market_data_archive import versions as archive_versions
@@ -61,6 +62,7 @@ __all__ = [
     "archive_captures",
     "archive_memberships",
     "archive_versions",
+    "external_searches",
     "narrative_results",
     "narrative_runs",
     "paqs_q_analysis_runs",

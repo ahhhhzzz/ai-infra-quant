@@ -155,6 +155,7 @@
     <div id="e-basis" hidden>          <section class="analysis-results">
             <div id="decision-heading" class="decision-heading">尚无选中的分析结果</div>
             <div id="decision-result"><p class="note">选择成功历史，或填写模型后显式 Analyze。</p></div>
+            <section id="external-research-evidence" aria-label="Tavily 检索来源" hidden></section>
             <details class="audit"><summary>审计身份与原始结果</summary><pre id="decision-audit">—</pre></details>
             <details class="research-audit"><summary>所选结果的冻结联网研究证据</summary><pre id="research-evidence">—</pre></details>
             <details class="known-run"><summary>已知 Analysis Run 查询与失败详情</summary>
@@ -231,8 +232,9 @@
             <p id="analysis-security" class="identity-line">请选择证券</p>
             <label>模型<select id="model-id" name="model_key" required disabled></select></label>
             <label>主策略<select id="strategy-id" name="strategy_id" required disabled></select></label>
-            <label class="research-toggle"><input id="web-research" type="checkbox"> 联网研究</label>
+            <label class="research-toggle"><input id="web-research" type="checkbox"> <span id="web-research-label">联网研究</span></label>
             <button id="configure-credential" type="button">配置此模型 API Key</button>
+            <button id="configure-research-credential" type="button" hidden>配置 Tavily 搜索 Key</button>
             <p id="research-status" class="note"></p>
             <p id="configuration-status" class="note" role="status">读取服务器配置…</p>
             <button id="analyze-button" type="submit" disabled>运行 E 分析（可能收费）</button>

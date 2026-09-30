@@ -180,6 +180,7 @@ def test_explicit_narrative_success_and_frozen_research_are_not_prose_extraction
     )
     result["web_research"] = True
     page = app.open()
+    page.locator("#branch-e").click()
     app.hold = "/paqs-e/narrative-analyses"
     page.locator("#model-id").select_option(result["model_id"])
     page.locator("#web-research").check()
@@ -189,12 +190,14 @@ def test_explicit_narrative_success_and_frozen_research_are_not_prose_extraction
     expect(page.locator("#analyze-button")).to_be_disabled()
     page.locator("#analyze-form").dispatch_event("submit")
     app.hold = None  # Only the already captured POST stays pending.
+    page.locator("#tab-history").click()
     select(app, 1)
     selected = page.locator(".narrative-text").text_content()
     app.hold = None
     app.respond(app.pending.pop())
     expect(page.locator("#analysis-state")).to_contain_text("已提交成功 Narrative")
     assert page.locator(".narrative-text").text_content() == selected
+    page.locator("#tab-history").click()
     select(app, 2)
     assert page.locator(".narrative-text").text_content() == result["response_text"]
     assert json.loads(page.locator("#research-evidence").text_content() or "") == evidence

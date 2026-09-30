@@ -48,6 +48,12 @@ class ModelOptionRead(StrictSchema):
     credential_label: str
     credential_configured: bool
     web_research_supported: bool
+    external_web_research_supported: bool = False
+
+
+class ExternalResearchRead(StrictSchema):
+    provider: Literal["tavily"] = "tavily"
+    credential_configured: bool
 
 
 class CredentialStatusRead(StrictSchema):
@@ -69,6 +75,7 @@ class ConfigurationRead(StrictSchema):
     models: list[ModelOptionRead]
     default_strategy_id: str
     strategies: tuple[StrategyOptionRead, ...]
+    external_research: ExternalResearchRead | None = None
 
 
 class AnalyzeCreate(StrictSchema):

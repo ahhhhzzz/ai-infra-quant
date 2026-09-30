@@ -10,12 +10,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import Field, StrictBool, TypeAdapter
 
+from ai_infra_quant.application.external_research import uses_external_research
 from ai_infra_quant.application.market_data_queries import (
     MarketDataSecurityMetadataConflict,
     MarketDataSecurityNotFound,
     MarketDataSecurityNotSupported,
 )
-from ai_infra_quant.application.paqs_e_research import ResearchFailure
+from ai_infra_quant.application.paqs_e_research import ExternalResearchFailure, ResearchFailure
 from ai_infra_quant.application.paqs_e_runtime import RuntimePackageError
 from ai_infra_quant.backend.api.errors import problem_response
 from ai_infra_quant.backend.dependencies import ContainerDep
@@ -31,6 +32,7 @@ from ai_infra_quant.backend.schemas.paqs_e import (
     CredentialStatusRead,
     DecisionHistoryRead,
     DecisionRead,
+    ExternalResearchRead,
     ModelOptionRead,
     StrategyOptionRead,
     analysis_run_read,
@@ -78,9 +80,19 @@ def get_configuration(
     return ConfigurationRead(
         default_model_key=container.paqs_e_credentials.registry.default_model_key,
         models=[
-            ModelOptionRead.model_validate(item)
+            ModelOptionRead.model_validate(
+                {
+                    **item,
+                    "external_web_research_supported": uses_external_research(
+                        container.paqs_e_credentials.registry.resolve(str(item["model_key"]))
+                    ),
+                }
+            )
             for item in container.paqs_e_credentials.projection()
         ],
+        external_research=ExternalResearchRead(
+            credential_configured=container.search_credentials.status()["credential_configured"]
+        ),
         default_strategy_id=configuration.default_strategy_id,
         strategies=tuple(StrategyOptionRead(**asdict(item)) for item in configuration.strategies),
     )
@@ -117,6 +129,57 @@ def _credential_failure(request: Request, status: int) -> JSONResponse:
         title="Credential operation unavailable",
         detail="Check the registered model and operating-system secure store.",
     )
+
+
+@router.get("/research-credentials/tavily", dependencies=[Depends(_credential_boundary)])
+def search_credential_status(container: ContainerDep) -> dict[str, bool]:
+    return container.search_credentials.status()
+
+
+@router.put(
+    "/research-credentials/tavily",
+    dependencies=[Depends(_credential_boundary)],
+    response_model=None,
+)
+def save_search_credential(
+    payload: CredentialSave, request: Request, container: ContainerDep
+) -> dict[str, bool] | JSONResponse:
+    try:
+        return container.search_credentials.save(payload.secret.get_secret_value())
+    except ValueError:
+        return _credential_failure(request, 422)
+    except Exception:
+        return _credential_failure(request, 503)
+
+
+@router.delete(
+    "/research-credentials/tavily",
+    dependencies=[Depends(_credential_boundary)],
+    response_model=None,
+)
+def delete_search_credential(
+    payload: CredentialDelete, request: Request, container: ContainerDep
+) -> dict[str, bool] | JSONResponse:
+    del payload
+    try:
+        return container.search_credentials.delete()
+    except Exception:
+        return _credential_failure(request, 503)
+
+
+@router.get("/external-research/{research_id}", response_model=None)
+def get_search_evidence(
+    research_id: UUID, request: Request, container: ContainerDep
+) -> JSONResponse:
+    try:
+        result = container.search_evidence.get(str(research_id))
+        return (
+            JSONResponse(content=json.loads(canonical_json(result)))
+            if result
+            else _not_found(request, "RESEARCH")
+        )
+    except (LedgerIntegrityError, LedgerPersistenceError, ValueError):
+        return _ledger_error(request)
 
 
 @router.get(
@@ -266,9 +329,20 @@ def analyze(
             status=422,
             code="PAQS_E_RESEARCH_PRECONDITION_FAILED",
             title="Web research failed",
-            detail=str(failure),
+            detail=(
+                "历史 Q 快照不能使用当前 Tavily 检索。请取消联网后显式运行同快照 E。"
+                "需要当前资料时另行分析当前快照。"
+                if isinstance(failure, ExternalResearchFailure)
+                and failure.failure_code == "FROZEN_SNAPSHOT_EXTERNAL_RESEARCH_BLOCKED"
+                else str(failure)
+            ),
             extra={
                 "failure_kind": failure.kind.value,
+                **(
+                    {"external_research": failure.public_detail()}
+                    if isinstance(failure, ExternalResearchFailure)
+                    else {}
+                ),
                 **(
                     {"research_diagnostic": failure.diagnostic.as_dict()}
                     if failure.diagnostic
@@ -334,9 +408,20 @@ def analyze_narrative(
             status=422,
             code="PAQS_E_RESEARCH_PRECONDITION_FAILED",
             title="Web research failed",
-            detail=str(failure),
+            detail=(
+                "历史 Q 快照不能使用当前 Tavily 检索。请取消联网后显式运行同快照 E。"
+                "需要当前资料时另行分析当前快照。"
+                if isinstance(failure, ExternalResearchFailure)
+                and failure.failure_code == "FROZEN_SNAPSHOT_EXTERNAL_RESEARCH_BLOCKED"
+                else str(failure)
+            ),
             extra={
                 "failure_kind": failure.kind.value,
+                **(
+                    {"external_research": failure.public_detail()}
+                    if isinstance(failure, ExternalResearchFailure)
+                    else {}
+                ),
                 **(
                     {"research_diagnostic": failure.diagnostic.as_dict()}
                     if failure.diagnostic
@@ -431,9 +516,20 @@ def analyze_narrative_from_q(
             status=422,
             code="PAQS_E_RESEARCH_PRECONDITION_FAILED",
             title="Web research failed",
-            detail=str(failure),
+            detail=(
+                "历史 Q 快照不能使用当前 Tavily 检索。请取消联网后显式运行同快照 E。"
+                "需要当前资料时另行分析当前快照。"
+                if isinstance(failure, ExternalResearchFailure)
+                and failure.failure_code == "FROZEN_SNAPSHOT_EXTERNAL_RESEARCH_BLOCKED"
+                else str(failure)
+            ),
             extra={
                 "failure_kind": failure.kind.value,
+                **(
+                    {"external_research": failure.public_detail()}
+                    if isinstance(failure, ExternalResearchFailure)
+                    else {}
+                ),
                 **(
                     {"research_diagnostic": failure.diagnostic.as_dict()}
                     if failure.diagnostic

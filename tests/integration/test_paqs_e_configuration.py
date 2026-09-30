@@ -70,12 +70,15 @@ def test_configuration_is_exact_read_only_and_secret_free(
                     "credential_configured": bool(credential and credential.strip())
                     and item.provider_id == "openai",
                     "web_research_supported": item.web_research_supported,
+                    "external_web_research_supported": item.provider_id == "deepseek"
+                    and not item.web_research_supported,
                 }
                 for item in ModelRegistry().models
                 if item.enabled
                 if item.enabled
             ],
             "default_strategy_id": actual.strategy_id,
+            "external_research": {"provider": "tavily", "credential_configured": False},
             "strategies": [
                 {
                     "strategy_id": actual.strategy_id,

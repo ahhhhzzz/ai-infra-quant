@@ -1,18 +1,29 @@
 from __future__ import annotations
 
+import json
+import re
 from collections.abc import Callable
 from datetime import datetime
 from importlib.resources import files
 
+from ai_infra_quant.application.external_research import uses_external_research
 from ai_infra_quant.application.paqs_e_analysis import CurrentSnapshotQueries
 from ai_infra_quant.application.paqs_e_models import ModelRegistry
-from ai_infra_quant.application.paqs_e_research import ResearchFailure, WebResearch
+from ai_infra_quant.application.paqs_e_research import (
+    ExternalResearchFailure,
+    ResearchFailure,
+    WebResearch,
+)
 from ai_infra_quant.application.paqs_e_runtime import RuntimePackageError, load_strategy_package
 from ai_infra_quant.core.domain.common import canonical_uuid, utc_now
 from ai_infra_quant.core.domain.paqs_e_ledger import payload_sha256
 from ai_infra_quant.core.domain.paqs_e_narrative import (
     NARRATIVE_PROMPT_VERSION,
+    TAVILY_PROMPT_VERSION,
+    NarrativeFailure,
+    NarrativeFailureKind,
     NarrativeRequest,
+    NarrativeSuccess,
     PersistedNarrative,
 )
 from ai_infra_quant.core.domain.paqs_e_reasoning import (
@@ -26,8 +37,8 @@ from ai_infra_quant.core.ports.paqs_e_narrative import NarrativeLedger, PaqsENar
 from ai_infra_quant.core.ports.paqs_e_reasoning import ReasoningFailureKind
 
 
-def load_narrative_prompt() -> PromptPackage:
-    name = "runtime_prompt_narrative_v1.md"
+def load_narrative_prompt(*, external: bool = False) -> PromptPackage:
+    name = "runtime_prompt_narrative_tavily_v1.md" if external else "runtime_prompt_narrative_v1.md"
     try:
         content = (
             files("ai_infra_quant.resources.paqs_e").joinpath(name).read_text(encoding="utf-8")
@@ -35,7 +46,7 @@ def load_narrative_prompt() -> PromptPackage:
     except (OSError, UnicodeError):
         raise RuntimePackageError("Narrative prompt unavailable") from None
     return PromptPackage(
-        NARRATIVE_PROMPT_VERSION,
+        TAVILY_PROMPT_VERSION if external else NARRATIVE_PROMPT_VERSION,
         "src/ai_infra_quant/resources/paqs_e/" + name,
         payload_sha256(content),
         content,
@@ -84,9 +95,11 @@ class NarrativeAnalysisService:
         research: WebResearch,
         *,
         now: Callable[[], datetime] = utc_now,
+        external_research: WebResearch | None = None,
     ) -> None:
         self.snapshots, self.provider, self.ledger = snapshots, provider, ledger
         self.models, self.research, self.now = models, research, now
+        self.external_research = external_research
 
     def analyze(
         self, *, security_id: str, model_key: str, strategy_id: str, web_research: bool
@@ -118,6 +131,8 @@ class NarrativeAnalysisService:
         reserved for an explicit same-Snapshot Q/E comparison and never fetches data.
         """
         canonical_uuid(security_id)
+        if web_research and uses_external_research(self.models.resolve(model_key)):
+            raise ExternalResearchFailure("FROZEN_SNAPSHOT_EXTERNAL_RESEARCH_BLOCKED")
         strategy, prompt = load_strategy_package(strategy_id), load_narrative_prompt()
         return self._analyze_snapshot(
             security_id=security_id,
@@ -141,9 +156,16 @@ class NarrativeAnalysisService:
         if snapshot.security.security_id != security_id:
             raise ValueError("Snapshot Security mismatch")
         model = self.models.resolve(model_key)
-        if web_research and not model.web_research_supported:
+        external = web_research and uses_external_research(model)
+        if external and self.external_research is None:
+            raise ExternalResearchFailure("NOT_CONFIGURED")
+        if web_research and not external and not model.web_research_supported:
             raise ResearchFailure(ReasoningFailureKind.CONFIGURATION_ERROR)
-        context = self.research.research(model, snapshot) if web_research else ()
+        if external and self.external_research is not None:
+            context = self.external_research.research(model, snapshot)
+            prompt = load_narrative_prompt(external=True)
+        else:
+            context = self.research.research(model, snapshot) if web_research else ()
         request = build_narrative_request(
             snapshot=snapshot,
             model_provider=model.provider_id,
@@ -155,6 +177,15 @@ class NarrativeAnalysisService:
         )
         started = self.now()
         outcome = self.provider.reason_text(request=request, strategy=strategy, prompt=prompt)
+        if external and isinstance(outcome, NarrativeSuccess):
+            source_ids = {
+                source["source_id"]
+                for item in context
+                for source in json.loads(item.provenance or "{}").get("sources", [])
+            }
+            cited = set(re.findall(r"\[(T\d+)\]", outcome.text))
+            if not cited or not cited.issubset(source_ids):
+                outcome = NarrativeFailure(NarrativeFailureKind.INVALID_FINAL_TEXT)
         return self.ledger.record(
             request=request,
             strategy=strategy,

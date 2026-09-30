@@ -136,3 +136,32 @@ class WebResearch(Protocol):
     def research(
         self, model: ModelDescriptor, snapshot: PaqsMarketSnapshot
     ) -> tuple[AuxiliaryContextItem, ...]: ...
+
+
+class ExternalResearchFailure(ResearchFailure):
+    """Independent search failure; never a fabricated native model tool event."""
+
+    def __init__(self, failure_code: str, evidence: dict[str, object] | None = None) -> None:
+        if failure_code not in {
+            "NOT_CONFIGURED",
+            "AUTHENTICATION_FAILED",
+            "RATE_LIMITED",
+            "TIMEOUT",
+            "EMPTY_RESULTS",
+            "INVALID_RESPONSE",
+            "PROVIDER_UNAVAILABLE",
+            "IDENTITY_INSUFFICIENT",
+            "FROZEN_SNAPSHOT_EXTERNAL_RESEARCH_BLOCKED",
+        }:
+            raise ValueError("Unknown external research failure")
+        self.failure_code = failure_code
+        self.evidence = evidence or {}
+        self.research_id: str | None = None
+        super().__init__(ReasoningFailureKind.CONFIGURATION_ERROR)
+
+    def public_detail(self) -> dict[str, object]:
+        return {
+            "provider": "tavily",
+            "failure_code": self.failure_code,
+            "research_id": self.research_id,
+        }

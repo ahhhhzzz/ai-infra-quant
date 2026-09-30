@@ -8,6 +8,7 @@ from fastapi import Depends, Request
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from ai_infra_quant.application.external_research import SavedExternalResearch
 from ai_infra_quant.application.market_data_archive import MarketDataArchiveService
 from ai_infra_quant.application.market_data_queries import (
     MarketDataProviderFactory,
@@ -23,6 +24,7 @@ from ai_infra_quant.application.paqs_market_snapshot_queries import PaqsMarketSn
 from ai_infra_quant.application.paqs_q_product_analysis import PaqsQProductAnalysisService
 from ai_infra_quant.application.paqs_structure_queries import PaqsStructureQueries
 from ai_infra_quant.application.portfolio_queries import PortfolioQueries
+from ai_infra_quant.application.search_credentials import SearchCredentials
 from ai_infra_quant.application.security_service import SecurityService
 from ai_infra_quant.application.status_queries import StatusQueries
 from ai_infra_quant.application.supported_security_service import SupportedSecurityService
@@ -34,6 +36,7 @@ from ai_infra_quant.core.domain.strategy import StrategyDefinition
 from ai_infra_quant.core.ports.paqs_e_ledger import PaqsELedger
 from ai_infra_quant.core.ports.paqs_e_narrative import NarrativeLedger
 from ai_infra_quant.core.strategy.registry import StrategyRegistry
+from ai_infra_quant.database.repositories.external_research import SQLAlchemySearchEvidence
 from ai_infra_quant.database.repositories.market_data_archive import SQLAlchemyMarketDataArchive
 from ai_infra_quant.database.repositories.paqs_e_ledger import SQLAlchemyPaqsELedger
 from ai_infra_quant.database.repositories.paqs_e_narrative import SQLAlchemyNarrativeLedger
@@ -43,6 +46,7 @@ from ai_infra_quant.integrations.futu_quote.adapter import FutuQuoteAdapter
 from ai_infra_quant.integrations.openai_reasoning.gateway import ModelGateway
 from ai_infra_quant.integrations.openai_reasoning.narrative import NarrativeGateway
 from ai_infra_quant.integrations.registry import Registries
+from ai_infra_quant.integrations.tavily_research import TavilyResearch
 from ai_infra_quant.integrations.windows_credentials import WindowsCredentialStore
 
 
@@ -71,6 +75,8 @@ class AppContainer:
     narrative_analysis_service: NarrativeAnalysisService
     paqs_q_analysis_ledger: SQLAlchemyPaqsQAnalysisStore
     paqs_q_analysis_service: PaqsQProductAnalysisService
+    search_credentials: SearchCredentials
+    search_evidence: SQLAlchemySearchEvidence
 
 
 def build_container(
@@ -146,6 +152,14 @@ def build_container(
     )
     gateway = ModelGateway(models, credentials)
     narrative_ledger = SQLAlchemyNarrativeLedger(session_factory)
+    search_credentials = SearchCredentials(
+        WindowsCredentialStore(frozenset({"tavily"})),
+        fallback=os.environ.get("TAVILY_API_KEY"),
+    )
+    search_evidence = SQLAlchemySearchEvidence(session_factory)
+    external_research = SavedExternalResearch(
+        TavilyResearch(search_credentials.secret), search_evidence
+    )
     paqs_q_ledger = SQLAlchemyPaqsQAnalysisStore(session_factory)
     return AppContainer(
         settings=settings,
@@ -181,6 +195,8 @@ def build_container(
         paqs_e_configuration=configuration,
         paqs_e_credentials=credentials,
         narrative_ledger=narrative_ledger,
+        search_credentials=search_credentials,
+        search_evidence=search_evidence,
         paqs_q_analysis_ledger=paqs_q_ledger,
         paqs_q_analysis_service=PaqsQProductAnalysisService(snapshot_queries, paqs_q_ledger),
         narrative_analysis_service=NarrativeAnalysisService(
@@ -189,6 +205,7 @@ def build_container(
             narrative_ledger,
             models,
             gateway,
+            external_research=external_research,
         ),
         paqs_e_analysis_service=PaqsEAnalysisService(
             snapshot_queries,

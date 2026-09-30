@@ -19,6 +19,7 @@ from ai_infra_quant.core.domain.paqs_market_snapshot import PaqsMarketSnapshot
 NARRATIVE_REQUEST_VERSION = "paqs-e-narrative-request-v1"
 NARRATIVE_OUTPUT_VERSION = "paqs-e-narrative-markdown-v1"
 NARRATIVE_PROMPT_VERSION = "paqs-e-narrative-prompt-v1"
+TAVILY_PROMPT_VERSION = "paqs-e-narrative-tavily-prompt-v1"
 MAX_NARRATIVE_CHARACTERS = 100_000
 
 
@@ -116,7 +117,7 @@ class NarrativeRequest:
         if (
             self.request_schema_version != NARRATIVE_REQUEST_VERSION
             or self.output_format_version != NARRATIVE_OUTPUT_VERSION
-            or self.prompt_version != NARRATIVE_PROMPT_VERSION
+            or self.prompt_version not in {NARRATIVE_PROMPT_VERSION, TAVILY_PROMPT_VERSION}
             or self.analysis_mode is not AnalysisMode.CURRENT_ANALYSIS
         ):
             raise ValueError("Unsupported narrative version or mode")

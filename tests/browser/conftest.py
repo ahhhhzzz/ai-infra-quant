@@ -20,6 +20,7 @@ def workbench_server(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
     temporary = tmp_path_factory.mktemp("007c-real-startup")
     env = os.environ.copy()
     env.pop("OPENAI_API_KEY", None)
+    env.pop("TAVILY_API_KEY", None)
     env.update(
         DATABASE_URL=f"sqlite:///{(temporary / 'app.db').as_posix()}",
         MARKET_DATA_PROVIDER="none",
@@ -76,7 +77,7 @@ def workbench_server(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
                 time.sleep(0.1)
             else:
                 raise AssertionError("Actual Uvicorn startup timed out")
-            assert health.json()["migration_revision"] == "0005_task006e_q_analysis"
+            assert health.json()["migration_revision"] == "0006_external_research"
             yield address
         finally:
             # Only the subprocess created above belongs to this fixture.
