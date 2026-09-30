@@ -9,6 +9,7 @@ from ai_infra_quant.application.watchlist_service import WatchlistItemView
 from ai_infra_quant.core.domain.common import utc_now
 from ai_infra_quant.core.domain.enums import DataAvailabilityStatus, InstrumentType
 from ai_infra_quant.core.domain.market_data import MarketDataSecurity, ProviderResult, QuoteSnapshot
+from ai_infra_quant.core.domain.quote_metadata import NamedQuoteSnapshot
 from ai_infra_quant.core.domain.security import (
     Security,
     SecurityIdentityConflict,
@@ -21,6 +22,7 @@ class ProviderValidation:
     status: DataAvailabilityStatus
     provider: str
     retrieved_at: datetime
+    display_name: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -83,7 +85,7 @@ class SupportedSecurityService:
                             symbol=normalized_symbol,
                             currency=currency,
                             instrument_type=InstrumentType.EQUITY.value,
-                            display_name=normalized_symbol,
+                            display_name=validation.display_name or normalized_symbol,
                         )
                     except SecurityIdentityConflict as exc:
                         security = uow.securities.get(exc.security_id)
@@ -91,6 +93,10 @@ class SupportedSecurityService:
                         if security is None:
                             raise
                 _require_compatible_security(security, currency)
+                if validation.display_name:
+                    security = uow.securities.fill_display_name(
+                        security.id, validation.display_name
+                    )
                 created_item, item_security, added_at, display_order = uow.watchlists.add(
                     security.id
                 )
@@ -130,7 +136,30 @@ class SupportedSecurityService:
                 retrieved_at=utc_now(),
             ) from exc
         _require_valid_quote(result, security)
-        return ProviderValidation(result.status, result.provider, result.retrieved_at)
+        name = result.data.display_name if isinstance(result.data, NamedQuoteSnapshot) else None
+        if (
+            not isinstance(name, str)
+            or not 0 < len(name.strip()) <= 120
+            or any(ord(c) < 32 for c in name)
+        ):
+            name = None
+        return ProviderValidation(result.status, result.provider, result.retrieved_at, name)
+
+    def refresh_name(self, security_id: str) -> Security:
+        with self._uow_factory() as uow:
+            security = uow.securities.get(security_id)
+        if security is None:
+            raise LookupError("Security not found")
+        currency, timezone = _market_contract(security.market)
+        _require_compatible_security(security, currency)
+        validation = self._validate(
+            MarketDataSecurity(security.market, security.symbol, currency, timezone)
+        )
+        if validation.display_name:
+            with self._uow_factory() as uow:
+                security = uow.securities.fill_display_name(security.id, validation.display_name)
+                uow.commit()
+        return security
 
 
 def _market_contract(market: str) -> tuple[str, str]:

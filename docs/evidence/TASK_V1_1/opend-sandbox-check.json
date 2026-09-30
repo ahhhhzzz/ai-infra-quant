@@ -1,0 +1,61 @@
+{
+  "security": "HK.09698",
+  "name_status": 422,
+  "name": null,
+  "provider": "futu",
+  "q_http_status": 201,
+  "analysis_id": "d056d310-becb-4596-b0f1-793f9f997a4e",
+  "status": "INSUFFICIENT",
+  "snapshot_hash": "542f53e437e8fe2115f54b2e48ea1a74017ebfded25435700b95003f5585ed99",
+  "coverage": {
+    "d1_source_count": 0,
+    "m30_completed_count": 0,
+    "m30_partial_count": 0,
+    "minute_source_count": 0,
+    "w1_completed_count": 0,
+    "w1_partial_count": 0,
+    "w1_unknown_count": 0
+  },
+  "snapshot_counts": {
+    "w1_bars": 0,
+    "d1_bars": 0,
+    "m30_bars": 0
+  },
+  "raw_minute_count": 0,
+  "source_sha256": "66a44ef6fc436bd2edd83235f9f8e07a5a19031503c924d0f0c1ba2b466961de",
+  "context": {
+    "D1": {
+      "status": "INSUFFICIENT",
+      "latest_frame": []
+    },
+    "M30": {
+      "status": "INSUFFICIENT",
+      "latest_frame": []
+    },
+    "W1": {
+      "status": "INSUFFICIENT",
+      "latest_frame": []
+    }
+  },
+  "diagnostics": [
+    "HISTORICAL_PRICE_AVAILABILITY_UNKNOWN",
+    "HISTORICAL_CALENDAR_AVAILABILITY_UNKNOWN",
+    "INDEPENDENT_M30_OPEN_REFERENCE_MISSING",
+    "CLOSED_DAY_FACTS_UNAVAILABLE",
+    "ADJUSTMENT_HISTORY_NOT_POINT_IN_TIME",
+    "CURRENT_QFQ_NOT_POINT_IN_TIME",
+    "CALENDAR_SOURCE_NOT_AVAILABLE",
+    "W1_INPUT_MISSING",
+    "D1_INPUT_MISSING",
+    "M30_INPUT_MISSING"
+  ],
+  "entry_reference_count": 0,
+  "qualification_mode": "OBSERVATIONAL",
+  "warnings": [
+    "1m UNAVAILABLE: [Errno 13] Permission denied: <OpenD SDK log directory>",
+    "Current provider QFQ data is not point-in-time-safe historical replay",
+    "D1 UNAVAILABLE: [Errno 13] Permission denied: <OpenD SDK log directory>",
+    "calendar UNAVAILABLE: [Errno 13] Permission denied: <OpenD SDK log directory>"
+  ],
+  "calendar_status": "UNAVAILABLE"
+}

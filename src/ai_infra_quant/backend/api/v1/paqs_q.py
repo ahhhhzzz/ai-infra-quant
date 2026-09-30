@@ -83,14 +83,64 @@ def history(
     request: Request,
     container: ContainerDep,
     limit: int = Query(default=20, ge=1, le=100),
+    deleted: bool = False,
 ) -> JSONResponse:
     try:
-        items = container.paqs_q_analysis_ledger.history(str(security_id), limit=limit)
+        items = container.paqs_q_analysis_ledger.history(
+            str(security_id), limit=limit, deleted=deleted
+        )
     except (PaqsQAnalysisIntegrityError, PaqsQAnalysisPersistenceError, ValueError):
         return _error(
             request, 500, "PAQS_Q_LEDGER_ERROR", "Q history failed integrity verification"
         )
     return JSONResponse(content={"items": items})
+
+
+@router.get("/analyses/{analysis_id}/e-matches", response_model=None)
+def matching_e(
+    analysis_id: UUID,
+    request: Request,
+    container: ContainerDep,
+    limit: int = Query(default=20, ge=1, le=100),
+) -> JSONResponse:
+    try:
+        q = container.paqs_q_analysis_ledger.get(str(analysis_id))
+        if q is None:
+            return _error(request, 404, "PAQS_Q_ANALYSIS_NOT_FOUND", "Q analysis not found")
+        ledger = container.narrative_ledger
+        matches = ledger.history(q["security_id"], limit=limit, snapshot_hash=q["snapshot_hash"])
+        has_deleted = bool(
+            ledger.history(
+                q["security_id"], limit=1, snapshot_hash=q["snapshot_hash"], deleted=True
+            )
+        )
+        state = (
+            "MATCHES_FOUND"
+            if matches
+            else "MATCHES_DELETED"
+            if has_deleted
+            else "OTHER_SNAPSHOT_ONLY"
+            if ledger.history(q["security_id"], limit=1)
+            else "NO_E_FOR_SNAPSHOT"
+        )
+        items = []
+        for entry in matches:
+            item = json.loads(canonical_json(entry))
+            item.pop("response_text")
+            items.append(item)
+        return JSONResponse(
+            content={"items": items, "state": state, "has_deleted_matches": has_deleted}
+        )
+    except (
+        PaqsQAnalysisIntegrityError,
+        PaqsQAnalysisPersistenceError,
+        LedgerIntegrityError,
+        LedgerPersistenceError,
+        ValueError,
+        TypeError,
+        KeyError,
+    ):
+        return _error(request, 500, "COMPARISON_LEDGER_ERROR", "Matching history query failed")
 
 
 @router.get("/analyses/{analysis_id}/compare/{narrative_result_id}", response_model=None)

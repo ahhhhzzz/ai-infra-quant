@@ -5,18 +5,24 @@ particular, a completed M30 OHLC does not prove its opening price was separately
 observed when the interval opened.
 """
 
-from dataclasses import dataclass
+import hashlib
+from dataclasses import dataclass, replace
 from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from ai_infra_quant.application.observed_calendar import ScheduledCalendarMetadata
+from ai_infra_quant.application.paqs_capture_evidence import (
+    CapturedPaqsInputBundle,
+    capture_payload,
+)
 from ai_infra_quant.core.domain.enums import DataAvailabilityStatus
-from ai_infra_quant.core.domain.market_data import TradingDay, TradingDayType
+from ai_infra_quant.core.domain.market_data import DailyBar, MinuteBar, TradingDay, TradingDayType
 from ai_infra_quant.core.domain.paqs_input import PaqsInputBundle
 from ai_infra_quant.core.domain.paqs_market_snapshot import (
     PaqsMarketSnapshot,
     SnapshotDailyBar,
     SnapshotDerivedBar,
+    canonical_json,
 )
 from ai_infra_quant.core.domain.paqs_q.canonical import FrozenJSON
 from ai_infra_quant.core.domain.paqs_q.inputs import Bar, Fact, QInput
@@ -289,9 +295,12 @@ def adapt_snapshot(snapshot: PaqsMarketSnapshot, source: PaqsInputBundle) -> Pro
     diagnostics = [
         "HISTORICAL_PRICE_AVAILABILITY_UNKNOWN",
         "HISTORICAL_CALENDAR_AVAILABILITY_UNKNOWN",
-        "DERIVED_BAR_SOURCE_RETRIEVAL_UNAVAILABLE",
         "INDEPENDENT_M30_OPEN_REFERENCE_MISSING",
     ]
+    source_digest = hashlib.sha256(canonical_json(capture_payload(source)).encode()).hexdigest()
+    retained = isinstance(source, CapturedPaqsInputBundle)
+    if not retained:
+        diagnostics.append("DERIVED_BAR_SOURCE_RETRIEVAL_UNAVAILABLE")
     schedule = source.calendar
     schedule_evidence = None
     if isinstance(schedule, ScheduledCalendarMetadata):
@@ -342,7 +351,10 @@ def adapt_snapshot(snapshot: PaqsMarketSnapshot, source: PaqsInputBundle) -> Pro
             "adjustment_basis": adjustment,
             "adjustment_as_of": source.adjustment.adjustment_as_of,
             "historical_replay_safe": source.adjustment.historical_replay_safe,
-            "derived_bar_retrieval": "SNAPSHOT_OBSERVATION_ONLY",
+            "derived_bar_retrieval": "RETAINED_SOURCE_CAPTURE"
+            if retained
+            else "SNAPSHOT_OBSERVATION_ONLY",
+            "source_capture_sha256": source_digest,
         }
     )
 
@@ -372,6 +384,65 @@ def adapt_snapshot(snapshot: PaqsMarketSnapshot, source: PaqsInputBundle) -> Pro
     if weekly is None:
         diagnostics.append("W1_SESSION_FACT_MISSING")
     intraday = _m30(snapshot.m30_bars, security, adjustment, snapshot.as_of_timestamp)
+    if isinstance(source, CapturedPaqsInputBundle):
+
+        def bind(bars: tuple[Bar, ...]) -> tuple[Bar, ...]:
+            bound = []
+            zone = ZoneInfo(snapshot.security.market_timezone)
+            for bar in bars:
+                members: tuple[DailyBar | MinuteBar, ...]
+                if bar.timeframe == "W1":
+                    members = tuple(
+                        x
+                        for x in source.completed_d1_bars
+                        if bar.start.astimezone(zone).date()
+                        <= x.session_date
+                        < bar.end.astimezone(zone).date()
+                    )
+                else:
+                    members = tuple(
+                        x
+                        for x in source.source_minute_bars
+                        if bar.start <= x.interval_start and x.interval_end <= bar.end
+                    )
+                if not members or any(
+                    x.security != security
+                    or not x.is_completed
+                    or x.retrieved_at > snapshot.as_of_timestamp
+                    for x in members
+                ):
+                    raise ValueError("DERIVED_SOURCE_MEMBERSHIP_INVALID")
+                if bar.timeframe == "M30" and (
+                    len(members) != 30
+                    or any(
+                        not isinstance(x, MinuteBar)
+                        or x.interval_start != bar.start + timedelta(minutes=i)
+                        or x.interval_end != bar.start + timedelta(minutes=i + 1)
+                        for i, x in enumerate(members)
+                    )
+                ):
+                    raise ValueError("DERIVED_SOURCE_COVERAGE_INVALID")
+                # Canonical raw OHLCV must actually reproduce the frozen derived bar.
+                if (
+                    members[0].open != bar.open
+                    or members[-1].close != bar.close
+                    or max(x.high for x in members) != bar.high
+                    or min(x.low for x in members) != bar.low
+                    or sum(x.volume for x in members) != bar.volume
+                ):
+                    raise ValueError("DERIVED_SOURCE_PRICES_MISMATCH")
+                ref = hashlib.sha256(canonical_json(members).encode()).hexdigest()
+                bound.append(
+                    replace(
+                        bar,
+                        retrieved_at=max(x.retrieved_at for x in members),
+                        source_ref=f"capture:{source_digest}:members:{ref}",
+                    )
+                )
+            return tuple(bound)
+
+        weekly = bind(weekly) if weekly is not None else None
+        intraday = bind(intraday)
     return ProductQInputs(
         snapshot_hash=snapshot.snapshot_hash,
         multi_input=MultiInput(

@@ -21,6 +21,7 @@ from ai_infra_quant.backend.api.router import api_router
 from ai_infra_quant.backend.dependencies import build_container
 from ai_infra_quant.backend.runtime_identity import capture_source_revision
 from ai_infra_quant.config import Settings
+from ai_infra_quant.database.repositories.analysis_visibility import AnalysisDeletedError
 from ai_infra_quant.database.seed import bootstrap_phase_one
 from ai_infra_quant.database.session import (
     create_database_engine,
@@ -84,6 +85,13 @@ def create_app(
         return await validation_exception_handler(request, exc)
 
     application.add_exception_handler(RequestValidationError, request_validation_handler)
+
+    async def deleted_handler(request: Request, exc: Exception) -> JSONResponse:
+        return problem_response(
+            request, status=410, code="ANALYSIS_DELETED", title="Analysis deleted", detail=str(exc)
+        )
+
+    application.add_exception_handler(AnalysisDeletedError, deleted_handler)
 
     @application.middleware("http")
     async def request_context(request: Request, call_next: RequestResponseEndpoint) -> Response:

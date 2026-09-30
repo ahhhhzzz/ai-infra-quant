@@ -1,11 +1,12 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import JSONResponse
 
 from ai_infra_quant.application.supported_security_service import SupportedSecurityAddError
 from ai_infra_quant.application.watchlist_service import WatchlistItemView
 from ai_infra_quant.backend.api.errors import problem_response
+from ai_infra_quant.backend.api.v1.paqs_e import _credential_boundary
 from ai_infra_quant.backend.dependencies import ContainerDep
 from ai_infra_quant.backend.schemas.security import security_summary_from_domain
 from ai_infra_quant.backend.schemas.watchlist import (
@@ -19,6 +20,27 @@ from ai_infra_quant.backend.schemas.watchlist import (
 )
 
 router = APIRouter()
+
+
+@router.post(
+    "/securities/{security_id}/refresh-name",
+    dependencies=[Depends(_credential_boundary)],
+    response_model=None,
+)
+def refresh_security_name(
+    security_id: UUID, request: Request, container: ContainerDep
+) -> JSONResponse:
+    try:
+        security = container.supported_security_service.refresh_name(str(security_id))
+        return JSONResponse(content=security_summary_from_domain(security).model_dump(mode="json"))
+    except (LookupError, SupportedSecurityAddError, ValueError) as exc:
+        return problem_response(
+            request,
+            status=404 if isinstance(exc, LookupError) else 422,
+            code="SECURITY_NAME_UNAVAILABLE",
+            title="Name refresh unavailable",
+            detail="未能补全名称, 继续保留原名称或代码; 行情与分析可照常使用。",
+        )
 
 
 def _item_schema(item: WatchlistItemView) -> WatchlistItemRead:

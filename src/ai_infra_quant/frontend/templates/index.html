@@ -12,7 +12,7 @@
   <div class="header-actions">
     <span id="service-health" role="status">服务检查中</span>
     <span id="provider-mode" class="provider-mode">行情来源 —</span>
-    <button id="refresh-market" class="refresh-button" type="button">刷新行情</button>
+    <button id="refresh-security-name" type="button">补全证券名称</button><button id="refresh-market" class="refresh-button" type="button">刷新行情</button>
     <span id="refresh-countdown" class="countdown" aria-live="polite">自动刷新：—</span>
     <button id="theme-toggle" type="button" aria-label="切换明暗主题">浅色模式</button>
   </div>
@@ -168,14 +168,14 @@
 </div>
   </section>
   <section id="pane-history" role="tabpanel" aria-labelledby="tab-history" hidden>
-    <p class="note">查看已保存的结果，不重新分析。以下记录仅属于当前证券。</p>
+    <p class="note">查看已保存的结果，不重新分析。删除仅从历史列表移除，可恢复；原始证据仍保留，不释放数据库空间。</p>
     <div class="history-columns">
-      <section class="decision-history"><div class="section-heading"><h2>Q 分析历史</h2><button id="q-history-refresh" type="button" disabled>刷新列表</button></div><p id="q-history-status" role="status"></p><div id="q-history"></div></section>
+      <section class="decision-history"><div class="section-heading"><h2>Q 分析历史</h2><button id="q-history-refresh" type="button" disabled>刷新列表</button></div><label><input id="q-history-deleted" type="checkbox">已删除 Q 记录（可恢复）</label><p id="q-history-status" role="status"></p><div id="q-history"></div></section>
           <section class="decision-history" aria-label="成功 E 分析历史">
             <div class="section-heading"><h2>E 分析历史</h2><button id="reload-history" type="button">刷新历史</button></div>
             <label>策略序列筛选<select id="history-strategy"><option value="">全部策略</option></select></label>
             <p class="note">仅成功记录 · 最近 20 条 · 修订号按证券与策略分别计数</p>
-            <p id="history-status" role="status"></p>
+            <label><input id="e-history-deleted" type="checkbox">已删除 E 记录（可恢复）</label><p id="history-status" role="status"></p>
             <div id="decision-history"></div>
             <details id="legacy-history-section"><summary>Legacy 结构化 Decision 历史（只读）</summary>
               <p id="legacy-history-status" role="status"></p><div id="legacy-history"></div>
@@ -185,11 +185,11 @@
 </div></section>
   <section id="pane-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
     <div class="section-heading"><h2>同快照 · Q/E 对照</h2><button type="button" id="q-e-settings">设置 E 模型</button></div>
-    <p id="q-e-selection" class="note">读取模型设置…</p>
+    <p class="note">本次对照固定不联网：同快照路径不支持追加 Tavily 检索，不改变 E 页联网设置。</p><p id="q-e-selection" class="note">读取模型设置…</p>
     <p class="note">从右侧选中的 Q 记录开始。读取已有记录免费；运行 E 将调用所选模型，可能产生费用。</p>
     <div class="compare-existing"><label>同快照 E 历史<select id="q-e-options" disabled><option value="">请先选择 Q 记录</option></select></label><button id="q-e-read" type="button" disabled>读取对照</button><button id="q-e-refresh" type="button" disabled>刷新列表</button></div>
     <p id="q-e-list-status" class="note" role="status"></p>
-    <button id="q-e-analyze" type="button" disabled>运行同快照 E 分析（可能收费）</button>
+    <button id="q-e-analyze" type="button" disabled>使用这份 Q 快照生成 E 对照（可能收费）</button>
     <details class="advanced-compare"><summary>高级：按已知 E 记录 ID 读取</summary><form id="q-e-known-form" class="paqs-q-known-form"><label>E Narrative Result UUID<input id="q-e-known-id" maxlength="36" autocomplete="off" required></label><button type="submit">读取对照</button></form></details>
     <p id="q-e-status" role="status" aria-live="polite">请先选择 Q 记录。</p><div id="q-e-result"></div>
   </section>
@@ -264,6 +264,7 @@
 <script src="/static/market-data-archive.js" defer></script>
 <script src="/static/app.js" defer></script>
 <script src="/static/narrative-markdown.js" defer></script>
+<script src="/static/history-visibility.js" defer></script>
 <script src="/static/paqs-e.js" defer></script>
 <script src="/static/paqs-q-view.js" defer></script>
 <script src="/static/workbench.js" defer></script>

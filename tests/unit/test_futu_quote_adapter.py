@@ -712,3 +712,41 @@ def test_daily_five_year_limit_pages_past_one_thousand() -> None:
     assert len(result.data) == 1300
     assert len(context.history_calls) == 2
     assert result.data == tuple(sorted(result.data, key=lambda bar: bar.session_date))
+
+
+@pytest.mark.parametrize(
+    "name, expected",
+    [
+        ("中文名称", "中文名称"),
+        ("<img src=x>", "<img src=x>"),
+        ("x" * 120, "x" * 120),
+        ("x" * 121, None),
+        (float("nan"), None),
+        ("", None),
+    ],
+)
+def test_quote_name_uses_identity_checked_snapshot(name, expected):
+    context = FakeQuoteContext()
+    context.snapshot_result[1].rows[0]["name"] = name
+    with _adapter(context) as adapter:
+        result = adapter.get_latest_quote(US_AVGO)
+    assert result.status is DataAvailabilityStatus.AVAILABLE
+    assert result.data.display_name == expected
+
+
+def test_minute_retrieval_is_receipt_time_but_completion_uses_request_cutoff():
+    context = FakeQuoteContext()
+    clock = [FIXED_NOW]
+    original = context.request_history_kline
+
+    def delayed(**kwargs):
+        result = original(**kwargs)
+        clock[0] += timedelta(minutes=1)
+        return result
+
+    context.request_history_kline = delayed
+    with _adapter(context, now=lambda: clock[0]) as adapter:
+        result = adapter.get_recent_minute_bars(US_AVGO)
+    assert result.retrieved_at == FIXED_NOW + timedelta(minutes=1)
+    assert len(result.data) == 1  # The bar incomplete at request time stays excluded.
+    assert result.data[0].retrieved_at == result.retrieved_at

@@ -7,6 +7,7 @@ from ai_infra_quant.database.models.accounting import (
     PortfolioSnapshotModel,
     UnitTransactionModel,
 )
+from ai_infra_quant.database.models.analysis_visibility import visibility
 from ai_infra_quant.database.models.external_research import searches as external_searches
 from ai_infra_quant.database.models.market_data_archive import captures as archive_captures
 from ai_infra_quant.database.models.market_data_archive import memberships as archive_memberships
@@ -66,4 +67,5 @@ __all__ = [
     "narrative_results",
     "narrative_runs",
     "paqs_q_analysis_runs",
+    "visibility",
 ]

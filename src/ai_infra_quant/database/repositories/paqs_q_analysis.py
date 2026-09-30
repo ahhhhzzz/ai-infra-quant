@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from ai_infra_quant.core.domain.common import canonical_uuid, require_utc
 from ai_infra_quant.core.domain.paqs_market_snapshot import PaqsMarketSnapshot, canonical_json
 from ai_infra_quant.database.models.paqs_q_analysis import paqs_q_analysis_runs
+from ai_infra_quant.database.repositories.analysis_visibility import deleted_filter, require_visible
 
 
 class PaqsQAnalysisIntegrityError(ValueError):
@@ -72,6 +73,13 @@ def _verify_payload(
         raise PaqsQAnalysisIntegrityError("Frozen Q Snapshot content hash mismatch")
     if "status" in payload and payload["status"] != status:
         raise PaqsQAnalysisIntegrityError("Q analysis status differs from payload")
+    source = payload.get("source_capture")
+    if source is not None and (
+        not isinstance(source, dict)
+        or source.get("security_id") != security_id
+        or _digest(canonical_json(source)) != payload.get("source_capture_sha256")
+    ):
+        raise PaqsQAnalysisIntegrityError("Q source capture identity or digest mismatch")
     try:
         return canonical_json(payload)
     except (TypeError, ValueError) as exc:
@@ -159,6 +167,7 @@ class SQLAlchemyPaqsQAnalysisStore:
         analysis_id = canonical_uuid(analysis_id)
         try:
             with self._sessions() as session:
+                require_visible(session, "Q", analysis_id)
                 row = (
                     session.execute(
                         sa.select(paqs_q_analysis_runs).where(
@@ -172,7 +181,9 @@ class SQLAlchemyPaqsQAnalysisStore:
         except SQLAlchemyError as exc:
             raise PaqsQAnalysisIntegrityError("Q analysis could not be read") from exc
 
-    def history(self, security_id: str, limit: int = 20) -> list[dict[str, Any]]:
+    def history(
+        self, security_id: str, limit: int = 20, *, deleted: bool = False
+    ) -> list[dict[str, Any]]:
         security_id = canonical_uuid(security_id)
         if isinstance(limit, bool) or not 1 <= limit <= 100:
             raise ValueError("Q analysis history limit must be 1..100")
@@ -182,6 +193,7 @@ class SQLAlchemyPaqsQAnalysisStore:
                     session.execute(
                         sa.select(paqs_q_analysis_runs)
                         .where(paqs_q_analysis_runs.c.security_id == security_id)
+                        .where(deleted_filter("Q", paqs_q_analysis_runs.c.analysis_id) == deleted)
                         .order_by(
                             paqs_q_analysis_runs.c.created_at.desc(),
                             paqs_q_analysis_runs.c.analysis_id.desc(),

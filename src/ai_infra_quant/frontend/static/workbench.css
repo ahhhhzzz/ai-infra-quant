@@ -150,3 +150,12 @@ main { width: 100%; max-width: none; padding: 12px 16px 20px; }
   .workspace-tabs button { padding: 11px 10px; font-size: 12px; }
   .chart-stage { height: 310px; }
 }
+
+/* History cleanup stays next to its own record; long names remain inert text. */
+.history-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.history-visibility { font-size: 11px; max-width: 130px; overflow-wrap: anywhere; }
+.security-name, .instrument-name { overflow-wrap: anywhere; }
+.q-next { font-size: 12px; line-height: 1.7; color: var(--muted-strong); }
+#q-result .q-periods { gap: 5px; }
+#q-result .q-periods > section { padding: 6px; }
+#q-result .q-periods p { font-size: 11px; }

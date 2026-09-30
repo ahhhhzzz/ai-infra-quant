@@ -1,0 +1,32 @@
+{
+  "method": "Static baseline inspection, not a baseline pytest run",
+  "baseline": "a07b2723329f6718ac3926d7c43b486882c2f929",
+  "unchanged_test_files": {
+    "tests/architecture/test_task006a_boundaries.py": true,
+    "tests/architecture/test_task006b2_boundaries.py": true,
+    "tests/architecture/test_task006b_boundaries.py": true,
+    "tests/architecture/test_task007a_boundaries.py": true,
+    "tests/architecture/test_task007b_boundaries.py": true
+  },
+  "baseline_migrations": [
+    "0001_phase1_foundation.py",
+    "0002_task007b_paqs_e_decision_ledger.py",
+    "0003_task007c1_narrative_ledger.py",
+    "0004_task006b1_market_archive.py",
+    "0005_task006e_q_analysis.py",
+    "0006_external_research.py"
+  ],
+  "baseline_models": [
+    "__init__.py",
+    "accounting.py",
+    "external_research.py",
+    "market_data_archive.py",
+    "paqs_e_ledger.py",
+    "paqs_e_narrative.py",
+    "paqs_q_analysis.py",
+    "portfolio.py",
+    "security.py",
+    "settings.py",
+    "strategy.py"
+  ]
+}

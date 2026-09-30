@@ -104,6 +104,24 @@ def install(
                 [] if empty or HK in path else [{k: v for k, v in record.items() if k != "payload"}]
             )
             return app.fulfill(route, {"items": items})
+        if path.endswith("/e-matches"):
+            return app.fulfill(
+                route,
+                {
+                    "items": [
+                        {
+                            "narrative_result_id": E_ID,
+                            "security_id": US,
+                            "snapshot_hash": Q_HASH,
+                            "created_at": record["created_at"],
+                            "model_id": "synthetic",
+                            "strategy_id": "fixture",
+                            "web_research": False,
+                        }
+                    ],
+                    "state": "MATCHES_FOUND",
+                },
+            )
         if "/compare/" in path:
             return app.fulfill(
                 route,
@@ -239,7 +257,7 @@ def test_candidate_geometry_stages_limits_and_unknown_codes(
     expect(root).to_contain_text("未识别的原因：UNRECOGNIZED_TEST_REASON")
     expect(root).to_contain_text("开盘时尚无可用的独立价格证据")
     assert "尚无此候选的下一开盘验证事实" not in root.inner_text()
-    expect(root).to_contain_text("未形成 / 无法评估")
+    expect(root).to_contain_text("该阶段未计算有效失效位")
     # An independent limitation cannot be promoted to the headline's direct reason.
     assert "缺少闭市日期的事实" not in page.locator("#q-result").inner_text()
     expect(page.locator("#q-basis")).to_contain_text("以下为输入限制与诊断集合")
@@ -262,7 +280,9 @@ def test_candidate_geometry_stages_limits_and_unknown_codes(
             "effective_at": "2026-09-23T12:00:00Z",
         }
     )
-    assert page.evaluate("r => PaqsQView.headline(r)", record) == "规则未满足，尚无入场资格"
+    assert (
+        page.evaluate("r => PaqsQView.headline(r)", record) == "当前无有效候选 · 最近候选形态已失效"
+    )
     record["payload"]["setup"]["facts"].pop()
     record["payload"]["qualification_mode"] = "OBSERVATIONAL"
     assert "未认证" in page.evaluate("r => PaqsQView.headline(r)", record)
@@ -296,7 +316,7 @@ def test_empty_failure_and_late_history_never_cross_security(
     page.unroute("**/paqs-q/analyses/" + Q_ID)
     page.locator(f'[data-security-id="{US}"]').click()
     choose(app)
-    expect(page.locator("#q-result .q-headline")).to_have_text("规则未满足，尚无入场资格")
+    expect(page.locator("#q-result .q-headline")).to_have_text("规则未满足，不形成入场资格")
     assert app.errors == [] and not app.posts
     app.close()
 
@@ -342,16 +362,28 @@ def test_replay_diagnostic_is_not_current_missing_data(
         {"index": 0, "atr": None},
         {"index": 1, "atr": "11.58133628411984225", "base_regime": "BEAR_TREND"},
     ]
-    p["q_inputs"] = {"D1": {"payload": {"bars": [
-        {"completed_at": "2024-09-25T20:00:00Z"},
-        {"completed_at": "2026-09-23T20:00:00Z"},
-    ]}}}
+    p["q_inputs"] = {
+        "D1": {
+            "payload": {
+                "bars": [
+                    {"completed_at": "2024-09-25T20:00:00Z"},
+                    {"completed_at": "2026-09-23T20:00:00Z"},
+                ]
+            }
+        }
+    }
     # This diagnostic predates discovery; no candidate carries it.
     base = p["setup"]["facts"][0]
     p["setup"]["facts"] = [
         {**base, "candidate_key": None, "status": "CREATED", "reasons": ["FROZEN_SETUP_SOURCE"]},
-        {**base, "candidate_key": None, "fact_key": "terminal", "status": "EXPIRED",
-         "effective_at": "2026-09-23T11:00:00Z", "reasons": ["SETUP_D1_CLOCK_EXPIRED"]},
+        {
+            **base,
+            "candidate_key": None,
+            "fact_key": "terminal",
+            "status": "EXPIRED",
+            "effective_at": "2026-09-23T11:00:00Z",
+            "reasons": ["SETUP_D1_CLOCK_EXPIRED"],
+        },
     ]
     original = copy.deepcopy(record)
     calls = install(app, record)
@@ -392,8 +424,13 @@ def test_candidate_reason_keeps_its_own_stage_time_and_identity(
     app = Workbench(browser, workbench_server, legacy_history=False)
     record = display_record()
     facts = record["payload"]["setup"]["facts"]
-    old = {**facts[0], "fact_key": "early-failure", "status": "NO_TRADE",
-           "effective_at": "2026-09-23T09:00:00Z", "reasons": ["D1_ATR_UNAVAILABLE"]}
+    old = {
+        **facts[0],
+        "fact_key": "early-failure",
+        "status": "NO_TRADE",
+        "effective_at": "2026-09-23T09:00:00Z",
+        "reasons": ["D1_ATR_UNAVAILABLE"],
+    }
     current = {**facts[1], "status": "NO_TRADE", "reasons": ["RR_T1_BELOW_2"]}
     record["payload"]["setup"]["facts"] = [old, facts[0], current]
     install(app, record)

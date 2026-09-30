@@ -32,6 +32,7 @@ from ai_infra_quant.core.domain.paqs_market_snapshot import canonical_json
 from ai_infra_quant.database.models.paqs_e_ledger import PaqsERuntimeArtifactModel
 from ai_infra_quant.database.models.paqs_e_narrative import results, runs
 from ai_infra_quant.database.models.security import SecurityModel
+from ai_infra_quant.database.repositories.analysis_visibility import deleted_filter, require_visible
 from ai_infra_quant.database.repositories.paqs_e_ledger import SQLAlchemyPaqsELedger
 
 
@@ -283,6 +284,11 @@ class SQLAlchemyNarrativeLedger:
     def get_run(self, run_id: str) -> NarrativeRun | None:
         canonical_uuid(run_id)
         with self.sessions() as session:
+            result_id = session.scalar(
+                select(results.c.narrative_result_id).where(results.c.narrative_run_id == run_id)
+            )
+            if result_id:
+                require_visible(session, "E", result_id)
             row = (
                 session.execute(select(runs).where(runs.c.narrative_run_id == run_id))
                 .mappings()
@@ -293,6 +299,7 @@ class SQLAlchemyNarrativeLedger:
     def get_result(self, result_id: str) -> NarrativeResult | None:
         canonical_uuid(result_id)
         with self.sessions() as session:
+            require_visible(session, "E", result_id)
             row = (
                 session.execute(select(results).where(results.c.narrative_result_id == result_id))
                 .mappings()
@@ -301,12 +308,21 @@ class SQLAlchemyNarrativeLedger:
             return self._result(session, dict(row)) if row else None
 
     def history(
-        self, security_id: str, strategy_id: str | None = None, limit: int = 20
+        self,
+        security_id: str,
+        strategy_id: str | None = None,
+        limit: int = 20,
+        *,
+        snapshot_hash: str | None = None,
+        deleted: bool = False,
     ) -> tuple[NarrativeResult, ...]:
         canonical_uuid(security_id)
         if not 1 <= limit <= 100:
             raise ValueError("Invalid narrative history limit")
         query = select(results).where(results.c.security_id == security_id)
+        query = query.where(deleted_filter("E", results.c.narrative_result_id) == deleted)
+        if snapshot_hash is not None:
+            query = query.where(results.c.snapshot_hash == snapshot_hash)
         if strategy_id is not None:
             query = query.where(results.c.strategy_id == strategy_id)
         with self.sessions() as session:

@@ -1,0 +1,147 @@
+{
+  "security": "HK.09698",
+  "name": "万国数据-SW",
+  "provider": "futu",
+  "q_http_status": 201,
+  "analysis_id": "16db5144-001a-4cca-b97a-b84d8924278c",
+  "status": "INSUFFICIENT",
+  "snapshot_hash": "b23ec46b068a4c50e01faa251c7f1a76e878a5a33022adc5ac3c5e42d3a4d394",
+  "coverage": {
+    "d1_source_count": 1455,
+    "m30_completed_count": 220,
+    "m30_partial_count": 22,
+    "minute_source_count": 7282,
+    "w1_completed_count": 308,
+    "w1_partial_count": 1
+  },
+  "snapshot_counts": {
+    "w1_bars": 156,
+    "d1_bars": 500,
+    "m30_bars": 200
+  },
+  "raw_minute_count": 7282,
+  "source_sha256": "81df48cb0419e5fd93ac67dc147dd72edf90dcac43706d48b8762e0813acc556",
+  "source_window_start": "2026-08-31T09:52:23.932304Z",
+  "as_of": "2026-09-30T09:52:24.243862Z",
+  "context": {
+    "D1": {
+      "status": "AVAILABLE",
+      "reasons": [
+        "REFERENCE_CONTEXT_READY"
+      ],
+      "latest_frame": [
+        {
+          "active_range": null,
+          "atr": "0.989428477078142711",
+          "bar_ref": "196b886a05e4ed32668ce00e397afc79ea86f15c8bce32e9d66a225184955d1f",
+          "base_regime": "UNCERTAIN",
+          "index": 499,
+          "major": [
+            "3bb79ea7c1ad084f6832d3c23f14e355a66d6cb435917bc2066ad794f910df0b",
+            "ac7e130f9f9a838430121299a37e965fe9b12b8893c24958648aa3559ac296c1",
+            "87e864a4aaac5b0750e1d3c8fc7420476d3221a0a38f5e1a7b966ce3f90d8502",
+            "52c531cf8eef633d2388c9f72f5063014db25edf9e4e8840ad0e8e530551c4b7"
+          ],
+          "micro": [
+            "1b39af3b4d7a25b6ba1fa3ca57469d00c8e4aca036ed1745d3bd13485303358a",
+            "8722ad3feff013ce2e0795ccecd0dc67ffa514dee0008f795e711675ec939817",
+            "64265afe17579c6229eff943ce009fbe8d60231ab2f63f5ffa29bb224df62f61",
+            "df4aac5f98cdcd0a2fcaa68c7f4e0383319ef9b58b624bb8310be545cb7b6809"
+          ],
+          "ranges": [],
+          "readiness": {
+            "atr": true,
+            "major": true,
+            "micro": true,
+            "range": false,
+            "zone": true
+          },
+          "zones": [
+            "2e1cf6f7bc5b5996acf7f248bd77527c65755d906803cc67cce7699f14535051",
+            "ba948612615996c5142ec203d4fe6985b7268f7419da7bb706ec6f0db78f7be8",
+            "8437a4b71b64079b949aadc55ff6c18eecec51a809ef25691a94fc7cb76f0df1",
+            "2809acbeb228ea5c22172c40f917de69b772a980695d47eea8c15e8ee9a76fce",
+            "5154dab8da86baf4232c4c4bc91626eeaf465372a845a574f9d6add271d79407",
+            "dc05a0e7d60777059a5d2e62eedd467bc770e9458999f4daf1045012b208b98f",
+            "c0104369b1e71fd725f7d04c375dfde5f9ab8ac933672df79d351dfbc0534a98",
+            "6b4e5c630df77783659746e4db87cd6c39eea20148ff0afd76355e11c92eb8b8",
+            "0e8d3d4005eb98ef0ca549bd84e9df038bc9517281afb573cfaa511606612e05",
+            "22d06b59fcdce2d122d5966c22e901f6cc6a511fe2c405cb41dd2bb107913817",
+            "c9af731febd56e000c0339c94625b641e846ebd158c9794024ec763262f7e93f",
+            "a5cc2bf9efae88c836f1a7540a849c33d028757a078c91390c9ee3c231c34b97"
+          ]
+        }
+      ]
+    },
+    "M30": {
+      "status": "INSUFFICIENT",
+      "reasons": [
+        "MISSING_EXPECTED_BAR"
+      ],
+      "latest_frame": []
+    },
+    "W1": {
+      "status": "AVAILABLE",
+      "reasons": [
+        "REFERENCE_CONTEXT_READY"
+      ],
+      "latest_frame": [
+        {
+          "active_range": "87152dc68555151a3a48ea6b96107e6e23780222b79f757ceb2a3fceef62f7d5",
+          "atr": "3.17574033520833191",
+          "bar_ref": "b9252f7d2a71786c284afcad6882b0e2693b558302f2f41ffec0e046c4d8a83f",
+          "base_regime": "RANGE",
+          "index": 155,
+          "major": [
+            "b89a72536835d49f09920b590c3add1811b10e13c8d4aad3100f74c2c440e94b",
+            "c5cb17b1fed88922589dfea97dc659abd8e512f869c5ca79179955f062496e41",
+            "9ee4a603c96006b81bd466a6fcacbcec90ccd27a3478e9810702611b9e2efc2e",
+            "8d7f4279f6cd4da87669c9da94cbd92de42c8e19832a834a3ec2fcac0bd4b784"
+          ],
+          "micro": [
+            "c5b2a05e6865509ec88e2cb5e8ddcebe6f5f03292697463eafd6103aa3d2d5ed",
+            "d8dac0bfb6103da0f9d673e4ee7b9761144913e12a2ee4314d3b72e6011b3d3a",
+            "7272868e8be37f061055e4295e85ebcc507b7a9df4890acdbf7840a1c9e61c91",
+            "259a4b671afcdd7591c245a0dc77023bd1f6ae937eac81178df659a8f4b514ab"
+          ],
+          "ranges": [
+            "87152dc68555151a3a48ea6b96107e6e23780222b79f757ceb2a3fceef62f7d5"
+          ],
+          "readiness": {
+            "atr": true,
+            "major": true,
+            "micro": true,
+            "range": true,
+            "zone": true
+          },
+          "zones": [
+            "f53b1152941cb8438f1ec71fafb7f4cb3596c0df6163e21fa37732f89c2c03c6",
+            "58639f41c2c369d39f77d43acba4bb77c9a2968a7ccb196911bec56ab816e9fb",
+            "004e4fede5d53a7d4b8ed05d7fe815f38d0d69434c1330b8f10aeb58aadc6af2",
+            "b8db4406afadfd0ab64fbebbd546705dfe75be36eef1cbcdf674284a20704374",
+            "e36e956da9f1591d07dad3570a4b1307dd9e01c0f8868567c3e07b1f4a42e1bb",
+            "85ff0e3daf5f0c16039d45b1d229e3574e5facd50fc154c9086eee9719ca954b",
+            "2f66ac88732dee0405cacc4017c29bf90f0fd877b762f254130e6d5a532f15c6",
+            "2078c49bb90a4c9b5cef2844d61561e24978f62f95e270043d11026a4cf00478",
+            "f12d63f4420499d70a25971e55a6d6063f1c44ddccb70cd241665e72472dfe42",
+            "e24719b9bfd43867e037ec024b5b2df981ec2fc496d299d5a0dd75671771319f",
+            "446af7a5d392394910f577dde7084ad3d94b5286066fb744c6862ccfb9ece1d2"
+          ]
+        }
+      ]
+    }
+  },
+  "diagnostics": [
+    "HISTORICAL_PRICE_AVAILABILITY_UNKNOWN",
+    "HISTORICAL_CALENDAR_AVAILABILITY_UNKNOWN",
+    "INDEPENDENT_M30_OPEN_REFERENCE_MISSING",
+    "SCHEDULED_CALENDAR_EXCLUDES_EMERGENCY_CLOSURES",
+    "ADJUSTMENT_HISTORY_NOT_POINT_IN_TIME",
+    "CURRENT_QFQ_NOT_POINT_IN_TIME",
+    "M30_COVERAGE_INCOMPLETE",
+    "M30_MISSING_EXPECTED_BAR"
+  ],
+  "qualification_mode": "OBSERVATIONAL",
+  "entry_reference_count": 0,
+  "paid_calls": 0
+}

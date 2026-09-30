@@ -27,6 +27,7 @@ from ai_infra_quant.core.domain.market_data import (
     QuoteSnapshot,
     TradingDay,
 )
+from ai_infra_quant.core.domain.quote_metadata import NamedQuoteSnapshot
 from ai_infra_quant.database.models.security import SecurityModel, WatchlistItemModel
 from ai_infra_quant.database.repositories.unit_of_work import SQLAlchemyUnitOfWork
 
@@ -40,6 +41,7 @@ class SupportedFakeProvider:
         self.quote_reason: str | None = None
         self.quote_security_override: str | None = None
         self.quote_is_equity: bool | None = True
+        self.display_name: str | None = None
         self.raise_quote: Exception | None = None
         self.on_quote: Callable[[MarketDataSecurity], None] | None = None
         self.seen: list[str] = []
@@ -71,7 +73,8 @@ class SupportedFakeProvider:
             raise self.raise_quote
         data = None
         if self.quote_status is DataAvailabilityStatus.AVAILABLE:
-            data = QuoteSnapshot(
+            data = NamedQuoteSnapshot(
+                display_name=self.display_name,
                 security=self.quote_security_override or security.display_symbol,
                 price=Decimal("100.25"),
                 currency=security.currency,
@@ -397,3 +400,34 @@ def test_provider_none_rejects_before_mutation(
     assert response.status_code == 503
     assert response.json()["code"] == "MARKET_DATA_PROVIDER_NOT_CONFIGURED"
     assert _counts(session_factory) == before
+
+
+def test_name_completion_preserves_id_custom_name_and_failure(supported_app, supported_provider):
+    with TestClient(
+        supported_app, base_url="http://127.0.0.1", client=("127.0.0.1", 3210)
+    ) as client:
+        added = client.post(
+            "/api/v1/watchlist/supported-securities", json={"market": "HK", "symbol": "700"}
+        ).json()
+        security = added["item"]["security"]
+        assert security["display_name"] == "00700"
+        supported_provider.display_name = "腾讯控股 <b>文本</b>"
+        path = f"/api/v1/securities/{security['id']}/refresh-name"
+        response = client.post(path, headers={"Origin": "http://127.0.0.1"}, json={})
+        assert response.status_code == 200, response.text
+        assert response.json()["display_name"] == supported_provider.display_name
+        assert response.json()["id"] == security["id"]
+        supported_provider.display_name = "另一名称"
+        assert (
+            client.post(path, headers={"Origin": "http://127.0.0.1"}, json={}).json()[
+                "display_name"
+            ]
+            == "腾讯控股 <b>文本</b>"
+        )
+        supported_provider.quote_status = DataAvailabilityStatus.UNAVAILABLE
+        assert client.post(path, headers={"Origin": "http://127.0.0.1"}, json={}).status_code == 422
+        supported_provider.quote_status = DataAvailabilityStatus.AVAILABLE
+        fresh = client.post(
+            "/api/v1/watchlist/supported-securities", json={"market": "HK", "symbol": "9988"}
+        ).json()
+        assert fresh["item"]["security"]["display_name"] == "另一名称"

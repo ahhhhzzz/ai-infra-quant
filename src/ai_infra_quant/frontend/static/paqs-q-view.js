@@ -96,7 +96,14 @@
     if (Number.isNaN(d.getTime())) return `时间无法解析：${raw}`;
     return new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(d) + " UTC+8";
   };
-  const exactPrice = (value) => typeof value === "string" && /^-?\d+(\.\d+)?$/.test(value) ? value : "未形成 / 无法评估";
+  const exactPrice = (value) => {
+    if (typeof value !== "string" || !/^-?\d+(\.\d+)?$/.test(value)) return "未提供";
+    // String/BigInt rounding only. Exact stored Decimal stays in technical details.
+    const negative = value.startsWith("-"), [whole, fraction = ""] = value.replace(/^-/, "").split(".");
+    let scaled = BigInt(whole) * 100n + BigInt((fraction + "00").slice(0, 2));
+    if ((fraction[2] || "0") >= "5") scaled += 1n;
+    return `${negative ? "-" : ""}${scaled / 100n}.${String(scaled % 100n).padStart(2, "0")}`;
+  };
   const stamp = (raw) => { const el = node("time", time(raw)); if (raw) { el.dateTime = raw; el.title = raw; } return el; };
   function reasons(codes = [], limit = 3) {
     const root = node("div"), list = node("ul", "", "q-reasons");
@@ -128,10 +135,28 @@
       if (!candidates.has(key)) candidates.set(key, []);
       candidates.get(key).push(f);
     });
-    return [...candidates.values()].map((items, index) => ({ items, latest: items.at(-1), terminal: terminals.get(items[0].setup_key), number: index + 1 }));
+    const result = [...candidates.values()].map((items, index) => ({ items, latest: items.at(-1), terminal: terminals.get(items[0].setup_key), number: index + 1 }));
+    for (const group of result) group.superseded = result.some(other => other !== group
+      && other.latest.setup_key === group.latest.setup_key
+      && Date.parse(other.items[0].effective_at) > Date.parse(group.items[0].effective_at));
+    return result;
   }
   const currentFact = group => group.terminal || group.latest;
   const ended = f => ["INVALIDATED", "EXPIRED"].includes(f?.status);
+  const currentCandidate = g => !g.terminal && !ended(g.latest) && !g.superseded
+    && !["FOLLOW_THROUGH_NONE", "FOLLOW_THROUGH_FAILED"].includes(g.latest.status);
+  const openMissing = f => (f?.reasons || []).some(r => ["ENTRY_REFERENCE_UNAVAILABLE_AT_OPEN", "NEXT_M30_BAR_MISSING"].includes(r));
+  function nextCondition(f) {
+    if (ended(f)) return "该形态已结束；原候选不能继续获得当前入场资格。";
+    if (openMissing(f)) return "尚未接入独立开盘证据；当前采集不能回填已错过开盘的资格。Stage A 仅保留为指示性评估。";
+    if (f?.status === "ENTRY_PENDING_REVALIDATION") return "下一常规 M30 开盘须有及时到达、同证券同价格口径的独立证据，再复核背景、失效位、原目标和 RR。";
+    if (f?.status === "FOLLOW_THROUGH_PENDING") return "在触发后第 1 至第 3 根完整 M30 内确认延续；确认后才能评估 Stage A 几何。";
+    if (f?.status === "TRIGGER_PENDING") return "等待与本形态关联的完整 M30 触发，再检查延续。";
+    if (["FOLLOW_THROUGH_NONE", "FOLLOW_THROUGH_FAILED"].includes(f?.status)) return "此候选的延续检查已结束；等待该形态内新的合格触发，不延长旧候选窗口。";
+    if (f?.status === "VALID_SETUP_BUT_POOR_ENTRY") return "当前入场几何不足；保留原失效与目标，不扩大失效距离或挑选更远目标。";
+    if (["LONG_READY", "OBSERVATIONAL_LONG_QUALIFIED"].includes(f?.status)) return "本候选已完成所列规则评估；仍须区分观察性结论与严格资格，不代表成交。";
+    return "当前阶段的阻断原因见本候选；需要新的规则事实后才能继续评估。";
+  }
   function stage(f, items = []) {
     if (!f.candidate_key) return "形态生命周期（无入场候选）";
     if (f.status === "ENTRY_PENDING_REVALIDATION") return "确认后指示性评估 · Stage A";
@@ -155,38 +180,50 @@
   function headline(record) {
     const p = record.payload || {};
     if (record.status !== "AVAILABLE") return state(record.status);
-    const candidates = groups(p), states = candidates.map(g => currentFact(g).status);
+    const candidates = groups(p).filter(currentCandidate), states = candidates.map(g => currentFact(g).status);
     if (states.includes("LONG_READY") && p.qualification_mode === "AS_OF" && p.setup?.strict_confirmation === true) return "符合入场规则";
     if (states.includes("LONG_READY") || states.includes("OBSERVATIONAL_LONG_QUALIFIED")) return "观察性规则满足，资格未认证";
     if (states.includes("ENTRY_PENDING_REVALIDATION")) return "确认评估通过，待开盘验证";
     if (states.some(s => ["TRIGGER_PENDING", "FOLLOW_THROUGH_PENDING", "FOLLOW_THROUGH_CONFIRMED"].includes(s))) return "候选仍在等待规则确认";
-    return "规则未满足，尚无入场资格";
+    if (candidates.some(g => openMissing(g.latest))) return "确认评估已保留，开盘证据尚未接入";
+    if (states.includes("VALID_SETUP_BUT_POOR_ENTRY")) return "形态有效，入场几何不足";
+    if (candidates.length) return state(candidates.sort((a,b)=>Date.parse(b.latest.effective_at)-Date.parse(a.latest.effective_at))[0].latest.status);
+    const past = groups(p).sort((a,b)=>Date.parse(currentFact(b).effective_at)-Date.parse(currentFact(a).effective_at));
+    return past.length ? `当前无有效候选 · 最近候选${state(currentFact(past[0]).status)}` : "输入可判断，当前尚无合格形态";
   }
   function prices(fact, valid = true) {
     const grid = node("dl", "", "q-prices");
     const rows = [["入场参考", fact?.reference_price], ["失效参考", fact?.risk_reference_price], ["第一目标", fact?.target1?.effective_price], ["盈亏比 · T1", fact?.rr_t1]];
-    rows.forEach(([title, value]) => { const cell = node("div"); cell.append(node("dt", title), node("dd", valid ? exactPrice(value) : "未形成 / 无法评估")); grid.append(cell); }); return grid;
+    const missing = ["尚未形成确认后参考", fact ? "该阶段未计算有效失效位" : "尚无可绑定的形态", "尚无合格结构目标", "缺少有效入场、失效或目标，暂不能计算"];
+    rows.forEach(([title, value], index) => { const cell = node("div"), shown = node("dd", value != null && valid ? exactPrice(value) : missing[index]); if (value != null) shown.title = `精确原值：${value}`; cell.append(node("dt", title), shown); grid.append(cell); }); return grid;
   }
   const validGeometry = f => ["ENTRY_PENDING_REVALIDATION", "LONG_READY", "OBSERVATIONAL_LONG_QUALIFIED", "VALID_SETUP_BUT_POOR_ENTRY"].includes(f?.status);
   function candidate(group, compact = false, strictAllowed = false) {
     const f = currentFact(group), latest = group.latest;
-    const entryLabel = code => code === "LONG_READY" && !strictAllowed ? "资格声明未认证，不构成正式入场资格" : state(code);
+    const entryLabel = item => item?.status === "LONG_READY" && !strictAllowed
+      ? "资格声明未认证，不构成正式入场资格"
+      : item?.status === "NO_TRADE" && (item.reasons || []).some(code => ["ENTRY_REFERENCE_UNAVAILABLE_AT_OPEN", "NEXT_REGULAR_M30_OPEN_UNKNOWN"].includes(code))
+        ? "独立开盘证据缺失，尚不能验证下一开盘资格" : state(item?.status);
     const root = node("section", "", "q-candidate");
     root.dataset.candidateKey = latest.candidate_key; root.dataset.setupKey = latest.setup_key;
-    root.append(node("h3", `候选 ${group.number} · ${state(latest.family)}`), node("p", entryLabel(f.status)), factLabel(f, group.items));
+    root.append(node("h3", `候选 ${group.number} · ${state(latest.family)}`), node("p", entryLabel(f)), factLabel(f, group.items));
     if (f.status === "LONG_READY") root.append(node("p", "不代表已成交", "note"));
     if (compact) {
-      root.append(prices(f, validGeometry(f)), reasons(f.reasons, 1));
+      const a = group.items.filter(x => x.status === "ENTRY_PENDING_REVALIDATION").at(-1);
+      const geometry = validGeometry(f) ? f : a;
+      if (geometry && geometry !== f) root.append(node("p", "本候选 Stage A 指示性评估（保留事实，不是已验证开盘价）", "note"));
+      root.append(prices(geometry || f, Boolean(geometry) || validGeometry(f)), reasons(f.reasons, 1), node("p", `下一步条件：${nextCondition(f)}`, "q-next"));
     } else {
       const a = group.items.filter(x => x.status === "ENTRY_PENDING_REVALIDATION").at(-1);
       const b = group.items.filter(x => a && Date.parse(x.effective_at) >= Date.parse(a.effective_at)
         && ["LONG_READY", "OBSERVATIONAL_LONG_QUALIFIED", "VALID_SETUP_BUT_POOR_ENTRY", "NO_TRADE"].includes(x.status)).at(-1);
       root.append(reasons(f.reasons));
-      if (group.terminal) root.append(node("p", "该形态已结束。以下阶段事实仅供历史复盘，不代表当前资格。", "q-limit"));
+      if (!currentCandidate(group)) root.append(node("p", "该候选已结束或已有后续候选。以下阶段事实仅供历史复盘，不代表当前资格。", "q-limit"));
+      root.append(node("p", `下一步条件：${nextCondition(f)}`, "q-next"));
       for (const [title, item] of [["确认后指示性评估 · Stage A", a], ["下一常规 M30 开盘验证 · Stage B", b]]) {
         root.append(node("h4", title));
         if (!item) { root.append(node("p", title.includes("Stage A") ? "尚无通过确认的指示性评估。失败或等待原因见上方最新事实。" : "尚无此候选的下一开盘验证事实；不能用已完成 K 线的 open 回填。", "note")); continue; }
-        root.append(node("p", entryLabel(item.status)), stamp(item.effective_at), prices(item, validGeometry(item)), reasons(item.reasons));
+        root.append(node("p", entryLabel(item)), stamp(item.effective_at), prices(item, validGeometry(item)), reasons(item.reasons));
         if (item.target2 || item.rr_t2) root.append(table(["第二目标", "盈亏比 · T2"], [[validGeometry(item) ? exactPrice(item.target2?.effective_price) : "无法评估", validGeometry(item) ? exactPrice(item.rr_t2) : "无法评估"]]));
         root.append(technical("阶段事实与精确时间", item));
       }
@@ -194,7 +231,7 @@
       history.append(node("summary", "候选完整事实与历史原因（按时间）"));
       group.items.forEach(item=>{
         const row = node("section"); row.dataset.factKey = item.fact_key || "";
-        row.append(factLabel(item, group.items), node("p", entryLabel(item.status)), reasons(item.reasons, Infinity));
+        row.append(factLabel(item, group.items), node("p", entryLabel(item)), reasons(item.reasons, Infinity));
         history.append(row);
       });
       root.append(history);
@@ -232,16 +269,23 @@
     const date = node("p", "分析时点：", "q-stamp"); date.append(stamp(snap.as_of_timestamp)); root.append(date);
     root.append(node("p", `快照参考报价：${snap.current_price_reference?.status === "AVAILABLE" ? exactPrice(snap.current_price_reference.price) : "未提供"}（不是最新报价或入场价）`, "q-stamp"));
     const title = headline(record); root.append(node("h2", title, "q-headline"));
+    const backgrounds = node("section", "", "q-periods");
+    for (const tf of ["W1", "D1", "M30"]) {
+      const result = p.context?.[tf], frame = result?.evidence?.frames?.at(-1), box = node("section");
+      box.append(node("h3", tf), node("p", result?.status === "AVAILABLE" && frame ? state(frame.base_regime) : "背景暂不可判断"), node("p", `输入：${state(result?.status)} · ATR ${exactPrice(frame?.atr)}`, "note"));
+      backgrounds.append(box);
+    }
+    root.append(backgrounds);
     root.append(node("p", record.status === "INSUFFICIENT" ? "当前证据无法完成规则判断；这不表示看空，也不等于没有机会。" : record.status !== "AVAILABLE" ? "本次结果不可用于规则判断。可查看具体原因与原始记录。" : title === "符合入场规则" ? "所列候选的入场规则已满足，不代表已成交。各候选分别判断。" : "以下是已保存的规则事实；候选与阶段独立展示，不构成统一买卖结论。", "q-thesis"));
     const issues = currentIssues(p), missing = node("section", "", "q-current-evidence");
-    missing.append(node("h3", "当前数据缺失 / 模块状态"));
+    missing.append(node("h3", "当前输入可用性"));
     issues.forEach(v=>missing.append(node("p", `${v.label}${v.status ? ` · ${state(v.status)}` : ""}${v.at ? ` · ${time(v.at)}` : ""}`), reasons(v.codes)));
     if (!issues.length) missing.append(node("p", record.status === "AVAILABLE" ? "本记录各模块未报告输入阻断；严格资格限制另列。" : "返回结果未列明模块原因，请查看各层证据。", "note"));
     root.append(missing);
     if (p.qualification_mode === "OBSERVATIONAL" || p.strict_historical_as_of === false) root.append(node("p", "适用限制：观察性分析，历史可知性未认证；不能据此获得正式入场资格。", "q-limit"));
-    if (p.diagnostics?.includes("INDEPENDENT_M30_OPEN_REFERENCE_MISSING")) root.append(node("p", "缺少独立开盘证据：确认后的指示性评估不等于下一开盘资格。", "q-limit"));
+    if (p.diagnostics?.includes("INDEPENDENT_M30_OPEN_REFERENCE_MISSING")) root.append(node("p", "证据适用范围：尚未接入独立开盘证据；确认后的指示性评估不等于下一开盘资格。", "q-limit"));
     const strictAllowed = p.qualification_mode === "AS_OF" && p.setup?.strict_confirmation === true;
-    const all = groups(p).filter(g=>!ended(currentFact(g))).sort((a,b)=>(Date.parse(currentFact(b).effective_at) - Date.parse(currentFact(a).effective_at)));
+    const all = groups(p).filter(currentCandidate).sort((a,b)=>(Date.parse(currentFact(b).effective_at) - Date.parse(currentFact(a).effective_at)));
     root.append(node("h3", "当前候选 · 规则状态"));
     if (record.status === "AVAILABLE" && all.length) {
       root.append(node("p", `共 ${all.length} 个候选 · 下方「入场资格」可查看各阶段`, "note"));

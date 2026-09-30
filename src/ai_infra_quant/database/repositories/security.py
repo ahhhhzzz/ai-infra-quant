@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -67,6 +67,29 @@ class SQLAlchemySecurityRepository:
     def get(self, security_id: str) -> Security | None:
         row = self._session.get(SecurityModel, security_id)
         return None if row is None else security_from_model(row)
+
+    def fill_display_name(self, security_id: str, display_name: str) -> Security:
+        name = display_name.strip()
+        if not name or len(name) > 120 or any(ord(c) < 32 for c in name):
+            raise ValueError("Invalid display name")
+        self._session.execute(
+            update(SecurityModel)
+            .where(
+                SecurityModel.id == security_id,
+                or_(
+                    SecurityModel.display_name.is_(None),
+                    func.trim(SecurityModel.display_name) == "",
+                    SecurityModel.display_name == SecurityModel.symbol,
+                    SecurityModel.display_name == SecurityModel.market + "." + SecurityModel.symbol,
+                ),
+            )
+            .values(display_name=name, updated_at=utc_now())
+        )
+        self._session.expire_all()
+        result = self.get(security_id)
+        if result is None:
+            raise LookupError("Security not found")
+        return result
 
     def get_by_identity(self, market: str, symbol: str) -> Security | None:
         normalized_market, normalized_symbol = canonicalize_security_identity(market, symbol)

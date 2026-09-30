@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any, Protocol, cast
 
+from ai_infra_quant.application.paqs_capture_evidence import capture_payload
 from ai_infra_quant.application.paqs_market_snapshot_queries import PaqsMarketSnapshotQueries
 from ai_infra_quant.application.paqs_q_event_artifacts import load_event_registry
 from ai_infra_quant.application.paqs_q_holder import conditional_holder
@@ -18,7 +19,7 @@ from ai_infra_quant.core.domain.paqs_q.setup_reference import SetupFact, SetupRu
 from ai_infra_quant.core.strategy.paqs_q.event_context import CONTEXT_ID, EVENT_ID
 
 PRODUCT_ID = "paqs-q-product-analysis"
-PRODUCT_VERSION = "1.0.1"
+PRODUCT_VERSION = "1.1.0"
 EVIDENCE_GUIDANCE = {
     "SCHEDULED_CALENDAR_EXCLUDES_EMERGENCY_CLOSURES": (
         "当前日历覆盖计划交易日、周末和假日, 不认证临时休市; "
@@ -229,6 +230,10 @@ class PaqsQProductAnalysisService:
                     "acquisition": _code_hash(Path(__file__).with_name("paqs_input_queries.py")),
                 },
                 "market_snapshot": snapshot,
+                "source_capture": capture_payload(source),
+                "source_capture_sha256": hashlib.sha256(
+                    canonical_json(capture_payload(source)).encode()
+                ).hexdigest(),
                 "snapshot_hash": snapshot.snapshot_hash,
                 "snapshot_as_of_timestamp": snapshot.as_of_timestamp,
                 "capture_source": {

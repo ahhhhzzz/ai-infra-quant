@@ -459,3 +459,15 @@ Real-account/trading behavior is forbidden.
 | 独立安全 Key 与默认关闭 | Windows 独立 tavily 凭据槽、只读环境后备；[凭据测试](../tests/unit/test_search_credentials.py)、[浏览器测试](../tests/browser/test_tavily_workbench.py) |
 | 先保存检索证据，失败停止最终模型；引用编号属于本次来源 | 只追加增量迁移 0006、新版本 Narrative 提示词；[API 与模拟全链路测试](../tests/integration/test_external_research_api.py) |
 | 旧历史无外部调用、Q 冻结事实不变、历史 Q 禁止后补 Tavily | 旧 E Ledger、Q API/同快照兼容检查；[使用与实际验证说明](PAQS_E_MODELS.md#deepseek-独立联网研究--tavily2026-09-30)；不宣称真实服务已验收 |
+
+
+### 2026-09-30 Issue #2 工作台可用性维护
+
+| 范围 | 实现与聚焦验证 |
+| --- | --- |
+| A 名称补全、身份及自定义名称保护 | NamedQuoteSnapshot、refresh-name、原子填空；`test_futu_quote_adapter.py`、`test_supported_security_api.py`；真实 HK.09698 名称核验 |
+| B 原始来源绑定、严格规则及确定性说明 | CapturedPaqsInputBundle、来源成员校验、采集边界修复；`test_workbench_capture.py`、`test_paqs_input_api.py`；Stage A/B、ATR、生命周期浏览器覆盖；独立开盘继续缺失 |
+| C 服务端同快照过滤及独立不联网生成 | e-matches 过滤在 limit 之前；`test_workbench_usability.py`、`test_paqs_q_e_frozen_api.py`、浏览器开启 Tavily 后不联网对照且原开关保留 |
+| D 独立可见性与可恢复删除 | 0007、410、幂等并发、内部修订链不变；API/SQLite/Chrome 删除取消恢复/过期响应；真实迁移先备份、原表和触发器验证 |
+
+具体实际结果与保留缺口见 [实施报告](reports/ISSUE_2_WORKBENCH_USABILITY.md)。合成测试不代表真实市场或付费服务通过；本轮无收费模型或 Tavily 调用。

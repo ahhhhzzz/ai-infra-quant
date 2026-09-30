@@ -74,21 +74,24 @@
       void loadEHistory();
     }
   }
-  async function loadEHistory() {
+  async function loadEHistory(preferredId = null) {
     if (!selected) return;
     const record = selected, intent = selection, nav = navigation, token = ++eHistoryVersion;
     $("q-e-list-status").textContent = "读取 E 历史…";
     $("q-e-options").disabled = true; $("q-e-read").disabled = true;
     try {
-      const body = await api(`paqs-e/securities/${encodeURIComponent(record.security_id)}/narrative-results?limit=20`);
+      const body = await api(`paqs-q/analyses/${encodeURIComponent(record.analysis_id)}/e-matches?limit=20`);
       if (token !== eHistoryVersion || intent !== selection || nav !== navigation) return;
       if (!Array.isArray(body.items) || body.items.some(e => !uuid(e.narrative_result_id) || !digest(e.snapshot_hash) || e.security_id !== record.security_id)) throw new Error("E 历史身份不一致");
-      const matches = body.items.filter(e => e.snapshot_hash === record.snapshot_hash);
+      const matches = body.items;
+      if (matches.some(e => e.snapshot_hash !== record.snapshot_hash)) throw new Error("同快照列表身份不一致");
       $("q-e-options").replaceChildren(...(matches.length ? matches.map(e => {
-        const option = node("option", `${view.time(e.created_at)} · ${e.model_id} · ${e.strategy_id}`); option.value = e.narrative_result_id; return option;
-      }) : [node("option", "最近 20 条中无匹配记录")]));
+        const option = node("option", `${e.market || ""}.${e.symbol || ""} · ${view.time(e.created_at)} · ${e.model_id} · ${e.strategy_id} · ${e.web_research ? "联网研究" : "不联网"}`); option.value = e.narrative_result_id; return option;
+      }) : [node("option", "该快照暂无可读取的 E 记录")]));
+      if (preferredId && matches.some(e => e.narrative_result_id === preferredId)) $("q-e-options").value = preferredId;
       $("q-e-options").disabled = !matches.length; $("q-e-read").disabled = !matches.length;
-      $("q-e-list-status").textContent = `最近 20 条 E 成功记录中有 ${matches.length} 条快照摘要匹配；读取对照时再校验完整身份。更早记录可用高级 ID 入口读取。`;
+      const states = {NO_E_FOR_SNAPSHOT: "该快照尚无 E 分析。", OTHER_SNAPSHOT_ONLY: "已有 E 分析，但属于其他快照；不能直接对照。", MATCHES_DELETED: "该快照的 E 记录已删除，可在已删除记录中恢复。"};
+      $("q-e-list-status").textContent = matches.length ? `服务端按证券与快照筛选后返回 ${matches.length} 条（最多 20 条）；读取时校验完整冻结身份。` : (states[body.state] || "该快照尚无 E 分析。");
     } catch (error) {
       if (token === eHistoryVersion && intent === selection && nav === navigation) {
         $("q-e-options").replaceChildren(node("option", "列表读取失败"));
@@ -111,7 +114,8 @@
     if (!id) return;
     $("q-history-status").textContent = "读取 Q 历史…";
     try {
-      const body = await api(`paqs-q/securities/${encodeURIComponent(id)}/analyses?limit=20`);
+      const deleted = $("q-history-deleted").checked;
+      const body = await api(`paqs-q/securities/${encodeURIComponent(id)}/analyses?limit=20&deleted=${deleted}`);
       if (token !== historyVersion || nav !== navigation) return;
       if (!Array.isArray(body.items) || body.items.length > 20 || body.items.some((item) =>
         !uuid(item.analysis_id) || item.security_id !== id || !digest(item.snapshot_hash)))
@@ -131,7 +135,10 @@
             if (nav === navigation && intent === selection) status(`Q 历史读取失败：${error.message}`, true);
           });
         });
-        return button;
+        button.disabled = deleted;
+        const row = node("div", "", "history-item");
+        row.append(button, window.HistoryVisibility.button("Q", item, security, deleted));
+        return row;
       });
       $("q-history").replaceChildren(...rows);
       $("q-history-status").textContent = rows.length ? `已读取 ${rows.length} 条 Q 历史；未重新分析。` : "尚无 Q 历史。";
@@ -200,11 +207,15 @@
       const e = await api("paqs-e/narrative-analyses/from-q", {
         method: "POST",
         body: JSON.stringify({ q_analysis_id: qRecord.analysis_id, model_key: model,
-          strategy_id: strategy, web_research: $("web-research").checked }),
+          strategy_id: strategy, web_research: false }),
       });
       if (!uuid(e.narrative_result_id) || e.snapshot_hash !== qRecord.snapshot_hash)
         throw new Error("E 返回的快照身份与 Q 不一致");
-      if (nav === navigation && intent === selection) await compare(e.narrative_result_id, qRecord, nav, intent);
+      if (nav === navigation && intent === selection) {
+        await loadEHistory(e.narrative_result_id);
+        if (nav === navigation && intent === selection) await compare(e.narrative_result_id, qRecord, nav, intent);
+        document.dispatchEvent(new CustomEvent("e-history-created", {detail: {security_id: qRecord.security_id}}));
+      }
     } catch (error) {
       if (nav === navigation && intent === selection) $("q-e-status").textContent = `E 对照未能确认：${error.message}。请检查 E 历史或已知 Run；不会自动重试。`;
     } finally { busyE = false; controls(); }
@@ -219,8 +230,9 @@
     if (!record) return;
     $("q-e-status").textContent = "读取既有对照；不会运行模型。";
     $("q-e-result").replaceChildren();
+    const version = compareVersion + 1;
     void compare(id, record, nav, intent).catch(error => {
-      if (nav === navigation && intent === selection) $("q-e-status").textContent = `对照读取失败：${error.message}`;
+      if (version === compareVersion && nav === navigation && intent === selection) $("q-e-status").textContent = `对照读取失败：${error.message}`;
     });
   }
   $("q-e-known-form").addEventListener("submit", (event) => {
@@ -236,12 +248,30 @@
     historyVersion += 1;
     setSelected(null);
     $("q-history").replaceChildren();
-    $("q-security").textContent = item ? `${item.display_symbol} · ${item.market}` : "请选择证券";
+    $("q-security").textContent = item ? `${item.display_name || item.symbol} · ${item.display_symbol} · ${item.currency}` : "请选择证券";
     status(item ? "可查看历史，或显式分析当前快照。" : "请选择证券");
     controls();
     if (item) void loadHistory();
   }
   document.addEventListener("security-selected", (event) => onSecurity(event.detail));
+  $("q-history-deleted").addEventListener("change", () => { void loadHistory(); });
+  document.addEventListener("security-metadata-updated", event => {
+    if (security?.id === event.detail.id) {
+      security = event.detail;
+      $("q-security").textContent = `${security.display_name || security.symbol} · ${security.display_symbol} · ${security.currency}`;
+    }
+  });
+  document.addEventListener("analysis-visibility-changing", ({detail}) => {
+    if (detail.security_id !== security?.id) return;
+    historyVersion += 1; eHistoryVersion += 1; compareVersion += 1;
+    if (detail.kind === "Q" && detail.deleted) setSelected(null);
+    else { selection += 1; $("q-e-result").replaceChildren(); }
+    $("q-e-options").disabled = true; $("q-e-read").disabled = true;
+  });
+  document.addEventListener("analysis-visibility-changed", ({detail}) => {
+    if (detail.security_id !== security?.id) return;
+    void loadHistory(); if (selected) void loadEHistory();
+  });
   if (security) onSecurity(security);
   else controls();
 })();

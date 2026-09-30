@@ -26,6 +26,7 @@ from ai_infra_quant.core.domain.market_data import (
     TradingDayType,
     TradingSessionSegment,
 )
+from ai_infra_quant.core.domain.quote_metadata import NamedQuoteSnapshot
 from ai_infra_quant.integrations.futu_quote.symbols import futu_code_for
 
 MAX_HISTORY_PAGES = 100
@@ -163,14 +164,16 @@ class FutuQuoteAdapter:
             return cast(ProviderResult[QuoteSnapshot], rows)
         try:
             row = _matching_row(rows, futu_code_for(security))
+            retrieved_at = self._retrieved_at()
             quote_time = _provider_datetime(row["update_time"], security)
-            quote = QuoteSnapshot(
+            quote = NamedQuoteSnapshot(
                 security=security.display_symbol,
                 price=_decimal(row["last_price"], "last_price"),
                 currency=security.currency,
                 latest_quote_at=quote_time,
                 retrieved_at=retrieved_at,
                 is_equity=_provider_optional_bool(row.get("equity_valid")),
+                display_name=_display_name(row.get("name")),
             )
         except (KeyError, TypeError, ValueError) as exc:
             return _failure(DataAvailabilityStatus.INVALID, retrieved_at, _safe_reason(exc))
@@ -221,6 +224,7 @@ class FutuQuoteAdapter:
         )
         if isinstance(rows, ProviderResult):
             return cast(ProviderResult[tuple[DailyBar, ...]], rows)
+        retrieved_at = self._retrieved_at()
         try:
             rows_with_session_dates = tuple(
                 (
@@ -295,6 +299,8 @@ class FutuQuoteAdapter:
         )
         if isinstance(rows, ProviderResult):
             return cast(ProviderResult[tuple[MinuteBar, ...]], rows)
+        completion_cutoff = retrieved_at
+        retrieved_at = self._retrieved_at()
         try:
             bars_by_interval: dict[datetime, MinuteBar] = {}
             for row in rows:
@@ -302,7 +308,7 @@ class FutuQuoteAdapter:
                 interval_end = interval_start + timedelta(minutes=1)
                 if interval_start < window_start:
                     continue
-                if interval_end > retrieved_at:
+                if interval_end > completion_cutoff:
                     continue
                 bars_by_interval[interval_start] = _minute_bar(
                     row, security, interval_start, interval_end, retrieved_at
@@ -350,6 +356,7 @@ class FutuQuoteAdapter:
         rows = _rows(payload, retrieved_at)
         if isinstance(rows, ProviderResult):
             return cast(ProviderResult[tuple[TradingDay, ...]], rows)
+        retrieved_at = self._retrieved_at()
         try:
             days_by_date: dict[date, TradingDay] = {}
             for row in rows:
@@ -507,6 +514,13 @@ def _provider_datetime(value: object, security: MarketDataSecurity) -> datetime:
     if parsed.tzinfo is None or parsed.utcoffset() is None:
         parsed = parsed.replace(tzinfo=ZoneInfo(security.market_timezone))
     return parsed.astimezone(UTC)
+
+
+def _display_name(value: object) -> str | None:
+    if not isinstance(value, str):
+        return None
+    value = value.strip()
+    return value if 0 < len(value) <= 120 and not any(ord(c) < 32 for c in value) else None
 
 
 def _decimal(value: object, field_name: str) -> Decimal:

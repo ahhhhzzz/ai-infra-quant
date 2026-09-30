@@ -1,0 +1,123 @@
+{
+  "backup_file": "before_issue2_20260930_173721_020431.db",
+  "from": "0006_external_research",
+  "to": "0007_analysis_visibility",
+  "existing_tables": {
+    "broker_accounts": {
+      "count": 1,
+      "sha256": "ba21e625be3a3cbad98c8383f076656c37a167cc3ac17cbbb624c8e204eaab8f"
+    },
+    "broker_profiles": {
+      "count": 1,
+      "sha256": "255af085280133b3a06f079d8ac6e000723d2c05c3a03c83350edeb77c37899e"
+    },
+    "cash_balances": {
+      "count": 1,
+      "sha256": "685f9685d5330f09f4f590521086ae36e196e8f5ae8745475af2637403682ebc"
+    },
+    "cash_flows": {
+      "count": 1,
+      "sha256": "4a83743d4e6af36b295d19f5cd9b41c48ebe7d05a606b6a613b67ae94e282543"
+    },
+    "ledger_accounts": {
+      "count": 2,
+      "sha256": "403f373169ee3652a069e870aea82e1cff02fade3333329602a71200d0258184"
+    },
+    "ledger_entries": {
+      "count": 2,
+      "sha256": "f0bcd751c416d3b3b4d1fc7d0eb715e186e2b8d5bd0f9efbb070e9607927eed5"
+    },
+    "ledger_transactions": {
+      "count": 1,
+      "sha256": "6de0721ec084dcd4019aed7fa764b773834bfea8f7efa6ce7012836b28efa7ba"
+    },
+    "market_archive_bar_versions": {
+      "count": 63478,
+      "sha256": "ee544fbf2ba9ad3d43d103c82fafda0bb866ffd353c5ffce5833f534f8910ffa"
+    },
+    "market_archive_captures": {
+      "count": 2,
+      "sha256": "17a227be303761db888faeb07ad26b5ab4848787d5c6ab013b318387d8305141"
+    },
+    "market_archive_memberships": {
+      "count": 63478,
+      "sha256": "755b2a21857e1e91083f30d74e7f4308682c45f0636a2815577fd14947743a90"
+    },
+    "paqs_e_analysis_runs": {
+      "count": 4,
+      "sha256": "455fc2a39f55df4a025ed446d6a8a3eece554fd7bcc2cf7ddc419f9e62d32c12"
+    },
+    "paqs_e_decisions": {
+      "count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "paqs_e_external_research": {
+      "count": 1,
+      "sha256": "44ef416f34be5b34a2dcde1a2ed3ca884be48ffcff5760db684d800843f06807"
+    },
+    "paqs_e_narrative_results": {
+      "count": 6,
+      "sha256": "a77b62fdd67babd63f46504fc365a235e8aff51a509f1b66ef7782894cba8d4d"
+    },
+    "paqs_e_narrative_runs": {
+      "count": 8,
+      "sha256": "864d58f0053f3feb011655beb238a5a396b7f45d0ea763116f33c62e7e4667b9"
+    },
+    "paqs_e_runtime_artifacts": {
+      "count": 4,
+      "sha256": "d8432820c24a9d1f6e380bd846abfed5571c9c19fb6ebba490886bba88410773"
+    },
+    "paqs_q_analysis_runs": {
+      "count": 5,
+      "sha256": "b9887d9db33578e5122bf852128358ed0987482370e00091c1f53c02824bdf58"
+    },
+    "portfolio_accounts": {
+      "count": 1,
+      "sha256": "4bed17be2d2c8cf4b0531fc0aaaa9e167d89e90c8795dd4ec7e20c022cb0b958"
+    },
+    "portfolio_snapshots": {
+      "count": 1,
+      "sha256": "369d84c6585334b9efb269588c4280f4a572506e5b65fcf27317fd71d18af5b4"
+    },
+    "portfolios": {
+      "count": 1,
+      "sha256": "6ef8841ab7825d86ccca6b246e8719e1ad405507fb518f08f693128443021cb7"
+    },
+    "provider_symbol_mappings": {
+      "count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "securities": {
+      "count": 4,
+      "sha256": "cd4046dacf1ffa3b1d5ef50d2e422b17fc5e754215a91c84840635bbadea4373"
+    },
+    "settings": {
+      "count": 2,
+      "sha256": "0b4d472dc24ffec99db71c1d6fce7843f56a3481257bc7e17eabe8be5598bf39"
+    },
+    "strategy_assignments": {
+      "count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "strategy_definitions": {
+      "count": 1,
+      "sha256": "155d1497258fd9704f5b335861011e40fd951260d18f72f0a2fceca046207fd2"
+    },
+    "unit_transactions": {
+      "count": 1,
+      "sha256": "e80b49f0791bd6cce280ede0526c66180ea1c03f891bd59122b3e20892a068b3"
+    },
+    "watchlist_items": {
+      "count": 4,
+      "sha256": "c68bcff9726ef7e6ea754b5f42f03f546b0ebb36122ee5623644fdbf6a40f758"
+    },
+    "watchlists": {
+      "count": 1,
+      "sha256": "8f3a7550dcb60f3bda0b83b198c0ac3d0379d1ee593b00cbdde484e5e43c258b"
+    }
+  },
+  "preserved_trigger_count": 35,
+  "business_bytes_unchanged": true,
+  "integrity_check": "ok",
+  "foreign_key_check": []
+}

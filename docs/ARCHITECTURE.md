@@ -384,3 +384,12 @@ Core remains deterministic and independent of providers, databases, network and 
 Production must not import research tools; a tested minimal port preserves frozen golden semantics.
 Old results retain original versions. No API, Dashboard, archive, Narrative/Analyze or PAQS-E
 connection is authorized. Event interface tests may use test-only fixtures, not production strategies.
+
+
+### Issue #2 工作台维护边界（2026-09-30）
+
+- 证券名称由 Futu 已验证 snapshot 的 name 提供，独立 NamedQuoteSnapshot 扩展展示元数据；不修改受 Q manifest 锁定的 QuoteSnapshot，填空更新不覆盖自定义名称。
+- 新 Q product 1.1.0 保存 CapturedPaqsInputBundle：规范化原始 D1/M1、日历、派生周期、实际接收时间与采集范围。source_capture 的 canonical SHA-256 与冻结结果一同保存在既有 append-only Q 账本，派生成员须重现 OHLCV，M30 须有连续 30 根原始分钟线。来源引用绑定 capture/member 摘要；没有历史 available_at 仍保持未知。
+- M30 覆盖统计只计入采集窗口内完整桶；不改变时段定义、策略阈值、Q 核心算法或 manifest。用户选择维持独立开盘证据缺口和严格资格，不新增后台采集。
+- 同快照 E 列表在仓储过滤后限量；比较保留完整身份校验。可恢复历史删除独立存可见性表，所有面向用户的读取应用过滤，内部不可变证据和修订链验证不被隐藏状态截断。
+- 前端使用记录/证券/请求版本守卫处理迟到响应；所有名称及原文通过文本节点呈现。名称刷新、Q、E 和历史可见性写入各由明确操作触发。

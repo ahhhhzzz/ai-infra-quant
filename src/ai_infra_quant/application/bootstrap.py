@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-EXPECTED_REVISION = "0006_external_research"
+EXPECTED_REVISION = "0007_analysis_visibility"
 
 
 class DatabaseNotReadyError(RuntimeError):

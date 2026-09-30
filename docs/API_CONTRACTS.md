@@ -403,3 +403,12 @@ They are pagination tokens, not credentials. List anchors must exist; bar anchor
 frozen membership range. No offset-based mutable history, gap-filling or cross-capture stitching.
 All GETs operate even when provider construction fails; they do not verify current provider state
 or invoke Snapshot, Analyze, credentials, model or research services.
+
+
+### Issue #2 工作台维护（2026-09-30）
+
+- `POST /api/v1/securities/{security_id}/refresh-name`：JSON 请求，同源/本机写约束；复用只读行情快照，验证证券身份后仅补全空/代码占位名称。名称不可用或自定义名称时保留现值；证券不存在 404，验证失败 422。历史快照不变。
+- `GET /api/v1/paqs-q/analyses/{analysis_id}/e-matches?limit=20`：先读取未删除 Q，服务端按 security_id + snapshot_hash + 未删除过滤再限量（1–100）。返回 `items`、`state`、`has_deleted_matches`。状态：MATCHES_FOUND、MATCHES_DELETED、OTHER_SNAPSHOT_ONLY、NO_E_FOR_SNAPSHOT；读取 compare 仍校验完整冻结快照。
+- `PUT /api/v1/analysis-history/{Q|E}/{record_id}/visibility`：严格 JSON `{security_id: UUID, deleted: bool}`；同源/本机写约束，幂等。未知记录 404，证券归属冲突 409，非法 UUID/类型 422；返回类型、ID、证券、deleted、deleted_at。
+- Q analyses / E narrative-results 历史 GET 新增 `deleted=false`；`true` 仅返回已删除项。默认列表、E latest、同快照匹配排除删除项。按 ID 读取已删除 Q/E 或其 E run，以及 compare/from-q，返回 410 `ANALYSIS_DELETED`。恢复后原 ID 可读；内部修订链校验仍读取全部证据。
+- 从 Q 生成 E 沿用 frozen 通道，入口独立固定 `web_research=false`；不改变 E 页 Tavily 设置，不重新采集行情，不隐式调用或重试收费服务。

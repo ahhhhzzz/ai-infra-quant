@@ -262,3 +262,16 @@ def test_provider_none_input_status_is_truthfully_unavailable(client: TestClient
     assert body["d1_source_count"] == body["minute_source_count"] == 0
     assert body["completed_w1_count"] == body["completed_m30_count"] == 0
     assert any("not configured" in warning for warning in body["warnings"])
+
+
+def test_minute_window_does_not_count_buckets_before_its_after_close_start(
+    paqs_client: TestClient, paqs_provider: PaqsFakeProvider, paqs_app: FastAPI
+) -> None:
+    security_id = _avgo_id(paqs_client)
+    queries = paqs_app.state.container.paqs_input_queries
+    original = queries.current_bundle(security_id)
+    # The 30-day window begins June 10 at 18:00 New York, after every regular bucket.
+    paqs_provider.calendar_dates = (date(2026, 6, 10), *paqs_provider.calendar_dates)
+    refreshed = queries.current_bundle(security_id)
+    assert refreshed.source_coverage.m30_partial_count == original.source_coverage.m30_partial_count
+    assert refreshed.completed_30m_bars == original.completed_30m_bars

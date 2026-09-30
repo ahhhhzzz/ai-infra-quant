@@ -165,3 +165,12 @@ No W1/M30 authority tables, history stitching, historical Analyze or strictly po
 claim is added. [Migration test](../tests/integration/test_market_archive_migration.py) upgrades a
 real temporary SQLite 0003 database containing Legacy Decision, Narrative Result and watchlist
 rows and compares all old table definitions/rows before/after, then reads both ledgers normally.
+
+
+### 0007_analysis_visibility（Issue #2）
+
+仅新增 `analysis_visibility`：`record_type`（Q/E）和 `record_id` 联合主键，`deleted_at` UTC 可空。非空表示已删除，空或无行表示可见。恢复清空时间，重复删除保留原时间。
+
+记录归属由 API/仓储在事务内核对；SQLite 使用 BEGIN IMMEDIATE，PostgreSQL 锁定对应证据行，串行化并发写。多态 ID 不增加指向单张证据表的外键。所有原始 Q/E 表、修订链、payload、hash、共享来源及不可变触发器保持原样。删除不释放磁盘空间。
+
+迁移前使用 SQLite backup API 备份；`tools/verify_workbench_migration.py` 对比原业务表逐行摘要及原触发器，检查完整性与外键。实际结果见 [维护报告](reports/ISSUE_2_WORKBENCH_USABILITY.md)。已有 0006 数据库启动前需显式执行迁移；不通过重建数据库升级。

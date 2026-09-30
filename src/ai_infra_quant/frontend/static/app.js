@@ -830,3 +830,21 @@ initialize().catch((error) => {
   element("#market-watchlist-status").textContent = safeErrorMessage(error);
   showChartMessage("Dashboard unavailable", "Local application data could not be loaded.");
 });
+
+// Explicit metadata-only refresh; preserve security identity and frozen history.
+element("#refresh-security-name").addEventListener("click", async () => {
+  if (!selectedSecurity) return;
+  const button = element("#refresh-security-name"), id = selectedSecurity.id;
+  button.disabled = true;
+  try {
+    const updated = await api(`${API_BASE}/securities/${encodeURIComponent(id)}/refresh-name`, {
+      method: "POST", headers: {"Content-Type": "application/json"}, body: "{}",
+    });
+    watchlistSecurities = watchlistSecurities.map(s => s.id === id ? updated : s);
+    if (selectedSecurity?.id === id) { selectedSecurity = updated; renderSecurityHeader(); }
+    renderSecuritySelector();
+    document.dispatchEvent(new CustomEvent("security-metadata-updated", {detail: updated}));
+    element("#supported-security-result").textContent = "名称已核对；仅补全代码占位名称，自定义名称保留。";
+  } catch (error) { element("#supported-security-result").textContent = safeErrorMessage(error); }
+  finally { button.disabled = false; }
+});

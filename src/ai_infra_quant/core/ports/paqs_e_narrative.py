@@ -34,5 +34,11 @@ class NarrativeLedger(Protocol):
     def get_run(self, run_id: str) -> NarrativeRun | None: ...
     def get_result(self, result_id: str) -> NarrativeResult | None: ...
     def history(
-        self, security_id: str, strategy_id: str | None = None, limit: int = 20
+        self,
+        security_id: str,
+        strategy_id: str | None = None,
+        limit: int = 20,
+        *,
+        snapshot_hash: str | None = None,
+        deleted: bool = False,
     ) -> tuple[NarrativeResult, ...]: ...

@@ -1,0 +1,354 @@
+{
+  "source_window_start": "2026-08-31T09:42:03.057687Z",
+  "as_of": "2026-09-30T09:42:03.380712Z",
+  "scheduled_days": [
+    {
+      "date": "2026-08-31",
+      "scheduled_type": "FULL",
+      "source_minutes": 0,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-01",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-02",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-03",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-04",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-07",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-08",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-09",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-10",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-11",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-14",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-15",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-16",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-17",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-18",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-21",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-22",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-23",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-24",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-25",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-28",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-29",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-30",
+      "scheduled_type": "FULL",
+      "source_minutes": 331,
+      "segments": [
+        {
+          "end": "12:00:00",
+          "start": "09:30:00"
+        },
+        {
+          "end": "16:00:00",
+          "start": "13:00:00"
+        }
+      ]
+    }
+  ],
+  "m30_first": "2026-09-03T01:30:00Z",
+  "m30_last": "2026-09-30T08:00:00Z",
+  "capture_hash": "469945737b65292369abe7cbf934658f183e383bd703cb4b8dca14e6b4d7bd76"
+}

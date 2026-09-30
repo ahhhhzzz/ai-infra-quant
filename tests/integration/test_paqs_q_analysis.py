@@ -166,7 +166,7 @@ def test_additive_0005_migration_does_not_change_0004_tables(database_url: str) 
     engine = create_database_engine(database_url)
     try:
         original = set(inspect(engine).get_table_names())
-        command.upgrade(config, "head")
+        command.upgrade(config, "0005_task006e_q_analysis")
         assert current_migration_revision(engine) == "0005_task006e_q_analysis"
         assert set(inspect(engine).get_table_names()) == original | {"paqs_q_analysis_runs"}
         with engine.connect() as connection:

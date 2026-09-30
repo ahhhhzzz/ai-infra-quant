@@ -450,10 +450,11 @@
     $("decision-history").replaceChildren();
     if ($("legacy-history-section").open) void reloadLegacyHistory();
     if (!security) { $("history-status").textContent = "请选择证券"; return; }
-    const id = security.id, strategy = $("history-strategy").value;
+    const id = security.id, strategy = $("history-strategy").value, deleted = $("e-history-deleted").checked;
+    $("latest-decision").disabled = deleted;
     $("history-status").textContent = "读取成功历史…";
     try {
-      const body = await get(`securities/${encodeURIComponent(id)}/narrative-results?limit=20${strategy ? `&strategy_id=${encodeURIComponent(strategy)}` : ""}`);
+      const body = await get(`securities/${encodeURIComponent(id)}/narrative-results?limit=20&deleted=${deleted}${strategy ? `&strategy_id=${encodeURIComponent(strategy)}` : ""}`);
       if (token !== historyGeneration || nav !== navigation) return;
       if (!Array.isArray(body.items) || body.items.length > 20 || body.items.some(item =>
         !same(item.security_id, id) || !uuid(item.narrative_result_id) || !uuid(item.narrative_run_id)
@@ -468,7 +469,10 @@
         button.append(node("strong", `${item.strategy_id} · Narrative 修订 ${item.revision_no}`),
           node("span", `${stamp(item.created_at, item.market)} · ${modelName(item.model_id)}`), node("span", item.preview));
         button.addEventListener("click", () => selectDecision(item));
-        return button;
+        button.disabled = deleted;
+        const row = node("div", "", "history-item");
+        row.append(button, window.HistoryVisibility.button("E", item, security, deleted));
+        return row;
       }));
       $("history-status").textContent = history.length ? `已显示 ${history.length} 条成功 Narrative` : "此筛选下暂无成功 Narrative";
     } catch (error) {
@@ -634,13 +638,32 @@
     decision = null; historical = false; earlier = false;
     legacyGeneration += 1; $("legacy-history").replaceChildren();
     clearEvidence(); renderDecision(); mode(false);
-    $("analysis-security").textContent = item ? `${item.display_symbol} · ${item.market} · ${item.currency}` : "请选择证券";
+    $("analysis-security").textContent = item ? `${item.display_name || item.symbol} · ${item.display_symbol} · ${item.currency}` : "请选择证券";
     $("known-run-id").value = "";
     $("known-run-status").textContent = ""; $("known-run-detail").textContent = "—";
     if (!inFlight) state("尚未为当前证券发起新分析；可读取成功历史。");
     updateButton(); void reloadHistory();
   }
   document.addEventListener("security-selected", (event) => onSecurity(event.detail));
+  $("e-history-deleted").addEventListener("change", reloadHistory);
+  document.addEventListener("security-metadata-updated", ({detail}) => {
+    if (security?.id === detail.id) {
+      security = detail;
+      $("analysis-security").textContent = `${detail.display_name || detail.symbol} · ${detail.display_symbol} · ${detail.currency}`;
+    }
+  });
+  document.addEventListener("analysis-visibility-changing", ({detail}) => {
+    if (detail.kind !== "E" || detail.security_id !== security?.id) return;
+    selectionIntent += 1; detailGeneration += 1; runGeneration += 1; historyGeneration += 1;
+    decision = null; clearEvidence(); renderDecision(); mode(false);
+    $("known-run-detail").textContent = "—";
+  });
+  document.addEventListener("analysis-visibility-changed", ({detail}) => {
+    if (detail.security_id === security?.id) void reloadHistory();
+  });
+  document.addEventListener("e-history-created", ({detail}) => {
+    if (detail.security_id === security?.id) void reloadHistory();
+  });
   $("watchlist-toggle").addEventListener("click", () => {
     const expanded = $("watchlist-toggle").getAttribute("aria-expanded") !== "true";
     $("watchlist-toggle").setAttribute("aria-expanded", String(expanded));
@@ -659,7 +682,7 @@
   $("reload-history").addEventListener("click", reloadHistory);
   $("history-strategy").addEventListener("change", reloadHistory);
   $("latest-decision").addEventListener("click", () => {
-    if (history.length) void selectDecision(history[0]);
+    if (history.length && !$("e-history-deleted").checked) void selectDecision(history[0]);
   });
   $("known-run-form").addEventListener("submit", (event) => {
     event.preventDefault(); void showRun($("known-run-id").value);

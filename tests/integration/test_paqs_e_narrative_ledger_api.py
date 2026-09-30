@@ -100,6 +100,7 @@ def test_upgrade_from_0002_preserves_legacy_bytes_and_downgrade_removes_only_nar
         "market_archive_memberships",
         "paqs_q_analysis_runs",
         "paqs_e_external_research",
+        "analysis_visibility",
     }
     assert legacy_evidence(migrated_engine) == before
     assert ledger.get_decision(legacy.decision.id) == legacy.decision

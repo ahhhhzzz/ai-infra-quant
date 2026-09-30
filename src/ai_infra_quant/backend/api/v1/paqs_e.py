@@ -599,9 +599,12 @@ def narrative_history(
     container: ContainerDep,
     strategy_id: str | None = Query(default=None, min_length=1, max_length=120),
     limit: int = Query(default=20, ge=1, le=100),
+    deleted: bool = False,
 ) -> JSONResponse:
     try:
-        entries = container.narrative_ledger.history(str(security_id), strategy_id, limit)
+        entries = container.narrative_ledger.history(
+            str(security_id), strategy_id, limit, deleted=deleted
+        )
         items = []
         for entry in entries:
             item = json.loads(canonical_json(entry))

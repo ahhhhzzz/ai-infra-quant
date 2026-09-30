@@ -10,6 +10,7 @@ from ai_infra_quant.application.observed_calendar import (
     ScheduledCalendarMetadata,
     ScheduledTradingDays,
 )
+from ai_infra_quant.application.paqs_capture_evidence import CapturedPaqsInputBundle
 from ai_infra_quant.core.domain.common import utc_now
 from ai_infra_quant.core.domain.enums import DataAvailabilityStatus, SnapshotQualityStatus
 from ai_infra_quant.core.domain.market_data import PROVIDER_FUTU_QUOTE
@@ -21,7 +22,6 @@ from ai_infra_quant.core.domain.paqs_input import (
     SourceCoverage,
     derive_m30_bars,
     derive_weekly_bars,
-    expected_completed_m30_bucket_count,
 )
 
 
@@ -128,8 +128,24 @@ class PaqsInputQueries:
             as_of=as_of,
         )
         completed_weekly = tuple(bar for bar in weekly if bar.is_completed)
-        completed_m30 = tuple(bar for bar in m30 if bar.is_completed)
-        expected_m30 = expected_completed_m30_bucket_count(m30_trading_days, as_of)
+        completed_m30 = tuple(
+            bar
+            for bar in m30
+            if bar.is_completed and bar.interval_start >= minute_view.window_start
+        )
+        # Only whole buckets inside the requested source window are expected.
+        # In particular, an after-close lower bound must not count that earlier day as missing.
+        expected_m30 = 0
+        for day in m30_trading_days:
+            if day.retrieved_at > as_of:
+                continue
+            for segment in day.session_segments:
+                start = datetime.combine(day.market_date, segment.start, tzinfo=timezone)
+                end = datetime.combine(day.market_date, segment.end, tzinfo=timezone)
+                while start + timedelta(minutes=30) <= end:
+                    if start >= minute_view.window_start and start + timedelta(minutes=30) <= as_of:
+                        expected_m30 += 1
+                    start += timedelta(minutes=30)
         unknown_days = sum(1 for item in m30_trading_days if not item.session_segments)
         missing_m30 = max(0, expected_m30 - len(completed_m30))
         warnings = _warnings(
@@ -156,7 +172,11 @@ class PaqsInputQueries:
             if self._provider_name == PROVIDER_FUTU_QUOTE
             else AdjustmentBasis.UNAVAILABLE
         )
-        bundle = PaqsInputBundle(
+        bundle = CapturedPaqsInputBundle(
+            source_minute_bars=minute,
+            daily_retrieved_at=daily_view.result.retrieved_at,
+            minute_retrieved_at=minute_view.result.retrieved_at,
+            minute_window_start=minute_view.window_start,
             security_id=security.id,
             market=security.market,
             symbol=security.symbol,

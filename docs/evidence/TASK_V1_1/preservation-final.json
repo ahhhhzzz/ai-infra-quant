@@ -1,0 +1,22 @@
+{
+  "old_tables": 28,
+  "old_rows_unchanged_except_name_metadata": true,
+  "allowed_name_updates": [
+    {
+      "display_name": [
+        "09698",
+        "万国数据-SW"
+      ],
+      "updated_at": [
+        "2026-08-30T16:00:00.000000Z",
+        "2026-09-30T09:42:02.040914Z"
+      ]
+    }
+  ],
+  "appended_rows": {
+    "paqs_q_analysis_runs": 4
+  },
+  "integrity": "ok",
+  "foreign_key_violations": 0,
+  "original_triggers_unchanged": true
+}

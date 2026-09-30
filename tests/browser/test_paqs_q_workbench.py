@@ -82,6 +82,14 @@ def test_q_history_refresh_and_explicit_e_same_snapshot_actions(
             return app.fulfill(route, {"items": items})
         if path.endswith("/paqs-q/analyses/" + Q_ID):
             return app.fulfill(route, q)
+        if path.endswith("/e-matches"):
+            return app.fulfill(
+                route,
+                {
+                    "items": [{**e, "security_id": US, "created_at": q["created_at"]}],
+                    "state": "MATCHES_FOUND",
+                },
+            )
         if "/compare/" in path:
             differing = path.endswith(OTHER_E_ID)
             other = (
@@ -102,7 +110,7 @@ def test_q_history_refresh_and_explicit_e_same_snapshot_actions(
         assert payload["q_analysis_id"] == Q_ID
         assert payload["model_key"] == "qwen3.8-max"
         assert payload["strategy_id"] == "fixture-alternative"
-        assert payload["web_research"] is True
+        assert payload["web_research"] is False
         return app.fulfill(route, {**e, "status": "SUCCEEDED"}, 201)
 
     page.route("**/api/v1/paqs-q/**", q_route)
@@ -125,6 +133,7 @@ def test_q_history_refresh_and_explicit_e_same_snapshot_actions(
     page.locator("#tab-compare").click()
     page.locator("#q-e-analyze").click()
     expect(page.locator("#q-e-status")).to_contain_text("快照身份一致")
+    expect(page.locator("#web-research")).to_be_checked()
     assert page.locator("#q-e-result .narrative-text").text_content() == PROSE
     expect(page.locator("#q-e-result")).to_contain_text("E 冻结输入覆盖与来源")
     expect(page.locator("#q-e-result")).to_contain_text("E 附加研究原始引用")
