@@ -14,8 +14,8 @@ from sqlalchemy import Engine
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
-from ai_infra_quant import __version__
 from ai_infra_quant.application.bootstrap import ensure_database_ready
+from ai_infra_quant.application_version import APP_VERSION
 from ai_infra_quant.backend.api.errors import problem_response, validation_exception_handler
 from ai_infra_quant.backend.api.router import api_router
 from ai_infra_quant.backend.dependencies import build_container
@@ -67,7 +67,7 @@ def create_app(
 
     application = FastAPI(
         title="AI Infra Quant",
-        version=__version__,
+        version=APP_VERSION,
         lifespan=lifespan,
         docs_url="/docs",
         redoc_url=None,
@@ -105,7 +105,7 @@ def create_app(
             )
         return {
             "status": "OK",
-            "app_version": __version__,
+            "app_version": APP_VERSION,
             "source_revision": source_revision,
             "database": "READY",
             "migration_revision": request.app.state.migration_revision,
@@ -115,7 +115,11 @@ def create_app(
 
     @application.get("/", response_class=HTMLResponse, include_in_schema=False)
     def dashboard(request: Request) -> HTMLResponse:
-        return _TEMPLATES.TemplateResponse(request=request, name="index.html", context={})
+        return _TEMPLATES.TemplateResponse(
+            request=request,
+            name="index.html",
+            context={"app_version": APP_VERSION, "source_revision": source_revision},
+        )
 
     application.include_router(api_router)
     application.mount(

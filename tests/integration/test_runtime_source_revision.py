@@ -4,12 +4,15 @@ import json
 import os
 import shutil
 import subprocess
+import tomllib
+from importlib.metadata import version
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine
 
+from ai_infra_quant.application_version import APP_VERSION
 from ai_infra_quant.backend.main import create_app
 from ai_infra_quant.backend.runtime_identity import capture_source_revision
 from ai_infra_quant.config import Settings
@@ -36,6 +39,19 @@ def test_health_revision_is_frozen_despite_checkout_environment_change(
         assert client.get("/health").json()["source_revision"] == SHA
         monkeypatch.setenv("AI_INFRA_SOURCE_REVISION", "f" * 40)
         assert client.get("/health").json()["source_revision"] == SHA
+        assert f'name="source-revision" content="{SHA}"' in client.get("/").text
+
+
+def test_release_version_agrees_across_package_health_page_and_openapi(client: TestClient) -> None:
+    declared = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"][
+        "version"
+    ]
+    assert declared == APP_VERSION == version("ai-infra-quant") == "1.0.0"
+    assert client.get("/health").json()["app_version"] == declared
+    page = client.get("/").text
+    assert f'name="app-version" content="{declared}"' in page
+    assert f'id="app-version">v{declared}</span>' in page
+    assert client.get("/openapi.json").json()["info"]["version"] == declared
 
 
 @pytest.mark.parametrize(

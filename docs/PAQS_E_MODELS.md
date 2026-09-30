@@ -1,5 +1,10 @@
 # Model and credential guide
 
+v1.0.0 当前交付状态见 [README](../README.md)。用户已手动完成一次 NVDA 的 Tavily + DeepSeek
+分析并保存带来源的 Narrative；发布收尾只读核对了该历史及来源，不重新调用搜索或模型。
+下方实现时的“未真实调用”、零行检索表和待验收说明保留其原时点含义。
+外部独立 Linux 聚焦检查为 107 项中 105 passed、2 项已在产品基线复现的失败，不是全部通过。
+
 C1 and C2 are accepted and integrated. Current architecture/lifecycle is documented in
 [ARCHITECTURE](ARCHITECTURE.md); status and acceptance attribution are in [ROADMAP](ROADMAP.md).
 Current catalog capability was checked against official documentation on 2026-09-24;

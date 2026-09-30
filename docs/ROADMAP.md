@@ -1,5 +1,24 @@
 # Read-Only PAQS Dual-Branch Decision-Terminal Product Roadmap
 
+## v1.0.0 — 功能冻结 / 使用与维护（2026-09-30）
+
+用户授权以已整合的 `2810c1e0da3c97a82983cd3ad779d5faae316bf3` 功能基线完成 v1.0.0
+发布，随后停止功能扩展。当前范围包括已有行情与存档、已接受 Q 规则/条件式 Holder、
+中文 Dashboard、不可变 Q/E 历史、最小同快照对照，以及 DeepSeek + Tavily 独立研究。
+本次只统一发布身份、使用说明和必要检查；不增加新策略、EXE 打包或跨机器部署。
+[Windows 使用与一致性备份](../README.md)为日常入口，当前数据库迁移是
+`0006_external_research`。当前状态优先于下文各历史时点的待开发/待整合表述。
+
+用户报告已手动完成 NVDA 的 Tavily + DeepSeek 联网分析；这不是 Codex 本轮真实调用。
+用户提供的外部 Linux 复核为 107 项中 105 passed、2 项基线失败，失败记录保留；
+本轮未独立重跑浏览器。既有本地 Windows、模拟服务和浏览器结果仍引用
+[原执行记录](PAQS_E_MODELS.md#deepseek-独立联网研究--tavily2026-09-30)，不改变执行归属。
+
+仍保留观察性/非严格 PIT 限制、证据不足时的 `INSUFFICIENT`、尚未建立真实数据正式 Entry
+资格、`LONG_READY` 不代表成交、AVGO 原结论，以及 F1 用户接受的 Linux 布局限定例外。
+这不是全平台、全部真实服务路径或市场有效性验收。后续只做使用和针对具体问题的维护；
+新增功能必须另行授权。以下原文继续保留其历史时点含义，不作为自动开启下一任务的指令。
+
 ## TASK-006E-Q / TASK-007D bounded product batch — closeout, 2026-09-23
 
 The owner authorized one delivery batch for an explicit PAQS-Q product action, conditional Holder,

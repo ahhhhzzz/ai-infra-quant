@@ -2,12 +2,13 @@
 <html lang="zh-Hans">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="app-version" content="{{ app_version }}"><meta name="source-revision" content="{{ source_revision }}">
   <link rel="icon" href="data:,"><title>AI INFRA QUANT · 决策工作台</title>
   <link rel="stylesheet" href="/static/app.css"><link rel="stylesheet" href="/static/workbench.css">
 </head>
 <body>
 <header class="terminal-header">
-  <div class="brand-block"><span class="brand-mark" aria-hidden="true">IQ</span><div><h1>AI INFRA QUANT</h1><p>决策工作台 <span>· 只读研究</span></p></div></div>
+  <div class="brand-block"><span class="brand-mark" aria-hidden="true">IQ</span><div><h1>AI INFRA QUANT</h1><p>决策工作台 <span>· 只读研究 · </span><span id="app-version">v{{ app_version }}</span></p></div></div>
   <div class="header-actions">
     <span id="service-health" role="status">服务检查中</span>
     <span id="provider-mode" class="provider-mode">行情来源 —</span>

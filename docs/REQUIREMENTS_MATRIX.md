@@ -1,5 +1,18 @@
 # Requirements Traceability Matrix
 
+## v1.0.0 — 功能冻结 / 使用与维护（2026-09-30）
+
+| 发布要求 | 当前范围 / 依据 |
+|---|---|
+| 固定 Windows 使用入口、保留现有 Python/配置/历史 | [README 使用指南](../README.md)、[start_dashboard.bat](../start_dashboard.bat)；本机 ignored 入口 `启动AIInfraQuant.cmd` 不随源码发布 |
+| 当前库身份和一致性备份，不覆盖既有历史 | [README 备份命令](../README.md#数据配置与备份)、[增量迁移 0006](../src/ai_infra_quant/database/migrations/versions/0006_external_research.py) |
+| 已有 Q/E、历史和 Tavily 作为冻结范围，不新增策略 | [当前路线图](ROADMAP.md#v100--功能冻结--使用与维护2026-09-30)、[Q 产品规则](PAQS_Q_PRODUCT_COMPARE_V1.md)、[E/Tavily 使用](PAQS_E_MODELS.md) |
+| 用户使用与外部复核、历史本地测试分别归属 | [README 验证归属](../README.md#v10-变更与验证归属)：用户报告 NVDA 联网成功；外部 Linux 107 项中 105 passed、2 项基线失败；本轮未独立执行浏览器验收 |
+
+发布不代表严格 PIT、真实数据正式 Entry、市场有效性或全平台验收。F1 Linux 限定例外及
+原 AVGO 结论保持不变。下文为各阶段原始实现/验证记录；包括先前 Tavily“待聚焦复核”在内的
+历史文字保留当时含义，当前冻结状态以上节和路线图为准。
+
 ## Dashboard readable Q workbench (local UI delivery, 2026-09-24)
 
 | Requirement | Implementation / focused verification |
