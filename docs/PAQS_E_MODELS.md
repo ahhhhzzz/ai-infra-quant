@@ -2,8 +2,8 @@
 
 C1 and C2 are accepted and integrated. Current architecture/lifecycle is documented in
 [ARCHITECTURE](ARCHITECTURE.md); status and acceptance attribution are in [ROADMAP](ROADMAP.md).
-This catalog describes repository configuration at `722936984deac652b443eba132c69650653345e1`,
-not a new live verification of provider availability.
+Current catalog capability was checked against official documentation on 2026-09-24;
+this is not a paid provider-connectivity verification. Historical execution evidence stays unchanged.
 
 ## Select a model and configure its key
 
@@ -23,14 +23,14 @@ Never share a screenshot containing a key, and do not put keys in chat, URLs or 
 
 ## Exact catalog and transports
 
-Default: **DeepSeek V4 Flash**. The selector is flat, with no provider grouping. The single source
+Default: **DeepSeek Flash (V4.1)**. The selector is flat, with no provider grouping. The single source
 is [model_registry.json](../src/ai_infra_quant/resources/paqs_e/model_registry.json). Model keys currently equal the exact
 provider model IDs; no prefix inference or provider `/models` discovery occurs.
 
 | Display name | Exact model key / provider model ID | Provider identity | Slot | Reasoning | Research |
 |---|---|---|---|---|---|
-| DeepSeek V4 Flash | `deepseek-v4-flash` | `deepseek` | `deepseek` | responses / final text | Responses web_search |
-| DeepSeek V4 Pro | `deepseek-v4-pro` | `deepseek` | `deepseek` | responses / final text | Responses web_search |
+| DeepSeek Flash (V4.1) | `deepseek-flash` | `deepseek` | `deepseek` | responses / final text | Disabled |
+| DeepSeek V4 Pro | `deepseek-v4-pro` | `deepseek` | `deepseek` | responses / final text | Disabled |
 | Qwen3.8 Flash | `qwen3.8-flash` | `alibaba` | `dashscope` | chat / final text | Responses web_search |
 | Qwen3.8 Max | `qwen3.8-max` | `alibaba` | `dashscope` | chat / final text | Responses web_search |
 | Qwen3.7 Plus | `qwen3.7-plus` | `alibaba` | `dashscope` | chat / final text | Responses web_search |
@@ -58,6 +58,14 @@ non-empty final text (at most 100,000 Unicode characters) is preserved exactly; 
 model identity, refusal, incompleteness, tool invocation, credential echo and safe response-ID checks
 still fail closed. Provider reasoning traces are discarded.
 
+The retired `deepseek-v4-flash` selection is disabled for new calls. Existing records retain
+their original model identity and text. The current Flash selection shares the same secure
+`deepseek` credential slot. [Official model naming](https://api-docs.deepseek.com/zh-cn/)
+and [Responses compatibility](https://api-docs.deepseek.com/guides/responses_api/) now state
+that old Flash names route to V4.1 and built-in `web_search` is ignored. Research ON is rejected
+before model dispatch; the user must explicitly run without research or select another
+supported research route. No ordinary model text is accepted as completed search.
+
 ## Explicit lifecycle and evidence
 
 Only Analyze submits the four required fields: Security, registered model key, registered strategy
@@ -73,18 +81,18 @@ request fails explicitly. Presence of a stored key does not establish provider a
 | Research choice | Behavior before final Narrative |
 |---|---|
 | OFF | Zero research calls; unchanged Snapshot-bound final-text path |
-| DeepSeek ON | One native SEARCH; direct valid factual memo, or exactly one tool-free SYNTHESIS for valid completed tool-only SEARCH |
+| Historical DeepSeek ON (disabled in current catalog) | One native SEARCH; direct valid factual memo, or exactly one tool-free SYNTHESIS for valid completed tool-only SEARCH |
 | OpenAI / Alibaba ON | One native search request, source-specific summary normalization; no DeepSeek synthesis flow |
 | GLM / Kimi / Hy4 | Research disabled; ordinary Narrative remains available with configured credentials |
 
-DeepSeek accepts recognized partial native actions alongside completed evidence, but requires at
+The retained historical DeepSeek parser accepts recognized partial native actions alongside completed evidence, but requires at
 least one completed search. Only accepted completed calls enter stateless pass-back, unchanged;
 partial queries/sources never become trusted evidence. Its advisory four-query instruction is not
 a four-query acceptance cap. Capture stores only a bounded ordered prefix with total exposed query
 count and completeness flag. See [research bounds and diagnostics](ARCHITECTURE.md#5-optional-research-and-provenance)
 for the source-verified acceptance/capture limits, provider differences and request counts.
 
-ON can add latency/API cost: DeepSeek uses at most two additional research HTTP requests, final
+ON can add latency/API cost: the historical DeepSeek route used at most two additional research HTTP requests, final
 Narrative is separate. Native search actions/queries are not the number of HTTP attempts or a billing
 guarantee. The transport uses a 120-second HTTPX timeout and 2 MB response bound. The browser's
 180-second notice leaves the synchronous request guarded; it does not cancel or retry it.

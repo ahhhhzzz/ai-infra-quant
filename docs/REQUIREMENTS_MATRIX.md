@@ -1,5 +1,14 @@
 # Requirements Traceability Matrix
 
+## Dashboard readable Q workbench (local UI delivery, 2026-09-24)
+
+| Requirement | Implementation / focused verification |
+|---|---|
+| Compact desktop layout, readable Q summary, folded technical JSON, responsive history tabs | [UI usage and actual verification](DASHBOARD_WORKBENCH.md), [browser checks](../tests/browser/test_dashboard_readability.py) |
+| Deterministic Chinese mappings, separate candidates/stages, no invented geometry or Holder inference | [presentation mapping](../src/ai_infra_quant/frontend/static/paqs-q-view.js), [mapping and copy checks](../tests/browser/test_dashboard_readability.py) |
+| Current module evidence, candidate fact reasons and historical replay diagnostics retain distinct scope and time | [scope fix](DASHBOARD_WORKBENCH.md#q-原因归属修正2026-09-24), [frozen-view regression checks](../tests/browser/test_dashboard_readability.py) |
+| Read-only history, same-Snapshot E list, explicit paid-model action, no cross-security stale results | [Q flow](../src/ai_infra_quant/frontend/static/paqs-q.js), [explicit-action regression](../tests/browser/test_paqs_q_workbench.py), [API compatibility](../tests/integration/test_paqs_q_e_frozen_api.py) |
+
 ## TASK-006E-Q / TASK-007D — Q01 focused review PASS / CLOSED; integrated upon product fast-forward
 
 | Requirement | Implementation / focused verification |
@@ -419,3 +428,12 @@ Real-account/trading behavior is forbidden.
 | ARC-006 | Bounded stable offline pages, 4xx validation, no read-side provider calls | [API/pagination tests](../tests/integration/test_market_data_archive_api.py) |
 | ARC-007 | Default-folded UI, explicit save guard, stale selection, exact local table, both themes | [Real Uvicorn browser tests](../tests/browser/test_market_archive_browser.py); [F01 evidence](reports/TASK_006B1_F01_REMEDIATION_REPORT.md); [user closeout](decisions/TASK_006B1_CLOSEOUT_2026_09_09.md) |
 | ARC-008 | No Analyze/research/trading coupling; protected paths unchanged | [Boundary tests](../tests/architecture/test_task006b1_boundaries.py); [implementation report](reports/TASK_006B1_IMPLEMENTATION_REPORT.md) |
+
+
+### 2026-09-24 真实使用阻断修复（本地工作版本）
+
+| 要求 | 实现与验证 |
+| --- | --- |
+| Q 计划日历完整范围及观察性闭市事实 | `observed_calendar.py`、Futu 日历适配、产品适配 1.0.1；范围/未知/未来证据拒绝，W1 正例；VRT 只读 OpenD 复验通过 |
+| E 当前接口能力与显式不联网路径 | 当前 DeepSeek Flash 身份、禁用未支持的内置联网；无传输前置拒绝，原文与历史保持，错误技术详情；真实付费调用未执行 |
+| 保留严格证据及历史 | 原策略 manifest 不变；三张 Q/E 记录表摘要不变；浏览器历史/切换没有 POST；详见 [增量说明](DASHBOARD_WORKBENCH.md) |

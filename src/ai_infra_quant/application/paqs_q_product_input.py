@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
+from ai_infra_quant.application.observed_calendar import ScheduledCalendarMetadata
 from ai_infra_quant.core.domain.enums import DataAvailabilityStatus
 from ai_infra_quant.core.domain.market_data import TradingDay, TradingDayType
 from ai_infra_quant.core.domain.paqs_input import PaqsInputBundle
@@ -125,7 +126,36 @@ def _actual_open_facts(snapshot: PaqsMarketSnapshot, source: PaqsInputBundle) ->
                 complete=source.calendar.status is DataAvailabilityStatus.AVAILABLE,
             )
         )
-    return tuple(facts)
+    schedule = source.calendar
+    if (
+        isinstance(schedule, ScheduledCalendarMetadata)
+        and schedule.status is DataAvailabilityStatus.AVAILABLE
+        and schedule.retrieved_at <= snapshot.as_of_timestamp
+    ):
+        if (
+            schedule.coverage_end < schedule.coverage_start
+            or (schedule.coverage_end - schedule.coverage_start).days > 10000
+            or any(not schedule.coverage_start <= day <= schedule.coverage_end for day in seen)
+        ):
+            raise ValueError("SNAPSHOT_CALENDAR_SCOPE_INVALID")
+        for offset in range((schedule.coverage_end - schedule.coverage_start).days + 1):
+            calendar_date = schedule.coverage_start + timedelta(days=offset)
+            # UNKNOWN listed sessions stay unknown; they cannot become CLOSED.
+            if calendar_date not in seen:
+                facts.append(
+                    Fact(
+                        day=calendar_date,
+                        market=snapshot.security.market,
+                        timezone=snapshot.security.market_timezone,
+                        kind="CLOSED",
+                        segments=(),
+                        source=schedule.provider,
+                        retrieved_at=schedule.retrieved_at,
+                        available_at=None,
+                        complete=True,
+                    )
+                )
+    return tuple(sorted(facts, key=lambda item: item.day))
 
 
 def _segments(day: TradingDay) -> tuple[tuple[datetime, datetime], ...]:
@@ -145,7 +175,7 @@ def _daily(
     result = []
     for bar in bars:
         fact = calendar.get(bar.session_date)
-        if fact is None:
+        if fact is None or fact.kind != "OPEN" or not fact.segments:
             return None
         start, end = fact.segments[0][0], fact.segments[-1][1]
         result.append(
@@ -187,6 +217,7 @@ def _weekly(
             calendar[first + timedelta(days=i)]
             for i in range(7)
             if first + timedelta(days=i) in calendar
+            and calendar[first + timedelta(days=i)].kind == "OPEN"
         ]
         if not known_sessions:
             return None
@@ -258,10 +289,23 @@ def adapt_snapshot(snapshot: PaqsMarketSnapshot, source: PaqsInputBundle) -> Pro
     diagnostics = [
         "HISTORICAL_PRICE_AVAILABILITY_UNKNOWN",
         "HISTORICAL_CALENDAR_AVAILABILITY_UNKNOWN",
-        "CLOSED_DAY_FACTS_UNAVAILABLE",
         "DERIVED_BAR_SOURCE_RETRIEVAL_UNAVAILABLE",
         "INDEPENDENT_M30_OPEN_REFERENCE_MISSING",
     ]
+    schedule = source.calendar
+    schedule_evidence = None
+    if isinstance(schedule, ScheduledCalendarMetadata):
+        schedule_evidence = {
+            "coverage_start": schedule.coverage_start.isoformat(),
+            "coverage_end": schedule.coverage_end.isoformat(),
+            "basis": schedule.schedule_basis,
+            "retrieved_at": schedule.retrieved_at,
+            "historical_available_at": None,
+            "listed_dates": [day.market_date.isoformat() for day in schedule.trading_days],
+        }
+        diagnostics.append("SCHEDULED_CALENDAR_EXCLUDES_EMERGENCY_CLOSURES")
+    if not any(fact.kind == "CLOSED" for fact in facts):
+        diagnostics.append("CLOSED_DAY_FACTS_UNAVAILABLE")
     if not snapshot.adjustment_metadata.historical_replay_safe:
         diagnostics.append("ADJUSTMENT_HISTORY_NOT_POINT_IN_TIME")
     if adjustment == "PROVIDER_QFQ_CURRENT":
@@ -294,6 +338,7 @@ def adapt_snapshot(snapshot: PaqsMarketSnapshot, source: PaqsInputBundle) -> Pro
             "input_provider": source.provider,
             "calendar_provider": source.calendar.provider,
             "calendar_retrieved_at": source.calendar.retrieved_at,
+            "calendar_schedule_evidence": schedule_evidence,
             "adjustment_basis": adjustment,
             "adjustment_as_of": source.adjustment.adjustment_as_of,
             "historical_replay_safe": source.adjustment.historical_replay_safe,

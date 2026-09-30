@@ -6,8 +6,8 @@ from datetime import timedelta
 from typing import Any
 
 import pytest
-from paqs_e_support import MemoryCredentials
-from test_paqs_e_model_gateway import REGISTRY, SENTINEL, Transport, envelope
+from paqs_e_support import MemoryCredentials, historical_deepseek_registry
+from test_paqs_e_model_gateway import SENTINEL, Transport, envelope
 from test_paqs_e_runtime import _snapshot
 
 from ai_infra_quant.application.paqs_e_models import ModelCredentials
@@ -22,6 +22,7 @@ from ai_infra_quant.core.domain.paqs_market_snapshot import canonical_json
 from ai_infra_quant.integrations.openai_reasoning.gateway import ModelGateway
 from ai_infra_quant.integrations.openai_reasoning.narrative import NarrativeGateway
 
+REGISTRY = historical_deepseek_registry()
 MODEL = REGISTRY.resolve("deepseek-v4-flash")
 MEMO = "  # 合成研究备忘\n事实辅助;价格以 Snapshot 为准。https://prose.example/unverified\n"
 

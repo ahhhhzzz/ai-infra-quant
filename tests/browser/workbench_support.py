@@ -332,7 +332,7 @@ class Workbench:
             return self.fulfill(
                 route,
                 {
-                    "default_model_key": "deepseek-v4-flash",
+                    "default_model_key": ModelRegistry().default_model_key,
                     "models": [
                         {
                             "model_key": item.model_key,
@@ -342,6 +342,7 @@ class Workbench:
                             "web_research_supported": item.web_research_supported,
                         }
                         for item in ModelRegistry().models
+                        if item.enabled
                     ],
                     "default_strategy_id": STRATEGY,
                     "strategies": [

@@ -10,7 +10,6 @@ from typing import Any
 
 import pytest
 from paqs_e_support import MemoryCredentials
-from test_paqs_e_runtime import _result, _snapshot
 
 from ai_infra_quant.application.paqs_e_models import ModelCredentials, ModelRegistry
 from ai_infra_quant.application.paqs_e_research import ResearchFailure
@@ -27,6 +26,7 @@ from ai_infra_quant.core.ports.paqs_e_reasoning import ReasoningFailureKind as K
 from ai_infra_quant.core.ports.paqs_e_reasoning import ReasoningProviderFailure
 from ai_infra_quant.integrations.openai_reasoning.gateway import ModelGateway, normalize_research
 from ai_infra_quant.integrations.windows_credentials import WindowsCredentialStore
+from tests.unit.test_paqs_e_runtime import _result, _snapshot
 
 REGISTRY = ModelRegistry()
 SENTINEL = "synthetic-007c1-never-a-real-credential"
@@ -104,6 +104,7 @@ def research_response(model_id: str = "qwen3.8-max") -> dict[str, Any]:
 
 def test_exact_catalog_single_source_routes_slots_and_default() -> None:
     assert [item.display_name for item in REGISTRY.models] == [
+        "DeepSeek Flash (V4.1)",
         "DeepSeek V4 Flash",
         "DeepSeek V4 Pro",
         "Qwen3.8 Flash",
@@ -116,16 +117,20 @@ def test_exact_catalog_single_source_routes_slots_and_default() -> None:
         "GPT-5.6 Terra",
         "GPT-5.6 Sol",
     ]
-    assert REGISTRY.default_model_key == "deepseek-v4-flash"
-    assert len({item.model_key for item in REGISTRY.models}) == 11
+    assert REGISTRY.default_model_key == "deepseek-flash"
+    assert len({item.model_key for item in REGISTRY.models}) == 12
     assert len({item.credential_slot for item in REGISTRY.models}) == 6
-    assert all(item.enabled for item in REGISTRY.models)
+    assert not next(
+        item for item in REGISTRY.models if item.model_key == "deepseek-v4-flash"
+    ).enabled
     for invalid in ("gpt-unapproved", "https://evil.example", "OPENAI", "", "qwen3.8-max "):
         with pytest.raises(ValueError):
             REGISTRY.resolve(invalid)
 
 
-@pytest.mark.parametrize("model", REGISTRY.models, ids=lambda model: model.model_key)
+@pytest.mark.parametrize(
+    "model", [m for m in REGISTRY.models if m.enabled], ids=lambda model: model.model_key
+)
 @pytest.mark.parametrize(
     "scenario", ["success", "malformed", "identity", "refusal", "network", "secret"]
 )
@@ -193,7 +198,9 @@ def test_every_selected_route_strict_stateless_outcomes(model: Any, scenario: st
     assert "synthetic-discarded-trace" not in str(outcome)
 
 
-@pytest.mark.parametrize("model", REGISTRY.models, ids=lambda model: model.model_key)
+@pytest.mark.parametrize(
+    "model", [m for m in REGISTRY.models if m.enabled], ids=lambda model: model.model_key
+)
 def test_missing_key_and_unknown_route_never_call_provider(model: Any) -> None:
     transport = Transport({})
     gateway = ModelGateway(REGISTRY, ModelCredentials(REGISTRY, MemoryCredentials()), transport)
@@ -218,12 +225,12 @@ def test_missing_key_and_unknown_route_never_call_provider(model: Any) -> None:
 def test_shared_credential_slot_delete_update_and_read_only_openai_fallback() -> None:
     store = MemoryCredentials()
     credentials = ModelCredentials(REGISTRY, store, openai_fallback="synthetic-env-fallback")
-    credentials.save("deepseek-v4-flash", SENTINEL)
+    credentials.save("deepseek-flash", SENTINEL)
     assert credentials.secret("deepseek-v4-pro") == SENTINEL
     assert not credentials.status("qwen3.8-max").credential_configured
     credentials.save("deepseek-v4-pro", "synthetic-updated")
-    assert credentials.secret("deepseek-v4-flash") == "synthetic-updated"
-    credentials.delete("deepseek-v4-flash")
+    assert credentials.secret("deepseek-flash") == "synthetic-updated"
+    credentials.delete("deepseek-flash")
     assert not credentials.status("deepseek-v4-pro").credential_configured
     credentials.save("gpt-5.6-sol", SENTINEL)
     credentials.delete("gpt-5.6-terra")
@@ -310,7 +317,9 @@ def test_research_bounds_and_provenance_fail_closed(corruption: str) -> None:
         )
 
 
-@pytest.mark.parametrize("model", REGISTRY.models, ids=lambda model: model.model_key)
+@pytest.mark.parametrize(
+    "model", [m for m in REGISTRY.models if m.enabled], ids=lambda model: model.model_key
+)
 def test_research_selected_model_only_no_retries_and_no_hidden_reasoning_tools(model: Any) -> None:
     transport = Transport(research_response(model.model_id))
     store = MemoryCredentials()
@@ -402,7 +411,7 @@ def test_native_citation_only_sources_and_raw_source_bound() -> None:
         {"type": "url_citation", "url": "https://example.org/earnings", "title": "Native title"}
     ]
     context = normalize_research(
-        response, REGISTRY.resolve("deepseek-v4-flash"), _snapshot(), datetime.now(UTC), "news"
+        response, REGISTRY.resolve("deepseek-flash"), _snapshot(), datetime.now(UTC), "news"
     )
     assert context[0].source_label == "Native title"
     response["output"][0]["action"]["sources"] = [
@@ -410,7 +419,7 @@ def test_native_citation_only_sources_and_raw_source_bound() -> None:
     ]
     with pytest.raises(ValueError, match="source bound"):
         normalize_research(
-            response, REGISTRY.resolve("deepseek-v4-flash"), _snapshot(), datetime.now(UTC), "news"
+            response, REGISTRY.resolve("deepseek-flash"), _snapshot(), datetime.now(UTC), "news"
         )
 
 

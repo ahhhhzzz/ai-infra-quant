@@ -4,14 +4,14 @@ import json
 from typing import Any
 
 import pytest
-from paqs_e_support import MemoryCredentials
+from paqs_e_support import MemoryCredentials, historical_deepseek_registry
 from sqlalchemy import Engine, select, text
 from test_paqs_e_analysis_api import AnalysisHarness
 from test_paqs_e_analysis_api import analysis as analysis_fixture
 from test_paqs_e_narrative_ledger_api import PROSE, TextProvider, install
 from test_paqs_e_research_continuation_api import SECRET, TRACE, ResearchTransport
 
-from ai_infra_quant.application.paqs_e_models import ModelCredentials, ModelRegistry
+from ai_infra_quant.application.paqs_e_models import ModelCredentials
 from ai_infra_quant.core.domain.paqs_e_ledger import payload_sha256
 from ai_infra_quant.database.models.paqs_e_narrative import results, runs
 from ai_infra_quant.integrations.openai_reasoning.gateway import ModelGateway
@@ -20,12 +20,20 @@ from ai_infra_quant.integrations.openai_reasoning.narrative import NarrativeGate
 analysis = analysis_fixture
 
 
+@pytest.fixture(autouse=True)
+def historical_catalog(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Synthetic historical protocol coverage; current production capability is disabled.
+    monkeypatch.setattr(
+        "ai_infra_quant.backend.schemas.paqs_e.ModelRegistry", historical_deepseek_registry
+    )
+
+
 @pytest.mark.parametrize("mode", ["off", "direct", "tool-only"])
 @pytest.mark.parametrize("many_queries", [False, True])
 def test_live_multiplicity_freezes_before_narrative_and_preserves_ledger(
     analysis: AnalysisHarness, migrated_engine: Engine, mode: str, many_queries: bool
 ) -> None:
-    registry = ModelRegistry()
+    registry = historical_deepseek_registry()
     model = registry.resolve("deepseek-v4-flash")
     store = MemoryCredentials()
     store.values[model.credential_slot] = SECRET
@@ -49,6 +57,7 @@ def test_live_multiplicity_freezes_before_narrative_and_preserves_ledger(
     gateway = ModelGateway(registry, ModelCredentials(registry, store), transport)
     install(analysis, TextProvider())
     service = analysis.container.narrative_analysis_service
+    service.models = registry
     service.research = gateway
     service.provider = NarrativeGateway(registry, gateway.credentials, transport)
     schema_sql = text("SELECT type, name, sql FROM sqlite_master ORDER BY name")
@@ -56,7 +65,7 @@ def test_live_multiplicity_freezes_before_narrative_and_preserves_ledger(
         schema = connection.execute(schema_sql).all()
         assert (
             connection.execute(text("SELECT version_num FROM alembic_version")).scalar()
-            == "0004_task006b1_market_archive"
+            == "0005_task006e_q_analysis"
         )
     response = analysis.client.post(
         "/api/v1/paqs-e/narrative-analyses",

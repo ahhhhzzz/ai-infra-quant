@@ -11,6 +11,7 @@ from types import TracebackType
 from typing import Any, Protocol, cast
 from zoneinfo import ZoneInfo
 
+from ai_infra_quant.application.observed_calendar import ScheduledTradingDays
 from ai_infra_quant.core.domain.enums import DataAvailabilityStatus
 from ai_infra_quant.core.domain.market_data import (
     CanonicalMarketState,
@@ -353,6 +354,8 @@ class FutuQuoteAdapter:
             days_by_date: dict[date, TradingDay] = {}
             for row in rows:
                 market_date = date.fromisoformat(str(row["time"]).strip())
+                if not start_date <= market_date <= end_date or market_date in days_by_date:
+                    raise ValueError("calendar response has out-of-range or duplicate dates")
                 raw_type = _provider_enum_text(row["trade_date_type"])
                 day_type, segments = _calendar_semantics(normalized_market, raw_type)
                 days_by_date[market_date] = TradingDay(
@@ -370,10 +373,16 @@ class FutuQuoteAdapter:
             days = tuple(days_by_date[key] for key in sorted(days_by_date))
         except (KeyError, TypeError, ValueError) as exc:
             return _failure(DataAvailabilityStatus.INVALID, retrieved_at, _safe_reason(exc))
-        return ProviderResult(
+        # This API enumerates scheduled trading dates in the explicit range;
+        # its complement is scheduled weekends/holidays, NOT missing OHLC.
+        # Futu explicitly excludes emergency closures from this guarantee.
+        return ScheduledTradingDays(
             status=DataAvailabilityStatus.AVAILABLE,
             retrieved_at=retrieved_at,
             data=days,
+            coverage_start=start_date,
+            coverage_end=end_date,
+            schedule_basis="FUTU_REQUEST_TRADING_DAYS_SCHEDULE_EXCLUDES_EMERGENCY_CLOSURES",
         )
 
     def _call(self, method_name: str, code_list: list[str]) -> object | ProviderResult[Any]:

@@ -1,4 +1,5 @@
 """Focused Q product actions and same-Snapshot comparison in real Chromium."""
+# ruff: noqa: RUF001 -- Exact Chinese UI punctuation.
 
 from __future__ import annotations
 
@@ -96,6 +97,7 @@ def test_q_history_refresh_and_explicit_e_same_snapshot_actions(
     def e_route(route: Route) -> None:
         request = route.request
         payload = request.post_data_json
+        assert isinstance(payload, dict)
         calls.append((request.method, urlparse(request.url).path, payload))
         assert payload["q_analysis_id"] == Q_ID
         assert payload["model_key"] == "qwen3.8-max"
@@ -113,12 +115,14 @@ def test_q_history_refresh_and_explicit_e_same_snapshot_actions(
     expect(page.locator("#q-analyze")).to_be_enabled()
     assert not any(method == "POST" for method, _, _ in calls)
     page.locator("#q-analyze").click()
-    expect(page.locator("#q-result")).to_contain_text(Q_ID)
+    expect(page.locator("#q-result")).to_contain_text("证据不足，暂无法判断")
     expect(page.locator("#q-e-analyze")).to_be_enabled()
     assert len([call for call in calls if call[0] == "POST"]) == 1
+    page.locator("#branch-e").click()
     page.locator("#model-id").select_option("qwen3.8-max")
     page.locator("#strategy-id").select_option("fixture-alternative")
     page.locator("#web-research").check()
+    page.locator("#tab-compare").click()
     page.locator("#q-e-analyze").click()
     expect(page.locator("#q-e-status")).to_contain_text("快照身份一致")
     assert page.locator("#q-e-result .narrative-text").text_content() == PROSE
@@ -127,6 +131,7 @@ def test_q_history_refresh_and_explicit_e_same_snapshot_actions(
     assert page.locator("#q-e-result script").count() == 0
     assert page.evaluate("window.qAttack") is None
     assert len([call for call in calls if call[0] == "POST"]) == 2
+    page.locator(".advanced-compare > summary").click()
     page.locator("#q-e-known-id").fill(OTHER_E_ID)
     page.locator("#q-e-known-form button").click()
     expect(page.locator("#q-e-status")).to_contain_text("快照身份不一致")
@@ -134,8 +139,9 @@ def test_q_history_refresh_and_explicit_e_same_snapshot_actions(
     page.reload()
     expect(page.locator("#q-history .history-row")).to_have_count(1)
     assert len([call for call in calls if call[0] == "POST"]) == 2
+    page.locator("#tab-history").click()
     page.locator("#q-history .history-row").click()
-    expect(page.locator("#q-result")).to_contain_text(Q_ID)
+    expect(page.locator("#q-result")).to_contain_text("证据不足，暂无法判断")
     assert len([call for call in calls if call[0] == "POST"]) == 2
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")

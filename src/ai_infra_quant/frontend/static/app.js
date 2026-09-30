@@ -73,14 +73,16 @@ const statusClass = (status) =>
 const setStatus = (selector, status) => {
   const node = element(selector);
   const value = status || "UNKNOWN";
-  node.textContent = value;
+  node.textContent = ({AVAILABLE: "可用", UNAVAILABLE: "不可用", UNKNOWN: "未知", MISSING: "缺失", PROVIDER_ERROR: "行情服务错误", NOT_ENTITLED: "无行情权限", NOT_SUPPORTED: "不支持", STALE: "数据过旧", DELAYED: "行情延迟", INVALID: "数据无效"})[value] || value;
+  node.title = value;
   node.className = `status-badge ${statusClass(value)}`;
 };
 
 const setMarketState = (state) => {
   const node = element("#market-state");
   const value = state || "UNKNOWN";
-  node.textContent = value.replaceAll("_", "-");
+  node.textContent = ({OPEN: "交易中", CLOSED: "已休市", PRE_MARKET: "盘前", AFTER_HOURS: "盘后", BREAK: "午间休市", UNKNOWN: "状态未知"})[value] || value;
+  node.title = value;
   node.className = `market-state ${statusClass(value)}`;
 };
 
@@ -304,13 +306,13 @@ const renderChart = ({ resetViewport = false } = {}) => {
   configureChartTime(timeZone);
 
   if (activeTimeframe === "daily") {
-    element("#chart-caption").textContent = "Completed daily OHLCV · market-local sessions";
+    element("#chart-caption").textContent = "已完成日 K 与成交量 · 交易所日期";
     const bars = dailySnapshot?.bars || [];
     if (!bars.length) {
       clearChart();
       showChartMessage(
         "日 K 行情暂不可用",
-        dailySnapshot?.reason || "No completed daily candles are available.",
+        dailySnapshot?.reason || "暂无可用的已完成日线。",
       );
       return;
     }
@@ -318,14 +320,14 @@ const renderChart = ({ resetViewport = false } = {}) => {
     volumeSeries.setData(bars.filter((bar) => bar.volume != null)
       .map((bar) => volumeBar(bar, bar.session_date)));
   } else {
-    element("#chart-caption").textContent = "Completed 1-minute OHLCV · recent 30 calendar days";
+    element("#chart-caption").textContent = "已完成 1 分钟与成交量 · 最近 30 个日历日";
     const bars = minuteSnapshot?.bars || [];
     if (!bars.length) {
       clearChart();
       const currentState = stateSnapshot?.market_state || "UNKNOWN";
       showChartMessage(
         "1分钟行情暂不可用",
-        `当前市场：${currentState} · ${minuteSnapshot?.reason || "No completed recent candles."}`,
+        `当前市场：${currentState} · ${minuteSnapshot?.reason || "暂无最近已完成行情。"}`,
       );
       return;
     }
@@ -375,29 +377,30 @@ const resetMarketView = () => {
   element("#latest-quote-at").textContent = "—";
   element("#state-retrieved-at").textContent = "—";
   element("#latest-daily-session").textContent = "—";
+  element("#latest-daily-close").textContent = "—";
   element("#latest-minute-at").textContent = "—";
-  element("#provider-market-state").textContent = "Provider state —";
-  element("#provider-mode").textContent = "Provider —";
+  element("#provider-market-state").textContent = "来源状态 —";
+  element("#provider-mode").textContent = "行情来源 —";
   element("#market-data-reason").textContent = "";
   setMarketState("UNKNOWN");
   for (const selector of ["#quote-status", "#market-status", "#daily-status", "#minute-status"]) {
     setStatus(selector, "UNKNOWN");
   }
   clearChart();
-  showChartMessage("Loading market data", "The chart will show completed candles only.");
+  showChartMessage("正在读取行情", "图表仅展示已完成行情。");
 };
 
 const renderState = (data) => {
   stateSnapshot = data;
-  element("#provider-mode").textContent = `Provider ${data.provider}`;
+  element("#provider-mode").textContent = `行情来源 ${data.provider}`;
   element("#latest-price").textContent = data.quote_status === "AVAILABLE" && data.latest_price
     ? data.latest_price
     : "—";
   element("#latest-currency").textContent = data.currency;
   setMarketState(data.market_state);
   element("#provider-market-state").textContent = data.provider_market_state
-    ? `Provider state ${data.provider_market_state}`
-    : "Provider state —";
+    ? `来源状态 ${data.provider_market_state}`
+    : "来源状态 —";
   element("#latest-quote-at").textContent = formatTimestamp(data.latest_quote_at, data.market_timezone);
   element("#state-retrieved-at").textContent = formatTimestamp(data.retrieved_at, data.market_timezone);
   setStatus("#quote-status", data.quote_status);
@@ -409,7 +412,7 @@ const renderStateFailure = (reason) => {
   element("#latest-price").textContent = "—";
   element("#latest-quote-at").textContent = "—";
   element("#state-retrieved-at").textContent = "—";
-  element("#provider-market-state").textContent = "Provider state —";
+  element("#provider-market-state").textContent = "来源状态 —";
   setMarketState("UNKNOWN");
   setStatus("#quote-status", "PROVIDER_ERROR");
   setStatus("#market-status", "PROVIDER_ERROR");
@@ -431,6 +434,7 @@ const renderDaily = (data, fullHistory) => {
   dailySnapshot = { ...data, bars: sortedBars };
   setStatus("#daily-status", data.status);
   element("#latest-daily-session").textContent = sortedBars.at(-1)?.session_date || "—";
+  element("#latest-daily-close").textContent = sortedBars.at(-1)?.close || "—";
 };
 
 const renderDailyFailure = (reason, fullHistory) => {
@@ -439,6 +443,7 @@ const renderDailyFailure = (reason, fullHistory) => {
   dailySnapshot = { status: "PROVIDER_ERROR", bars, reason };
   setStatus("#daily-status", "PROVIDER_ERROR");
   element("#latest-daily-session").textContent = bars.at(-1)?.session_date || "—";
+  element("#latest-daily-close").textContent = bars.at(-1)?.close || "—";
   return reason;
 };
 
@@ -640,10 +645,10 @@ const refreshSelectedSecurity = async (_trigger) => {
 
     if (daily) {
       renderDaily(daily, fullHistory);
-      if (daily.reason) reasons.push(`Daily: ${daily.reason}`);
+      if (daily.reason) reasons.push(`日线：${daily.reason}`);
     } else {
       reasons.push(renderDailyFailure(
-        rejectedReason(results[1]) || "Daily data unavailable",
+        rejectedReason(results[1]) || "日线数据不可用",
         fullHistory,
       ));
     }
@@ -689,7 +694,7 @@ const renderSecuritySelector = () => {
     return button;
   });
   replaceChildren("#security-selector", choices);
-  element("#market-watchlist-status").textContent = `${choices.length} securities`;
+  element("#market-watchlist-status").textContent = `${choices.length} 只证券`;
 };
 
 const selectSecurity = (security) => {
@@ -715,16 +720,16 @@ const clearSelectedSecurity = () => {
   renderSecuritySelector();
   resetMarketView();
   element("#selected-identity").textContent = "—";
-  element("#selected-title").textContent = "No tracked securities";
+  element("#selected-title").textContent = "暂无自选证券";
   element("#selected-name").textContent = "Add a Security to the Watchlist";
   element("#latest-currency").textContent = "—";
   element("#chart-caption").textContent = "Select a tracked Security to load market data";
-  element("#market-data-reason").textContent = "No tracked securities";
+  element("#market-data-reason").textContent = "暂无自选证券";
   for (const selector of ["#quote-status", "#market-status", "#daily-status", "#minute-status"]) {
     setStatus(selector, "MISSING");
   }
   showChartMessage(
-    "No tracked securities",
+    "暂无自选证券",
     "Add a Security to the Watchlist to load market data.",
   );
   element("#refresh-market").disabled = true;

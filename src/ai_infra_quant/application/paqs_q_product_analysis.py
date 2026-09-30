@@ -18,8 +18,12 @@ from ai_infra_quant.core.domain.paqs_q.setup_reference import SetupFact, SetupRu
 from ai_infra_quant.core.strategy.paqs_q.event_context import CONTEXT_ID, EVENT_ID
 
 PRODUCT_ID = "paqs-q-product-analysis"
-PRODUCT_VERSION = "1.0.0"
+PRODUCT_VERSION = "1.0.1"
 EVIDENCE_GUIDANCE = {
+    "SCHEDULED_CALENDAR_EXCLUDES_EMERGENCY_CLOSURES": (
+        "当前日历覆盖计划交易日、周末和假日, 不认证临时休市; "
+        "仅用于 OBSERVATIONAL, 严格历史验证仍需历史日历版本与可知时间。"
+    ),
     "HISTORICAL_PRICE_AVAILABILITY_UNKNOWN": (
         "提供逐根历史行情的真实 available_at; 当前抓取时间不能替代。"
     ),
@@ -220,6 +224,10 @@ class PaqsQProductAnalysisService:
                 "adapter_code_hash": _code_hash(
                     Path(__file__).with_name("paqs_q_product_input.py")
                 ),
+                "calendar_capture_code_hashes": {
+                    "metadata": _code_hash(Path(__file__).with_name("observed_calendar.py")),
+                    "acquisition": _code_hash(Path(__file__).with_name("paqs_input_queries.py")),
+                },
                 "market_snapshot": snapshot,
                 "snapshot_hash": snapshot.snapshot_hash,
                 "snapshot_as_of_timestamp": snapshot.as_of_timestamp,

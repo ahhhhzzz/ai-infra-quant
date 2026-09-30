@@ -539,8 +539,13 @@
         }
       } else if ([404, 409, 422, 500].includes(response.status) && body.status === response.status && typeof body.code === "string") {
         const researchFailure = body.code === "PAQS_E_RESEARCH_PRECONDITION_FAILED";
-        const detail = researchFailure ? "联网研究未完成" : (body.detail || "");
-        state(`${target}：${response.status === 500 ? "账本证据无法提交或验证" : "分析前提失败"} · ${body.code} · ${detail}。没有确认新的 Narrative。${researchFailure ? researchDiagnostic(body.research_diagnostic) : ""}`);
+        const detail = researchFailure
+          ? "联网研究未完成：没有取得符合协议的搜索证据。请检查模型的联网支持，或明确关闭联网研究后再点击分析（仍可能产生模型费用）"
+          : (body.detail || "");
+        state(`${target}：${response.status === 500 ? "账本证据无法提交或验证" : "分析前提失败"} · ${detail}。没有确认新的 Narrative。`);
+        const technical = node("details");
+        technical.append(node("summary", "错误技术详情"), node("p", `${body.code} · ${researchFailure ? researchDiagnostic(body.research_diagnostic) : detail}`));
+        $("analysis-state").append(technical);
       } else throw new Error("未确认响应");
     } catch (_error) {
       state(`${target}：结果未知，响应未能确认（可能断连、超时、格式或身份异常）。服务端可能已保存结果。请检查成功历史或已知 Run，再决定是否显式发起新尝试；不会自动重试。`);
@@ -617,8 +622,11 @@
     const item = selectedModel();
     $("web-research").disabled = !item?.web_research_supported;
     $("web-research").checked = false;
-    $("research-status").textContent = "联网研究默认关闭；开启可能在最终分析前增加最多 2 次研究请求，增加耗时和 API 成本。"
-      + (item?.web_research_supported ? "" : "此模型当前未启用可审计联网研究；可关闭研究后分析。");
+    $("research-status").textContent = item?.web_research_supported
+      ? "联网研究默认关闭；开启可能在最终分析前增加最多 2 次研究请求，增加耗时和 API 成本。"
+      : (item?.model_key.startsWith("deepseek-")
+        ? "DeepSeek 当前 Responses 接口不支持内置联网搜索。此处仅可运行不联网分析；不会自动替代联网请求，点击分析仍可能产生模型费用。"
+        : "此模型当前未启用可审计联网研究；可明确选择不联网分析，仍可能产生模型费用。");
     $("configuration-status").textContent = item?.credential_configured
       ? "凭据已存在（仅确认存在，未验证有效性、模型权限或连接）。"
       : "未配置此模型凭据。请配置 API Key；行情与历史仍可读取。";

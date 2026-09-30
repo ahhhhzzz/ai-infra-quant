@@ -5,19 +5,27 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
-from paqs_e_support import MemoryCredentials
+from paqs_e_support import MemoryCredentials, historical_deepseek_registry
 from sqlalchemy import Engine, select
 from test_paqs_e_analysis_api import AnalysisHarness
 from test_paqs_e_analysis_api import analysis as analysis_fixture
 from test_paqs_e_narrative_ledger_api import PROSE, TextProvider, install
 
-from ai_infra_quant.application.paqs_e_models import ModelCredentials, ModelRegistry
+from ai_infra_quant.application.paqs_e_models import ModelCredentials
 from ai_infra_quant.core.domain.paqs_e_ledger import payload_sha256
 from ai_infra_quant.database.models.paqs_e_narrative import results, runs
 from ai_infra_quant.integrations.openai_reasoning.gateway import ModelGateway
 from ai_infra_quant.integrations.openai_reasoning.narrative import NarrativeGateway
 
 analysis = analysis_fixture
+
+
+@pytest.fixture(autouse=True)
+def historical_catalog(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Synthetic historical protocol coverage; current production capability is disabled.
+    monkeypatch.setattr(
+        "ai_infra_quant.backend.schemas.paqs_e.ModelRegistry", historical_deepseek_registry
+    )
 
 
 def envelope(prose: str, surface: str, model: str) -> dict[str, Any]:
@@ -47,7 +55,7 @@ def test_real_gateway_api_exact_memo_freeze_hash_readback_and_no_failure_run(
     research_on: bool,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    registry = ModelRegistry()
+    registry = historical_deepseek_registry()
     model = registry.resolve("deepseek-v4-flash")
     fixtures = SimpleNamespace(
         REGISTRY=registry,
@@ -81,6 +89,7 @@ def test_real_gateway_api_exact_memo_freeze_hash_readback_and_no_failure_run(
     monkeypatch.setattr(transport, "post", post)
     install(analysis, TextProvider())
     service = analysis.container.narrative_analysis_service
+    service.models = registry
     service.research = research
     service.provider = NarrativeGateway(fixtures.REGISTRY, research.credentials, transport)
     response = analysis.client.post(

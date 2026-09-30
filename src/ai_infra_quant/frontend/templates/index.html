@@ -1,51 +1,45 @@
 <!doctype html>
 <html lang="zh-Hans">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="data:,">
-    <title>PAQS-E · 决策工作台</title>
-    <link rel="stylesheet" href="/static/app.css">
-  </head>
-  <body>
-    <header class="terminal-header">
-      <div class="brand-block">
-        <p class="eyebrow">AI INFRA QUANT / RESEARCH</p>
-        <h1>PAQS-E 决策工作台</h1>
-      </div>
-      <div class="header-actions">
-        <span id="service-health" role="status">服务检查中</span>
-        <button id="theme-toggle" type="button" aria-label="切换明暗主题">浅色模式</button>
-        <span class="read-only-badge">READ ONLY · DECISION SUPPORT</span>
-        <span id="provider-mode" class="provider-mode">Provider —</span>
-        <button id="refresh-market" class="refresh-button" type="button">刷新最新行情</button>
-        <span id="refresh-countdown" class="countdown" aria-live="polite">自动刷新：—</span>
-      </div>
-    </header>
-
-    <main>
-      <button id="watchlist-toggle" class="watchlist-toggle" type="button" aria-expanded="false" aria-controls="watchlist-panel">展开关注证券 / 添加与移除</button>
-      <section class="terminal-grid" aria-label="Market data Dashboard">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,"><title>AI INFRA QUANT · 决策工作台</title>
+  <link rel="stylesheet" href="/static/app.css"><link rel="stylesheet" href="/static/workbench.css">
+</head>
+<body>
+<header class="terminal-header">
+  <div class="brand-block"><span class="brand-mark" aria-hidden="true">IQ</span><div><h1>AI INFRA QUANT</h1><p>决策工作台 <span>· 只读研究</span></p></div></div>
+  <div class="header-actions">
+    <span id="service-health" role="status">服务检查中</span>
+    <span id="provider-mode" class="provider-mode">行情来源 —</span>
+    <button id="refresh-market" class="refresh-button" type="button">刷新行情</button>
+    <span id="refresh-countdown" class="countdown" aria-live="polite">自动刷新：—</span>
+    <button id="theme-toggle" type="button" aria-label="切换明暗主题">浅色模式</button>
+  </div>
+</header>
+<main>
+  <button id="watchlist-toggle" class="watchlist-toggle" type="button" aria-expanded="false" aria-controls="watchlist-panel">展开自选证券</button>
+  <section class="terminal-grid" aria-label="行情与决策工作台">
         <aside id="watchlist-panel" class="watchlist-panel">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">WATCHLIST</p>
-              <h2>关注证券</h2>
+
+              <h2>自选证券</h2>
             </div>
-            <span id="market-watchlist-status" class="small-status">Loading</span>
+            <span id="market-watchlist-status" class="small-status">读取中</span>
           </div>
-          <form id="supported-security-form" class="supported-security-form">
-            <label>Market
+          <label class="watch-search">搜索自选<input id="watchlist-search" type="search" placeholder="代码或名称" autocomplete="off"></label><p id="watch-search-empty" class="note" hidden>没有匹配的自选证券</p>
+          <details class="watch-add"><summary>＋ 添加证券</summary><form id="supported-security-form" class="supported-security-form">
+            <label>市场
               <select name="market" aria-label="Stock market">
                 <option value="US">US</option>
                 <option value="HK">HK</option>
               </select>
             </label>
-            <label>Symbol
-              <input name="symbol" required maxlength="32" placeholder="NVDA or 700">
+            <label>代码
+              <input name="symbol" required maxlength="32" placeholder="例如 NVDA 或 700">
             </label>
-            <button type="submit">Add US/HK stock</button>
-          </form>
+            <button type="submit">添加美股 / 港股</button>
+          </form></details>
           <p id="supported-security-result" class="add-security-result" role="status"></p>
           <div id="security-selector" class="security-selector" role="listbox"
                aria-label="Select security"></div>
@@ -55,31 +49,31 @@
         <article class="market-panel">
           <div class="instrument-header">
             <div>
-              <p id="selected-identity" class="eyebrow">SELECTED SECURITY</p>
+              <p id="selected-identity" class="eyebrow">当前证券</p>
               <h2 id="selected-title" class="instrument-title">—</h2>
               <p id="selected-name" class="instrument-name">—</p>
             </div>
             <div class="market-state-block">
               <span id="market-state" class="market-state status-unknown">UNKNOWN</span>
-              <span id="provider-market-state" class="provider-state">Provider state —</span>
+              <span id="provider-market-state" class="provider-state">行情商状态 —</span>
             </div>
           </div>
 
           <section class="quote-strip" aria-label="Latest market state">
             <div>
-              <span class="metric-label">Latest price</span>
+              <span class="metric-label">最新报价</span>
               <strong id="latest-price" class="latest-price">—</strong>
               <span id="latest-currency" class="price-currency">—</span>
             </div>
-            <div class="quote-timestamps">
-              <span>Last quote <strong id="latest-quote-at">—</strong></span>
-              <span>Retrieved <strong id="state-retrieved-at">—</strong></span>
+            <div class="quote-timestamps"><span>最近完成日线收盘 <strong id="latest-daily-close">—</strong></span><span>涨跌幅 <strong class="note">行情接口未提供</strong></span>
+              <span>报价时间 <strong id="latest-quote-at">—</strong></span>
+              <span>读取时间 <strong id="state-retrieved-at">—</strong></span>
             </div>
           </section>
 
           <div class="chart-mode-toolbar" role="group" aria-label="图表来源">
             <button id="mode-current" type="button" aria-pressed="true">当前行情</button>
-            <button id="mode-frozen" type="button" aria-pressed="false">分析结果冻结证据</button>
+            <button id="mode-frozen" type="button" aria-pressed="false">E 分析冻结证据</button>
           </div>
           <div class="chart-toolbar current-chart-part">
             <div class="timeframe-tabs" role="tablist" aria-label="Chart timeframe">
@@ -88,14 +82,14 @@
               <button id="tab-minute" class="timeframe-tab" type="button"
                       role="tab" aria-selected="false" data-timeframe="minute">1 分钟</button>
             </div>
-            <span id="chart-caption" class="chart-caption">Completed daily OHLCV</span>
+            <span id="chart-caption" class="chart-caption">已完成日线 · 含成交量</span>
           </div>
 
           <div id="chart-stage" class="chart-stage current-chart-part" aria-label="Candlestick and volume chart">
             <div id="market-chart" class="market-chart"></div>
             <div id="chart-empty" class="chart-empty" role="status">
-              <strong>Loading market data</strong>
-              <span>The chart will show completed candles only.</span>
+              <strong>正在读取行情</strong>
+              <span>图表仅展示已完成的 K 线。</span>
             </div>
           </div>
 
@@ -115,80 +109,50 @@
             <details><summary>证据质量、完成区间与精确 OHLCV</summary><div id="evidence-facts"></div></details>
           </section>
 
-          <section class="data-status-panel" aria-label="Market data status and timestamps">
+          <details class="market-meta"><summary>行情时间与数据状态</summary><section class="data-status-panel" aria-label="Market data status and timestamps">
             <div class="status-cell">
-              <span>Quote</span>
+              <span>报价</span>
               <strong id="quote-status" class="status-badge status-unknown">UNKNOWN</strong>
             </div>
             <div class="status-cell">
-              <span>Market</span>
+              <span>市场</span>
               <strong id="market-status" class="status-badge status-unknown">UNKNOWN</strong>
             </div>
             <div class="status-cell">
-              <span>Daily</span>
+              <span>日线</span>
               <strong id="daily-status" class="status-badge status-unknown">UNKNOWN</strong>
             </div>
             <div class="status-cell">
-              <span>1 minute</span>
+              <span>分钟线</span>
               <strong id="minute-status" class="status-badge status-unknown">UNKNOWN</strong>
             </div>
             <div class="status-cell wide">
-              <span>Latest completed daily session</span>
+              <span>最近完成日线日期</span>
               <strong id="latest-daily-session">—</strong>
             </div>
             <div class="status-cell wide">
-              <span>Latest completed minute</span>
+              <span>最近完成分钟线</span>
               <strong id="latest-minute-at">—</strong>
             </div>
           </section>
 
+          </details>
           <p id="market-data-reason" class="market-data-reason" role="status"></p>
           <p class="chart-attribution">
             TradingView Lightweight Charts™ · Copyright © 2025 TradingView, Inc. ·
             <a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">TradingView</a>
           </p>
-          <section class="decision-history" aria-label="成功 Narrative 历史">
-            <div class="section-heading"><h2>Narrative 历史</h2><button id="reload-history" type="button">刷新历史</button></div>
-            <label>策略序列筛选<select id="history-strategy"><option value="">全部策略</option></select></label>
-            <p class="note">仅成功记录 · 最近 20 条 · 修订号按证券与策略分别计数</p>
-            <p id="history-status" role="status"></p>
-            <div id="decision-history"></div>
-            <details id="legacy-history-section"><summary>Legacy 结构化 Decision 历史（只读）</summary>
-              <p id="legacy-history-status" role="status"></p><div id="legacy-history"></div>
-            </details>
-            <button id="latest-decision" type="button">查看列表最新 Narrative</button>
-          </section>
-        </article>
 
-        <aside class="analysis-panel" aria-label="PAQS-E 分析与结果">
-          <form id="analyze-form" class="analysis-controls">
-            <div class="section-heading"><div><p class="eyebrow">ON-DEMAND ANALYSIS</p><h2>新的当前分析</h2></div></div>
-            <p id="analysis-security" class="identity-line">请选择证券</p>
-            <label>模型<select id="model-id" name="model_key" required disabled></select></label>
-            <label>主策略<select id="strategy-id" name="strategy_id" required disabled></select></label>
-            <label class="research-toggle"><input id="web-research" type="checkbox"> 联网研究</label>
-            <button id="configure-credential" type="button">配置此模型 API Key</button>
-            <p id="research-status" class="note"></p>
-            <p id="configuration-status" class="note" role="status">读取服务器配置…</p>
-            <button id="analyze-button" type="submit" disabled>Analyze · 分析当前快照</button>
-            <p class="note">每次显式提交采集新快照。行情刷新不会运行分析。</p>
-            <div id="analysis-state" class="analysis-state" role="status" aria-live="polite">尚未发起分析</div>
-          </form>
-          <dialog id="credential-dialog" aria-labelledby="credential-title" aria-describedby="credential-storage">
-            <form id="credential-form" autocomplete="off">
-              <h3 id="credential-title">配置此模型 API Key</h3>
-              <p id="credential-service"></p>
-              <p id="credential-storage" class="note">仅保存在当前 Windows 用户的凭据管理器；存在不代表余额或权限已验证。</p>
-              <label>API Key<input id="credential-secret" type="password" autocomplete="new-password" maxlength="1024" required autofocus></label>
-              <p id="credential-status" role="status"></p>
-              <div class="credential-actions">
-                <button id="credential-save" type="submit">安全保存 / 更新</button>
-                <button id="credential-delete" type="button">删除已保存凭据</button>
-                <button id="credential-close" type="button">关闭</button>
-              </div>
-            </form>
-          </dialog>
-          <section class="analysis-results">
+<section class="workspace-deck">
+  <nav class="workspace-tabs" role="tablist" aria-label="分析内容">
+    <button id="tab-details" type="button" role="tab" aria-selected="true" aria-controls="pane-details" data-workspace="details">分析详情</button>
+    <button id="tab-history" type="button" role="tab" aria-selected="false" aria-controls="pane-history" data-workspace="history" tabindex="-1">历史记录</button>
+    <button id="tab-compare" type="button" role="tab" aria-selected="false" aria-controls="pane-compare" data-workspace="compare" tabindex="-1">Q/E 对照</button>
+    <button id="tab-archive" type="button" role="tab" aria-selected="false" aria-controls="pane-archive" data-workspace="archive" tabindex="-1">行情存档</button>
+  </nav>
+  <section id="pane-details" role="tabpanel" aria-labelledby="tab-details">
+    <div id="q-basis"><div class="empty-state"><strong>等待选择 Q 记录</strong><p>查看历史或显式运行分析后，在这里查看判断依据。</p></div></div>
+    <div id="e-basis" hidden>          <section class="analysis-results">
             <div id="decision-heading" class="decision-heading">尚无选中的分析结果</div>
             <div id="decision-result"><p class="note">选择成功历史，或填写模型后显式 Analyze。</p></div>
             <details class="audit"><summary>审计身份与原始结果</summary><pre id="decision-audit">—</pre></details>
@@ -199,36 +163,35 @@
               <div id="known-run-status" role="status"></div><pre id="known-run-detail">—</pre>
             </details>
           </section>
-        </aside>
-      </section>
-
-      <section id="paqs-q-workbench" class="paqs-q-workbench" aria-label="PAQS-Q 分析与 Q/E 对照">
-        <div class="section-heading"><div><p class="eyebrow">DETERMINISTIC REFERENCE</p><h2>PAQS-Q · 当前快照分析</h2></div></div>
-        <p class="note">仅显式点击才采集快照并运行 Q。行情刷新、重载和历史读取不会重新分析。Q 的 Entry 是规则资格，LONG_READY 不代表成交或真实持仓。</p>
-        <p id="q-security" class="identity-line">请选择证券</p>
-        <div class="archive-actions">
-          <button id="q-analyze" type="button" disabled>分析当前快照 · Q</button>
-          <button id="q-history-refresh" type="button" disabled>读取 Q 历史</button>
-        </div>
-        <p id="q-status" role="status" aria-live="polite">尚未发起 Q 分析</p>
-        <div class="paqs-q-columns">
-          <section aria-label="PAQS-Q 历史"><h3>Q 分析历史</h3><div id="q-history"></div></section>
-          <section aria-label="PAQS-Q 结果"><h3>选定 Q 结果</h3><div id="q-result"><p class="note">运行分析或选择历史记录。</p></div></section>
-        </div>
-        <section class="paqs-q-compare" aria-label="Q/E 同快照对照">
-          <h3>Q/E 对照</h3>
-          <p class="note">仅相同冻结快照可标记为同快照对照。E 模型、主策略与联网研究选项沿用上方显式选择；点击下方按钮才会发起可能收费的模型请求。</p>
-          <div class="archive-actions">
-            <button id="q-e-analyze" type="button" disabled>用选定模型分析这份 Q 快照 · E</button>
-            <form id="q-e-known-form" class="paqs-q-known-form"><label>已有 E Narrative Result UUID<input id="q-e-known-id" maxlength="36" autocomplete="off" required></label><button type="submit">读取对照</button></form>
-          </div>
-          <p id="q-e-status" role="status" aria-live="polite">请选择 Q 记录后显式发起 E 或读取已有 E 结果。</p>
-          <div id="q-e-result"></div>
-        </section>
-      </section>
-
-
-      <details id="market-archive" class="market-archive">
+</div>
+  </section>
+  <section id="pane-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+    <p class="note">查看已保存的结果，不重新分析。以下记录仅属于当前证券。</p>
+    <div class="history-columns">
+      <section class="decision-history"><div class="section-heading"><h2>Q 分析历史</h2><button id="q-history-refresh" type="button" disabled>刷新列表</button></div><p id="q-history-status" role="status"></p><div id="q-history"></div></section>
+          <section class="decision-history" aria-label="成功 E 分析历史">
+            <div class="section-heading"><h2>E 分析历史</h2><button id="reload-history" type="button">刷新历史</button></div>
+            <label>策略序列筛选<select id="history-strategy"><option value="">全部策略</option></select></label>
+            <p class="note">仅成功记录 · 最近 20 条 · 修订号按证券与策略分别计数</p>
+            <p id="history-status" role="status"></p>
+            <div id="decision-history"></div>
+            <details id="legacy-history-section"><summary>Legacy 结构化 Decision 历史（只读）</summary>
+              <p id="legacy-history-status" role="status"></p><div id="legacy-history"></div>
+            </details>
+            <button id="latest-decision" type="button">查看列表最新 E 记录</button>
+          </section>
+</div></section>
+  <section id="pane-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
+    <div class="section-heading"><h2>同快照 · Q/E 对照</h2><button type="button" id="q-e-settings">设置 E 模型</button></div>
+    <p id="q-e-selection" class="note">读取模型设置…</p>
+    <p class="note">从右侧选中的 Q 记录开始。读取已有记录免费；运行 E 将调用所选模型，可能产生费用。</p>
+    <div class="compare-existing"><label>同快照 E 历史<select id="q-e-options" disabled><option value="">请先选择 Q 记录</option></select></label><button id="q-e-read" type="button" disabled>读取对照</button><button id="q-e-refresh" type="button" disabled>刷新列表</button></div>
+    <p id="q-e-list-status" class="note" role="status"></p>
+    <button id="q-e-analyze" type="button" disabled>运行同快照 E 分析（可能收费）</button>
+    <details class="advanced-compare"><summary>高级：按已知 E 记录 ID 读取</summary><form id="q-e-known-form" class="paqs-q-known-form"><label>E Narrative Result UUID<input id="q-e-known-id" maxlength="36" autocomplete="off" required></label><button type="submit">读取对照</button></form></details>
+    <p id="q-e-status" role="status" aria-live="polite">请先选择 Q 记录。</p><div id="q-e-result"></div>
+  </section>
+  <section id="pane-archive" role="tabpanel" aria-labelledby="tab-archive" hidden>      <details id="market-archive" class="market-archive">
         <summary>本地行情存档</summary>
         <p class="note">本地存档；当前观察到的复权数据；不等于严格历史时点回测。各批次独立获取，不是原子行情快照。</p>
         <p id="archive-security">请选择证券；也可离线按 Capture ID 查询。</p>
@@ -252,13 +215,54 @@
         <div class="archive-table-scroll" tabindex="0" role="region" aria-label="存档精确 OHLCV 分页表">
           <table id="archive-bars"><thead><tr><th>日期 / UTC 起始</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Volume</th></tr></thead><tbody></tbody></table>
         </div>
-      </details>
-    </main>
-    <script src="/static/vendor/lightweight-charts.standalone.production.js" defer></script>
-    <script src="/static/market-data-archive.js" defer></script>
-    <script src="/static/app.js" defer></script>
-    <script src="/static/narrative-markdown.js" defer></script>
-    <script src="/static/paqs-e.js" defer></script>
-    <script src="/static/paqs-q.js" defer></script>
-  </body>
-</html>
+      </details></section>
+</section>
+</article>
+<aside class="analysis-panel" aria-label="Q/E 分析面板">
+  <nav class="branch-tabs" role="tablist" aria-label="分析分支"><button id="branch-q" type="button" role="tab" aria-selected="true" aria-controls="paqs-q-workbench">Q · 规则分析</button><button id="branch-e" type="button" role="tab" aria-selected="false" aria-controls="e-actions" tabindex="-1">E · 专家分析</button></nav>
+  <section id="paqs-q-workbench" role="tabpanel" aria-labelledby="branch-q">
+    <div class="q-actions"><p id="q-security" class="identity-line">请选择证券</p><button id="q-analyze" type="button" disabled>分析当前快照 · Q</button><p class="note">确定性规则 · 不调用大模型</p></div>
+    <p id="q-status" role="status" aria-live="polite">尚未发起 Q 分析</p>
+    <div id="q-result"><div class="empty-state"><strong>尚未选择分析结果</strong><p>查看已保存历史，或点击上方按钮生成新快照。</p></div></div>
+    <button type="button" class="q-open-history" data-open-history>查看 Q 历史</button>
+  </section>
+  <section id="e-actions" role="tabpanel" aria-labelledby="branch-e" hidden>          <form id="analyze-form" class="analysis-controls">
+            <div class="section-heading"><div><p class="eyebrow">PAQS-E</p><h2>E · 专家分析</h2></div></div>
+            <p id="analysis-security" class="identity-line">请选择证券</p>
+            <label>模型<select id="model-id" name="model_key" required disabled></select></label>
+            <label>主策略<select id="strategy-id" name="strategy_id" required disabled></select></label>
+            <label class="research-toggle"><input id="web-research" type="checkbox"> 联网研究</label>
+            <button id="configure-credential" type="button">配置此模型 API Key</button>
+            <p id="research-status" class="note"></p>
+            <p id="configuration-status" class="note" role="status">读取服务器配置…</p>
+            <button id="analyze-button" type="submit" disabled>运行 E 分析（可能收费）</button>
+            <p class="note">调用所选模型可能产生费用；仅点击才运行。历史与刷新不调用模型。</p>
+            <div id="analysis-state" class="analysis-state" role="status" aria-live="polite">尚未发起分析</div>
+          </form>
+          <dialog id="credential-dialog" aria-labelledby="credential-title" aria-describedby="credential-storage">
+            <form id="credential-form" autocomplete="off">
+              <h3 id="credential-title">配置此模型 API Key</h3>
+              <p id="credential-service"></p>
+              <p id="credential-storage" class="note">仅保存在当前 Windows 用户的凭据管理器；存在不代表余额或权限已验证。</p>
+              <label>API Key<input id="credential-secret" type="password" autocomplete="new-password" maxlength="1024" required autofocus></label>
+              <p id="credential-status" role="status"></p>
+              <div class="credential-actions">
+                <button id="credential-save" type="submit">安全保存 / 更新</button>
+                <button id="credential-delete" type="button">删除已保存凭据</button>
+                <button id="credential-close" type="button">关闭</button>
+              </div>
+            </form>
+          </dialog>
+<p class="note e-details-hint">E 原文显示在左侧「分析详情」，保留模型原有叙述。</p></section>
+</aside>
+</section>
+</main>
+<script src="/static/vendor/lightweight-charts.standalone.production.js" defer></script>
+<script src="/static/market-data-archive.js" defer></script>
+<script src="/static/app.js" defer></script>
+<script src="/static/narrative-markdown.js" defer></script>
+<script src="/static/paqs-e.js" defer></script>
+<script src="/static/paqs-q-view.js" defer></script>
+<script src="/static/workbench.js" defer></script>
+<script src="/static/paqs-q.js" defer></script>
+</body></html>

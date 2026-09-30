@@ -323,7 +323,7 @@ def test_narrative_research_freezes_before_reasoning_and_failure_does_not_fall_b
     research = Research(analysis)
     analysis.container.narrative_analysis_service.research = research
     for model_key, enabled in [
-        ("deepseek-v4-flash", True),
+        ("deepseek-flash", False),
         ("qwen3.8-max", True),
         ("kimi-k3", False),
     ]:
@@ -346,14 +346,16 @@ def test_narrative_research_freezes_before_reasoning_and_failure_does_not_fall_b
     research.fail = True
     response = analysis.client.post(
         "/api/v1/paqs-e/narrative-analyses",
-        json=analysis.payload(model_key="deepseek-v4-flash", web_research=True),
+        json=analysis.payload(model_key="qwen3.8-max", web_research=True),
     )
     assert response.status_code == 422 and "narrative_run_id" not in response.json()
     assert len(provider.requests) == 3
     assert analysis.container.narrative_ledger.history(analysis.security_id) == entries
 
 
-@pytest.mark.parametrize("model", ["glm-5.2", "kimi-k3", "hy4-preview"])
+@pytest.mark.parametrize(
+    "model", ["glm-5.2", "kimi-k3", "hy4-preview", "deepseek-flash", "deepseek-v4-pro"]
+)
 def test_narrative_unsupported_research_never_dispatches_or_creates_run(
     analysis: AnalysisHarness,
     model: str,
@@ -426,7 +428,7 @@ def test_actual_narrative_gateway_never_persists_credential_or_reasoning_trace(
 
     fixtures = importlib.import_module("tests.unit.test_paqs_e_model_gateway")
     registry = ModelRegistry()
-    model = registry.resolve("deepseek-v4-flash")
+    model = registry.resolve("deepseek-flash")
     store = MemoryCredentials()
     store.values[model.credential_slot] = fixtures.SENTINEL
     transport = fixtures.Transport(fixtures.envelope(PROSE, model.api_surface, model.model_id))

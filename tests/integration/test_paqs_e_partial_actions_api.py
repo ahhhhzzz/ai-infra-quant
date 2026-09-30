@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 from paqs_e_partial_action_support import partial_actions
-from paqs_e_support import MemoryCredentials
+from paqs_e_support import MemoryCredentials, historical_deepseek_registry
 from sqlalchemy import Engine, select, text
 from test_paqs_e_analysis_api import AnalysisHarness
 from test_paqs_e_analysis_api import analysis as analysis_fixture
@@ -14,13 +14,21 @@ from test_paqs_e_narrative_ledger_api import PROSE, TextProvider, install
 from test_paqs_e_native_memo_ledger import envelope
 from test_paqs_e_research_continuation_api import MEMO, SECRET, TRACE, ResearchTransport
 
-from ai_infra_quant.application.paqs_e_models import ModelCredentials, ModelRegistry
+from ai_infra_quant.application.paqs_e_models import ModelCredentials
 from ai_infra_quant.core.domain.paqs_e_ledger import payload_sha256
 from ai_infra_quant.database.models.paqs_e_narrative import results, runs
 from ai_infra_quant.integrations.openai_reasoning.gateway import ModelGateway
 from ai_infra_quant.integrations.openai_reasoning.narrative import NarrativeGateway
 
 analysis = analysis_fixture
+
+
+@pytest.fixture(autouse=True)
+def historical_catalog(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Synthetic historical protocol coverage; current production capability is disabled.
+    monkeypatch.setattr(
+        "ai_infra_quant.backend.schemas.paqs_e.ModelRegistry", historical_deepseek_registry
+    )
 
 
 class PartialTransport(ResearchTransport):
@@ -45,7 +53,7 @@ class PartialTransport(ResearchTransport):
 def test_partial_actions_freeze_before_narrative_and_fail_without_ledger_mutation(
     analysis: AnalysisHarness, migrated_engine: Engine, mode: str, failure: str
 ) -> None:
-    registry = ModelRegistry()
+    registry = historical_deepseek_registry()
     model = registry.resolve("deepseek-v4-flash")
     store = MemoryCredentials()
     store.values[model.credential_slot] = SECRET
@@ -62,6 +70,7 @@ def test_partial_actions_freeze_before_narrative_and_fail_without_ledger_mutatio
     gateway = ModelGateway(registry, ModelCredentials(registry, store), transport)
     install(analysis, TextProvider())
     service = analysis.container.narrative_analysis_service
+    service.models = registry
     service.research = gateway
     service.provider = NarrativeGateway(registry, gateway.credentials, transport)
     schema_sql = text("SELECT type, name, sql FROM sqlite_master ORDER BY name")
@@ -69,7 +78,7 @@ def test_partial_actions_freeze_before_narrative_and_fail_without_ledger_mutatio
         schema = connection.execute(schema_sql).all()
         assert (
             connection.execute(text("SELECT version_num FROM alembic_version")).scalar()
-            == "0004_task006b1_market_archive"
+            == "0005_task006e_q_analysis"
         )
     response = analysis.client.post(
         "/api/v1/paqs-e/narrative-analyses",

@@ -7,12 +7,44 @@ from .test_paqs_e_narrative import make_app, select
 from .workbench_support import MODEL
 
 
+def test_current_deepseek_explains_unsupported_search_without_automatic_requests(
+    browser: Browser, workbench_server: str
+) -> None:
+    app = make_app(browser, workbench_server)
+    page = app.open()
+    page.locator("#branch-e").click()
+    expect(page.locator("#model-id")).to_have_value("deepseek-flash")
+    expect(page.locator("#web-research")).to_be_disabled()
+    expect(page.locator("#web-research")).not_to_be_checked()
+    expect(page.locator("#research-status")).to_contain_text("不支持内置联网搜索")
+    expect(page.locator("#research-status")).to_contain_text("模型费用")
+    page.locator("#tab-history").click()
+    select(app)
+    before = page.locator(".narrative-text").text_content()
+    assert app.posts == []
+    app.post_status = 422
+    app.post_body = dict(status=422, code="PAQS_E_RESEARCH_PRECONDITION_FAILED")
+    page.locator("#analyze-button").click()
+    expect(page.locator("#analysis-state")).to_contain_text("没有确认新的 Narrative")
+    assert len(app.posts) == 1 and app.posts[0]["web_research"] is False
+    assert app.posts[0]["model_key"] == "deepseek-flash"
+    assert page.locator(".narrative-text").text_content() == before
+    assert not page.locator("#analysis-state details").get_attribute("open")
+    page.locator("#branch-q").click()
+    page.locator("#tab-details").click()
+    assert len(app.posts) == 1
+    app.close()
+
+
 @pytest.mark.parametrize("stage", ["SEARCH", "SYNTHESIS", "unsafe"])
 def test_explicit_research_cost_and_bounded_failure_detail_preserve_narrative(
     browser: Browser, workbench_server: str, stage: str
 ) -> None:
     app = make_app(browser, workbench_server)
     page = app.open()
+    page.locator("#branch-e").click()
+    page.locator("#tab-history").click()
+    page.locator("#model-id").select_option(MODEL)
     expect(page.locator("#web-research")).not_to_be_checked()
     disclosure = page.locator("#research-status").text_content() or ""
     assert all(

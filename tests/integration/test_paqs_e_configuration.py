@@ -6,6 +6,7 @@ from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
+from paqs_e_support import MemoryCredentials
 from sqlalchemy import Engine, event
 
 from ai_infra_quant.application import paqs_e_runtime as runtime
@@ -28,6 +29,9 @@ def test_configuration_is_exact_read_only_and_secret_free(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setattr(
+        "ai_infra_quant.backend.dependencies.WindowsCredentialStore", MemoryCredentials
+    )
     if credential is not None:
         monkeypatch.setenv("OPENAI_API_KEY", credential)
 
@@ -38,7 +42,9 @@ def test_configuration_is_exact_read_only_and_secret_free(
     monkeypatch.setattr(ModelGateway, "reason", forbidden)
     monkeypatch.setattr(HttpJsonTransport, "post", forbidden)
     monkeypatch.setattr(FutuQuoteAdapter, "__init__", forbidden)
-    settings = Settings(database_url=database_url, market_data_provider="none")
+    settings = Settings(
+        database_url=database_url, market_data_provider="none", openai_api_key=credential or ""
+    )
     with TestClient(create_app(settings, migrated_engine)) as client:
         statements: list[str] = []
 
@@ -55,7 +61,7 @@ def test_configuration_is_exact_read_only_and_secret_free(
         assert response.status_code == 200
         actual = runtime.load_strategy_package()
         assert response.json() == {
-            "default_model_key": "deepseek-v4-flash",
+            "default_model_key": "deepseek-flash",
             "models": [
                 {
                     "model_key": item.model_key,
@@ -66,6 +72,8 @@ def test_configuration_is_exact_read_only_and_secret_free(
                     "web_research_supported": item.web_research_supported,
                 }
                 for item in ModelRegistry().models
+                if item.enabled
+                if item.enabled
             ],
             "default_strategy_id": actual.strategy_id,
             "strategies": [

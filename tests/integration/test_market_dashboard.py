@@ -27,7 +27,7 @@ def test_homepage_renders_market_first_read_only_dashboard(client: TestClient) -
     assert response.headers["cache-control"] == "no-store"
     page = response.text
     for required in (
-        'aria-label="Market data Dashboard"',
+        'aria-label="行情与决策工作台"',
         'id="security-selector"',
         'id="latest-price"',
         'id="market-state"',
@@ -35,8 +35,8 @@ def test_homepage_renders_market_first_read_only_dashboard(client: TestClient) -
         'id="refresh-market"',
         'id="refresh-countdown"',
         'id="supported-security-form"',
-        "Add US/HK stock",
-        "READ ONLY · DECISION SUPPORT",
+        "添加美股 / 港股",
+        "只读研究",
     ):
         assert required in page
     for retired in (
@@ -168,12 +168,12 @@ def test_empty_watchlist_invalidates_requests_and_clears_market_state() -> None:
         "selectedSecurity = null",
         "resetMarketView()",
         'element("#selected-identity").textContent = "—"',
-        'element("#selected-title").textContent = "No tracked securities"',
+        'element("#selected-title").textContent = "暂无自选证券"',
         'setStatus(selector, "MISSING")',
         'element("#refresh-market").disabled = true',
     ):
         assert required in empty_state
-    assert 'showChartMessage(\n    "No tracked securities"' in empty_state
+    assert 'showChartMessage(\n    "暂无自选证券"' in empty_state
     assert "if (!defaultSecurity) {\n    clearSelectedSecurity();\n    return;" in source
     assert "if (!selectedSecurity || activeRequest" in source
     assert "selectedSecurity = security;\n  setRefreshLoading(false);" in source
@@ -204,7 +204,7 @@ def test_frontend_has_no_fake_market_values_or_forbidden_controls() -> None:
     assert not re.search(r"\border\s+(submission|control)\b", lowered)
     assert "composite score" not in lowered
     assert "score calculation" not in lowered
-    assert "latest price" in lowered
+    assert "最新报价" in lowered
     assert "closing price" not in lowered
     assert "today's close" not in lowered
     assert not re.search(r'latest_price\s*:\s*["\']?\d', owned_sources)

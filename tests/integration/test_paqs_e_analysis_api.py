@@ -324,9 +324,7 @@ def test_strategy_selection_is_independent_and_history_is_bounded_and_filterable
     alternate_run = analysis.client.post(
         ANALYSES, json=analysis.payload(strategy_id=alternate.strategy_id)
     ).json()
-    last = analysis.client.post(
-        ANALYSES, json=analysis.payload(model_key="deepseek-v4-flash")
-    ).json()
+    last = analysis.client.post(ANALYSES, json=analysis.payload(model_key="deepseek-flash")).json()
     assert selected == [STRATEGY_ID, alternate.strategy_id, STRATEGY_ID]
     assert [item.strategy_id for item in analysis.provider.strategies] == selected
     assert [first["revision_no"], alternate_run["revision_no"], last["revision_no"]] == [1, 1, 2]

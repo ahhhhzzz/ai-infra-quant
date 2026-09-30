@@ -48,7 +48,9 @@ def call(
     return outcome, transport
 
 
-@pytest.mark.parametrize("model", REGISTRY.models, ids=lambda model: model.model_key)
+@pytest.mark.parametrize(
+    "model", [m for m in REGISTRY.models if m.enabled], ids=lambda model: model.model_key
+)
 @pytest.mark.parametrize(
     "text",
     [TEXT, '{"not": "a PAQS-E schema"}', "短答。", "文" * 100000],
@@ -82,7 +84,9 @@ def test_all_models_return_exact_plain_final_text_without_structured_output(
     assert "synthetic-discarded-trace" not in canonical_json(outcome)
 
 
-@pytest.mark.parametrize("model", REGISTRY.models, ids=lambda model: model.model_key)
+@pytest.mark.parametrize(
+    "model", [m for m in REGISTRY.models if m.enabled], ids=lambda model: model.model_key
+)
 @pytest.mark.parametrize(
     "scenario",
     [

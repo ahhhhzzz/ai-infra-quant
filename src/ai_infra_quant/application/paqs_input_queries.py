@@ -6,6 +6,10 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from ai_infra_quant.application.market_data_queries import MarketDataQueries
+from ai_infra_quant.application.observed_calendar import (
+    ScheduledCalendarMetadata,
+    ScheduledTradingDays,
+)
 from ai_infra_quant.core.domain.common import utc_now
 from ai_infra_quant.core.domain.enums import DataAvailabilityStatus, SnapshotQualityStatus
 from ai_infra_quant.core.domain.market_data import PROVIDER_FUTU_QUOTE
@@ -81,6 +85,30 @@ class PaqsInputQueries:
             calendar_view.result.retrieved_at,
         )
         trading_days = calendar_view.result.data or ()
+        calendar_metadata = CalendarMetadata(
+            status=calendar_view.result.status,
+            provider=calendar_view.result.provider,
+            retrieved_at=calendar_view.result.retrieved_at,
+            trading_days=trading_days,
+            reason=calendar_view.result.reason,
+        )
+        calendar_result = calendar_view.result
+        if isinstance(calendar_result, ScheduledTradingDays):
+            if (
+                calendar_result.coverage_start != earliest_local_date
+                or calendar_result.coverage_end != calendar_end
+            ):
+                raise ValueError("CALENDAR_RESPONSE_SCOPE_MISMATCH")
+            calendar_metadata = ScheduledCalendarMetadata(
+                status=calendar_result.status,
+                provider=calendar_result.provider,
+                retrieved_at=calendar_result.retrieved_at,
+                trading_days=trading_days,
+                reason=calendar_result.reason,
+                coverage_start=calendar_result.coverage_start,
+                coverage_end=calendar_result.coverage_end,
+                schedule_basis=calendar_result.schedule_basis,
+            )
         minute_window_start_date = minute_view.window_start.astimezone(timezone).date()
         m30_trading_days = tuple(
             item for item in trading_days if item.market_date >= minute_window_start_date
@@ -138,13 +166,7 @@ class PaqsInputQueries:
             completed_w1_bars=completed_weekly,
             completed_d1_bars=daily,
             completed_30m_bars=completed_m30,
-            calendar=CalendarMetadata(
-                status=calendar_view.result.status,
-                provider=calendar_view.result.provider,
-                retrieved_at=calendar_view.result.retrieved_at,
-                trading_days=trading_days,
-                reason=calendar_view.result.reason,
-            ),
+            calendar=calendar_metadata,
             adjustment=AdjustmentMetadata(
                 basis=adjustment_basis,
                 adjustment_as_of=as_of,

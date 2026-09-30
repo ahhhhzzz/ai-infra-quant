@@ -6,8 +6,8 @@ from typing import Any
 
 import pytest
 from paqs_e_support import MemoryCredentials
-from test_paqs_e_model_gateway import REGISTRY, SENTINEL, envelope
-from test_paqs_e_native_research import MEMO, MODEL, native
+from test_paqs_e_model_gateway import SENTINEL, envelope
+from test_paqs_e_native_research import MEMO, MODEL, REGISTRY, native
 from test_paqs_e_runtime import _snapshot
 
 from ai_infra_quant.application.paqs_e_models import ModelCredentials

@@ -91,7 +91,7 @@ def test_credential_mutations_reject_unsafe_input_without_secret_echo(
     store = setup_credentials(analysis)
     headers = {"Origin": ORIGIN, "Content-Type": "application/json"}
     body: dict[str, Any] = {"secret": SENTINEL}
-    url = PATH + "deepseek-v4-flash"
+    url = PATH + "deepseek-flash"
     if case == "cross-origin":
         headers["Origin"] = "https://evil.example"
     if case == "null-origin":
@@ -136,7 +136,7 @@ def test_credential_boundary_rejects_nonloopback_hosts_and_peers(
         for method in ("GET", "PUT", "DELETE"):
             response = client.request(
                 method,
-                PATH + "deepseek-v4-flash",
+                PATH + "deepseek-flash",
                 json={"secret": SENTINEL},
                 headers={"Origin": host},
             )
@@ -150,7 +150,7 @@ def test_unavailable_secure_store_has_truthful_safe_status_and_mutation_failure(
     store = setup_credentials(analysis)
     store.available = False
     with TestClient(analysis.app, base_url=ORIGIN, client=("127.0.0.1", 5000)) as client:
-        url = PATH + "deepseek-v4-flash"
+        url = PATH + "deepseek-flash"
         assert client.get(url).json() == {
             "credential_configured": False,
             "credential_source": "missing",
@@ -222,9 +222,9 @@ def test_cross_provider_revision_chain_frozen_web_capsule_and_failed_run_gap(
         research=research,
     )
     decisions = []
-    for key in ("deepseek-v4-flash", "qwen3.8-max", "kimi-k3"):
+    for key in ("deepseek-flash", "qwen3.8-max", "kimi-k3"):
         response = analysis.client.post(
-            ANALYSES, json=analysis.payload(model_key=key, web_research=key != "kimi-k3")
+            ANALYSES, json=analysis.payload(model_key=key, web_research=key == "qwen3.8-max")
         )
         assert response.status_code == 201, response.text
         decisions.append(response.json())
@@ -237,9 +237,9 @@ def test_cross_provider_revision_chain_frozen_web_capsule_and_failed_run_gap(
         payload = json.loads(run["request_payload_json"])
         assert payload["model_provider"] == decision["model_provider"]
         assert payload["model_id"] == decision["model_id"]
-        assert len(payload["auxiliary_context"]) == (0 if index == 2 else 1)
-        if index < 2:
-            assert analysis.provider.requests[index].market_snapshot is research.snapshots[index]
+        assert len(payload["auxiliary_context"]) == (1 if index == 1 else 0)
+        if index == 1:
+            assert analysis.provider.requests[index].market_snapshot is research.snapshots[0]
             assert "publication time unknown" in payload["auxiliary_context"][0]["provenance"]
     before = _counts(migrated_engine)
     frozen_runs = [

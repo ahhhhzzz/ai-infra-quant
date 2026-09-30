@@ -11,18 +11,11 @@
   const uuid = (value) => typeof value === "string" &&
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
   const digest = (value) => typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
-  const valueText = (value) => value == null ? "未提供" : typeof value === "object"
-    ? JSON.stringify(value) : String(value);
-  const exact = (value) => node("pre", JSON.stringify(value, null, 2));
-  const fact = (label, value) => {
-    const row = node("div", "", "paqs-q-fact");
-    row.append(node("strong", label), node("span", valueText(value)));
-    return row;
-  };
-  const details = (title, value) => {
-    const section = document.createElement("details");
-    section.append(node("summary", title), exact(value));
-    return section;
+  const view = window.PaqsQView;
+  const details = view.technical;
+  const fact = (label, value) => node("p", `${label}：${value ?? "未提供"}`);
+  const status = (text, error = false) => {
+    $("q-status").textContent = text; $("q-status").dataset.error = String(error);
   };
   const api = async (path, options = {}) => {
     const response = await fetch(`/api/v1/${path}`, {
@@ -52,50 +45,56 @@
     $("q-history-refresh").disabled = !security;
     $("q-e-analyze").disabled = !selected || busyE;
   }
-  function renderQ(record) {
-    const root = $("q-result");
+  function renderQ(record, source) {
     if (!record) {
-      root.replaceChildren(node("p", "运行分析或选择历史记录。", "note"));
+      const empty = node("div", "", "empty-state");
+      empty.append(node("strong", "尚未选择分析结果"), node("p", "查看已保存历史，或显式分析当前快照。"));
+      $("q-result").replaceChildren(empty);
+      $("q-basis").replaceChildren(node("p", "选择 Q 记录后查看市场背景、价格事件、候选形态、入场资格及条件式持有依据。", "empty-state"));
       return;
     }
-    const payload = record.payload;
-    const snapshot = payload.market_snapshot;
-    const summary = node("div", "");
-    summary.append(
-      fact("分析记录", record.analysis_id),
-      fact("冻结快照", record.snapshot_hash),
-      fact("分析状态", record.status),
-      fact("分析时点", snapshot.as_of_timestamp),
-      fact("行情质量", snapshot.data_quality),
-      fact("产品规则版本", payload.product_version),
-      fact("复权及历史安全性", snapshot.adjustment_metadata),
-      fact("W1/D1/M30 覆盖", snapshot.timeframe_evidence_status),
-    );
-    for (const [key, title] of [
-      ["context", "Context 与结构"], ["event", "Event"], ["setup", "Setup、失效位与目标"],
-      ["entry", "Entry · 确认评估与独立下一开盘资格"],
-      ["holder", "若已持有 · 条件式 Holder"], ["diagnostics", "缺少证据与限制"],
-      ["evidence_guidance", "补证据操作"],
-    ]) {
-      const section = details(title, payload[key] ?? { status: "UNAVAILABLE", reason: `${title} 未提供` });
-      section.open = ["entry", "diagnostics", "evidence_guidance"].includes(key);
-      summary.append(section);
-    }
-    summary.append(details("输入来源与各周期身份", {
-      capture_source: payload.capture_source, q_inputs: payload.q_inputs,
-    }));
-    summary.append(details("冻结输入及完整审计结果", record));
-    root.replaceChildren(summary);
+    $("q-result").replaceChildren(view.summary(record, source));
+    $("q-basis").replaceChildren(view.basis(record));
   }
-  function setSelected(record) {
-    selected = record;
-    selection += 1;
-    renderQ(record);
+  let eHistoryVersion = 0, compareVersion = 0;
+  function setSelected(record, source = "查看历史 · 已保存快照") {
+    selected = record; selection += 1; compareVersion += 1; eHistoryVersion += 1;
+    renderQ(record, source);
     $("q-e-result").replaceChildren();
-    $("q-e-status").textContent = record
-      ? "已选择 Q 冻结结果。可显式运行 E 或按已知 E Result UUID 读取对照。"
-      : "请选择 Q 记录后显式发起 E 或读取已有 E 结果。";
+    $("q-e-options").replaceChildren(node("option", record ? "读取同快照记录…" : "请先选择 Q 记录"));
+    $("q-e-options").disabled = true;
+    $("q-e-read").disabled = true;
+    $("q-e-refresh").disabled = !record;
+    $("q-e-list-status").textContent = "";
+    $("q-e-status").textContent = record ? `对照基准：${record.payload.market_snapshot.security.display_symbol || record.payload.market_snapshot.security.symbol} · Q 快照 ${view.time(record.payload.market_snapshot.as_of_timestamp)}。读取历史不调用模型。` : "请选择 Q 记录后读取对照或显式运行 E。";
+    document.querySelectorAll("[data-q-analysis-id]").forEach(b => b.setAttribute("aria-current", String(b.dataset.qAnalysisId === record?.analysis_id)));
     controls();
+    if (record) {
+      document.querySelector(".analysis-panel").scrollTop = 0;
+      void loadEHistory();
+    }
+  }
+  async function loadEHistory() {
+    if (!selected) return;
+    const record = selected, intent = selection, nav = navigation, token = ++eHistoryVersion;
+    $("q-e-list-status").textContent = "读取 E 历史…";
+    $("q-e-options").disabled = true; $("q-e-read").disabled = true;
+    try {
+      const body = await api(`paqs-e/securities/${encodeURIComponent(record.security_id)}/narrative-results?limit=20`);
+      if (token !== eHistoryVersion || intent !== selection || nav !== navigation) return;
+      if (!Array.isArray(body.items) || body.items.some(e => !uuid(e.narrative_result_id) || !digest(e.snapshot_hash) || e.security_id !== record.security_id)) throw new Error("E 历史身份不一致");
+      const matches = body.items.filter(e => e.snapshot_hash === record.snapshot_hash);
+      $("q-e-options").replaceChildren(...(matches.length ? matches.map(e => {
+        const option = node("option", `${view.time(e.created_at)} · ${e.model_id} · ${e.strategy_id}`); option.value = e.narrative_result_id; return option;
+      }) : [node("option", "最近 20 条中无匹配记录")]));
+      $("q-e-options").disabled = !matches.length; $("q-e-read").disabled = !matches.length;
+      $("q-e-list-status").textContent = `最近 20 条 E 成功记录中有 ${matches.length} 条快照摘要匹配；读取对照时再校验完整身份。更早记录可用高级 ID 入口读取。`;
+    } catch (error) {
+      if (token === eHistoryVersion && intent === selection && nav === navigation) {
+        $("q-e-options").replaceChildren(node("option", "列表读取失败"));
+        $("q-e-list-status").textContent = `E 列表不可用：${error.message}。可重试读取或使用高级 ID 入口。`;
+      }
+    }
   }
   async function readRecord(id, expectedSecurity, nav, intent) {
     const record = await api(`paqs-q/analyses/${encodeURIComponent(id)}`);
@@ -110,7 +109,7 @@
     const id = security?.id;
     $("q-history").replaceChildren();
     if (!id) return;
-    $("q-status").textContent = "读取 Q 历史…";
+    $("q-history-status").textContent = "读取 Q 历史…";
     try {
       const body = await api(`paqs-q/securities/${encodeURIComponent(id)}/analyses?limit=20`);
       if (token !== historyVersion || nav !== navigation) return;
@@ -121,28 +120,29 @@
         const button = node("button", "", "history-row");
         button.type = "button";
         button.dataset.qAnalysisId = item.analysis_id;
-        button.append(node("strong", `${item.status} · ${item.created_at}`),
-          node("span", `快照 ${item.snapshot_hash}`));
+        button.append(node("strong", `${view.state(item.status)} · ${view.time(item.created_at)}`),
+          node("span", `${security?.display_symbol || "所选证券"} · 已保存快照`));
         button.addEventListener("click", () => {
           const intent = ++selection;
-          $("q-status").textContent = "读取所选 Q 冻结结果…";
+          status("读取所选 Q 冻结结果…");
           void readRecord(item.analysis_id, id, nav, intent).then(() => {
-            if (intent === selection - 1 && nav === navigation) $("q-status").textContent = "已读取 Q 冻结结果；未重新分析。";
+            if (intent === selection - 1 && nav === navigation) status("已读取 Q 冻结结果；未重新分析。");
           }).catch((error) => {
-            if (nav === navigation) $("q-status").textContent = `Q 历史不可用：${error.message}`;
+            if (nav === navigation && intent === selection) status(`Q 历史读取失败：${error.message}`, true);
           });
         });
         return button;
       });
       $("q-history").replaceChildren(...rows);
-      $("q-status").textContent = rows.length ? `已读取 ${rows.length} 条 Q 历史；未重新分析。` : "尚无 Q 历史。";
+      $("q-history-status").textContent = rows.length ? `已读取 ${rows.length} 条 Q 历史；未重新分析。` : "尚无 Q 历史。";
     } catch (error) {
-      if (token === historyVersion && nav === navigation) $("q-status").textContent = `Q 历史不可用：${error.message}`;
+      if (token === historyVersion && nav === navigation) $("q-history-status").textContent = `Q 历史不可用：${error.message}`;
     }
   }
   async function compare(eResultId, qRecord, nav, intent) {
+    const comparison = ++compareVersion;
     const body = await api(`paqs-q/analyses/${encodeURIComponent(qRecord.analysis_id)}/compare/${encodeURIComponent(eResultId)}`);
-    if (nav !== navigation || intent !== selection || selected?.analysis_id !== qRecord.analysis_id) return;
+    if (comparison !== compareVersion || nav !== navigation || intent !== selection || selected?.analysis_id !== qRecord.analysis_id) return;
     const e = body.e_narrative || body.e || body.narrative_result;
     const q = body.q_analysis || body.q || qRecord;
     if (!e || e.narrative_result_id !== eResultId || typeof e.response_text !== "string"
@@ -151,12 +151,11 @@
       || typeof body.same_snapshot !== "boolean") throw new Error("Q/E 对照身份不一致");
     const same = body.same_snapshot && e.snapshot_hash === qRecord.snapshot_hash;
     const banner = node("p", same ? "同一冻结快照 · 输出分别呈现" : "快照不同：不可直接比较；仅并排阅读", "note");
-    const pair = node("div", "", "paqs-q-pair");
+    const pair = node("div", "", "q-e-pair");
     const left = node("section", "");
-    left.append(node("h3", "Q · 确定性规则事实"), fact("快照", qRecord.snapshot_hash),
-      details("Q 原始结果", q.payload || qRecord.payload));
+    left.append(node("h3", "Q · 确定性规则事实"), view.summary(qRecord), details("Q 冻结输入覆盖与原始结果", qRecord));
     const right = node("section", "");
-    right.append(node("h3", "E · Narrative 原文"), fact("快照", e.snapshot_hash),
+    right.append(node("h3", "E · Narrative 原文"),
       fact("模型 / 主策略 / 联网研究", `${e.model_id} / ${e.strategy_id} / ${e.web_research}`),
       details("E 冻结输入覆盖与来源", {
         timeframe_evidence_status: e.market_snapshot?.timeframe_evidence_status,
@@ -176,17 +175,17 @@
     if (!security || busyQ) return;
     const id = security.id, nav = navigation, intent = selection;
     busyQ = true; controls();
-    $("q-status").textContent = "正在显式采集并分析 Q 当前快照…";
+    status("正在显式采集并分析 Q 当前快照…");
     try {
       const record = await api("paqs-q/analyses", { method: "POST", body: JSON.stringify({ security_id: id }) });
       if (!validRecord(record, id)) throw new Error("Q 分析响应身份不一致");
       if (nav === navigation && security?.id === id) {
-        if (intent === selection) setSelected(record);
-        $("q-status").textContent = `Q 分析已保存：${record.status}；快照 ${record.snapshot_hash}。`;
+        if (intent === selection) { setSelected(record, "新分析 · 已保存快照"); window.AIQWorkbench.workspace("details"); }
+        status(`Q 分析已保存：${view.state(record.status)}。`);
         void loadHistory();
       }
     } catch (error) {
-      if (nav === navigation) $("q-status").textContent = `Q 分析未能确认：${error.message}。请检查历史，避免重复请求。`;
+      if (nav === navigation) status(`请求失败，未能确认新结果：${error.message}。已显示的旧记录不变；请检查历史后再决定是否重试。`, true);
     } finally { busyQ = false; controls(); }
   });
   $("q-history-refresh").addEventListener("click", () => { void loadHistory(); });
@@ -210,16 +209,26 @@
       if (nav === navigation && intent === selection) $("q-e-status").textContent = `E 对照未能确认：${error.message}。请检查 E 历史或已知 Run；不会自动重试。`;
     } finally { busyE = false; controls(); }
   });
+  $("q-e-refresh").addEventListener("click", () => { void loadEHistory(); });
+  $("q-e-read").addEventListener("click", () => {
+    if (!selected || !uuid($("q-e-options").value)) return;
+    readComparison($("q-e-options").value);
+  });
+  function readComparison(id) {
+    const record = selected, nav = navigation, intent = selection;
+    if (!record) return;
+    $("q-e-status").textContent = "读取既有对照；不会运行模型。";
+    $("q-e-result").replaceChildren();
+    void compare(id, record, nav, intent).catch(error => {
+      if (nav === navigation && intent === selection) $("q-e-status").textContent = `对照读取失败：${error.message}`;
+    });
+  }
   $("q-e-known-form").addEventListener("submit", (event) => {
     event.preventDefault();
     if (!selected) { $("q-e-status").textContent = "请先选择 Q 记录。"; return; }
     const id = $("q-e-known-id").value.trim();
     if (!uuid(id)) { $("q-e-status").textContent = "请输入合法 E Narrative Result UUID。"; return; }
-    const qRecord = selected, nav = navigation, intent = selection;
-    $("q-e-status").textContent = "读取既有 E 与所选 Q 的对照；不会运行模型。";
-    void compare(id, qRecord, nav, intent).catch((error) => {
-      if (nav === navigation && intent === selection) $("q-e-status").textContent = `对照读取失败：${error.message}`;
-    });
+    readComparison(id);
   });
   function onSecurity(item) {
     security = item;
@@ -228,7 +237,7 @@
     setSelected(null);
     $("q-history").replaceChildren();
     $("q-security").textContent = item ? `${item.display_symbol} · ${item.market}` : "请选择证券";
-    $("q-status").textContent = item ? "读取当前证券的 Q 历史…" : "请选择证券";
+    status(item ? "可查看历史，或显式分析当前快照。" : "请选择证券");
     controls();
     if (item) void loadHistory();
   }

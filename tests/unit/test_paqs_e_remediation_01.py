@@ -9,8 +9,8 @@ from decimal import Decimal
 from typing import Any
 
 import pytest
-from paqs_e_support import MemoryCredentials
-from test_paqs_e_model_gateway import REGISTRY, SENTINEL, Transport, envelope, research_response
+from paqs_e_support import MemoryCredentials, historical_deepseek_registry
+from test_paqs_e_model_gateway import SENTINEL, Transport, envelope, research_response
 from test_paqs_e_runtime import _result, _snapshot
 
 from ai_infra_quant.application.paqs_e_models import ModelCredentials, ModelDescriptor
@@ -32,6 +32,8 @@ from ai_infra_quant.core.domain.paqs_e_reasoning import (
 )
 from ai_infra_quant.core.domain.paqs_market_snapshot import canonical_json
 from ai_infra_quant.integrations.openai_reasoning.gateway import ModelGateway, normalize_research
+
+REGISTRY = historical_deepseek_registry()
 
 
 @pytest.mark.parametrize(

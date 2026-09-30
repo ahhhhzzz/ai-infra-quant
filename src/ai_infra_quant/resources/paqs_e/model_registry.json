@@ -1,6 +1,20 @@
 {
-  "default_model_key": "deepseek-v4-flash",
+  "default_model_key": "deepseek-flash",
   "models": [
+    {
+      "model_key": "deepseek-flash",
+      "display_name": "DeepSeek Flash (V4.1)",
+      "provider_id": "deepseek",
+      "model_id": "deepseek-flash",
+      "credential_slot": "deepseek",
+      "credential_label": "DeepSeek",
+      "endpoint": "https://api.deepseek.com/responses",
+      "api_surface": "responses",
+      "structured_output_mode": "json_schema",
+      "web_research_mode": "disabled",
+      "enabled": true,
+      "research_endpoint": null
+    },
     {
       "model_key": "deepseek-v4-flash",
       "display_name": "DeepSeek V4 Flash",
@@ -11,9 +25,9 @@
       "endpoint": "https://api.deepseek.com/responses",
       "api_surface": "responses",
       "structured_output_mode": "json_schema",
-      "web_research_mode": "responses_search",
-      "enabled": true,
-      "research_endpoint": "https://api.deepseek.com/responses"
+      "web_research_mode": "disabled",
+      "enabled": false,
+      "research_endpoint": null
     },
     {
       "model_key": "deepseek-v4-pro",
@@ -25,9 +39,9 @@
       "endpoint": "https://api.deepseek.com/responses",
       "api_surface": "responses",
       "structured_output_mode": "json_schema",
-      "web_research_mode": "responses_search",
+      "web_research_mode": "disabled",
       "enabled": true,
-      "research_endpoint": "https://api.deepseek.com/responses"
+      "research_endpoint": null
     },
     {
       "model_key": "qwen3.8-flash",
